@@ -1,0 +1,54 @@
+## Visual Studio Specifics ##
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.opensdf
+*.sdf
+*.local
+
+## Build Results ##
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+
+## NuGet Packages ##
+# We commit packages.config but ignore the actual downloaded package contents
+*.nupkg
+packages/
+# Keep build scripts from packages
+!packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## ASP.NET MVC Specifics ##
+# Contains database files (mdf), xml files, or logs that shouldn't be shared
+App_Data/
+# Generated code for client-side libraries
+node_modules/
+bower_components/
+jspm_packages/
+
+## Testing ##
+TestResults/
+
+## OS Generated Files ##
+.DS_Store
+Thumbs.db
+
+## Web Configuration ##
+# NOTE: Usually you commit the main Web.config, but exclude transformation files
+# or local configs containing secrets. Uncomment below if needed:
+# Web.Debug.config
+# Web.Release.config
+# appsettings.Development.json
+
+## Logs ##
+*.log
+*.txt
