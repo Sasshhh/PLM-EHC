@@ -1,0 +1,297 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<style>
+    .chart-legend span {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+    }
+
+    .chart-legend li {
+        list-style-type: none;
+    }
+</style>
+
+ <h4>Graphs</h4>
+ <hr/>
+   
+    <div class="row">
+        <div class="container col-md-12 ">
+            <div class="panel panel-default ">
+                <div class="panel-heading">Last Bill Day</div>
+                <div class="panel-body">
+                    <div id="pie1" style="width: 400px; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="container col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Last 7 Days</div>
+            <div class="panel-body">
+                <div id="chart2" width:800></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="container col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">Last 30 Days</div>
+            <div class="panel-body">
+                <div id="line"  style ="height:400px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<link rel="stylesheet" type="text/css" href="~/Content/jquery.jqplot.css" />
+
+@section Scripts
+{
+    <script src="@Url.Content("~/scripts/jquery.jqplot.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.pieRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.barRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.categoryAxisRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.pointLabels.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.canvasTextRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.canvasAxisTickRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.canvasAxisLabelRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.dateAxisRenderer.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.highlighter.js")"></script>
+    <script src="@Url.Content("~/scripts/jqplot.enhancedLegendRenderer.js")"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            url: '@Url.Action("Pie", "eBillingDashBoard")',
+            dataType: "json",
+            type: "GET",
+            contentType: 'application/json; charset=utf-8',
+            async: false,
+            processData: false,
+            success: function (data) {
+                p(data);
+            },
+            error: function (xhr) {
+                console.log(xhr);
+                alert('error');
+            }
+        });
+
+        function p(data) {
+            var plot1 = $.jqplot('pie1', [
+                [
+                    ['Accounts', data.Accounts], ['CompletedEmails', data.CompletedMails], ['Errors', data.Errors],
+                    ['ExpectedAccounts', data.ExpectedAccounts], ['PendingEmails', data.PendingEmails]
+                ]
+            ], {
+                gridPadding: { top: 0, bottom: 38, left: 0, right: 0 },
+                seriesDefaults: {
+                    renderer: $.jqplot.PieRenderer,
+                    trendline: { show: false },
+                    rendererOptions: {
+                        showDataLabels: true,
+                        padding: 10,
+                        sliceMargin: 6,
+                        shadow: false
+                    }
+                },
+                legend: {
+                    show: true,
+                    placement: 'outside',
+                    rendererOptions: {
+                        @*//numberRows: 1*@
+                    },
+                    location: 'e',
+                    marginTop: '15px'
+                },
+
+                highlighter: {
+                    show: true,
+                    useAxesFormatters: false,
+                    tooltipFormatString: '%s'
+                }
+            });
+        }
+        $.ajax({
+            url: '@Url.Action("BarStats", "eBillingDashBoard")',
+            dataType: "json",
+            type: "GET",
+            contentType: 'application/json; charset=utf-8',
+            async: false,
+            processData: false,
+            success: function (data) {
+                b(data.accounts, data.emailAccounts, data.completedMails, data.dates, data.errors);
+            },
+            error: function (xhr) {
+                alert('error');
+            }
+        });
+
+
+
+        function b(accounts, emailAccounts, completedMails, dates, errors) {
+            $(document).ready(function () {
+                var s1 = accounts;
+                var s2 = emailAccounts;
+                var s3 = completedMails;
+                var s4 = errors;
+                var ticks = dates;
+
+                plot2 = $.jqplot('chart2', [s1, s2, s3, s4], {
+                    stackSeries: false,
+                    seriesDefaults: {
+                        renderer: $.jqplot.BarRenderer,
+                        pointLabels: { show: true }
+                    },
+                    axes: {
+                        xaxis: {
+                            renderer: $.jqplot.CategoryAxisRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            ticks: ticks,
+                            tickOptions: {
+                                angle: -45
+                            }
+                        }
+                    },
+                    series: [
+                        { label: 'Accounts' },
+                        { label: 'Email Accounts' },
+                        { label: 'Completed Mails' },
+                        { label: 'Errors' }
+                    ],
+                    legend: {
+                        show: true,
+                        renderer: $.jqplot.EnhancedLegendRenderer,
+                        placement: 'outsideGrid',
+                        rendererOptions: {
+                            numberRows: '1',
+                            numberColumns: '4'
+                        },
+                        location: 's',
+                        marginTop: '15px'
+                    },
+                    @*//highlighter: {
+                    //    show: true,
+                    //    useAxesFormatters: false,
+                    //    tooltipFormatString: '%s'
+                    //}*@
+
+                });
+
+
+            });
+
+        }
+
+
+        $.ajax({
+            url: '@Url.Action("Stats", "eBillingDashBoard")',
+            dataType: "json",
+            type: "GET",
+            contentType: 'application/json; charset=utf-8',
+            async: false,
+            processData: false,
+            success: function (data) {
+                l(data);
+            },
+            error: function (xhr) {
+                alert('error');
+            }
+        });
+
+        function l(data) {
+            var s1 = []; @*//mails;*@
+            var s2 = []; @*//accounts;*@
+            var s3 = [];
+            var s4 = [];
+
+            var rawData = data;
+
+            for (var i = 0; i < rawData.length; i++) {
+                s1[i] = [rawData[i].Date, rawData[i].Accounts];
+                s2[i] = [rawData[i].Date, rawData[i].EmailAccounts];
+                s3[i] = [rawData[i].Date, rawData[i].CompletedMails];
+                s4[i] = [rawData[i].Date, rawData[i].Errors];
+            }
+            console.log(s4);
+            var plot3 = $.jqplot('line', [s1, s2, s3, s4],
+                {
+                    width: 800,
+                    title: 'Last 30 Days',
+                    @*// Set default options on all series, turn on smoothing.*@
+                    seriesDefaults: {
+                        rendererOptions: {
+                            smooth: true
+                        }
+                    },
+
+                    axes: {
+                        xaxis: {
+                            renderer: $.jqplot.DateAxisRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            label: "Date",
+                            numberTicks: 30,
+                            tickOptions: {
+                                angle: -45
+                            }
+                        },
+                        yaxis: {
+                            label: "Number"
+                        }
+                    },
+
+                    series: [
+                        {
+                            @*// Change our line width and use a diamond shaped marker.*@
+                            lineWidth: 1,
+                            markerOptions: { style: 'diamond' },
+                            label: "Accounts"
+                        },
+                        {
+                            @*// Don't show a line, just show markers.
+                            // Make the markers 7 pixels with an 'x' style*@
+                            showLine: true,
+                            markerOptions: { size: 1, style: "x" },
+                            label: "Email Accounts"
+                        },
+                        {
+                            @*// Use (open) circlular markers.*@
+                            markerOptions: { style: "circle" },
+                            label: "Completed Mails"
+                        },
+                        {
+                            markerOptions: { style: "circle" },
+                            lineWidth: 1,
+                            label: "Errors"
+                        }
+                    ],
+                    legend: {
+                        show: true,
+                        renderer: $.jqplot.EnhancedLegendRenderer,
+                        placement: 'outsideGrid',
+                        rendererOptions: {
+                            numberRows: 1
+                        },
+                        location: 's',
+                        marginTop: '15px'
+                    },
+                    highlighter: {
+                        show: true,
+                        useAxesFormatters: true,
+                    }
+                }
+            );
+
+        };
+    });
+</script>
+}
+

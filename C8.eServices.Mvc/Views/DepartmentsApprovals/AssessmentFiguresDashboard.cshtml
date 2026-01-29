@@ -1,0 +1,163 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RCSApplicationStatus>
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    .rowCrit {
+        color: red !important;
+    }
+</style>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+
+
+
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        Rates Clearance Figures
+                        @*<h4 class="panel-title" align="center">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+
+                                </a>
+                            </h4>*@
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+                <div style="width: 90%; margin: 0 auto;">
+                    <table id="DepartmentsTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Reference Number
+                                </th>
+                                <th>
+                                    Attorney Code
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+                                <th>
+                                    Application Created Date
+                                </th>
+                                @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+
+                                {
+                                    <th>Clerk</th>
+                                }
+
+                                <th>
+
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Customer.AttorneyCode)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Status.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDateTime.Value)
+                                    </td>
+                                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                                    {
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Data)
+                                        </td>
+                                    }
+                                    <td style="background-color:@item.ColorCode">
+                                    </td>
+
+
+                                    <td>
+                                        @if (Request.IsAuthenticated && User.IsInRole("Submit Figures"))
+                                        {
+                                            if (item.Status.Key == StatusKeys.BackOffice)
+                                            {
+                                                @Html.ActionLink("Upload Rates Clearance Figures", "AssessmentFigures", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                                            }
+
+                                            if (item.Status.Key == StatusKeys.PendingAssessmentFeePaymentValidation)
+                                            {
+                                                @Html.ActionLink("View", "AssessmentFeeValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                                            }
+
+                                        }
+
+                                        @*@Html.ActionLink("Application Details", "Details", "Capture", new { refNo = item.Id, id = item.Id }, new { @class = "btn btn-primary" })*@
+                                        @Html.ActionLink("Application Details", "Details", "Capture", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.Id.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+
+                                        @*@if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+        {
+            @Html.ActionLink("Re-Allocate", "AssessmentFiguresReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" });
+        }*@
+                                        @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })
+
+
+                                        @if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin") || User.IsInRole("Back Office System Administrator")))
+                                        {
+                                            @Html.ActionLink("Re-Allocate Manual", "ManualReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&rrqID=" + item.RoundRobinQueueId + "&ResponsibilityType=" + ResponsibilityTypeKeys.SubmitFigures + "&ViewName=AssessmentFiguresDashboard" + "&TitleName=AssessmentFeeRedistributionTitle&BodyName=AssessmentFeeRedistribution") }, new { @class = "btn btn-primary" });
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+    @section Scripts{
+
+        <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+        <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    }
+
+
+    <script>
+    $(function () {
+        $('#DepartmentsTable').DataTable();
+            var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+    </script>

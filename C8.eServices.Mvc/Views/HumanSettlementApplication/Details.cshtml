@@ -1,0 +1,2237 @@
+﻿@model C8.eServices.Mvc.ViewModels.ApplicationDetailsViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+
+
+</head>
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+    }
+
+    .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+        cursor: not-allowed;
+        background-color: #f7f7f7;
+        opacity: 1;
+    }
+
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+    
+</style>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { Id = "CreateForm" }))
+{
+    <div id="demo">
+        <div class="step-app">
+            <ul class="step-steps">
+                <li><a href="#step3"><span class="number">1</span>Application<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                <li><a href="#step4"><span class="number">2</span>Applicant<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                <li><a href="#step2"><span class="number">3</span>Renewal & Terminations<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                <li><a href="#step6"> <span class="number">4</span>History<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                <li><a href="#step7"> <span class="number">5</span>Documents<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+
+                @*@if (ViewBag.LeaseDone == "done")
+                {
+                    <li><a href="#step8"> <span class="number">5</span>Lease Info<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                    <li><a href="#step9"> <span class="number">6</span>Unit Info<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                    <li><a href="#step7"> <span class="number">7</span>Documents<span class="glyphicon glyphicon-arrow-right"></span></a></li>
+                }
+                else
+                {
+
+                }*@
+            </ul>
+           
+        <div class="step-content">
+            <div class="step-tab-panel" id="step8">
+                <fieldset>
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div id="domicile" class="panel-collapse collapse in">
+                                <div id="domiciled" align="left">
+                                    <div class="form-horizontal">
+                                        <h3 style="text-align:center">Lease Information</h3>
+                                        <hr />
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.LeaseDetails.LeaseReferenceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-3">
+                                                @Html.EditorFor(model => model.LeaseDetails.LeaseReferenceNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.LeaseDetails.LeaseReferenceNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.LeaseDetails.PurchaserType.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-3">
+                                                @Html.EditorFor(model => model.LeaseDetails.PurchaserType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.LeaseDetails.PurchaserType.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        @if (ViewBag.TenantType == "@Model.LeaseDetails.PurchaserType.Name")
+                                        {
+                                            <br />
+                                            <h3 style="text-align:center">Tenant Details</h3>
+                                           <hr />
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.LeaseReferenceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-3">
+                                                    @Html.EditorFor(model => model.LeaseDetails.LeaseReferenceNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.LeaseReferenceNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.PurchaserType.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-3">
+                                                    @Html.EditorFor(model => model.LeaseDetails.PurchaserType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.PurchaserType.Name, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            if (ViewBag.TenantType == "@Model.LeaseDetails.PurchaserType.Name")
+                                            {
+                                                <br />
+                                                <h3 style="text-align:center">Tenant Details</h3>
+                                                <hr />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.LeaseDetails.FirstNames, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.LeaseDetails.FirstNames, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.LeaseDetails.FirstNames, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    @Html.LabelFor(model => model.LeaseDetails.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.LeaseDetails.LastName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.LeaseDetails.LastName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.IDNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.DOB, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.DOB, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.DOB, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <br />
+                                                <h3 style="text-align:center">Contact Details</h3>
+                                                <hr />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CellNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CellNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CellNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.PurEmail, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.PurEmail, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.PurEmail, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <br />
+
+                                                <h3 style="text-align:center">Current Addresss</h3>
+                                                <hr />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.ResAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.ResAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResAddress, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.ResSuburb, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.ResSuburb, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResSuburb, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.ResPostal, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.ResPostal, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResPostal, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            }
+                                        
+                                        }
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="step-tab-panel" id="step9">
+                    <fieldset>
+                        <div class="panel-group">
+                            <div class="panel panel-default">
+
+                                <div id="domicile" class="panel-collapse collapse in">
+                                    <div id="domiciled" align="left">
+                                        <div class="form-horizontal">
+
+                                            <h3 style="text-align:center">Unit Details</h3>
+                                            <hr />
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.SpaceUnitNo, "Space/Unit Number", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.SpaceUnitNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.SpaceUnitNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <br />
+
+                                            <h3 style="text-align:center">Leased Addresss</h3>
+                                            <hr />
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.LeaAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.LeaAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.LeaAddress, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                @Html.LabelFor(model => model.LeaseDetails.LeaSuburb, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.LeaSuburb, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.LeaSuburb, "", new { @class = "text-danger" })
+                                                </div>
+                                                @Html.LabelFor(model => model.LeaseDetails.LeaSuburb, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.LeaSuburb, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.LeaSuburb, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <br />
+
+                                            <h3 style="text-align:center">Lease Period</h3>
+                                            <hr />
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.StartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.StartDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.StartDate, "", new { @class = "text-danger" })
+                                                </div>
+                                                @Html.LabelFor(model => model.LeaseDetails.PeriodInMonths, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.PeriodInMonths, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.PeriodInMonths, "", new { @class = "text-danger" })
+                                                </div>
+                                                @Html.LabelFor(model => model.LeaseDetails.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.EndDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.EndDate, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.RenewalNotice, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.RenewalNotice, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.RenewalNotice, "", new { @class = "text-danger" })
+                                                </div>
+                                                @Html.LabelFor(model => model.LeaseDetails.TerminationNotice, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.TerminationNotice, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.TerminationNotice, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.RentalAmount, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.RentalAmount, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.RentalAmount, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.VATAmount, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.VATAmount, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.VATAmount, "", new { @class = "text-danger" })
+                                                </div>
+                                                @Html.LabelFor(model => model.LeaseDetails.TotalIncludingVAT, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.LeaseDetails.TotalIncludingVAT, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.LeaseDetails.TotalIncludingVAT, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.LeaseDetails.Email, "Communication Method", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-1">
+                                                    @Html.CheckBoxFor(model => model.LeaseDetails.Email, new { disabled = "disabled" })
+                                                    @Html.LabelFor(model => model.LeaseDetails.Email, htmlAttributes: new { @class = "control-label" })
+                                                </div>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-2"></div>
+                                                <div class="col-md-1">
+                                                    @Html.CheckBoxFor(model => model.LeaseDetails.SMS, new { disabled = "disabled" })
+                                                    @Html.LabelFor(model => model.LeaseDetails.SMS, htmlAttributes: new { @class = "control-label" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-2"></div>
+                                                <div class="col-md-1">
+                                                    @Html.CheckBoxFor(model => model.LeaseDetails.Postal, new { disabled = "disabled" })
+                                                    @Html.LabelFor(model => model.LeaseDetails.Postal, htmlAttributes: new { @class = "control-label" })
+                                                </div>
+                                            </div>
+                                            @if (ViewBag.TenantType == "@Model.LeaseDetails.PurchaserType.Name")
+                                            {
+
+                                                <h3 style="text-align:center">Contact Details</h3>
+                                                <hr />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.LeaseDetails.FirstNames, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.LeaseDetails.FirstNames, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.LeaseDetails.FirstNames, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.LastName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.LastName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.IDNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <br />
+
+
+
+                                            }
+                                            else if (ViewBag.TenantType == "Company")
+                                            {
+                                                <br />
+                                                <hr />
+                                                <h3>Business Activities Details</h3>
+                                                <br />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.LeaseDetails.TypeOfActivities, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-8">
+                                                        @Html.TextAreaFor(model => model.LeaseDetails.TypeOfActivities, new { @class = "form-control", @readonly = "readonly" })
+                                                        @Html.ValidationMessageFor(model => model.LeaseDetails.TypeOfActivities, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.LeaseDetails.ComplianceDetails, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-8">
+                                                        @Html.TextAreaFor(model => model.LeaseDetails.ComplianceDetails, new { @class = "form-control", @readonly = "readonly" })
+                                                        @Html.ValidationMessageFor(model => model.LeaseDetails.ComplianceDetails, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="step-tab-panel" id="step1" align="center">
+
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                        <div class="form-horizontal">
+                                            <h3>Applicant Details</h3>
+                                            <hr />
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <div class="form-group">
+
+                                                @Html.LabelFor(model => model.WalkInApplicant.ApplicanttName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-3">
+                                                    @Html.EditorFor(model => model.WalkInApplicant.ApplicanttName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.WalkInApplicant.ApplicanttName, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div id="">
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.WalkInApplicant.ActOnBehalfOf, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.WalkInApplicant.ActOnBehalfType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.WalkInApplicant.ActOnBehalfOf, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.WalkInApplicant.BusinessAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.WalkInApplicant.BusinessAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.WalkInApplicant.BusinessAddress, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.WalkInApplicant.ContactNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.WalkInApplicant.ContactNo, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.WalkInApplicant.ContactNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.WalkInApplicant.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.WalkInApplicant.Email, new { htmlAttributes = new { @class = "form-control", @onfocusout = "validateEmail(this.id)", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.WalkInApplicant.Email, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.WalkInApplicant.ContactPerson, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.WalkInApplicant.ContactPerson, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.WalkInApplicant.ContactPerson, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-tab-panel" id="step2" align="center">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                        <div class="form-horizontal">
+                                            <h3>Agreement Renewal Details</h3>
+                                            <hr />
+                                            <br />
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            @if (Model.RenewalActions.Count > 0)
+                                            {
+                                                foreach (var item in Model.RenewalActions)
+                                                {
+                                                    Model.SingleAction = item;
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.SingleAction.ActionByUser.UserFullName, "Actioned By", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.SingleAction.ActionByUser.UserFullName, new { htmlAttributes = new { @class = "form-control", @id = "attorneycode", @onfocusout = "ValidateAttorneyCode(this.value)", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.SingleAction.ActionByUser.UserFullName, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.SingleAction.CreatedDateTime, "Date Actioned", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.SingleAction.CreatedDateTime, new { htmlAttributes = new { @class = "form-control", @id = "attorneycode", @onfocusout = "ValidateAttorneyCode(this.value)", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.SingleAction.CreatedDateTime, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.TextAreaFor(model => model.SingleAction.Comment, new { @class = "form-control", @style = "height:100px;", @onkeypress = "retuen false", @readonly = "readonly" })
+                                                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <br />
+                                                <h5>Agreement of Lease Renewal Data Available</h5>
+                                                <br />
+                                            }
+                                            <br />
+                                            <h3>Agreement of Lease Terminations</h3>
+                                            <hr />
+                                            <br />
+                                            @if (Model.HumanSettlementApplication.ServeNoticeDate != null)
+                                            {
+                                                if (Model.HumanSettlementApplication.IsMaster)
+                                                {
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HumanSettlementLeaseMaster.TerminationDate, "Notice Date", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.ServeNoticeDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ServeNoticeDate, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @if (Model.HumanSettlementLeaseMaster.TerminationDate != null)
+                                                        {
+                                                            @Html.LabelFor(model => model.HumanSettlementLeaseMaster.TerminationDate, "Termination Date", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.HumanSettlementLeaseMaster.TerminationDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementLeaseMaster.TerminationDate, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        }
+                                                    </div>
+
+
+                                                }
+                                                else
+                                                {
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HumanSettlementLeaseDetails.TerminationDate, "Notice Date", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                        <div class="col-md-2">
+                                                            @*@Html.EditorFor(model => model.HumanSettlementLeaseDetails.ServeNoticeDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                        @Html.ValidationMessageFor(model => model.HumanSettlementLeaseDetails.ServeNoticeDate, "", new { @class = "text-danger" })*@
+                                                        </div>
+                                                        @if (Model.HumanSettlementLeaseDetails.TerminationDate != null)
+                                                        {
+                                                            @Html.LabelFor(model => model.HumanSettlementLeaseDetails.TerminationDate, "Termination Date", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.HumanSettlementLeaseDetails.TerminationDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementLeaseDetails.TerminationDate, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                                var Item = Model.PLMApplicationHistortyLogList.LastOrDefault(r => r.AuditAction.Contains("Termination Initiated"));
+                                                //Model.AuditAction = Item;
+                                                if (Item != null)
+                                                {
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => Item.User.FullName, "Terminated By", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => Item.User.FullName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => Item.User.FullName, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => Item.User.FullName, "Date Terminated", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => Item.CreatedDateTime, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => Item.CreatedDateTime, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.Label("Reason", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.TextAreaFor(model => Item.AuditAction, new { @class = "form-control", @style = "height:100px;", @onkeypress = "retuen false", @readonly = "readonly" })
+                                                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <br />
+                                                <h5>Agreement of Lease Termination Data Available</h5>
+                                                <br />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-tab-panel" id="step3" align="center">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+
+                                        <div class="form-horizontal">
+
+
+
+
+                                            <h3>Applicantion Information</h3>
+                                            <hr />
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <div class="form-group">
+
+                                                @Html.LabelFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber, "Application Reference No", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                <div class="col-md-2">
+                                                    @Html.EditorFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                    @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div id="divInformationFields">
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.PurchaserType.Name, "Application Type", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.PurchaserType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.PurchaserType.Name, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CreatedDateTime, "Application Date", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CreatedDateTime, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CreatedDateTime, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+
+
+                                                <br />
+                                                <h3>Unit Space Type</h3>
+                                                <hr />
+                                                <br />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.HSIncomeBracketId, "Income Brackets", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.HSIncomeBracket.Name, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @onkeydown = "return false"@*, @maxlength = "10"*@,
+@readonly = "readonly"
+}
+})
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.HSIncomeBracket.Name, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.UnitTypologyId, "Typology", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.UnitTypology.Name, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @onkeydown = "return false"@*, @maxlength = "10"*@,
+@readonly = "readonly"
+}
+})
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.UnitTypology.Name, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.UnitCategoryId, "Category", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.UnitCategory.Name, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @onkeydown = "return false"@*, @maxlength = "10"*@,
+@readonly = "readonly"
+}
+})
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.UnitCategory.Name, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.PreferredComplexArea2Id, "Preferred Complex/Area", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.PreferredComplexArea.Name, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.PreferredComplexArea.Name, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    <div class="col-md-2"></div>
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.PreferredComplexArea2.Name, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.PreferredComplexArea2.Name, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+
+
+                                                <br />
+                                                <h3>Matched Unit Details</h3>
+                                                <hr />
+                                                <br />
+                                                @if (Model.HumanSettlementApplication.IsMaster)
+                                                {
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HumanSettlementLeaseMaster.Solarreference, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HumanSettlementLeaseMaster.Solarreference, new { htmlAttributes = new { @class = "form-control"@*, @onkeypress = "return isNumber(event)", @maxlength = "10"*@, @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementLeaseMaster.Solarreference, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "Complex/Building Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                }
+
+
+                                                <div class="form-group">
+
+                                                    @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "Physical Address", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @readonly = "readonly"
+                                                            }
+                        })
+                                                        @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "Suburb", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @readonly = "readonly"
+                                                            }
+                        })
+                                                        @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.BuildingName, "", new { @class = "text-danger" })
+                                                    </div>
+
+
+                                                </div>
+
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.GeoLocation, "Geo-Location", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.GeoLocation, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @readonly = "readonly"
+                                                            }
+                        })
+                                                        @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.GeoLocation, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.Postal, "Postal Code", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.UnitsEkurhuleniHousingCompany.Postal, new
+                                                        {
+                                                            htmlAttributes = new
+                                                            {
+                                                                @class = "form-control",
+                                                                @onkeypress = "return isNumber(event)",
+                                                                @maxlength = "8",
+                                                                @readonly = "readonly"
+                                                            }
+                        })
+                                                        @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.Postal, "", new { @class = "text-danger" })
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.UnitsEkurhuleniHousingCompany.LettingRequirements, "Letting Requirements", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-8">
+                                                        @Html.TextAreaFor(model => model.UnitsEkurhuleniHousingCompany.LettingRequirements, new
+                                                            {
+                                                                @class = "form-control",
+                                                                @readonly = "readonly"
+                                                        })
+                                                        @Html.ValidationMessageFor(model => model.UnitsEkurhuleniHousingCompany.LettingRequirements, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+
+                                                <br />
+                                                @if (Model.ApplicantUnit != null)
+                                                {
+                                                    <h3>
+                                                        Housing Supervisor
+                                                    </h3>
+                                                    <hr />
+                                                    <br />
+                                                    <div class="form-group">
+
+                                                        @Html.LabelFor(model => model.HousingSupervisor.FullName, "Name of Supervisor", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HousingSupervisor.FullName, new
+                                                       {
+                                                           htmlAttributes = new
+                                                           {
+                                                               @class = "form-control",
+                                                               @readonly = "readonly"
+                                                                }
+                                                            })
+                                                            @Html.ValidationMessageFor(model => model.HousingSupervisor.FullName, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HousingSupervisor.SystemUser.ServiceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HousingSupervisor.SystemUser.ServiceNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HousingSupervisor.SystemUser.ServiceNo, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        @Html.LabelFor(model => model.HousingSupervisor.CellPhoneNumber, "Cell No", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HousingSupervisor.CellPhoneNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HousingSupervisor.CellPhoneNumber, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HousingSupervisor.WorkPhoneNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HousingSupervisor.WorkPhoneNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HousingSupervisor.WorkPhoneNumber, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HousingSupervisor.EmailAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HousingSupervisor.EmailAddress, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HousingSupervisor.EmailAddress, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <br />
+                                                    <br />
+
+                                                    <h3>
+                                                        Letting Officer
+                                                    </h3>
+                                                    <hr />
+                                                    <br />
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.LettingOfficer.FullName, "Name of Officer", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.LettingOfficer.FullName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.LettingOfficer.FullName, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.LettingOfficer.SystemUser.ServiceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.LettingOfficer.SystemUser.ServiceNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.LettingOfficer.SystemUser.ServiceNo, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.LettingOfficer.CellPhoneNumber, "Cell No", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.LettingOfficer.CellPhoneNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.LettingOfficer.CellPhoneNumber, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.LettingOfficer.WorkPhoneNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.LettingOfficer.WorkPhoneNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.LettingOfficer.WorkPhoneNumber, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.LettingOfficer.EmailAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.LettingOfficer.EmailAddress, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.LettingOfficer.EmailAddress, "", new { @class = "text-danger" })
+                                                        </div>
+
+                                                    </div>
+                                                    <br />
+                                                    <br />
+                                                }
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-tab-panel" id="step4" align="center">
+
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+
+                                        <div class="form-horizontal">
+                                            @if (ViewBag.TenantType == "Individual")
+                                            {
+                                                <h3>Applicant Information</h3>
+                                                <hr />
+                                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.FirstName, "Name of Applicant", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.ApplicantFullName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.FirstName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.IDNo, "ID No. of Applicant", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.IDNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.IdentificationTypeId, "Nationality", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.IdentificationType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.IdentificationTypeId, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CellNo, "Cell No", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CellNo, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CellNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.WorkNo, "Work No", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.WorkNo, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.WorkNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.HomeNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.HomeNo, new { htmlAttributes = new { @class = "form-control", @maxlength = "10", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.HomeNo, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.PurEmail, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.PurEmail, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.PurEmail, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+                                                <br />
+                                                <h3>Contact Person Information</h3>
+                                                <hr />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CoLastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CoLastName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CoLastName, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CoCell, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CoCell, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CoCell, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CoFirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CoFirstName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CoFirstName, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.CoEmail, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-3">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.CoEmail, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.CoEmail, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+
+
+                                                if (Model.ApplicantUnit == null)
+                                                {
+                                                    <br />
+                                                    <h3>Applicant Current Address</h3>
+                                                    <hr />
+                                                    <br />
+
+                                                    <div class="form-group">
+                                                        <div class="col-md-1"></div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.ResAddress, "Physical Address", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.ResAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResAddress, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.ResAddress, "Suburb", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.ResAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResAddress, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.ResPostal, "Postal Code", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-1">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.ResPostal, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "8", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.ResPostal, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                if (Model.HumanSettlementApplication.SecondApplicant == true)
+                                                {
+                                                    <div id="DivSecondaApplicant">
+                                                        <br />
+                                                        <h3>Applicant's Spouse Details</h3>
+                                                        <hr />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppFirstName, "Fist Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppFirstName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppFirstName, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppIDNo, "ID No. of Spouse", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppIDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppIDNo, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppLastName, "Surname", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppLastName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppLastName, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppTitleType.Name, "Title", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppTitleType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppTitleType.Name, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.ApplicantJoint.JointEmail, "Nationality", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.IdentificationType.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.ApplicantJoint.JointEmail, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppCellNo, "Cell Phone", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppCellNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppCellNo, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.HumanSettlementApplication.SecAppEmail, "E-mail", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.HumanSettlementApplication.SecAppEmail, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppEmail, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <br />
+                                                }
+
+
+                                                <br />
+                                                <h3>Applicant's Income Details</h3>
+                                                <hr />
+                                                <br />
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.IncomeSource.SourceOfIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.IncomeSource.SourceOfIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.IncomeSource.SourceOfIncome, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.GrossIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.GrossIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.GrossIncome, "", new { @class = "text-danger" })
+                                                    </div>
+                                                    @Html.LabelFor(model => model.HumanSettlementApplication.NetIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                    <div class="col-md-2">
+                                                        @Html.EditorFor(model => model.HumanSettlementApplication.NetIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.HumanSettlementApplication.NetIncome, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <br />
+
+                                                if (Model.HumanSettlementApplication.SecondApplicant == true)
+                                                {
+                                                    <br />
+                                                    <h3>Spouse's Income Details</h3>
+                                                    <hr />
+                                                    <br />
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppIncomeSource.SourceOfIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppIncomeSource.SourceOfIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppIncomeSource.SourceOfIncome, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppGrossIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppGrossIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppGrossIncome, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppNetIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppNetIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppNetIncome, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.TotalCombinedIncome, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-2">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.TotalCombinedIncome, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.TotalCombinedIncome, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                    <br />
+
+                                                    <br />
+                                                    <h3>Spouse Current Address</h3>
+                                                    <hr />
+                                                    <br />
+
+                                                    <div class="form-group">
+                                                        <div class="col-md-1"></div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppAddress, "Physical Address", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppAddress, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppSuburb, "Suburb", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-3">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppSuburb, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppSuburb, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        @Html.LabelFor(model => model.HumanSettlementApplication.SecAppPostal, "Postal Code", htmlAttributes: new { @class = "control-label col-md-1" })
+                                                        <div class="col-md-1">
+                                                            @Html.EditorFor(model => model.HumanSettlementApplication.SecAppPostal, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @maxlength = "8", @readonly = "readonly" } })
+                                                            @Html.ValidationMessageFor(model => model.HumanSettlementApplication.SecAppPostal, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <br />
+                                                <br />
+                                            }
+
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-tab-panel" id="step5" align="center">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                        <div class="form-horizontal">
+                                            <h3>Head of Department Comments</h3>
+                                            <hr />
+                                            <div class="panel-body" id="divNaturalPersontbl">
+
+
+
+                                                <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Department Name
+                                                            </th>
+                                                            <th>
+                                                                HoD Action
+                                                            </th>
+                                                            <th>
+                                                                HoD Comment
+                                                            </th>
+                                                            <th>
+                                                                Date Actioned
+                                                            </th>
+                                                        </tr>
+
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.hodList != null)
+                                                        {
+                                                            foreach (var item in Model.hodList)
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.HoDLastName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.Outcome)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.HoDCommments)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.CreatedDateTime.Value)
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <br />
+
+                                            <h3>Departmental Comments</h3>
+                                            <hr />
+                                            <div class="panel-body" id="divNaturalPersontbl">
+
+
+
+                                                <table id="DepartmentalTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Department Name
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                            <th>
+                                                                Comment
+                                                            </th>
+                                                            <th>
+                                                                Date Actioned
+                                                            </th>
+                                                        </tr>
+
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.DepartmentalCommentsList != null)
+                                                        {
+                                                            foreach (var item in Model.DepartmentalCommentsList)
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.DepartmentName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.Outcome)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.Reason)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.CreatedDateTime.Value)
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                            <hr />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-tab-panel" id="step6" align="center">
+
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                        <div class="form-horizontal">
+                                            <h3>Property Application History</h3>
+                                            <hr />
+                                            <div class="panel-body" id="divNaturalPersontbl">
+                                                <table id="ActivityTrackerTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Actioned By
+                                                            </th>
+                                                            <th>
+                                                                Action Description
+                                                            </th>
+
+                                                            <th>
+                                                                TimeStamp
+                                                            </th>
+
+                                                        </tr>
+
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.PLMApplicationHistortyLogList != null)
+                                                        {
+                                                            foreach (var item in Model.PLMApplicationHistortyLogList)
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        @if (item.User != null)
+                                                                        {
+                                                                            @item.User.FullName
+                                                                        }
+
+                                                                    </td>
+                                                                    <td>
+                                                                        @item.AuditAction
+                                                                    </td>
+
+                                                                    <td>
+                                                                        @item.CreatedDateTime
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+
+                                                </table>
+                                                <br />
+                                                <br />
+
+                                                <br />
+
+
+
+
+
+                                            </div>
+
+
+
+
+                                            <hr />
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="step-tab-panel" id="step7" align="center">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-group" style="margin-bottom: -1px;">
+                                <div class="panel panel-default">
+                                    <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                        <div class="form-horizontal">
+                                            <div class="panel-body" id="divNaturalPersontbl">
+                                                <div id="documentsCollapse" class="panel-collapse collapse in">
+                                                    <div class="panel-body">
+                                                        <div id="currentDocumentsGrp">
+                                                            @*<div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Property Application Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.Document)
+                                                            </div>
+                                                            <br />*@
+                                                            <br />
+                                                            @*<div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Risk Assessment Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentRiskAssessment)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Unit Inspection Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentUnitInspection)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Maintanance Job Sheet Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentMaintananceJobSheet)
+                                                            </div>
+                                                            <br />
+                                                            <br />*@
+
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Tenant Lease Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentTenantLease)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Appliation Lease Agreement Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentLeaseAgreement)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            @*<div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Lease Debit Order Document</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentDebitOrder)
+                                                            </div>
+                                                            <br />
+                                                            <br />*@
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Tenant Account Validation Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentTenantAccoutValidation)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            @*<div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Property Eviction Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentPropertyEviction)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Eviction Committee Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentEvictionCommittee)
+                                                            </div>
+                                                            <br />
+                                                            <br />
+                                                            <div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Tenant Risk Assessment Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentTenantRiskAssessment)
+                                                            </div>
+                                                            <br />
+                                                            <br />*@
+                                                            @*<div class="form-group">
+                                                                <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Exit Inspection Document/s</div>
+                                                                <hr />
+                                                                @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentExitInspection)
+                                                            </div>*@
+                                                        </div>
+                                                    <br />
+                                                        <br />
+                                                        @*<div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Application Lease Agreement Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentLeaseAgreement)
+                                                        </div>
+                                                        <br />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Tenant Account Validation Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentTenantAccoutValidation)
+                                                        </div>
+                                                        <br />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Property Eviction Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentPropertyEviction)
+                                                        </div>
+                                                        <br />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Eviction Committee Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentEvictionCommittee)
+                                                        </div>
+                                                        <br />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Tenant Risk Assessment Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentTenantRiskAssessment)
+                                                        </div>
+                                                        <br />
+                                                        <br />*@
+                                                        <div class="form-group">
+                                                            <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Exit Inspection Document/s</div>
+                                                            <hr />
+                                                            @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentExitInspection)
+                                                        </div>
+                                         </div>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-footer" align="center">
+                    <button data-direction="clos" onclick="window.open('', '_self', ''); window.close();" class="btn btn-outline-primary">Close</button>
+                    <button data-direction="prev" class="btn btn-outline-primary" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Previous</button>
+                    <button data-direction="next" class="btn btn-outline-primary" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script src="~/Scripts/jquery-steps.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#RCSTable').DataTable();
+        $('#ActivityTrackerTable').DataTable();
+        $('#DepartmentalTable').DataTable();
+        $('#NaturalPersontbl').DataTable();
+
+    });
+
+    //$('#demo').steps({
+    //    onFinish: function () { document.getElementById("Createbtn").click(); }
+    //});
+    var form = $("#CreateForm");
+    form.children("div").steps({
+
+        onFinish: function () { document.getElementById("Createbtn").click(); },
+        onChange: function (event, currentIndex, newIndex) {
+            debugger;
+            //submit(currentIndex, newIndex)
+
+            if (newIndex < currentIndex) {
+                return true;
+            }
+            form.validate().settings.ignore = ":disabled,:hidden";
+            return true;
+
+        }
+    });
+</script>
+<script>
+    function CloseDetails() {
+        debugger;
+        window.close;
+    }
+
+
+
+
+    function servicesCheckedFn() {
+        var servicesChecked = document.getElementById("MunicipalAccountInformation_ServicesOnProperty");
+        if (servicesChecked.checked) {
+            servicesChecked.value = true;
+            jQuery('#divServices').css("display", "block")
+        }
+        else {
+            servicesChecked.value = false;
+            jQuery('#divServices').css("display", "none")
+        }
+    }
+
+    function ValidateRatesNumber(rateNo) {
+        searchrate();
+        if (rateNo.length != 10) {
+            $('#TransferInformation_RatesNumber').val('');
+            //swal("Our First Alert");
+            swal("Error!", "Please enter a valid 10 digit Rate Number!", "warning");
+            //alert("Please enter a valid 10 digit Rate Number");
+            //swal({
+            //    title: "Good job!",
+            //    text: "Please enter a valid 10 digit Rate Number!",
+            //    icon: "success",
+            //});
+            jQuery('#divInformationFields').css("display", "none")
+            return false;
+        }
+        else {
+            jQuery('#divInformationFields').css("display", "block")
+
+        }
+
+    }
+    function searchrate() {
+        debugger;
+        var MunicipalAccNo = document.getElementById('rate').value;
+        $.getJSON("../Capture/VAInformation?MunicipalAccNo="
+            + MunicipalAccNo,
+
+            function (result) {
+                if (result != "Error") {
+                    try {
+                        debugger
+                        if (result.length == 0) {
+
+                            swal("Error!", "No Results found!", "error");
+                            $('#rate').val('');
+                        }
+
+                        else {
+                            var ownernames = result.Initials + " " + result.Surname
+                            $('#TransferInformation_Extent').val(result.UnitNo);
+                            $('#TransferInformation_PhysicalAddress').val(result.StreetAddr);
+                            $('#TransferInformation_NewSubConfirm').val(result.PostalCode);
+                            $('#SellerInformation_OwnerName').val(ownernames);
+                            $('#SellerInformation_OwnerIdNumber').val(result.IDNo);
+                            $('#SellerInformation_CellNo').val(result.CellNo);
+                            $('#SellerInformation_HomeNo').val(result.HomeTel);
+                            $('#SellerInformation_WorkNo').val(result.WorkTel);
+                            $('#SellerInformation_EmailAddress').val(result.EmailAddr);
+                            $('#TransferInformation_Suburb').val(result.PostalAddress2);
+                        }
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    swal("Error!", "Unsuccessfully captured.", "error");
+                }
+            });
+    }
+
+
+    function ValidateRSAIDNo(id) {
+        try {
+            if (id.length != 13) {
+                $('#PurchaserInformation_IDNo').val('');
+                //alert("Please enter a valid 13 digit ID no.");
+                swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                return false;
+            }
+            var y1o = id.substring(0, 1)
+            var y2e = id.substring(1, 2)
+            var m1o = id.substring(2, 3)
+            var m2e = id.substring(3, 4)
+            var d1o = id.substring(4, 5)
+            var d2e = id.substring(5, 6)
+            var go = id.substring(6, 7)
+            var s1e = id.substring(7, 8)
+            var s2o = id.substring(8, 9)
+            var s3e = id.substring(9, 10)
+            var co = id.substring(10, 11)
+            var ae = id.substring(11, 12)
+            var z = id.substring(12, 13)
+
+            var A = 0;
+            A = parseInt(A) + parseInt(y1o) + parseInt(m1o) + parseInt(d1o) + parseInt(go) + parseInt(s2o) + parseInt(co);
+            var B1 = y2e + m2e + d2e + s1e + s3e + ae;
+            var B2 = B1 * 2;
+            var i = 0;
+            var B3 = 0;
+            var B2string = B2.toString();
+            while (B2string.length > i) {
+                var x = B2string.substring(i, i + 1);
+                B3 = B3 + parseInt(x);
+                i = i + 1;
+            }
+
+            var C = A + B3;
+            var Cstring = C.toString();
+            var secNo = Cstring.substring(1, 2);
+            var D = 10 - parseInt(secNo);
+            while (D >= 10) D = D - 10;
+            if (D == z) {
+                //test for valid date in 1900
+                var valid = true;
+                var bd = new Date('19' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                else if (bd.getFullYear() != parseInt('19' + y1o + y2e)) valid = false;
+                else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+                //if invalid test again in 2000
+                valid = true;
+                bd = new Date('20' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                else if (bd.getFullYear() != parseInt('20' + y1o + y2e)) valid = false;
+                else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+
+
+                var tempDate = new Date(id.substring(0, 2), id.substring(2, 4) - 1, id.substring(4, 6));
+
+                var id_date = tempDate.getDate();
+                var id_month = tempDate.getMonth();
+                var id_year = tempDate.getFullYear();
+
+                var fullDate = (id_month + 1) + "/" + id_date + "/" + id_year;
+
+                $('#DOBAuto').val(fullDate);
+                debugger;
+
+
+                var today_date = new Date();
+                var today_year = today_date.getFullYear();
+                var today_month = today_date.getMonth();
+                var today_day = today_date.getDate();
+                var age = today_year - id_year;
+
+                if (today_month < (id_month - 1)) {
+                    age--;
+                }
+                if (((id_month - 1) == today_month) && (today_day < id_date)) {
+                    age--;
+                }
+
+                $('#AgeAuto').val(age);
+
+
+                if (!((tempDate.getYear() == id.substring(0, 2)) && (id_month == id.substring(2, 4) - 1) && (id_date == id.substring(4, 6)))) {
+                    error.append('<p>ID number does not appear to be authentic - date part not valid</p>');
+                    correct = false;
+                }
+
+
+                return valid;
+            }
+            else {
+                $('#PurchaserInformation_IDNo').val('');
+                //alert("Please enter a valid 13 digit ID no.");
+                swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                return false;
+            }
+        }
+        catch (e) {
+            //alert(bd+"Catch");
+            return false;
+        }
+    }
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function switchDivsMeterType() {
+        var Purchaser = document.getElementById("ElectricityMeterInformation_ElectricityMeterType").value;
+
+        if (Purchaser == "Pre-Paid") {
+            jQuery('#divPrepaid').css("display", "block")
+            jQuery('#divMunicipal').css("display", "none")
+        }
+        else if (Purchaser == "Municipal") {
+            jQuery('#divPrepaid').css("display", "none")
+            jQuery('#divMunicipal').css("display", "block")
+        }
+
+        else {
+            jQuery('#divPrepaid').css("display", "none")
+            jQuery('#divMunicipal').css("display", "none")
+        }
+    }
+    function switchDivsPurchaserInfo() {
+        var Purchaser = document.getElementById("PurchaserInformation_PurchaseType").value;
+
+        if (Purchaser == "t_Person") {
+            jQuery('#divNaturalPerson').css("display", "block")
+            jQuery('#divJuristic').css("display", "none")
+        }
+        else if (Purchaser == "t_Juristic") {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divJuristic').css("display", "block")
+        }
+
+        else {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divJuristic').css("display", "none")
+        }
+    }
+
+    function JuristicTypeChange() {
+        var JuristicType = document.getElementById("JuristicType").value;
+        if (JuristicType == 11) {
+            jQuery('#divDeemed').css("display", "block")
+            jQuery('#divCC').css("display", "none")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 6) {
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "block")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 7) {
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "block")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+
+        else if (JuristicType == 9) {
+            jQuery('#divTrust').css("display", "block")
+            jQuery('#divDeemed').css("display", "none")
+
+            jQuery('#divCC').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 15) {
+            jQuery('#divSpecify').css("display", "block")
+            jQuery('#divTrust').css("display", "none")
+
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "none")
+        }
+
+        else {
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divDeemed').css("display", "none")
+
+            jQuery('#divCC').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+
+    }
+
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
+<script>
+
+    function IdentitificationTypesChange() {
+        var Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+
+        if (Nationality == 3) {
+            jQuery('#PassportDiv').css("display", "block")
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "block")
+            jQuery('#PassportDatediv').css("display", "block")
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#IDDatedivdiv').css("display", "none")
+        }
+        else if (Nationality == 1) {
+            jQuery('#IdNoDiv').css("display", "block")
+            jQuery('#IDDatedivdiv').css("display", "block")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDatediv').css("display", "none")
+        }
+        else {
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDatediv').css("display", "none")
+        }
+    }
+    function AddElectricity() {
+        debugger;
+
+
+        var ElectricityMeterInformation_ElectricityMeterNo = document.getElementById("ElectricityMeterInformation_ElectricityMeterNo").value;
+        var ElectricityMeterInformation_ElectricityMeterReading = document.getElementById("ElectricityMeterInformation_ElectricityMeterReading").value;
+        var ElectricityMeterInformation_ElectricityMeterReadingDateTaken = document.getElementById("ElectricityMeterInformation_ElectricityMeterReadingDateTaken").value;
+
+        if (ElectricityMeterInformation_ElectricityMeterNo == "" || ElectricityMeterInformation_ElectricityMeterReading == "") {
+            //alert("Please enter all required fields!");
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+
+        else {
+
+            $.getJSON("../Capture/AddElectricity?ElectricityMeterInformation_ElectricityMeterNo=" + ElectricityMeterInformation_ElectricityMeterNo
+                + '&ElectricityMeterInformation_ElectricityMeterReading=' + ElectricityMeterInformation_ElectricityMeterReading
+                + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divElectricitytbl').css("display", "block")
+                            var row = $("<tr/>")
+                            $("#Electricitytbl").append(row);
+
+                            row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterNo + "</td>"));
+                            row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReading + "</td>"));
+                            row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken + "</td>"));
+                            clearElectricity();
+                            //$('#Electricitytbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+    function clearElectricity() {
+        $('#ElectricityMeterInformation_ElectricityMeterNo').val('');
+        $('#ElectricityMeterInformation_ElectricityMeterReading').val('');
+        $('#ElectricityMeterInformation_ElectricityMeterReadingDateTaken').val('');
+
+    }
+
+    function AddWater() {
+        debugger;
+
+
+        var WaterMeterInformation_WaterMeterNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        var WaterMeterInformation_WaterMeterReading = document.getElementById("WaterMeterInformation_WaterMeterReading").value;
+        var WaterMeterInformation_WaterMeterReadingDateTaken = document.getElementById("WaterMeterInformation_WaterMeterReadingDateTaken").value;
+
+        if (WaterMeterInformation_WaterMeterNo == "" || WaterMeterInformation_WaterMeterReading == "") {
+            //alert("Please enter all required fields!");
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+
+        else {
+
+            $.getJSON("../Capture/AddWater?WaterMeterInformation_WaterMeterNo=" + WaterMeterInformation_WaterMeterNo
+                + '&WaterMeterInformation_WaterMeterReading=' + WaterMeterInformation_WaterMeterReading
+                + '&WaterMeterInformation_WaterMeterReadingDateTaken=' + WaterMeterInformation_WaterMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divWatertbl').css("display", "block")
+                            var row = $("<tr/>")
+                            $("#Watertbl").append(row);
+
+                            row.append($("<td>" + WaterMeterInformation_WaterMeterNo + "</td>"));
+                            row.append($("<td>" + WaterMeterInformation_WaterMeterReading + "</td>"));
+                            row.append($("<td>" + WaterMeterInformation_WaterMeterReadingDateTaken + "</td>"));
+                            clearWater();
+                            //$('#Watertbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+
+    function clearWater() {
+        $('#WaterMeterInformation_WaterMeterNo').val('');
+        $('#WaterMeterInformation_WaterMeterReading').val('');
+        $('#WaterMeterInformation_WaterMeterReadingDateTaken').val('');
+
+    }
+    function AddNaturalPerson() {
+        debugger;
+        var Gender = document.getElementById("Gender").value;
+        var TitleType = document.getElementById("TitleType").value;
+        var MaritialStatus = document.getElementById("MaritialStatus").value;
+        var PurchaserInformation_Initial = document.getElementById("PurchaserInformation_Initial").value;
+        var PurchaserInformation_FirstName = document.getElementById("PurchaserInformation_FirstName").value;
+        var PurchaserInformation_LastName = document.getElementById("PurchaserInformation_LastName").value;
+        var PurchaserInformation_IDNo = document.getElementById("PurchaserInformation_IDNo").value;
+        var PurchaserInformation_Passport = document.getElementById("PurchaserInformation_Passport").value;
+        var PurchaserInformation_PurDateExpiry = document.getElementById("PurchaserInformation_PurDateExpiry").value;
+        var PurchaserInformation_Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+        var PurchaserInformation_CellNo = document.getElementById("PurchaserInformation_CellNo").value;
+        var PurchaserInformation_HomeNo = document.getElementById("PurchaserInformation_HomeNo").value;
+        var PurchaserInformation_WorkNo = document.getElementById("PurchaserInformation_WorkNo").value;
+        var PurchaserInformation_PurEmail = document.getElementById("PurchaserInformation_PurEmail").value;
+        var PurchaserInformation_PostAddress = document.getElementById("PurchaserInformation_PostAddress").value;
+        var PurchaserInformation_PostSuburb = document.getElementById("PurchaserInformation_PostSuburb").value;
+        var PurchaserInformation_PostalCity = document.getElementById("PurchaserInformation_PostalCity").value;
+        var PurchaserInformation_PostPostalCode = document.getElementById("PurchaserInformation_PostPostalCode").value;
+        var PurchaserInformation_PurchaseType = document.getElementById("PurchaserInformation_PurchaseType").value;
+        var PurchaserInformation_NominatedAddress = document.getElementById("PurchaserInformation_NominatedAddress").value;
+
+        if (PurchaserInformation_IDNo != "") {
+            var PurchaserInformation_DOB = document.getElementById("DOBAuto").value;
+            var PurchaserInformation_Age = document.getElementById("AgeAuto").value;
+        }
+        else {
+            var PurchaserInformation_DOB = document.getElementById("PurchaserInformation_DOB").value;
+            var PurchaserInformation_Age = document.getElementById("PurchaserInformation_Age").value;
+        }
+
+        if (Gender == "" || TitleType == "" || MaritialStatus == "") {
+
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+
+        else {
+
+            $.getJSON("../Capture/AddNaturalPerson?Gender="
+                + Gender + '&TitleType=' + TitleType
+                + '&MaritialStatus=' + MaritialStatus
+                + '&PurchaserInformation_Initial=' + PurchaserInformation_Initial
+                + '&PurchaserInformation_FirstName=' + PurchaserInformation_FirstName
+                + '&PurchaserInformation_LastName=' + PurchaserInformation_LastName
+                + '&PurchaserInformation_IDNo=' + PurchaserInformation_IDNo
+                + '&PurchaserInformation_DOB=' + PurchaserInformation_DOB
+                + '&PurchaserInformation_Age=' + PurchaserInformation_Age
+                + '&PurchaserInformation_Passport=' + PurchaserInformation_Passport
+                + '&PurchaserInformation_PurDateExpiry=' + PurchaserInformation_PurDateExpiry
+                + '&PurchaserInformation_Nationality=' + PurchaserInformation_Nationality
+                + '&PurchaserInformation_CellNo=' + PurchaserInformation_CellNo
+                + '&PurchaserInformation_HomeNo=' + PurchaserInformation_HomeNo
+                + '&PurchaserInformation_WorkNo=' + PurchaserInformation_WorkNo
+                + '&PurchaserInformation_PurEmail=' + PurchaserInformation_PurEmail
+                + '&PurchaserInformation_PostAddress=' + PurchaserInformation_PostAddress
+                + '&PurchaserInformation_PostSuburb=' + PurchaserInformation_PostSuburb
+                + '&PurchaserInformation_PostalCity=' + PurchaserInformation_PostalCity
+                + '&PurchaserInformation_PostPostalCode=' + PurchaserInformation_PostPostalCode
+                + '&PurchaserInformation_PurchaseType=' + PurchaserInformation_PurchaseType
+                + '&PurchaserInformation_NominatedAddress=' + PurchaserInformation_NominatedAddress,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divNaturalPersontbl').css("display", "block")
+                            var row = $("<tr/>")
+                            $("#NaturalPersontbl").append(row);
+                            row.append($("<td>" + PurchaserInformation_FirstName + " " + PurchaserInformation_LastName + "</td>"));
+                            if (PurchaserInformation_IDNo == "") {
+                                row.append($("<td>" + PurchaserInformation_Passport + "</td>"));
+                            }
+                            else {
+                                row.append($("<td>" + PurchaserInformation_IDNo + "</td>"));
+                            }
+                            row.append($("<td>" + PurchaserInformation_PurEmail + "</td>"));
+                            row.append($("<td>" + PurchaserInformation_PostAddress + "</td>"));
+                            row.append($("<td>" + PurchaserInformation_NominatedAddress + "</td>"));
+                            clearNaturalPerson();
+                            $('#NaturalPersontbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+
+    function clearNaturalPerson() {
+        $('#PurchaserInformation_PurchaseType').val('');
+        $('#Gender').val('');
+        $('#TitleType').val('');
+        $('#MaritialStatus').val('');
+        $('#PurchaserInformation_Initial').val('');
+        $('#PurchaserInformation_FirstName').val('');
+        $('#PurchaserInformation_LastName').val('');
+        $('#PurchaserInformation_IDNo').val('');
+        $('#PurchaserInformation_DOB').val('');
+        $('#PurchaserInformation_Age').val('');
+        $('#PurchaserInformation_Passport').val('');
+        $('#PurchaserInformation_PurDateExpiry').val('');
+        $('#PurchaserInformation_Nationality').val('');
+        $('#PurchaserInformation_CellNo').val('');
+        $('#PurchaserInformation_HomeNo').val('');
+        $('#PurchaserInformation_WorkNo').val('');
+        $('#PurchaserInformation_PurEmail').val('');
+        $('#PurchaserInformation_PostAddress').val('');
+        $('#PurchaserInformation_PostSuburb').val('');
+        $('#PurchaserInformation_PostalCity').val('');
+        $('#PurchaserInformation_PostPostalCode').val('');
+        $('#PurchaserInformation_NominatedAddress').val('');
+        $('#DOBAuto').val('');
+        $('#AgeAuto').val('');
+        jQuery('#IdNoDiv').css("display", "none")
+        jQuery('#PassportDiv').css("display", "none")
+        jQuery('#PassportDatediv').css("display", "none")
+        jQuery('#IDDatedivdiv').css("display", "none")
+    }
+
+    function clearJuristics() {
+        $('#CommentsAttachments_BICA_DATE').val('');
+        $('#CommentsAttachments_BICA_COMMENT').val('');
+    }
+
+    function validateEmail(email) {
+        var emailID = document.getElementById(email).value;
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        var isEmail = re.test(emailID);
+        if (isEmail != true) {
+            //alert("Please enter a valid email");
+            swal("Error!", "Please enter a valid email.", "warning");
+            document.getElementById(email).value = "";
+        }
+    }
+</script>
+
+
+

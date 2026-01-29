@@ -1,0 +1,60 @@
+﻿
+@{
+    //ViewBag.Title = "Help";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+
+        @@media only screen and (max-width: 1000px) {
+            .step-app > .step-steps {
+                display: inline-block;
+                padding: 1px;
+                color: white;
+                background-color: #848484;
+                text-decoration: none;
+                border-right: 1px solid #fff;
+                word-wrap: break-word;
+                width: 100%;
+            }
+
+            .buttonIcon {
+                font-size: 2.5rem !important;
+            }
+
+            .chkboxmargin {
+                margin-left: 30px;
+            }
+
+            .cards .fa {
+                font-size: 7.5rem;
+            }
+
+            .button1 {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<h2>PLM Supporting Documents</h2>
+<div class="panel-body">
+    @Html.ActionLink("Download Training Letting Officer Manual", "../Manuals/PLM Letting Officer Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Revenue Officer Manual", "../Manuals/PLM Revenue Officer Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Revenue Manager Manual", "../Manuals/PLM Revenue Manager Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Property Manager Manual", "../Manuals/PLM Property Manager Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Housing Supervisor Manual", "../Manuals/PLM Housing Supervisor Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Customer/Applicant Manual", "../Manuals/PLM Applicant-Tenant Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Community Development Officer Manual", "../Manuals/PLM Community Development Officer Training Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Housing Liaison Officer Manual", "../Manuals/PLM H-Housing Liaison Officer Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Senior Housing Specialist Manual", "../Manuals/PLM H-Senior Housing Specialist Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+    @Html.ActionLink("Download Training Regional Manager Manual", "../Manuals/PLM H-Regional Manager Manual.pdf", null, new { @class = "btn btn-primary", @target = "_blank" })<br /><br />
+</div>
+<br />
+<div>
+    <input type="button" value="Go Back" name="btnApproval" onclick="window.location.href='../Account/Login'" class="button1" />
+</div>

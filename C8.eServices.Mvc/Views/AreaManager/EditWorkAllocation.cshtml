@@ -1,0 +1,271 @@
+﻿@model C8.eServices.Mvc.ViewModels.ManualReAllocationViewModel
+@using C8.eServices.Mvc.Keys
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Register";
+}
+
+@*<h4>Re-Allocate</h4>*@
+@*@Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")*@
+@if (Request.HttpMethod == "POST")
+{
+    <script type="text/javascript">
+        $(function () {
+            if ('@ViewBag.Response' === "Success") {
+                $("#confirmEmailModal").modal('show');
+            }
+        });
+    </script>
+}
+
+<style type="text/css">
+    .validation-summary-errors {
+        color: red;
+        font-style: italic;
+    }
+</style>
+
+@using (Html.BeginForm("UpdateAreaRegionCCC", "AreaManager", FormMethod.Post, new { id = "registerForm" }))
+{
+    @Html.AntiForgeryToken()
+    <hr />
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse in">
+                <div class="panel-body">
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.PreferredComplexArea.Id, new { @class = "form-control", @Name = "PreferredComplexAreaId", @style = "display:none;" })
+    @Html.ValidationSummary()
+    <br />
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#accountInfoCollapse">
+                        Edit Complex
+                    </a>
+                </h4>
+            </div>
+            <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="alert alert-danger col-md-5 col-md-offset-3" id="AMYAlert" style="display:block; align-content:center;">
+                                <p style="text-align:center">Any changes made to this complex or area will affect all work assigned.</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span> @Html.LabelFor(m => m.UserWorkAllocation.PreferredComplexArea.Name, "Complex/Area Name", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(m => m.PreferredComplexArea.Name, new { @class = "form-control", @required = true, @Name = "CurrentAssignedUserName" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span> @Html.LabelFor(m => m.PreferredComplexArea.RegionTypeId, "Region", new { @class = "col-md-1 col-md-offset-1 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.DropDownListFor(m => m.PreferredComplexArea.RegionTypeId, (SelectList)ViewBag.Regionddl, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "RegionType", @id = "RegionTypeId", @required = "required" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span> @Html.LabelFor(m => m.PreferredComplexArea.CCCTypeId, "CCC", new { @class = "col-md-1 col-md-offset-1 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.DropDownListFor(m => m.PreferredComplexArea.CCCTypeId, (SelectList)ViewBag.CCCddl, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "CCCType", @id = "CCCTypeId", @required = "required" })
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="btnSubmit" type="submit" class="button1" value="Save" />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="validation-summary-valid" id="jValidationSummary">
+                            <ul>
+                                <li style="display:none"></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginForm("AddAreaRRUser", "AreaManager", FormMethod.Post, new { id = "registerForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.PreferredComplexArea.Id, new { @class = "form-control", @Name = "PreferredComplexAreaId", @style = "display:none;" })
+    @Html.ValidationSummary()
+    <br />
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#accountInfoCollapse2">
+                        Assign User To Complex
+                    </a>
+                </h4>
+            </div>
+            <div id="accountInfoCollapse2" class="panel-collapse collapse in">
+                <div class="panel-body">
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="alert alert-success col-md-5 col-md-offset-3" id="AMYAlert" style="display:block; align-content:center;">
+                                <p style="text-align:center">Do no refresh this page after you have successfully added a user.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <span> @Html.LabelFor(m => m.PreferredComplexArea.RegionTypeId, "User Name", new { @class = "col-md-1 col-md-offset-1 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.DropDownListFor(m => m.PreferredComplexArea.RegionTypeId, (SelectList)ViewBag.Users, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "UserId", @id = "Userddl", @required = "required", @onchange = "FindUserRoles(this.value)" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <span> @Html.LabelFor(m => m.UserWorkAllocation.PreferredComplexArea.Name, "Role(s)", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(m => m.Roles, new { @class = "form-control", @required = true, @Name = "Roles", @Id = "rolesId", @onkeydown = "return false" })
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="btnSubmit" type="submit" class="button1" value="Save" />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="validation-summary-valid" id="jValidationSummary">
+                            <ul>
+                                <li style="display:none"></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<br />
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountInfoCollapse3">
+                    Round Robin Users
+                </a>
+            </h4>
+        </div>
+        <div id="accountInfoCollapse3" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="form-horizontal">
+                    <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+
+                        <thead>
+                            <tr>
+                                <th>User Full Name</th>
+                                <th>Email</th>
+                                <th>Role(s)</th>
+                                <th>Round Robbin</th>
+                                
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.UserWorkAllocation_L)
+                            {
+                            <tr>
+                                <td>@item.SystemUser.UserName</td>
+                                <td>@item.SystemUser.EmailAddress</td>
+                                <td>@item.Roles</td>
+                                <td>@Html.DisplayFor(modelItem => item.RRActive)</td>
+                                <td>
+                                    @if (item.RRActive)
+                                    {
+                                        @Html.ActionLink("OFF", "EditWorkAllocationAction", "AreaManager", new { q = new AesCrypto().Encrypt("PreferredComplexAreaId=" + Model.PreferredComplexArea.Id + "&UserId=" + item.SystemUser.Id + "&Action=" + ViewCodeKeys.OFF) }, new { @class = "btn btn-primary" })
+                                    }
+                                    else
+                                    {
+                                        @Html.ActionLink("ON", "EditWorkAllocationAction", "AreaManager", new { q = new AesCrypto().Encrypt("PreferredComplexAreaId=" + Model.PreferredComplexArea.Id + "&UserId=" + item.SystemUser.Id + "&Action=" + ViewCodeKeys.ON) }, new { @class = "btn btn-primary" })
+                                    }
+                                    @Html.ActionLink("DELETE", "EditWorkAllocationAction", "AreaManager", new { q = new AesCrypto().Encrypt("PreferredComplexAreaId=" + Model.PreferredComplexArea.Id + "&UserId=" + item.SystemUser.Id + "&Action=" + ViewCodeKeys.DELETE) }, new { @class = "btn btn-primary" })
+
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <input type="button" id="btnExternal" class="button1" value="Back To List" onclick="location.href='@Url.Action("UserWorkAllocation", "AreaManager")'" />
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("form").submit(function (e) {
+            var success = true;
+
+            return success;
+        });
+    });
+
+    $(document).ready(function () {
+        $("#btnSubmit").click(function () {
+            $("form").submit(function (e) {
+                var success = true;
+                return success;
+            });
+            document.getElementById("registerForm").submit();
+        });
+    });
+</script>
+
+<script>
+    function FindUserRoles(UserId) {
+        debugger;
+        if (UserId != "") {
+            $.ajax({
+                url: "@Url.Action("FindUserRoles", "AreaManager")?UserId=" + UserId,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == "Success") {
+                        debugger;
+                        $('#rolesId').val(data.names);
+                    }
+                }
+            });
+        }
+    }
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+</script>

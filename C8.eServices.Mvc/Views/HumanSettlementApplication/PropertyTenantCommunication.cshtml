@@ -1,0 +1,289 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>New Communication</h4>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @*@Html.HiddenFor(m => m.WaitingListQueueId)
+        @Html.HiddenFor(m => m.PropertyLeaseApplicationId)
+        @Html.HiddenFor(m => m.ItemPosition, new { @class = "form-control", @Id = "ItemPosition" })*@
+
+<div class="form-horizontal">
+    @Html.ValidationSummary(true)
+
+    @Html.HiddenFor(lodel => lodel.Features)
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                        Send Tenant Communication
+                    </a>
+                </h4>
+            </div>
+
+            <div id="userRoleCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="form-group">
+                        @Html.Label("Communication Type", new { @class = "control-label col-md-2" })
+                        <div class="col-md-4">
+                            <div style="margin-left:0px">
+                                <label>@Html.RadioButton("CommunicationType", "Individual", new { @name = "CommunicationType", @id = "CommunicationTypeId", @onchange = "CommunicationTypeGet(this.value)", @required = "reuired" }) Individual</label>
+                                <label>@Html.RadioButton("CommunicationType", "PerComplex", new { @name = "CommunicationType", @id = "CommunicationTypeId", @onchange = "CommunicationTypeGet(this.value)", @required = "reuired" }) Per Complex</label>           
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="CommunicationDiv" style="display:none;">
+                        <div class="form-group">
+                            <span>@Html.Label("Communication Method", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-1">
+                                @Html.CheckBox("SMS", new { @Name = "SMS", @Id = "SMSId", @checked = "SMS" }) @Html.Label("SMS", new { @class = "control-label" })<br />
+                                @Html.CheckBox("Email", new { @Name = "EMAIL", @Id = "EMAILId", @checked = "EMAIL" }) @Html.Label("EMAIL", new { @class = "control-label" })
+                                
+                            <div hidden>
+                                <br />
+
+                                @Html.CheckBox("POSTAL", new { @Name = "POSTAL", @Id = "POSTALId", @checked = "POSTAL" }) @Html.Label("POSTAL", new { @class = "control-label" })
+                            </div>
+                            </div>
+                        </div>
+                        <div id="PerComplex" style="display:none;">
+                            <div class="form-group">
+                                <span>@Html.Label("To Complex", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                                <div class="col-md-3">
+                                    @foreach (var item in Model.Features)
+                                    {
+                                        <input type="checkbox" name="SelectedRoles" checked="@item.Selected" value="@item.Value" id="SelectedRoles+@item.Selected" class="checkbox-inline" />
+                                        @Html.Label(item.Text, new { @class = "control-label" })
+                                        <br />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divIndividual" style="display:none;">
+                            <div class="form-group">
+                                <span>@Html.Label("To Tenant", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                                <div class="col-md-2">
+                                    @Html.DropDownList("Users", null, " Select Tenant Name ", new { @class = "form-control",@Id="UserId", @Name = "User", @required = "reuired" })
+                                    @Html.ValidationMessage("")
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span>@Html.Label("Message Title", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.TextBox("MessageTitle", null, new { @class = "form-control", @Name = "Title", @required = "reuired" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span>@Html.Label("Message Body", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-5">
+                                @Html.TextArea("Message", null, new { @class = "form-control", @Name = "MessageBody", @required = true })
+                                @Html.ValidationMessage("Message", "")
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="button" value="Send Message/s" onclick="clickSubmit()" class="button1" />
+                            <input type="submit" value="Re-Allocate" style="display:none;" id="btnApproval" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
+@*<div>
+    @Html.ActionLink("Back to List", "WaitingListQueueManagement", null, new { @class = "button1" })
+</div>*@
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-danger col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please enter position within queue length.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="successId" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>@ViewBag.success</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="dangerId" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-danger col-md-5" id="AMYAlert" style="display:block;">
+                        <p>@ViewBag.success</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function CommunicationTypeGet(val) {
+        debugger;
+        if (val == "PerComplex") {
+            jQuery('#PerComplex').css("display", "block")
+            jQuery('#CommunicationDiv').css("display", "block")
+            jQuery('#divIndividual').css("display", "none")
+            $('#UserId').prop('required', false);
+        }
+        if (val == "Individual") {
+            jQuery('#PerComplex').css("display", "none")
+            jQuery('#divIndividual').css("display", "block")
+            jQuery('#CommunicationDiv').css("display", "block")
+            $('#UserId').prop('required', true);
+        }
+    }
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to send this message?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                WaitingListBusy();
+            }
+        });
+    }
+    function WaitingListBusy() {
+        document.getElementById("btnApproval").click();
+    }
+
+    function divAssignTo() {
+        if (document.getElementById("checkbox").checked == true) {
+            debugger;
+            jQuery('#divAssignTo').css("display", "block")
+        } else {
+            jQuery('#divAssignTo').css("display", "none")
+
+        }
+    }
+    //$('checkbox').change(function () {
+    //    if (document.getElementById("checkbox").checked == true) {
+    //        debugger;
+    //        jQuery("divAssignTo").display("block")
+    //    } else {
+    //        jQuery("divAssignTo").display("none")
+
+    //    }
+    //});
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+    function ValidateQueueLen(val) {
+        debugger;
+        var entered = parseFloat(document.getElementById("MoveToPosition").value);
+        var Queue = parseFloat(document.getElementById("Queue").value);
+        var ItemPosition = parseFloat(document.getElementById("ItemPosition").value);
+        if (Queue != 0 && entered > Queue) {
+            //jQuery.noConflict();
+            //$("#waitinglist_busy").modal('show');
+            $('#waitinglist_busy').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+            $("#MoveToPosition").val('');
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //document.getElementById("SMSId").val(false);
+        //document.getElementById("EMAILId").val(false);
+        //document.getElementById("POSTALId").val(false);
+        var Name = '@ViewBag.Name';
+        var Isactive = '@ViewBag.Isactive';
+
+        var success = '@ViewBag.True';
+        var message = '@ViewBag.Isactive';
+        if (success == "success") {
+            $('#successId').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        } else if (success == "empty") {
+            $('#dangerId').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        }
+        $("#Name").val(Name);
+        $("#MoveToPosition").val('');
+        debugger;
+        if (Isactive == "True") {
+            $("#rrIsActive").prop("checked", true);
+        }
+        else {
+            Isactive.value = false;
+        }
+             var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>
+

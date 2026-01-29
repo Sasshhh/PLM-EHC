@@ -1,0 +1,128 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RefundApplication>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        Pending Documents Evaluations
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+                <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                    <thead>
+                        <tr>
+                            <th>
+                                Applicant Full Name
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ApplicationReferenceNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.CreatedDateTime)
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+
+
+                            {
+                                <th>Clerk</th>
+                            }
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Customer.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Status.Name)
+                            </td>
+                            @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                            {
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Data)
+                                </td>
+                            }
+                        <td>
+                            @if (Request.IsAuthenticated && User.IsInRole("Acknowledge Refund Application"))
+                            {
+                                if (item.Status.Key == StatusKeys.PendingRefundDocumentValidation)
+                                {
+                                    @Html.ActionLink("View", "RefundDocumentVerification", new { id = item.Id }, new { @class = "btn btn-primary" })
+                                }
+                            }
+
+                            @Html.ActionLink("Application Details", "Details", "Capture", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.RCSApplicationStatusId.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+
+                            @*@Html.ActionLink("Message", "CreateMessage", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })*@
+                            @*@if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+        {
+            @Html.ActionLink("Re-Allocate", "RefundAcknowledgementReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" });
+        }*@
+
+                            @if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                            {
+                                @Html.ActionLink("Re-Allocate Manual", "ManualReAllocateRefund", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&rrqID=" + item.RoundRobinQueueId + "&ResponsibilityType=" + ResponsibilityTypeKeys.AcknowledgeRefundApplication + "&ViewName=RefundAcknowledgementDashboard" + "&TitleName=RefundAcknowledgementTitle&BodyName=RefundAcknowledgement") }, new { @class = "btn btn-primary" });
+                            }
+                            @Html.ActionLink("Message", "RefundCreateMessage", "RcsApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })
+
+                            @*@Html.ActionLink("Message", "CreateMessage", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToBo }, new { @class = "btn btn-primary" })*@
+                        </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+<script>
+    $(function () {
+        $('#RCSTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+
+
+</script>

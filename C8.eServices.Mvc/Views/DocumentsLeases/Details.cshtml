@@ -1,0 +1,179 @@
+﻿@model C8.eServices.Mvc.Models.DocumentsLease
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>DocumentsLease</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedBySystemUser.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Customer.IdentificationNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Customer.IdentificationNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DocumentCheckList.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DocumentCheckList.Id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.File.FileName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.File.FileName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.leaseDetails.leaseApplicationRef)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.leaseDetails.leaseApplicationRef)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LocationType.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LocationType.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ModifiedBySystemUser.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.RCSApplicationStatus.ApplicationReferenceNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.RCSApplicationStatus.ApplicationReferenceNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceType.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceType.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.RefundApplication.ApplicationReferenceNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.RefundApplication.ApplicationReferenceNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DocumentLocation)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DocumentLocation)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DocumentName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DocumentName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Comment)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Comment)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsActive)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsDeleted)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsDeleted)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsLocked)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsLocked)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedDateTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ModifiedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ModifiedDateTime)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

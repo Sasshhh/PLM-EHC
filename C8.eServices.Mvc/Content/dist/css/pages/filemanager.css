@@ -1,0 +1,118 @@
+.main-wrapper.side-menu .filemanager-menu {
+  display: none;
+}
+
+.main-wrapper.side-menu .file-manager {
+  margin-left: 0;
+}
+
+.filemanager-menu .account-storage-indicator {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.ev-page .page-content .col-content.col-left {
+  margin-right: 240px;
+}
+
+.ev-page .col-aside.col-right {
+  width: 240px;
+}
+
+.file-manager .topbar {
+  background-color: #3B3D51;
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+  padding: 4px 10px;
+}
+
+.file-manager .topbar .toolbar .icon.action {
+  color: #dedede !important;
+}
+
+.file-manager .topbar input {
+  color: #dedede;
+}
+
+.file-manager .list-group-item:hover, .file-manager .list-group-item.selected {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.file-manager .list-group-item .item-title {
+  line-height: 40px;
+}
+
+.file-manager .list-group-item .item-text {
+  font-size: 12px;
+}
+
+.file-manager .item-icon {
+  padding: 2px 0px;
+}
+
+.file-manager .item-icon .icon {
+  top: 10px;
+}
+
+.file-manager .item-avatar {
+  padding-right: 0;
+}
+
+.file-manager .item-avatar .avatar {
+  left: 10px !important;
+}
+
+.col-aside.col-right .list-group-item, .col-aside.col-right .divider {
+  padding: 5px 10px;
+}
+
+.col-aside.col-right .item-title {
+  color: #3B3D51;
+}
+
+.light-skin.ev-page .col-aside.col-left {
+  background-color: #fcfcfc;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.light-skin.ev-page .col-aside.col-right {
+  background-color: #d4d9ed;
+}
+
+.light-skin.ev-page .item-title {
+  color: #3B3D51;
+}
+
+.light-skin.ev-page .item-text {
+  color: #7072aa;
+}
+
+.light-skin:not(.ev-page) .col-aside.col-left {
+  padding-right: 10px;
+}
+
+.light-skin:not(.ev-page) .col-content {
+  background-color: #fcfcfc;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.light-skin:not(.ev-page) .page-content .col-content.col-right {
+  margin-right: 220px;
+}
+
+.dark-skin .col-aside.col-right,
+.dark-skin .col-aside.col-left,
+.dark-skin .file-manager .topbar {
+  background-color: #262733;
+}
+
+.dark-skin:not(.ev-page) .col-content {
+  padding-top: 0 !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .file-manager {
+    margin-right: 0px !important;
+  }
+}

@@ -1,0 +1,294 @@
+﻿@using C8.eServices.Mvc.Keys
+@model IEnumerable<C8.eServices.Mvc.Models.IncentivePolicyProperty>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var displayText = ViewBag.DisplayTextFor;
+}
+
+<div class="page-header">
+    <h3 align="center">Economic Development Incentive Application <br />Financial Incentives</h3>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Incentive Policy @displayText Applications</div>
+    <div class="panel-body">
+        @if(string.IsNullOrEmpty(displayText)){
+        <div id="summary">
+            @Html.Label("Application Summary")
+            <ul>
+                <li>
+                    Total Number of Applications
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfApplication</span>
+                </li>
+                <li>
+                    Received Applications
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfSubmittedApplications</span>
+                </li>
+                <li>
+                    In Progress Applications
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfInProgressApplications</span>
+                </li>
+                <li>
+                    Query Applications
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfApplicationsInQuery</span>
+                </li>
+                <li>
+                    Assessment Completed - Successful
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfApplicationApprovedAssessment</span>
+                </li>
+                <li>
+                    Assessment Completed - Declined
+                    <span class="badge" style="background-color: cornflowerblue; color: whitesmoke"> @ViewBag.Statistics.NoOfApplicationDeclinedAssessment</span>
+                </li>
+            </ul>
+
+        </div>
+        <hr />
+        <div class="fixed-table-toolbar">
+            <div class="pull-left">
+                <input type="text" id="startDate" class="form-control" />
+            </div>
+            <div class="pull-left">
+                <input type="text" id="endDate" class="form-control" />
+            </div>
+            <div class="pull-left">
+                &nbsp;
+                <div class="col-lg-11">
+                    @Html.DropDownList("ApplicationStatuses", null, "Select Status", new { id = "ddlStatusId", @class = "form-control", @style = "width: 160px;" })
+                </div>
+            </div>
+            <div class="pull-left">
+                &nbsp;
+                <button id="btnFilter" class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+        }
+
+        <div id="toolbar">
+            &nbsp;
+            <button id="btnSearch" class="btn btn-primary">Search</button>
+            <button id="btnRefresh" class="btn btn-primary">Reset</button>
+        </div>
+        <table class="table table-striped" id="applicationsTable"
+               data-toggle="table"
+               data-pagination="true"
+               data-toolbar="#toolbar"
+               data-url="@Url.Action("LoadApplications", "BackOfficeIncentivePolicy", new { applicationStatus = @ViewBag.StatusId})"
+               data-query-params-type="Else"
+               data-side-pagination="server"
+               data-page-list="[10, 100, 250]"
+               data-height="500"
+               data-search="true">
+            <thead>
+                <tr>
+                    <th data-field="ApplicationNumber">Application Number</th>
+                    <th data-field="IncentiveCategory">Incentive Category</th>
+                    <th data-field="Applicant">Applicant</th>
+                    <th data-field="RatesNumber">Rates Number</th>
+                    <th data-field="PropertyAddress">Property Address</th>
+                    <th data-field="Status">Status</th>
+                    <th data-field="ApplicationDate">Submission Date</th>
+                    <th data-formatter="Action">Action</th>
+                </tr>
+            </thead>
+        </table>
+        @*<table class="table table-striped" id="applicationsTable"
+                   data-toggle="table"
+                   data-height="500"
+                   data-search="true"
+                   data-pagination="true"
+                   data-page-list="[10,25, 50, 100, ALL]">
+                <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.IncentivePolicy.ApplicationNumber)</th>
+                    <th>Incentive Category</th>
+                    <th>Applicant</th>
+                    <th>Rates Number</th>
+                    <th>Property Address</th>
+                    <th>Status</th>
+                    <th>Application Date</th>
+                    <th>Action Application</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.ApplicationNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.CategoryType.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.Customer.FullName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Property.RatesNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Property.PropertyFullAddress)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.Status.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.CreatedDateTime)</td>
+                        @if (item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationInQuery)
+                        {
+                            <td>@Html.EncodedActionLink("Continue", "ProcessIncentivePolicyApplication", "BackOfficeIncentivePolicy", new {incentivePolicyId = item.IncentivePolicyId}, new {@class = "btn btn-sm btn-primary"}) |
+                                @Html.EncodedActionLink("View in PDF", "AsPdf", "BackOfficeIncentivePolicy", new {referenceId = item.IncentivePolicy.Id}, new {@class = "btn btn-sm btn-primary", title = "Print Application"})</td>
+                        }
+                        else
+                        {
+                            <td>@Html.EncodedActionLink("Start Case", "ProcessIncentivePolicyApplication", "BackOfficeIncentivePolicy", new {incentivePolicyId = item.IncentivePolicyId}, new {@class = "btn btn-sm btn-primary"}) |
+                                @Html.EncodedActionLink("View in PDF", "AsPdf", "BackOfficeIncentivePolicy", new {referenceId = item.IncentivePolicy.Id}, new {@class = "btn btn-sm btn-primary", title = "Print Application"})</td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>*@
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript" src="@Url.Content("~/Scripts/jquery.datetimepicker.js")"></script>
+    <script type="text/javascript">
+
+        var $table = $('#applicationsTable'),
+             $button = $('#btnRefresh'),
+        $buttonSearch = $("#btnSearch"),
+        $btnFilter = $('#btnFilter');
+
+        var today = new Date();
+        var day = ("0" + today.getDate()).slice(-2);
+        var month = ("0" + (today.getMonth() + 1)).slice(-2);
+        var year = today.getFullYear();
+
+        $(function () {
+
+            $button.click(function () {
+                resetSearch();
+            });
+
+            $buttonSearch.click(function () {
+                customSearch();
+            });
+
+            $btnFilter.click(function () {
+                customSearch();
+            });
+
+            $('#startDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: '2016/09/07',
+                onShow: function (ct) {
+                    this.setOptions({
+                        maxDate: jQuery('#endDate').val() ? jQuery('#endDate').val() : false
+                    });
+                }
+            });
+
+            $('#endDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: year + "/" + month + "/" + day,
+                onShow: function (ct) {
+                    this.setOptions({
+                        minDate: jQuery('#startDate').val() ? jQuery('#startDate').val() : false
+                    });
+                }
+            });
+
+        });
+
+        window.Action = function (value, row, index) {
+            var myUrl = '@Url.Action("AsPdf", "BackOfficeIncentivePolicy")/' + '?q=' + row.ReferenceId;
+            if ('@string.IsNullOrEmpty(displayText)' === 'True') {
+                if (row.IsApplicationInQuery) {
+                    return "<input type='button' value='Continue' onclick='processApplication(\"" + row.Data + "\");' class= 'btn btn-sm btn-primary'>|" +
+                        '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+                } else {
+                    return "<input type='button' value='Start Case' onclick='processApplication(\"" + row.Data + "\");' class= 'btn btn-sm btn-primary'>|" +
+                         //"<input type='button' value='View in PDF' onclick='DownloadApplication(\"" + row.ReferenceId + "\");' class= 'btn btn-sm btn-primary'>";
+                       '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+                }
+            } else {
+               return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+                //return "<input type='button' value='View in PDF' onclick='DownloadApplication(\"" + row.ReferenceId + "\");' class= 'btn btn-sm btn-primary'>";
+            }
+
+        }
+
+        window.processApplication = function (appId) {
+            try {
+                window.open(
+                    '@Url.Action("ProcessIncentivePolicyApplication", "BackOfficeIncentivePolicy")/?q=' + appId,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+
+        window.DownloadApplication = function (referenceId) {
+
+                try {
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("AsPdf", "BackOfficeIncentivePolicy")/?q=' + referenceId,
+                        dataType: 'json',
+                        traditional: true,
+                        success: function(data) {
+                        },
+                        error: function (response) {
+                            console.log(response);
+                           // console.log(response.result);
+                        }
+                    });
+
+
+                } catch (ex) {
+                console.log(ex);
+            }
+        }
+
+        function customSearch() {
+
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var statusId = $('#ddlStatusId').val();
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            if (startDate == null) startDate = '';
+            if (endDate == null) endDate = '';
+            if (statusId == null) statusId = '@ViewBag.StatusId';;
+
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadApplications", "BackOfficeIncentivePolicy")/?startDate=' + startDate + '&endDate=' + endDate +
+                    '&applicationStatus=' + statusId,
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            resetFilters();
+
+            var appStatus = '@ViewBag.StatusId';
+            console.log(appStatus);
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadApplications", "BackOfficeIncentivePolicy")/?applicationStatus=' + appStatus,
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetFilters() {
+            $('#startDate').val('2016/09/07');
+            $('#endDate').val(year + "/" + month + "/" + day);
+            $('#ddlStatusId').prop('selectedIndex', 0);
+        }
+    </script>
+}

@@ -1,0 +1,117 @@
+﻿@model C8.eServices.Mvc.Models.EntityType
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Are you sure you want to delete entity type -@Model.Name?</h4>
+<hr/>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                    Entity Type Information
+                </a>
+            </h4>
+        </div>
+        <div id="userRoleCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    @*<dt>
+            @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedBySystemUser.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ModifiedBySystemUser.FirstName)
+        </dd>*@
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Name)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Description)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Key)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Key)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IsActive)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IsDeleted)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IsDeleted)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IsLocked)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IsLocked)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.CreatedDateTime)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CreatedDateTime)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ModifiedDateTime)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ModifiedDateTime)
+                    </dd>
+
+                </dl>
+
+                @using (Html.BeginForm()) {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <input type="submit" value="Delete" class="btn btn-primary" /> 
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index",null,new {@class = "btn btn-primary"})
+</p>

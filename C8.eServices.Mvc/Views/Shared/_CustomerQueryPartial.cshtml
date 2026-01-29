@@ -1,0 +1,28 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Query>
+
+<div style="clear: both"></div>
+<table class="table table-bordered" id="customerQueriesTable" style="font-family: VERDANA,GENEVA,SANS-SERIF; font-size: x-small;">
+    <thead style="display: table-header-group;">
+        <tr style="background: cornflowerblue; color: azure;">
+            <th>Reference Number</th> 
+            <th>Email Address</th>
+            <th>Full Name</th>
+            <th>Query/ Comment</th>
+            <th>Status</th>
+            <th>Date Created</th>
+        </tr>
+    </thead>
+    <tbody style="overflow-y: scroll;">
+        @foreach (var item in Model)
+            {
+            <tr style="margin: 0; padding: 0; page-break-inside: avoid;">
+                <td>@Html.DisplayFor(modeitem => item.ReferenceNumber)</td>
+                <td>@Html.DisplayFor(modeitem => item.Email)</td>
+                <td>@Html.DisplayFor(modeitem => item.FullName)</td>
+                <td>@Html.DisplayFor(modeitem => item.Comment)</td>
+                <td>@Html.DisplayFor(modeitem => item.Status.Name)</td>
+                <td>@Html.DisplayFor(modeitem => item.CreatedDateTime)</td>
+            </tr>
+        }
+    </tbody>
+</table>

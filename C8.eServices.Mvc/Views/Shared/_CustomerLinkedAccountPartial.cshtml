@@ -1,0 +1,24 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.LinkedAccount>
+
+<div style="clear: both"></div>
+<table class="table table-bordered" id="linkedAccountsTable" style="font-family: VERDANA,GENEVA,SANS-SERIF; font-size: x-small;">
+    <thead style="display: table-header-group;">
+        <tr style="background: cornflowerblue; color: azure;">
+            <th data-field="IDNumber">ID Number/Business Reg Number</th>
+            <th data-field="AccountNumber">Account Number</th>
+            <th data-field="DateCreated">Date Created</th>
+            <th data-field="ModifiedDate">Date Modified</th>
+        </tr>
+    </thead>
+    <tbody style="overflow-y: scroll;">
+        @foreach (var item in Model)
+            {
+            <tr style="margin: 0; padding: 0; page-break-inside: avoid;">
+                <td>@Html.DisplayFor(modeitem => item.Customer.IdentificationNumber)</td>
+                <td>@Html.DisplayFor(modeitem => item.Account.AccountNumber)</td>
+                <td>@Html.DisplayFor(modeitem => item.CreatedDateTime)</td>
+                <td>@Html.DisplayFor(modeitem => item.ModifiedDateTime)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,689 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.DebitOrderViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var db = new eServicesDbContext();
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<h4>Bank Accounts</h4>
+<hr />
+
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Current Bank Accounts
+                </p>
+                <p>
+                    1.	In the Tab <strong>“Current Bank Accounts”</strong> all your bank account(s) will be displayed here.
+                </p>
+                <p>
+                    2.	Use the <strong>“Search”</strong> bar to search between your different bank accounts.
+                </p>
+                <p>  3.	Under <strong>“Current Bank Accounts”</strong>, you may edit or remove a bank account.</p><br />
+                <p>
+                    Add New Bank Account
+                </p>
+                <p>
+                    1.	 Select the dropdown <strong>“Bank Account Type”</strong>, and select your preferred account type.
+                </p>
+                <p>
+                    2.	 Select the dropdown <strong>“Bank Name”</strong>, and select your preferred bank.
+                </p>
+                <p>
+                    3.	The Branch code will be prepopulated based on the Bank selected above.
+                </p>
+                <p>
+                    4.	The Account Holder Name is prepopulated from your profile Name and Surname.
+                </p>
+                <p>
+                    5.	Enter your Bank Account Number.
+                </p>
+                <p>
+                    6.	Click Verify once all fields have been filled in.
+                </p>
+                <p>7.	After your banking details have been verified click <strong>“Submit”</strong>.</p>
+                <p>8.	Click <strong>"Reset"</strong> to clear all fields.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Current Bank Accounts</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="accountsTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Bank Name
+                        </th>
+                        <th>
+                            Account Type
+                        </th>
+                        <th>
+                            Account No
+                        </th>
+                        <th>
+                            Acount Holder
+                        </th>
+                        <th>
+                            Account Status
+                        </th>
+                        <th>
+                            Date Created
+                        </th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("Index", "BankAccount", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.BankAccount.Id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="panel-group" id="newLinkedAccount">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                        <span>Add New Bank Account</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        if (TempData["Success"].Equals(true))
+                        {
+                    <div class="alert alert-success">
+                        <a href="#" class="close" data-dismiss="alert">&times;</a>
+                        <strong>Success!</strong> @ViewBag.AccountsMessage
+                    </div>
+                        }
+                        else
+                        {
+                    <div class="alert alert-danger">
+                        <a href="#" class="close" data-dismiss="alert">&times;</a>
+                        <strong>Error! </strong> @ViewBag.AccountsMessage
+                    </div>
+                        }
+                    }
+                    <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                        @ViewBag.AccountsMessage
+                    </div>
+
+                    <div class="form-horizontal">
+                        @if (ViewBag.UserType != 7)
+                        {
+                            <div class="form-group" style="margin-top:-15px">
+                                @Html.LabelFor(model => model.BankAccount.IsBusiness, htmlAttributes: new { @class = "control-label col-md-2" })
+
+                                <div class="col-md-10">
+                                    <div style="margin-left:0px">
+                                        <label>@Html.RadioButtonFor(model => model.BankAccount.IsBusiness, "false", new { @name = "BankAccount.IsBusiness",@checked="true", @onclick = "ShowRecurring()" }) Personal Account</label>&nbsp;&nbsp;  <label>@Html.RadioButtonFor(model => model.BankAccount.IsBusiness, "true", new { @name = "BankAccount.IsBusiness", @onclick = "HideRecurring()" }) Business Account</label>
+  
+                                    </div>
+                                </div>
+                            </div>
+                            }
+
+                        <div class="form-group">
+                            @Html.Label("Bank Account Type", new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.BankAccount.BankAccountTypeId, (SelectList)ViewBag.BankAccountTypes, "Select type ...", htmlAttributes: new { @class = "form-control", id = "BankAccountTypeDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.BankAccount.BankAccountTypeId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label("Bank Name", new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.BankAccount.BankId, (SelectList)ViewBag.Banks, "Select type ...", htmlAttributes: new { @class = "form-control", id = "BankDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.BankAccount.BankId)
+                            </div>
+                        </div>
+                        <div class="form-group" style="display:none">
+                            @Html.Label("Branch Code", new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.BankAccount.BranchCode, (SelectList)ViewBag.UniBankCodes, "", htmlAttributes: new { @class = "form-control text-box single-line", id = "BankBranchCodedl", @required = true, @disabled = "disabled" })
+                                @Html.ValidationMessageFor(model => model.BankAccount.BranchCode)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BankAccount.BranchCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.BankAccount.BranchCode, new { htmlAttributes = new { @class = "form-control", @id = "BankBranchCode", maxlength = 6, minlength = 6, @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.BankAccount.BranchCode, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BankAccount.AccountHolder, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.BankAccount.AccountHolder, new { htmlAttributes = new { @class = "form-control", @id = "BankAccHold", @Value = ViewBag.UserN, @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.BankAccount.AccountHolder, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BankAccount.BankAccountNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.BankAccount.BankAccountNumber, new { htmlAttributes = new { @class = "form-control", @id = "BankAccNo", maxlength = 11, minlength = 8 } })
+                                @Html.ValidationMessageFor(model => model.BankAccount.BankAccountNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        @*<div class="form-group">
+            @Html.LabelFor(model => model.BankAccount.IsAccountHolder, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.CheckBoxFor(model => model.BankAccount.IsAccountHolder, new { @class = "form-control", @style = "width:30px!important;height:20px!important;margin-left: 4px!important;" })
+                @Html.ValidationMessageFor(model => model.BankAccount.IsAccountHolder, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+                        @Html.HiddenFor(model => model.BankAccount.IsAccountHolder)
+                        @Html.HiddenFor(model => model.BankAccount.AccountStatus)
+                        <div class="form-group">
+                            <div class="col-md-2">
+                            </div>
+                            <div class="alert alert-warning col-md-5" id="associatedAlert1" style="display:none;margin-left: 15px;">
+                                <label id="accStat" value="@ViewBag.AccStatus"> </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="validateBt1n" type="button" value="Verify" title="Verify account details" onclick="getSub()" class="btn btn-primary" />
+                                @*<input id="validateBt1n1" type="button" value="Re-Verify" title="Verify account details" onclick="getSubRecheck()" class="btn btn-primary" />*@
+                                <input id="submitBtn" type="submit" value="Submit" title="Edit account details" disabled class="btn btn-primary" />
+                                <input type="button" value="Reset" id="btnReset" title="Remove account" class="btn btn-primary" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+                   function ShowRecurring() {
+                       $("#BankAccount_IsBusiness").val(false);
+                      // alert($("#BankAccount_IsBusiness").val());
+           
+        }
+        function HideRecurring() {
+
+            $("#BankAccount_IsBusiness").val(true);
+            //alert($("#BankAccount_IsBusiness").val());
+        }
+
+        $('#BankDdl').on('change', function () {
+            var savedIndex = $('#BankDdl').prop('selectedIndex');
+          //  $('#BankBranchCode').prop('selectedIndex', savedIndex);
+            $('#BankBranchCodedl').prop('selectedIndex', savedIndex);
+           $('#BankBranchCode').val($('#BankBranchCodedl').val());
+            
+            //$('#hiddenRadioValue51').val(this.value);
+        });	
+        function loadAccounts() {
+            $('#accountsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadAccounts", "BankAccount", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "Bank.Name", "autoWidth": true },
+                    { "data": "BankAccountType.Name", "autoWidth": true },
+                    { "data": "HiddenBankAccountNumber", "autoWidth": true },
+                    {
+                        "data": "IsAccountHolder", "autoWidth": true,
+                        // `data` refers to the data for the cell (defined by `mData`, which
+                        // defaults to the column being worked with, in this case is the first
+                        // Using `row[0]` is equivalent.
+                        "render": function (data, type, row) {
+                            if (data == '1') {
+                                return 'Yes';
+                            } else {
+                                return 'No';
+                            }
+
+                        }
+                    },
+                    { "data": "AccountStatus", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "data": "Data",
+                        "title": "Linked Account",
+                        "render": function (data, type, row) {
+                            //var edit = '<a id=\"editAccount\" title=\"Edit account details\" style=\"display: inline-grid;\" href=\"#\" onclick=\"getBankAccount(\'' + data + '\');\"><span class=\"glyphicon glyphicon-edit\" style=\"text-align: center;\"></span>Edit</a>';
+                            var remove = '<a id=\"removeAccount\" title=\"Remove account\" style=\"display: inline-grid;\" href=\"#\" onclick=\"deleteItem(\'' + data + '\');\"><span class=\"glyphicon glyphicon-remove\" style=\"text-align: center;\"></span>Remove</a>';
+                            return remove;
+                        }
+
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No bank accounts.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function getBankAccount(data) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LoadAccount", "BankAccount")?q=" + data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response != null) {
+                        $("#BankAccount_Id").val(response.data.Id);
+                        $("#BankAccHold").val(response.data.AccountHolder);
+                        $("#BankAccNo").val(response.data.ShowBankAccountNumber);
+                        $("#BankBranchCode").val(response.data.BranchCode);
+                        $("#BankAccountTypeDdl").val(response.data.BankAccountTypeId);
+                        $("#BankDdl").val(response.data.BankId);
+                        $("#BankAccount_IsAccountHolder").prop("checked", response.data.IsAccountHolder);
+                        
+                        if (response.data.IsBusiness == true) {
+                            $("#BankAccount_IsBusiness").val(true);
+                        }
+                        else { $("#BankAccount_IsBusiness").val(false);}
+
+                    } else {
+                        alert("Unfortunately there is no such bank account in the system.");
+                    }
+                },
+                failure: function (response) {
+                    alert('f: ' + response.responseText);
+                },
+                error: function (response) {
+                    alert('e: ' + response.responseText);
+                }
+            });
+        }
+
+        function deleteItem(data) {
+            if (confirm("Are you sure you want to remove this account?")) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("DeleteAccount", "BankAccount")?q=" + data,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+            }
+
+            loadAccounts();
+            return false;
+        }
+
+        function resetControls() {
+            $("#BankAccountTypeDdl option:eq(0)").prop("selected", true);
+            $("#BankDdl option:eq(0)").prop("selected", true);
+            $("#BankBranchCodedl option:eq(0)").prop("selected", true);
+            $("#BankAccount_Id").val("");
+            $('#BankAccHold').val("@ViewBag.UserN");
+            $("#BankAccNo").val("");
+            $("#BankBranchCode").val("");
+            $('#BankAccount_IsBusiness').prop('checked', true);
+            $("#BankAccount_IsBusiness").val(false);
+            $("#BankAccount_IsAccountHolder").prop('checked', false);
+        }
+
+        $(function () {
+            loadAccounts();
+            //$('#BankAccount_IsBusiness').prop('checked', true);
+            $("#BankAccount_IsBusiness").val(false);
+             $('#BankAccHold').val("@ViewBag.UserN");
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        });
+        function getSub() {
+
+            //if ( $("#BankBranchCode").val() != "" && $("#BankAccNo").val() != "" && $("#BankAccHold").val() != "" && $("#BankDdl").val() != "Select type ...") {
+
+                var cat = 3;
+                //var BAId= $("#BankAccount_Id").val();
+                var BAccHold = $("#BankAccHold").val();
+                var BAccNo = $("#BankAccNo").val();
+                var BBranch = $("#BankBranchCode").val();
+            var BAccounttype = $("#BankAccountTypeDdl").val();
+            var BBusinAccounttype = $("#BankAccount_IsBusiness").val();
+                var batype = "0";
+                if ($("#BankAccountTypeDdl").val() == "2") {
+                    batype = "1";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "3") {
+                    batype = "2";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "4") {
+                    batype = "3";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "5") {
+                    batype = "4";
+                }
+                else {
+                    batype = "0";
+                }
+
+
+                $.ajax
+                    ({
+                        url: "@Url.Action("getSub", "BankAccount")?AccHold=" + BAccHold + "&AccNo=" + BAccNo + "&Branch=" + BBranch + "&Type=" + batype + "&BusType=" + BBusinAccounttype,
+                        //url: '/BankAccount/getSub?Type1='+cat,
+                        type: 'POST',
+                        datatype: 'json',
+                        contentType: 'applications/json; charset=utf-8',
+                        data: JSON.stringify({}),
+                        success: function (result) {
+
+                            document.getElementById('associatedAlert1').style.display = 'block';
+                            document.getElementById('accStat').innerHTML = result[0];
+                            $("#BankAccount_IsAccountHolder").val("True");
+                            $("#BankAccount_AccountStatus").val(result[1]);
+                            //alert(result1);
+                            //document.getElementById('accStat').innerHTML = "Account Verified.";
+                            document.getElementById('accStat').style.display = 'block';
+                            if (result[1] =="Verification Failed" ) {
+                                $("#submitBtn").prop('disabled', true);
+                            }
+                            else {
+                                $("#submitBtn").prop('disabled', false);
+                            }
+                            
+                        },
+                        error: function (result) {
+                            var name = JSON.stringify(result[3]);
+                            alert("This services is currently unavailable. Please try again later.");
+                        },
+                    });
+            //}
+            //else {
+            //    $("#submitBtn").prop('disabled', true);
+            //    alert("Please complete all fields before verifying");
+            //    document.getElementById('associatedAlert1').style.display = 'block';
+            //    document.getElementById('accStat').innerHTML = "Please complete all fields before clicking verify verifying.";
+            //    document.getElementById('accStat').style.display = 'block';
+            //}
+        }
+
+        function getSubRecheck() {
+
+            //if ( $("#BankBranchCode").val() != "" && $("#BankAccNo").val() != "" && $("#BankAccHold").val() != "" && $("#BankDdl").val() != "Select type ...") {
+
+                var cat = 3;
+                //var BAId= $("#BankAccount_Id").val();
+                var BAccHold = $("#BankAccHold").val();
+                var BAccNo = $("#BankAccNo").val();
+                var BBranch = $("#BankBranchCode").val();
+            var BAccounttype = $("#BankAccountTypeDdl").val();
+            var BBusinAccounttype = $("#BankAccount_IsBusiness").val();
+                var batype = "0";
+                if ($("#BankAccountTypeDdl").val() == "2") {
+                    batype = "1";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "3") {
+                    batype = "2";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "4") {
+                    batype = "3";
+                }
+                else if ($("#BankAccountTypeDdl").val() == "5") {
+                    batype = "4";
+                }
+                else {
+                    batype = "0";
+                }
+
+
+                $.ajax
+                    ({
+                        url: "@Url.Action("getSubRecheck", "BankAccount")?AccHold= TEST",
+                        //url: '/BankAccount/getSub?Type1='+cat,
+                        type: 'POST',
+                        datatype: 'json',
+                        contentType: 'applications/json; charset=utf-8',
+                        data: JSON.stringify({}),
+                        success: function (result) {
+                            document.getElementById('associatedAlert1').style.display = 'block';
+                            document.getElementById('accStat').innerHTML = result[0];
+                            $("#BankAccount_IsAccountHolder").val("True");
+                            $("#BankAccount_AccountStatus").val(result[1]);
+                            //alert(result1);
+                            //document.getElementById('accStat').innerHTML = "Account Verified.";
+                            document.getElementById('accStat').style.display = 'block';
+                            if (result[1] =="Verification Failed" ) {
+                                $("#submitBtn").prop('disabled', true);
+                            }
+                            else {
+                                $("#submitBtn").prop('disabled', false);
+                            }
+                            
+                        },
+                        error: function (result) {
+                            var name = JSON.stringify(result[3]);
+                            alert("This services is currently unavailable. Please try again later.");
+                        },
+                    });
+            //}
+            //else {
+            //    $("#submitBtn").prop('disabled', true);
+            //    alert("Please complete all fields before verifying");
+            //    document.getElementById('associatedAlert1').style.display = 'block';
+            //    document.getElementById('accStat').innerHTML = "Please complete all fields before clicking verify verifying.";
+            //    document.getElementById('accStat').style.display = 'block';
+            //}
+        }
+    </script>
+    <script>
+        setInputFilter(document.getElementById("BankBranchCode"), function (value) {
+            return /^\d*$/.test(value);
+        });
+        setInputFilter(document.getElementById("BankAccNo"), function (value) {
+            return /^\d*$/.test(value);
+        });
+        //setInputFilter(document.getElementById("BankAccHold"), function (value) {
+        //    return /^([a-zA-Z _-]*)$/.test(value);
+        //});
+        //setInputFilter(document.getElementById("BankName"), function (value) {
+        //    return /^([a-zA-Z _-]*)$/.test(value);
+        //});
+        function setInputFilter(textbox, inputFilter) {
+            ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+                textbox.addEventListener(event, function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    }
+                });
+            });
+        }
+
+        function blockSpecialChar(e) {
+            var k;
+            document.all ? k = e.keyCode : k = e.which;
+            return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+        }
+        //$("#validateBt1n").click(function () {
+
+        //}
+
+    </script>
+    <script type="application/Javascript">
+
+        //function validate(accountType, branchCode, accountNumber, callback) {
+        //    $.get(`https://freecdv.co.za/check/${accountType}/${branchCode}/${accountNumber}`, callback);
+        //}
+
+        //function validate(accountType, branchCode, accountNumber, callback) {
+        //    $.ajaxSetup({
+        //        headers: {
+        //            "accept": "application/json",
+        //            "Access-Control-Allow-Origin": "*",
+        //            "X-Content-Type-Options": "nosniff"
+        //        }
+        //    });
+
+        //    $.get("https://freecdv.co.za/check/${accountType}/${branchCode}/${accountNumber}", callback);
+        //}
+
+            $(document).ready(function () {
+
+                function validate(accountType, branchCode, accountNumber) {
+
+                    var settings = {
+
+                        'cache': false,
+
+                        'dataType': "jsonp",
+
+                        "async": true,
+
+                        "crossDomain": true,
+
+                        "url": "http://localhost/SeedyVerify/api/ValidateAccount?accountType=" + accountType + "&branchCode=" + branchCode + "&accountNumber=" + accountNumber,
+
+                        "method": "GET",
+
+                        "headers": {
+
+                            "accept": "application/json",
+
+                            "Access-Control-Allow-Origin": "*",
+                            "X-Content-Type-Options": "nosniff"
+
+                        }
+
+                    }
+                   // $.get(`https://freecdv.co.za/check/${accountType}/${branchCode}/${accountNumber}`, callback);
+                    $.ajax(settings).done(function (response) {
+                        var stat = JSON.stringify(response.status);
+
+                        if (stat == '"Valid"') {
+                            document.getElementById('associatedAlert1').style.display = 'block';
+                            document.getElementById('accStat').innerHTML = "Account Verified.";
+                            document.getElementById('accStat').style.display = 'block';
+                            $("#submitBtn").prop('disabled', false);
+                        }
+                        else {
+                            $("#submitBtn").prop('disabled', true);
+                            document.getElementById('associatedAlert1').style.display = 'block';
+                            document.getElementById('accStat').innerHTML = "This Account is Invalid.";
+                            document.getElementById('accStat').style.display = 'block';
+
+                        }
+
+                    })
+                }
+                $("#BankAccNo").focusin(function () {
+
+                });
+                $("#BankAccNo").focusout(function () {
+                    $("#submitBtn").prop('disabled', true);
+                });
+                $("#BankAccHold").focusin(function () {
+
+                });
+                $("#BankAccHold").focusout(function () {
+                    $("#submitBtn").prop('disabled', true);
+                });
+                $("#validateBtn").click(function () {
+                    document.getElementById('associatedAlert1').style.display = 'none';
+             var batype="Null";
+            if($("#BankAccountTypeDdl").val()=="2")
+            {
+            batype="Current";
+            }
+            else if($("#BankAccountTypeDdl").val()=="3")
+            {
+            batype="Savings";
+            }
+            else if($("#BankAccountTypeDdl").val()=="4")
+            {
+            batype="Transmission";
+            }
+            else{
+            batype="Null";
+            }
+
+            if(batype!="Null" && $("#BankBranchCode").val()!="" && $("#BankAccNo").val()!="" && $("#BankAccHold").val()!="" && $("#BankDdl").val()!="Select type ..." )
+            {
+
+                    validate(batype,
+                        $("#BankBranchCode").val(),
+                        $("#BankAccNo").val());
+                document.getElementById('associatedAlert1').style.display = 'none';
+                document.getElementById('accStat').innerHTML = "";
+                document.getElementById('accStat').style.display = 'None';
+                $("#submitBtn").prop('disabled', false);
+            }
+            else
+
+            {
+                $("#submitBtn").prop('disabled', true);
+                document.getElementById('associatedAlert1').style.display = 'block';
+                document.getElementById('accStat').innerHTML = "Please fill all fields and then click Verify";
+                document.getElementById('accStat').style.display = 'block';
+            }
+                });
+            });
+        function validateCaptcha(response) {
+            if (response.length == 0)
+                $("#submitBtn").prop('disabled', true);//$("#btnSubmit").prop('disabled', true);
+            else
+                $("#submitBtn").prop('disabled', false);//$("#btnSubmit").prop('disabled', false);
+        }
+    </script>
+}

@@ -1,0 +1,130 @@
+﻿
+@{
+    ViewBag.Title = "MessageTimeline";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<head>
+    <script src="~/Content/RcsStyles/VerticleTimeline/script.js"></script>
+    <link href="~/Content/RcsStyles/VerticleTimeline/style.css" rel="stylesheet" />
+    <style>
+             img {
+    width: 99px !important;
+    height: 60px !important;
+    margin: -30px !important;
+}
+.cd-timeline-img.cd-movie {
+    background: #75ce66;
+}
+    </style>
+</head>
+
+@{
+    int senderid = 0;
+    var item = ViewBag.requests;
+    var comments = ViewBag.comments;
+    if(comments.Count >0)
+    {
+        senderid = comments[0].SenderCustomerId;
+    }
+    
+}
+
+@if (senderid != 0) 
+{
+<section id="cd-timeline" class="cd-container">
+
+    @for (int i = 0; i < comments.Count; i++)
+    {
+        if (comments[i].SenderCustomer.Id == senderid)
+        {
+
+            <div class="cd-timeline-block cd-timeline-block1">
+                <div class="cd-timeline-img cd-timeline-img1 cd-movie">
+                    <img src="~/Content/Images/envelop.png" />
+                    @*<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-movie.svg" alt="Movie">*@
+                </div> <!-- cd-timeline-img -->
+
+                <div class="cd-timeline-content cd-timeline-content1">
+                    <h2>@comments[i].SenderCustomer.SystemUser.FirstName @comments[i].SenderCustomer.SystemUser.LastName</h2>
+                    <p>@comments[i].Comments</p>
+                    <span class="cd-date cd-date1"> @comments[i].CreatedDateTime</span>
+                </div> <!-- cd-timeline-content -->
+            </div>
+
+        }
+        else
+        {
+            <div class="cd-timeline-block">
+                <div class="cd-timeline-img cd-picture">
+                    <img src="~/Content/Images/envelop.png" sizes="10px" />
+                    @*<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-picture.svg" alt="Picture">*@
+                </div> <!-- cd-timeline-img -->
+
+                <div class="cd-timeline-content">
+                    <h2>@comments[i].SenderCustomer.SystemUser.FirstName @comments[i].SenderCustomer.SystemUser.LastName</h2>
+                    <p>@comments[i].Comments</p>
+                    <span class="cd-date">
+                        @comments[i].CreatedDateTime@*.ToString("dd/MM/yyyy hh:mm")*@
+                    </span>
+                </div> <!-- cd-timeline-content -->
+            </div>
+
+        }
+    }
+
+
+    @*<div class="cd-timeline-block">
+            <div class="cd-timeline-img cd-picture">
+                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-picture.svg" alt="Picture">
+            </div>  cd-timeline-img
+
+            <div class="cd-timeline-content">
+                <h2>Title of section 3</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi, obcaecati, quisquam id molestias eaque asperiores voluptatibus cupiditate error assumenda delectus odit similique earum voluptatem doloremque dolorem ipsam quae rerum quis. Odit, itaque, deserunt corporis vero ipsum nisi eius odio natus ullam provident pariatur temporibus quia eos repellat consequuntur perferendis enim amet quae quasi repudiandae sed quod veniam dolore possimus rem voluptatum eveniet eligendi quis fugiat aliquam sunt similique aut adipisci.</p>
+                <a href="#0" class="cd-read-more">Read more</a>
+                <span class="cd-date">Jan 24</span>
+            </div>  cd-timeline-content
+        </div>
+
+        <div class="cd-timeline-block">
+            <div class="cd-timeline-img cd-location">
+                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-location.svg" alt="Location">
+            </div>  cd-timeline-img
+
+            <div class="cd-timeline-content">
+                <h2>Title of section 4</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
+                <a href="#0" class="cd-read-more">Read more</a>
+                <span class="cd-date">Feb 14</span>
+            </div>  cd-timeline-content
+        </div>
+
+        <div class="cd-timeline-block">
+            <div class="cd-timeline-img cd-location">
+                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-location.svg" alt="Location">
+            </div>  cd-timeline-img
+
+            <div class="cd-timeline-content">
+                <h2>Title of section 5</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum.</p>
+                <a href="#0" class="cd-read-more">Read more</a>
+                <span class="cd-date">Feb 18</span>
+            </div>  cd-timeline-content
+        </div>
+
+        <div class="cd-timeline-block">
+            <div class="cd-timeline-img cd-movie">
+                <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/148866/cd-icon-movie.svg" alt="Movie">
+            </div>  cd-timeline-img
+
+            <div class="cd-timeline-content">
+                <h2>Final Section</h2>
+                <p>This is the content of the last section</p>
+                <span class="cd-date">Feb 26</span>
+            </div>  cd-timeline-content
+        </div>*@
+</section>
+
+}

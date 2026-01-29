@@ -1,0 +1,538 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<head>
+
+    <link href="~/Content/DashboardStyle.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/Content/font-awesome.min.css">
+    <script src="~/Scripts/f4f8b79905.js"></script>
+</head>
+
+<style>
+    @@media only screen and (min-device-width: 850px) and (-webkit-min-device-pixel-ratio: 1) {
+
+        .col-lg-3 {
+            width: 20%;
+        }
+}
+   
+
+
+
+    .mb-4, .my-4 {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .bg-primary {
+        background-color: #d2930b !important;
+    }
+
+    .rounded {
+        border-radius: .25rem !important
+    }
+
+    h5 {
+        color: white;
+    }
+
+    .row-spaces {
+        margin-top: 30px;
+    }
+
+    .infoPanel {
+        height: 350px;
+    }
+
+    .tbcheader {
+        color: white !important;
+    }
+
+    @@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+        .flip-container:hover .flip {
+            -webkit-transform: rotateY(10deg);
+            transform: rotateY(10deg);
+        }
+    }
+
+    @@media screen and (min-color-index:0) and(-webkit-min-device-pixel-ratio:0) {
+        @@media {
+            .flip-container:hover .flip {
+                -webkit-transform: rotateY(10deg);
+                transform: rotateY(10deg);
+            }
+        }
+    }
+</style>
+<!--[if IE]>
+<style>
+    /* entire container, keeps perspective */
+    .flip-container {
+        perspective: 1000px;
+        transform-style: preserve-3d;
+    }
+        /*  UPDATED! flip the pane when hovered */
+        .flip-container:hover .back {
+            transform: rotateY(0deg);
+        }
+
+        .flip-container:hover .front {
+            transform: rotateY(180deg);
+        }
+
+    .flip-container, .front, .back {
+        width: 320px;
+        height: 480px!important;
+    }
+
+    /* flip speed goes here */
+    .flipper {
+        transition: 0.6s;
+        transform-style: preserve-3d;
+        position: relative;
+    }
+
+    /* hide back of pane during swap */
+    .front, .back {
+        backface-visibility: hidden;
+        transition: 0.6s;
+        transform-style: preserve-3d;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    /*  UPDATED! front pane, placed above back */
+    .front {
+        z-index: 2;
+        transform: rotateY(0deg);
+    }
+
+    /* back, initially hidden pane */
+    .back {
+        transform: rotateY(-180deg);
+    }
+
+    /*
+    Some vertical flip updates
+*/
+    .vertical.flip-container {
+        position: relative;
+    }
+
+    .vertical .back {
+        transform: rotateX(180deg);
+    }
+
+    .vertical.flip-container:hover .back {
+        transform: rotateX(0deg);
+    }
+
+    .vertical.flip-container:hover .front {
+        transform: rotateX(180deg);
+    }
+</style>
+    <![endif]-->
+
+<body>
+    @{Html.RenderAction("RequestNotifications", "Requests");}
+    <div class="container-fluid" style="margin-top:-3%">
+        <div class="row">
+            <a href="~/Profile/Index">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br />
+                                        <i class="fas fa-id-card-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">My Profile</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-id-card-alt fa-3x"></i>
+                                    </p>
+
+
+                                    <h5 class="card-title">My Profile</h5>
+                                    <p class="card-text">View Your Profile Information and Link Municipal Accounts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/Profile/AccountRequests">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br />
+                                        <i class="fas fa-id-card-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Account Access Requests</h5>
+                                    <p class="card-text"></p>
+                                    <br />
+                                    <span style="margin-top: -20px;padding: 10px 10px 10px 10px !important;" class="badge alert-warning" id="fullbatchCount1">@Session["ReqCount"]</span>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-id-card-alt fa-3x"></i>
+                                    </p>
+
+
+                                    <h5 class="card-title">Account Access Requests</h5>
+                                    <p class="card-text">Send a request to access a municipal account that has already been linked to another Siyakhokha user.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/BankAccount/Index">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check fa-3x" style="margin-top:9%"></i>
+
+                                    </p>
+                                    <h5 class="card-title">My Bank Accounts</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check fa-3x"></i>
+                                    </p>
+                                    <h5 class="card-title">My Bank Accounts</h5>
+                                    <p class="card-text">View Your Current Bank Accounts and Add New Bank Accounts </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/InstantEFT/IndexBatchEFTPayment">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Instant EFT Payments</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Instant EFT Payments</h5>
+                                    <p class="card-text">Make a Single or Batch(multiple municipal accounts) Instant EFT Payment</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/DebitOrder/Index">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Once-Off Payments/ Debit Orders</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Once-Off Payments/ Debit Orders</h5>
+                                    <p class="card-text">Make a Once-Off Payment or Add a Recurring Debit Order</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/DebitOrder/IndexBatchPayment">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Batch Payments</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-money-check-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Batch Payments</h5>
+                                    <p class="card-text">Make a Once-Off Batch Payment Debit Order instruction for multiple municipal accounts.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/Report/OnlineBills">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div style="" class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-file-invoice fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">View/ Pay Municipal Bills</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-file-invoice fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">View/ Pay Municipal Bills</h5>
+                                    <p class="card-text">View Your Statement and Pay Your Ekurhuleni Municipal Account (MasterPass) </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/Consumption/Index">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-tachometer-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">View Consumption</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-tachometer-alt fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">View Consumption</h5>
+                                    <p class="card-text">View Your Utility Consumption </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/Payment/PaymentHistory">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-history fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Payment History</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-history fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Payment History</h5>
+                                    <p class="card-text">View Your Payment History</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="@Url.Action("Manage", "Account")">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-user-friends fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Manage Login Account</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-user-friends fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Manage Login Account</h5>
+                                    <p class="card-text">Manage Your Login Account Details</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="~/Support/Index">
+                <div class="col-sm-12 col-md-6 col-lg-3 mb-4" style="margin-left: 40.15%;">
+                    <div class="flip-container">
+                        <div class="flip">
+                            <div class="card bg-primary text-white rounded text-center flip-front">
+                                <div class="card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-question fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Create Support Query</h5>
+                                    <p class="card-text"></p>
+                                </div>
+                            </div>
+                            <i class="fas fa-ticket-alt"></i>
+                            <div class="card flip-back">
+                                <div class="card bg-primary text-white text-center rounded card-dashbody d-flex flex-column justify-content-center">
+                                    <p>
+                                        <br /><i class="fas fa-question fa-3x" style="margin-top:9%"></i>
+                                    </p>
+                                    <h5 class="card-title">Create Support Query</h5>
+                                    <p class="card-text">Support Queries - View Existing / Log New</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</body>
+@if (ViewBag.Status != null)
+{
+    <div>
+        <div class="alert alert-success">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> @ViewBag.Status.
+        </div>
+    </div>
+}
+@*@section Banners {
+        <div id="carousel-main" class="carousel slide" data-ride="carousel" style="
+        margin-top: -2%;">
+            <ol class="carousel-indicators">
+                <li data-target="#carousel-main" data-slide-to="0" class="active"></li>
+                <li data-target="#carousel-main" data-slide-to="1"></li>
+                <li data-target="#carousel-main" data-slide-to="2"></li>
+                <li data-target="#carousel-main" data-slide-to="3"></li>
+                <li data-target="#carousel-main" data-slide-to="4"></li>
+                <li data-target="#carousel-main" data-slide-to="5"></li>
+                <li data-target="#carousel-main" data-slide-to="6"></li>
+                <li data-target="#carousel-main" data-slide-to="7"></li>
+                <li data-target="#carousel-main" data-slide-to="8"></li>
+            </ol>
+
+            <div class="carousel-inner">
+                <div class="item active">
+                    <a href="#">
+                        <img src="~/Content/Images/germiston-lake-banner.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner01.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner02.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner03.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner04.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner05.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner06.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner01.jpg" />
+                    </a>
+
+                </div>
+                <div class="item">
+                    <a href="#">
+                        <img src="~/Content/Images/banner02.jpg" />
+                    </a>
+
+                </div>
+            </div>
+
+            <a class="left carousel-control" href="#carousel-main" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+            <a class="right carousel-control" href="#carousel-main" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </a>
+        </div>
+    }*@
+
+
+
+<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('#carousel-main').removeClass("container");
+    });
+</script>

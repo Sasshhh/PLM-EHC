@@ -1,0 +1,30 @@
+﻿@model C8.eServices.Mvc.Models.SidEftTransaction
+@{
+    ViewBag.Title = "EFT Payment";
+    Layout = "~/Views/Shared/_LayoutPayment.cshtml";
+}
+
+<h2>EFT Payment</h2>
+<hr />
+<div class="alert alert-info">
+    <strong>Please note :</strong> Updating your profile with the latest contact details will allow you to view the MasterPass QR Code and get notifications on payments.
+</div>
+
+<button id="sidButton" OnClick="SidEftJson(json)">Pay by Instant EFT</button>
+
+<p>
+    <a href="javascript:void(0);" onclick="history.go(-1);">Back</a>
+</p>
+
+@section Scripts {
+
+    <script type="text/javascript" src="~/Scripts/sidPopup.min.js"></script>
+    <link href="~/Content/sidPopupStyle.min.css" rel="stylesheet" />
+
+}
+
+<script type="text/javascript">
+
+    var json = '@string.Format("{0}';", Newtonsoft.Json.JsonConvert.SerializeObject(Model))
+
+</script>

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.BillDirectory>
+
+@{
+    ViewBag.Title = "BillDirectoryStatistics";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Statistics</h4>
+<br/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#statsCollapse">
+                    RMS Bills Statistics
+                </a>
+            </h4>
+        </div>
+        <div id="statsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table id="statisticsTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadBillDirectoryStatistics", "RmsDashBoard")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="10"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                    <tr>
+                        <th data-field="BillDate">Bill Date</th>
+                        <th data-field="BillsProcessed">Bills Processed</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        var $table = $('#statisticsTable'),
+            $button = $('#btnRefresh'),
+            $btnSearch = $('#btnSearch');
+
+        $(function () {
+            $(function () {
+                $button.click(function () {
+                    resetSearch();
+                });
+
+                $btnSearch.click(function () {
+                    customSearch();
+                });
+            });
+        });
+
+        function customSearch() {
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadBillDirectoryStatistics", "RmsDashBoard")',
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadBillDirectoryStatistics", "RmsDashBoard")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+    </script>
+}

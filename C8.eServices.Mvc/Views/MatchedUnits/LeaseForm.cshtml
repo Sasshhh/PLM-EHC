@@ -1,0 +1,385 @@
+﻿@model C8.eServices.Mvc.Models.LeaseForm
+
+@{
+    ViewBag.Title = "Lease form";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /*  h4 {
+        font-size: 1.2em;
+    }*/
+    @@media only screen and (max-width: 1000px) {
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    @Html.Raw(ViewBag.CaptureInstructions)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="step-app">
+            <ul class="step-steps">
+
+                <li style="text-align:center;"><a href="#step3">Lease Agreement<span class=""></span></a></li>
+            </ul>
+
+        </div>
+        <div class="panel-group" id="instructions">
+            <div class="panel panel-default">
+
+                <div id="collapseInstructions" class="panel-collapse collapse in">
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <div class="lease-content">
+                                <p>
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                                    when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
+                                    remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+                                    software like Aldus PageMaker including versions of Lorem Ipsum.
+                                </p>
+                                <p>
+                                    There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or
+                                    randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything
+                                    embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the
+                                    first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem
+                                    Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
+                                </p>
+                                <p>
+                                    Where does it come from?
+                                    Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC,
+                                    making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more
+                                    obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered
+                                    the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil)
+                                    by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum,
+                                    "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                                </p>
+                                <p>
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                                    when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
+                                    remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+                                    software like Aldus PageMaker including versions of Lorem Ipsum.
+                                </p>
+                                <p>
+                                <p>
+                                    The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum"
+                                    by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.
+
+                                </p>
+
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <div class="col-md-1" style="padding-left: 10%; padding-right: -5%;">
+                                <div class="checkbox">
+                                    <input type="checkbox" name="Signature" value="true" id="signature" unchecked>
+                                </div>
+                            </div>
+                            @Html.LabelFor(model => model.Signiturre, "I declare the information captured to be true", htmlAttributes: new { @class = "control-label col-md-4    required" })
+                            <div class="col-md-5"   >
+                                @Html.ValidationMessageFor(model => model.Signiturre, "", new { @class = "text-danger " })
+
+                            </div>
+                        </div>
+                        
+
+
+
+                    </div>
+                    </div>
+                    <div class="step-footer" align="center" style="padding-bottom:20px;">
+                        <button class="button1">Cancel</button>
+                        <button data-direction="finish" value="LeaseForm" class="button1">Confirm</button>
+                    </div>
+                    <div class="step-footer" align="left">
+                        @Html.EncodedActionLink("Cancel", "Index", "RCSApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })
+
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+<script type="text/javascript">
+    $("#savencon3").on("click", function () {
+
+        var count = 0;
+
+
+        if ($("#signature").val() == "" || $("#signature").val() == null) {
+            count = count + 1;
+        }
+
+        if (count == 0) {
+
+            $('#ticksection3').removeAttr("hidden");
+            $('#exclamationmark3').attr("hidden", "hidden");
+
+            return SaveProgress();
+
+        }
+        else {
+            $('#exclamationmark3').removeAttr("hidden");
+            $('#ticksection3').attr("hidden", "hidden");
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Note',
+                text: 'Please make sure that all mandatory fields for step 3 is completed!',
+                showCancelButton: false,
+            });
+            var $active = $('.wizard .nav-tabs li.active');
+            $active.next().removeClass('disabled');
+            nextTab($active);
+            //swal("Please make sure that all mandatory fields for step 3 is completed!");
+
+        }
+    });
+
+    function SaveProgress(last) {
+
+        appealsSwitchPreloaderStart();
+        $.ajax({
+        url: '@Url.Action("saveProgress", "AgricultureHoldings")',
+        data: $('#agriHoldings').serialize(),
+        type: 'POST',
+        dataType: 'json',
+        success: function (result) {
+
+        document.getElementById("RefNo").value = result.refNum;
+        document.getElementById("ApplicationID").value = result.id;
+            appealsSwitchPreloaderEnd();
+
+            //swal("Success!", "Progress Saved!");
+            if (last) {
+                var checkform = ValidateForm();
+                if (checkform) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success...',
+                        html: "Form has been submitted!<br/>Please wait for your reference number!",
+                        showCancelButton: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            appealsSwitchPreloaderStart();
+                        }
+                    });
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error...',
+                        html: "Please fill in all mandatory fields!",
+                        showCancelButton: false,
+                    });
+                }
+                //swal("Success!", "Please wait for your reference number!");
+            }
+            else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success...',
+                    text: "Progress Saved",
+                    showCancelButton: false,
+                });
+            }
+
+            var $active = $('.wizard .nav-tabs li.active');
+            $active.next().removeClass('disabled');
+            nextTab($active);
+
+        },
+        error: function () {
+            appealsSwitchPreloaderEnd();
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed...',
+                text: "Progress Not Saved!",
+                showCancelButton: false,
+            });
+        /*swal("Fail!", "Progress Not Saved!");*/
+        }
+        });
+
+
+        }
+
+</script>

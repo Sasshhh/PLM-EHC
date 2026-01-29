@@ -1,0 +1,145 @@
+﻿@model C8.eServices.Mvc.ViewModels.PLMList
+
+@using C8.eServices.Mvc.Models
+
+@{
+    ViewBag.Title = "AuditLogsIndex";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var caseHistoryLog = (List<PLMApplicationHistortyLog>)ViewData["CaseHistoryLog"];
+}
+
+<style>
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 10px;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group">
+        <!-- Filter Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading text-center">
+                Filter Criteria
+            </div>
+            <hr />
+            <div id="filterPanel" class="panel-collapse collapse in tablecss">
+                <br />
+                <div class="form-group row">
+                    @Html.Label("Start Date", new { @class = "control-label col-md-2 required-field", style = "padding-left: 20px;" })
+                    <div class="col-md-3">
+                        @Html.TextBox("startDate", null, new { @type = "date", @class = "form-control", @id = "startDate", placeholder = "Select Date", @required = "required" })
+                        @Html.ValidationMessage("startDate", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.Label("End Date", new { @class = "control-label col-md-2 required-field", style = "padding-left: 20px;" })
+                    <div class="col-md-3">
+                        @Html.TextBox("endDate", null, new { @type = "date", @class = "form-control", @id = "endDate", placeholder = "Select Date", @required = "required" })
+                        @Html.ValidationMessage("endDate", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-3">
+                        <button id="btnsubmit" type="submit" class="btn btn-primary">Submit</button>
+                        <button id="btnReset" type="button" class="btn btn-secondary">Reset</button>
+                    </div>
+                </div>
+                <br />
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading text-center">
+                Application Report
+            </div>
+            <hr />
+            <div id="resultsPanel" class="panel-collapse collapse in tablecss">
+                <br />
+                @if (Model.billViewModels != null)
+                {
+                    <div>
+                        <table class="table table-bordered table-hover table-striped panel panel-default display" id="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Application Reference Number</th>
+                                    <th>Created Date</th>
+                                    <th>Status</th>
+                                    <th>Complex Option 1</th>
+                                    <th>Complex Option 2</th>
+                                    <th>Unit Typology</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.billViewModels)
+                                {
+                                    <tr>
+                                        <td>@Html.Raw(item.PropertyLeaseApplication.FirstName + " " + item.PropertyLeaseApplication.LastName)</td>
+                                        <td>@item.PropertyLeaseApplication.ApplicationReferenceNumber</td>
+                                        <td>@item.PropertyLeaseApplication.CreatedDateTime</td>
+                                        <td>@item.PropertyLeaseApplication.Status.Name</td>
+                                        <td>@item.PropertyLeaseApplication.PreferredComplexArea.Name</td>
+                                        <td>@item.PropertyLeaseApplication.PreferredComplexArea2.Name</td>
+                                        <td>@item.PropertyLeaseApplication.HumanEHCOptions.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                <br />
+            </div>
+        </div>
+    </div>
+}
+
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Scripts/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.datetimepicker.js"></script>
+<script src="~/Content/RcsStyles/jquery.canvasjs.min.js"></script>
+<link href="~/Content/RcsStyles/fontReports.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+        $('#table').DataTable({ "order": [[3, "desc"]] });
+
+        document.getElementById("startDate").value = '';
+        document.getElementById("endDate").value = '';
+
+        $('#btnReset').on('click', function () {
+            document.getElementById("startDate").value = '';
+            document.getElementById("endDate").value = '';
+        });
+
+        $('#btnsubmit').on('click', function () {
+            var startDate = document.getElementById("startDate").value;
+            var endDate = document.getElementById("endDate").value;
+
+            if (!startDate || !endDate) {
+            
+                swal("Validation Error", "Please select both Start Date and End Date!", "warning")
+                return false;
+            }
+
+            if (startDate > endDate) {
+             
+                swal("Validation Error", "End date must be greater than or equal to start date!", "warning")
+                return false;
+            }
+        });
+    });
+</script>

@@ -1,0 +1,293 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.LeaseCaptureSheet>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaseReferenceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TenantCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PropertyCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HighLevelPropertyCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SolarAccountNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PropertyOfficerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Signiture)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TenantName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TenantType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CompantRegistrationNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VAtRegistrationNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IDNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BuildingNumberName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContactName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContactSurname)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RepresentativeCO)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaNegContactName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaNegContactSurname)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaNegRepresentativeCO)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CAA)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Lattitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Longitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.REDReferenceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CientAdvertisingSignReferenceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CityPanningreferenceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BuildingName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UsageOfPremises)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AreaLeased)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaseClassification)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdminOfficerCollection)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaseStartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaseEndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfFirstRentalEscalation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CommencementRental)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LegalActionTaken)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DepositPaid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsDeleted)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsLocked)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedDateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedDateTime)
+            </th>
+            <th></th>
+        </tr>
+    
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedBySystemUser.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ModifiedBySystemUser.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaseReferenceNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenantCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PropertyCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HighLevelPropertyCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SolarAccountNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PropertyOfficerName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Signiture)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenantName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenantType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CompantRegistrationNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.VAtRegistrationNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IDNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BuildingNumberName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ContactName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ContactSurname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RepresentativeCO)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaNegContactName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaNegContactSurname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaNegRepresentativeCO)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CAA)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Lattitude)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Longitude)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.REDReferenceNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CientAdvertisingSignReferenceNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CityPanningreferenceNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BuildingName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UsageOfPremises)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AreaLeased)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaseClassification)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdminOfficerCollection)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaseStartDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LeaseEndDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfFirstRentalEscalation)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CommencementRental)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LegalActionTaken)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DepositPaid)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsDeleted)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsLocked)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ModifiedDateTime)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            </td>
+        </tr>
+    }
+    
+    </table>
+</body>
+</html>

@@ -1,0 +1,152 @@
+﻿@using C8.eServices.Mvc.Helpers
+@model C8.eServices.Mvc.Models.Property
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Property</h4>
+    <hr />
+    <div>
+        @Html.Partial("_PropertyPartial", Model)
+    </div>
+    @*<dl class="dl-horizontal">
+        <dt>
+             @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.CreatedBySystemUser.FirstName)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.ModifiedBySystemUser.FirstName)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.Status.Name)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.Status.Name)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.RatesNumber)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.RatesNumber)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddress1)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddress1)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddress2)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddress2)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddress3)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddress3)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddress4)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddress4)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddress5)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddress5)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PhysicalAddressCode)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PhysicalAddressCode)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.PropertyDescription)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.PropertyDescription)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.IsActive)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.IsActive)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.IsDeleted)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.IsDeleted)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.IsLocked)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.IsLocked)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.CreatedDateTime)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.CreatedDateTime)
+         </dd>
+
+         <dt>
+             @Html.DisplayNameFor(model => model.ModifiedDateTime)
+         </dt>
+
+         <dd>
+             @Html.DisplayFor(model => model.ModifiedDateTime)
+         </dd>
+
+        </dl>*@
+</div>
+<p>
+    @Html.EncodedActionLink("Edit", "Edit", "Property", new { id = Model.Id }, null) |
+    @Html.EncodedActionLink("Back to List Of Properties", "Index", "Property", new { customerId }, null)
+</p>

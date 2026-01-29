@@ -1,0 +1,103 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<div class="w3-container">
+    <!--https://www.payfast.co.za/eng/process-->
+    <div>
+        <div class="w3-panel w3-card-4 myteme">
+            <h3>PayFast Payment</h3>
+            <!--p align="justify">Enter the payment information below, the payment will be forwarded to the PayFast sandbox system.</p-->
+        </div>
+
+        <form class="w3-container w3-card-4 w3-round w3-white" method="post" action="@Url.Action("Index", "Capture")">
+            <br />
+            <table width="400">
+                <tr>
+                    <td><input type="hidden" name="pgMerchantId" id="pgMerchantId" value="pg_app_cms"></td>
+                </tr>
+                <tr>
+                    <td>Vote No: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="voteNumber" id="voteNumber" value="453414z0610mkzzzzz16" /></td>
+                </tr>
+                <tr>
+                    <td>Merchant Reference No: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="pgMerchantReference" id="pgMerchantReference" value="CMS20200213" /></td>
+                </tr>
+                <tr>
+                    <td>Merchant Description: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="pgMerchantDescription" id="pgMerchantDescription" value="Cemetery Burial Site" /></td>
+                </tr>
+                <tr>
+                    <td>Amount Due (Rand): </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="Amount" id="Amount" value="10" /></td>
+                </tr>
+                <tr>
+                    <td>Customer  Email: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="pgEmail" id="pgEmail" value="ashraf@xetgroup.com" /></td>
+                </tr>
+                <tr>
+                    <td>Customer Mobile No: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="pgMobile" id="pgMobile" value="0731442326" /></td>
+                </tr>
+                <tr>
+                    <td>Customer First Name: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="customerFirstName" id="customerFirstName" value="Ashraf" /></td>
+                </tr>
+                <tr>
+                    <td>Customer Last Name: </td>
+                    <td><input type="text" class="w3-input w3-border w3-round" name="customerLastName" id="customerLastName" value="Abdul Kader" /></td>
+                </tr>
+                <tr>
+                    <td>Full Name of Deceased: </td>
+                    <td><input type="text" name="adhocRef1" id="adhocRef1" value="john Cena"></td>
+                </tr>
+
+                <tr>
+                    <td>ID No of Deceased: </td>
+                    <td><input type="text" name="adhocRef2" id="adhocRef2" value="7502235129083"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="adhocRef3" id="adhocRef3" value="Edenvale Cemetery" readonly></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="adhocRef4" id="adhocRef4" value="" readonly></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="adhocRef5" id="adhocRef5" value="" readonly></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="returnUrl" id="returnUrl" value="" readonly></td>
+                </tr>
+
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="right">
+                        <input type="submit" id="payfst" align="bottom" vspace="3" width="100" height="57" alt="Pay Now" title="Pay Now with PayFast" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    $(function () {
+        @* document.getElementById('Reference1').value = "@Model.AccountNumber";
+        document.getElementById('Reference2').value = "Single Instant EFT Cemetery Payment";
+        document.getElementById('Amount').value = "@Model.Amount";*@
+        var CurrUrl = window.location.href;
+        var ReturnUrl = CurrUrl+"/ReturnBackUrl";
+        document.getElementById('returnUrl').value = ReturnUrl;
+    });
+</script>
+
+

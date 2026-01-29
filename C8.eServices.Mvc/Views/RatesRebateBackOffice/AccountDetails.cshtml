@@ -1,0 +1,63 @@
+﻿@model C8.eServices.Mvc.ViewModels.AccountDetailsViewModel
+
+@{
+    ViewBag.Title = "AccountDetails";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<br />
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                   Account Details 
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.PropertyAccount.AccountNumber)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.AccountNumber)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.PropertyAccount.AccountType.Name)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.AccountType.Name)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.PropertyAccount.BilledFirstName)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.BilledFirstName)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.PropertyAccount.BilledLastName)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.BilledLastName)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.PropertyAccount.BilledIdentificationNumber)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.BilledIdentificationNumber)
+                    </dd>
+                    <dt>
+                        Address
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.PropertyAccount.Property.PropertyFullAddress)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+

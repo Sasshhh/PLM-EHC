@@ -1,0 +1,83 @@
+﻿@using C8.eServices.Mvc.Models
+
+@{
+    ViewBag.Title = "User Log Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var userHistoryLog = (List<SystemUserLogTime>)ViewData["UserHistoryLog"];
+}
+
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        Login Logs
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    if (userHistoryLog != null)
+                    {
+                        <div>
+                            <table class="table table-bordered table-hover table-striped panel panel-default display" id="table">
+
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            User
+                                        </th>
+                                        <th>
+                                            Login Time
+                                        </th>
+                                        <th>
+                                            Logout Time
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in userHistoryLog)
+                                    {
+                                        <tr>
+                                            <td>@item.SystemUser.UserName</td>
+                                            <td>@item.LoginTime</td>
+                                            <td>@item.LogoutTime</td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    }
+                    <br />
+                  
+                }
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $('#table').DataTable();
+    });
+</script>

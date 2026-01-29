@@ -1,0 +1,218 @@
+﻿@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@model IEnumerable<C8.eServices.Mvc.Models.PropertyAccount>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var propertyId = ViewBag.PropertyId;
+    var customerId = ViewBag.CustomerId;
+    var property = ( Property ) ViewData[ "Property" ];
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-done">Properties</li>
+        <li class="progtrckr-here">Accounts</li>
+        <li class="progtrckr-todo">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+        <li class="progtrckr-todo">Submit</li>
+    </ol>
+</div>*@
+<br />
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">Property
+                </a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial( "_PropertyPartial", property )
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 3:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li><strong>Accounts - Update information about the accounts associated with a property.</strong></li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    In this step you can add accounts to the property mentioned above, which is displayed in the above "Property" panel.
+                </p>
+                <p>
+                    If you would like to go back to the property details page, you may click the "Back" button on the "Navigation" panel.                      
+                </p>
+                <p>
+                    You may add accounts to this property by clicking the "Add Account" button in the "Navigation" panel.
+                </p>
+                <p>
+                    You may click the "Next" button in the "Navigation" panel to add additional owners to this property, which will take you to step 4.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="navigation">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">Navigation
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNavigation" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            @Html.EncodedActionLink("Back", "Edit", "Property", new { id = propertyId }, new { @class = "btn btn-primary" })
+                        </div>
+                        <div class="col-md-6">
+                            <span class="pull-right">
+                                @Html.EncodedActionLink("Add Account", "Create", "PropertyAccount", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, new {@class="btn btn-primary" })
+                                @*<a class="btn btn-primary" href="@Url.Action( "Create", new { propertyId, ratesRebateId = ViewBag.RatesRebateId } )">
+                                    <span class="font-icon-group"></span>Add Account
+                                </a>*@
+                                &nbsp;
+                                @Html.EncodedActionLink( "Next", "Index", "AdditionalPropertyOwner", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary", title = "Next to additional property owner(s)" } )
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="propertyAccountlst">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">List of Property Accounts
+                </a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table class="table table-striped" id="table"
+                    data-toggle="table"
+                    data-height="500"
+                    data-search="true"
+                    data-pagination="true"
+                    data-page-list="[10,25, 50, 100, ALL]">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor( model => model.AccountTypeId )
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor( model => model.Property.RatesNumber )
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor( model => model.AccountNumber )
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor( model => model.BilledFirstName )
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor( model => model.BilledLastName )
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor( model => model.BilledIdentificationNumber )
+                            </th>
+                            @*<th>
+                                @Html.DisplayNameFor( model => model.StatusId )
+                            </th>*@
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ( var item in Model )
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.AccountType.Name )
+                                </td>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.Property.RatesNumber )
+                                </td>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.AccountNumber )
+                                </td>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.BilledFirstName )
+                                </td>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.BilledLastName )
+                                </td>
+                                <td>
+                                    @Html.DisplayFor( modelItem => item.BilledIdentificationNumber )
+                                </td>
+                                @*<td>
+                                    @Html.DisplayFor( modelItem => item.Status.Name )
+                                </td>*@
+                                <td>
+                                    @Html.EncodedActionLink( "Edit", "Edit","PropertyAccount", new { id = item.Id, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary btn-sm btn-responsive" } )
+                                    @Html.EncodedActionLink( "Delete", "Delete","PropertyAccount", new { id = item.Id, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary btn-sm btn-responsive" } )
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+    $(function () {
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+    });
+
+    </script>
+
+}

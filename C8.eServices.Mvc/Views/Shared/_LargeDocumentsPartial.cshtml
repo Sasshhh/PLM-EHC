@@ -1,0 +1,440 @@
+﻿@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+@using System.Web
+@using C8.eServices.Mvc.Keys
+
+<style>
+    /* Used only for jquery selections. */
+    .docUpload {
+    }
+
+    .docDetails {
+    }
+       .disableClick {
+        pointer-events: none;
+    }
+
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-file input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            background: white;
+            cursor: inherit;
+            display: block;
+        }
+
+    .dtAlign {
+        text-align: left;
+        margin-bottom: 1em;
+        width: auto;
+        padding-right: 1em;
+    }
+
+    .ddAlign {
+        margin-left: 0;
+        margin-bottom: 1em;
+    }
+
+    /*.dl-horizontal dt {
+
+    }
+
+    .dl-horizontal dd {
+
+    }*/
+        .disableClick{
+    pointer-events: none;
+}
+</style>
+@{
+    var incentivePolicyId = ViewBag.IncentivePolicyId;
+    var referenceId = ViewBag.ReferenceId;
+    var xXx = "test";
+}
+<div id="documentResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Progress</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" id="modalText">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-horizontal">
+
+    @if (Model.IsUploadView)
+    {
+        foreach (var doc in Model.DocumentCheckLists.Where(dcl => dcl != null))
+        {
+            List<C8.eServices.Mvc.Models.Document> documents = null;
+            if (Model.Documents != null)
+            {
+                documents = Model.Documents.Where(o => o.DocumentCheckListId == doc.Id).ToList();
+            }
+
+            <text>
+
+                <div class="form-group">
+                    @Html.Label(doc.DocumentType.Name, new {@class = "control-label col-md-2"})
+                    <div class="col-md-10">
+                        <dl class="dl-horizontal">
+                            <dt class="dtAlign">
+                                <span class="btn btn-sm btn-default btn-file">
+                                    Browse
+                                    <input type="file" id="@Html.Raw(string.Format("docUpload_{0}", doc.Id))" name="@Html.Raw(string.Format("_{0}", doc.Id))" class="docUpload" multiple>
+                                </span>
+                            </dt>
+                            <dd class="ddAlign">
+                                <div id="@("docDetails_" + doc.Id)" class="docDetails">
+                                    @foreach (var d in documents)
+                                    {
+                                        @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", d.DocumentLocation, d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.CreatedDateTime)) : "No Document")
+                                        @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='glyphicon glyphicon-remove' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)
+                                        @*@Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocumentFromLocation", "File", new { q = d.DocumentLocation }), d.DocumentName) : "No Document<br/>")
+                                        @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='glyphicon glyphicon-remove' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)*@
+                                    }
+                                </div>
+                                @Html.Raw(string.Format("<small>{0}</small>", doc.DocumentType.Description))
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+            </text>
+
+        }
+
+        <text>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="button" value="Upload" class="btn btn-primary" id="uploadFiles"/>
+                </div>
+            </div>
+
+        </text>
+        <text>
+
+        </text>
+    }
+    else
+    {
+        foreach (var doc in Model.DocumentCheckLists)
+        {
+            var document = Model.Documents.FirstOrDefault(o => o.DocumentCheckListId == doc.Id);
+
+            <text>
+
+                <div class="form-group">
+                    @Html.Label(doc.DocumentType.Name, new {@class = "control-label col-md-2"})
+                    <div class="col-md-10">
+                        @Html.Raw(document != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", document.DocumentLocation, document.DocumentName, (document.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", document.CreatedDateTime)) : "No Document")
+                        @Html.Raw(doc.DocumentType.Description)
+                    </div>
+                </div>
+
+            </text>
+
+        }
+    }
+
+        </div>
+
+<script type="text/javascript">
+    var validFileExtensions = new Array('pdf', 'jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'xlsx');
+
+    $(document).ready(function () {
+        var documentCheckListIds = ''; @*// Used to store the IDs of the document check lists.*@
+        var isChecked = $(this).is(':checked');
+
+        $('.docUpload').each(function (i, fileInput) {
+            $(fileInput).on('change', fileInput, function () {
+                var name = $(fileInput).attr('Id');
+                var id = '#docDetails_' + name.substring(name.indexOf('_') + 1, name.length);
+
+                @*// Gets multiple files and shows them.*@
+                var files = $(fileInput).prop("files");
+                var names = $.map(files, function(val) { return val });
+                var fileExtensions = [];
+                var fileSize = 0;
+
+                names.forEach(function(value, index, array) {
+                    var extension = value.name.split('.').pop().toLowerCase();
+                    var isValidFile = $.inArray(extension, validFileExtensions);
+
+                    fileExtensions.push(isValidFile);
+                    fileSize += value.size;
+
+                    $(id).append(value.name + "</br>");
+                });
+
+                if ($.inArray(-1, fileExtensions) !== -1) {
+                    bootbox.alert("Please select a valid file of type pdf/jpg/png/gif/doc/docx/xlsx.");
+                    $(fileInput).val('');
+                    $(id).html('');
+                } else {
+                    if (fileSize > (1024 * 1024 * 50)) {
+                        bootbox.alert("File(s) size should not exceed 50MB.");
+                        $(fileInput).val('');
+                        $(id).html('');
+                    }
+                }
+            });
+        });
+
+        validateTsCs(isChecked);
+
+        $("#chkAgree").change(function() {
+            isChecked = $(this).is(':checked');
+            var fullname = $("#declareName").val();
+
+            if (isChecked && fullname === '') {
+                bootbox.alert("Please provide full name in your declaration section"); 
+                $(this).prop('checked', false); 
+                isChecked = false; 
+            } else {
+                $.ajax({
+                    url: '@Url.Action("SendElectronicSignature", "IncentivePolicy")',
+                    type: 'POST',
+                    data: { incentivePolicyId: @incentivePolicyId,hasElectronicSignature: isChecked, declareAs: fullname  }, 
+                    success: function(result) {
+                        // TODO: process the server results
+                        if (result === 'False') {
+                            $(this).prop('checked', false); 
+                            isChecked = false; 
+                        }
+                    }
+                });
+            }
+            validateTsCs(isChecked);
+        });
+
+        function validateTsCs(option) {
+            if (!option) {
+                $('#btnSubmit').addClass('disableClick');
+                $('#btnbtnSubmit').addClass('disableClick');     
+            }
+            else {
+                $('#btnSubmit').removeClass('disableClick');
+                $('#btnbtnSubmit').removeClass('disableClick');
+                $('#btnSubmit').removeAttr('title');
+                $('#btnbtnSubmit').removeAttr('title');
+            }          
+        }
+        $('#uploadFiles').click(function () {
+            var numOfFiles = 0;
+            var formdata = initFormData();
+
+            HoldOn.open({
+                message: 'Uploading document/s...Please Wait',
+                textColor: "white"
+            });
+
+            $('.docUpload').each(function (i, fileInput) {
+                numOfFiles = numOfFiles + fileInput.files.length;
+
+                for (i = 0; i < fileInput.files.length; i++) {
+                    formdata.append(fileInput.files[i].name, fileInput.files[i]);
+                    documentCheckListIds += $(this).attr("name"); @*// append all IDs together, the actual name has a underscore in it.*@
+                }
+            });
+
+            formdata.append('DocumentCheckListIds', documentCheckListIds);
+
+            if (numOfFiles > 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '@Url.Action( "AddDocument", "File", new { folder = Model.ApplicationReferenceNumber } )');
+
+                xhr.send(formdata);
+                xhr.onreadystatechange = function () {                 
+                    if (xhr.readyState == 4) {
+                        documentCheckListIds = '';
+
+                        if (xhr.status == 200) {
+                            HoldOn.close();
+                            $("#modalText").html("Document(s) Uploaded");
+                            $("#documentResponseModal").modal('show');
+                            displayDocumentDetails();
+
+                            $('.docUpload').each(function (i, fileInput) {
+                                var input = $(fileInput);
+                                input.val('');
+                            });
+                        }
+                        else {
+                            HoldOn.close();
+                            console.log(xhr.status);
+                            $("#modalText").html("An error occurred. Please try again");
+                            $("#documentResponseModal").modal('show');
+                        }
+                    }
+                }
+
+                return false;
+            }
+            else {
+                HoldOn.close();
+                $("#modalText").html("Please select file(s) to be uploaded");
+                $("#documentResponseModal").modal('show');
+            }
+        });
+    });
+
+    //output formdata elements
+    //var outputLog = {}, iterator = formdata.entries(), end = false;
+    //while (end == false) {
+    //    var item = iterator.next();
+    //    if (item.value != undefined) {
+    //        outputLog[item.value[0]] = item.value[1];
+    //    } else if (item.done == true) {
+    //        end = true;
+    //    }
+    //}
+    //console.log(outputLog);
+
+    function initFormData() {
+        var formdata = new FormData();
+
+        @*// Information to associate the documents to.*@
+        formdata.append('CustomerId', '@Html.Raw( Model.CustomerId )');
+        formdata.append('ReferenceTypeId', '@Html.Raw( Model.ReferenceTypeId )');
+        formdata.append('ReferenceId', '@Html.Raw( Model.ReferenceId )');
+        formdata.append('ApplicationId', '@Html.Raw( Model.ApplicationId )');
+        formdata.append('StatusId', '@Html.Raw( Model.StatusId )');
+
+        return formdata;
+    }
+
+
+    @*// Calls function to delete documents.*@
+    function deleteDocument(documentId) {
+        HoldOn.open({
+            message: 'Deleting document...Please Wait',
+            textColor: "white",
+        });
+
+        var formdata = initFormData();
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '@Url.Action( "DeleteDocument", "File" )?q=' + documentId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+                $("#modalText").html("Document Deleted");
+                $("#documentResponseModal").modal('show');
+                displayDocumentDetails();
+            }
+        }
+
+        return false;      
+    }
+
+    @*function getDocument(fileId) {
+        HoldOn.open({
+            message: 'Loading document...Please Wait',
+            textColor: "white",
+        });
+
+        var formdata = new FormData();
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '@Url.Action( "GetDocument", "File" )?fileId=' + fileId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+            }
+        }
+
+        return false;
+    }*@
+
+    function displayDocumentDetails() {
+        var documentCheckLists = JSON.parse('@Html.Raw(Json.Encode(Model.DocumentCheckLists.Where(d => d != null)
+                      .Select(d => new { Id = d.Id, DataList = d.DataList })))');
+
+        $('.docDetails').each(function (i, element) {
+            var elementId = $(element).attr('Id');
+            var documentCheckListId = elementId.substring(elementId.indexOf('_') + 1, elementId.length);
+
+            @*documentCheckListId = documentCheckListId.substring(documentCheckListId.indexOf('_') + 1, documentCheckListId.length);
+            // JK.20160504 - The missing javascript line terminators are included in the razor C# code.
+            var referenceTypeId = @Html.Raw( string.Format( "{0};", Model.ReferenceTypeId ) )
+            var referenceId = @Html.Raw( string.Format( "{0};", Model.ReferenceId ) )
+            var applicationId = @Html.Raw( string.Format( "{0};", Model.ApplicationId ) )
+            var customerId = @Html.Raw( string.Format( "{0};", Model.CustomerId ) )*@
+
+            var list = $.grep(documentCheckLists, function (e, i) {
+                return e.Id == documentCheckListId
+            });
+
+            $.ajax({
+                url: "@Url.Action( "RenderDocumentDetails", "Document" )?q=" + list[0].DataList[0],
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == "Success") {
+                        $(element).html($.parseHTML(data.view));
+                    } else {
+                        $(element).html('');
+                    }
+                },
+                error: function () {
+                    $("#modalText").html("Document failed to upload or be deleted... please try again");
+                    $("#documentResponseModal").modal('show');
+                }
+            });
+        });
+    }
+
+    function signDeclaration(data) {
+        bootbox.confirm({
+            title: "Declaration",
+            message: '<p>' + 'I do hereby declare that the information supplied is to the best of my knowledge, true and correct.' +
+                'I acknowledge that the Municipality reserves the right to prosecute anyone who willfully provides false information with the intention to benefit unlawfully from the rebates awarded.' + '</p>',
+            buttons: {
+                cancel: {
+                    label: '<i class="fa fa-times"></i> No'
+                },
+                confirm: {
+                    label: '<i class="fa fa-check"></i> Yes'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    // Submit application
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("SubmitApplication", "IncentivePolicy")/' + '?q=' + data,
+                        success: function (result) {
+                            // Reload application dashboard
+                            window.location = '@Url.Action("Index", "IncentivePolicy")';
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+</script>

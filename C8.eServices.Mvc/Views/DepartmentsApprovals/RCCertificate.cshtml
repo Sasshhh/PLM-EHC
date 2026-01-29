@@ -1,0 +1,88 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+
+@{
+    ViewBag.Title = "UploadAssessmentFigure";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.RcsApplicationId, new { htmlAttributes = new { @id = "returnUrl", @style = "display:none;" } })
+
+    <div id="documentsUpload">
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+
+
+
+
+                <div class="panel-group" style="margin-bottom: -1px;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" align="center">
+                            Document Upload
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                    <br />
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-4">
+
+                                @Html.ActionLink("Generate and Sign RCC Certificate", "Solarfileuploadapitest", "Home", new { id = Model.RcsApplicationId }, new { @class = "btn btn-primary" })
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div id="collapseOne" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger">
+                                    <a href="#" class="close" data-dismiss="alert">&times;</a>
+                                    <strong>Error!</strong> @ViewBag.Error
+                                </div>
+                            }
+                            <br />
+
+
+                            @Html.Partial("_DocumentsPartialBORCCCertificate", Model)
+
+                            <br />
+
+
+
+                            <div class="form-horizontal">
+                                <div class="form-group">
+                                    <div class="col-md-offset-2 col-md-4">
+                                        <input type="submit" value="Submit" class="button1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                 
+                </div>
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+
+}

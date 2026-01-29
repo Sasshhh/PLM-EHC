@@ -1,0 +1,28 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Customer>
+
+<div style="clear: both"></div>
+    <table class="table table-bordered" id="CustomerProfiles" style="font-family: VERDANA,GENEVA,SANS-SERIF; font-size: x-small;"> 
+        <thead style="display: table-header-group;">
+            <tr style="background: cornflowerblue; color: azure;"> 
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Customer Type</th>
+                <th>Profile Status</th>
+                @*<th>Email Activation</th>*@
+            </tr>
+        </thead>
+        <tbody style="overflow-y: scroll;">
+            @foreach (var item in Model)
+            {
+                <tr style="margin: 0; padding: 0; page-break-inside: avoid;">
+                    <td>@Html.DisplayFor(modeitem => item.IdentificationNumber)</td>
+                    <td>@Html.DisplayFor(modeitem => item.FullName)</td>
+                    <td>@Html.DisplayFor(modeitem => item.EmailAddress)</td>
+                    <td>@Html.DisplayFor(modeitem => item.CustomerType.Name)</td>
+                    <td>@Html.DisplayFor(modeitem => item.Status.Name)</td>
+                    @*<td>@Html.DisplayFor(modeitem => item.Status.Name)</td>*@
+                </tr>
+            }
+        </tbody>
+    </table>

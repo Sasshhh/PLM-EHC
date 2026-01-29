@@ -1,0 +1,288 @@
+﻿@{
+    ViewBag.Title = "Archive";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Queue Archive</h4>
+<hr/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1" aria-expanded="true">Search</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <form class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Account Number </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Customer Name </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Email Address To </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtAccountNumber" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtCustomerName" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" id="txtEmailAddressName" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Start Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">End Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox1", "Select Date", new { @class = "input-sm" })
+                                </div>
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox2", "Select Date", new { @class = "input-sm " })
+                                </div>
+                                <div class="col-md-4" style="padding-top:0px">
+                                    <button type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-search"></span>Search</button>
+                                    <button type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Linked Accounts Archive
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table id="myTable" class="table table-bordered table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th id="headings">Account Number</th>
+                            <th id="headings">Customer Name</th>
+                            <th id="headings" class="sorting_asc_disabled">Bill Date</th>
+                            <th id="headings">Email Address</th>
+                            <th id="headings">Email Address CC</th>
+                            <th id="headings">Queue Date</th>
+                            <th id="headings">Processed Date</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resendModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("ResendBill", "eBillingDashBoard", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "resendForm" }))
+    {
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Resend Bill</h4>
+                </div>
+                <div class="modal-body" id="">
+                    Are you sure you want to resend this bill ?
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="resendBill">Resend Bill</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+<style>
+    tr.even {
+        background-color: #F5F5F5 !important;
+    }
+</style>
+@* Load datatable css *@
+
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />
+
+@* Load datatable js *@
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script src="@Url.Content("~/scripts/ellipsis.js")"></script>
+    <script src="@Url.Content("~/scripts/moment.js")"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+
+    <script>
+
+
+    $('#txtBox1').datetimepicker({
+        format: 'Y/m/d',
+        timepicker: false,
+        onSelectDate: function (dt, i) {
+            $('#txtBox2').datetimepicker({
+                format: 'Y/m/d',
+                minDate: dt,
+                timepicker: false
+            });
+        }
+    });
+
+    function convertToDate(data) {
+        @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+        var dtStart = new Date(parseInt(data.substr(6)));
+        @*// Format using moment.js.*@
+        var dtStartWrapper = moment(dtStart);
+        return dtStartWrapper.format("YYYY/MM/DD");
+    }
+
+
+    $(document).ready(function () {
+        $('#myTable').DataTable({
+            "processing": true, @*// for show progress bar*@
+            "serverSide": true, @*// for process server side*@
+            "orderMulti": true, @*// for disable multiple column at once*@
+            "orderable": false,
+            "order": [2, 'asc'],
+            "dom": '<"top"i>rt<"bottom"lp><"clear">',
+            "scrollY": "500px",
+            "info": false,
+            "pageLength": 100,
+            "lengthChange": false,
+
+            "ajax": {
+                "url": "@Url.Action("loaddataArchive", "eBillingDashBoard")",
+                "type": "POST",
+                "datatype": "json"
+            },
+            "columns": [
+                { "data": "AccountNumber", "width": "15%", "orderable": false },
+                {
+                    "data": "CustomerAccountName",
+                    "width": "20%",
+                    "orderable": false,
+                    "render": $.fn.dataTable.render.ellipsis(20)
+                },
+                {
+                    "data": "BillDate",
+                    "name": "BillDate",
+                    "width": "10%",
+
+                    "orderable": false,
+                    "render": function (data) {
+                        return convertToDate(data);
+                    },
+                },
+                {
+                    "data": "EmailAddressTo",
+                    "width": "15%",
+                    "orderable": false,
+                    "render": $.fn.dataTable.render.ellipsis(20)
+                },
+                { "data": "EmailAddressCc", "width": "15%", "orderable": false },
+                {
+                    "data": "QueueDateTime",
+                    "render": function (data) {
+                        return convertToDate(data);
+                    },
+                    "width": "10%",
+                    "orderable": false
+                },
+                {
+                    "data": "ArchivedDateTime",
+                    "width": "10%",
+                    "orderable": false,
+                    "render": function (data) {
+                        return convertToDate(data);
+                    }
+
+                }
+            ]
+
+        });
+
+        $(document).on('click', '[id^=Resend]', function () {
+            console.log("in resend");
+            var nId = $(this).attr('data-id');
+            $('#resendBill').on('click', function () {
+                console.log(nId);
+                $.ajax({
+                    type: "POST",
+                    dataType: 'json',
+                    url: '@Url.Action("ResendBill", "eBillingDashBoard")',
+                    data: { id: nId }
+                }).success(function (data) {
+                    $('#resendModal').modal('hide');
+                    console.log("Success");
+                });;
+            });
+
+        });
+
+        oTable = $('#myTable').DataTable();
+
+        function submitParams() {
+            oTable.columns(0).search($('#txtAccountNumber').val().trim());
+            oTable.columns(1).search($('#txtCustomerName').val().trim());
+            oTable.columns(2).search($('#txtEmailAddressName').val().trim());
+            oTable.columns(3).search($('#txtBox1').val().trim());
+            oTable.columns(4).search($('#txtBox2').val().trim());
+            console.log("in function");
+            oTable.draw();
+        };
+
+        $('#btnSearch').click(function () {
+            submitParams();
+        });
+
+        $('#btnClear').click(function () {
+            $('#txtAccountNumber').val('');
+            $('#txtCustomerName').val('');
+            $('#txtEmailAddressName').val('');
+            $('#txtBox1').val('Select Date');
+            $('#txtBox2').val('Select Date');
+            submitParams();
+        });
+    });
+</script>
+}

@@ -1,0 +1,703 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.ViewModels.DebitOrderViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<style>
+    .isRecurring{
+        display:none;
+    }
+</style>
+
+<h4>Once Off Payments & Debit Orders</h4>
+
+<div class="alert alert-warning" id="associatedAlert" style="display:none">
+    @ViewBag.DebitOrderWarning
+</div>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>Current Once Off Payments & Debit Orders</p>
+                <p>1.	In the Tab <strong>“Current Once Off Payments & Debit Orders”</strong> all your Debit Order Instructions created will be displayed here.</p>
+                <p>2.	Use the <strong>“Search”</strong> bar to search between your different Debit Order Instructions created.</p>
+                @*<p>3.	Under <strong>“Linked Account”</strong>, you may edit or remove a bank account.</p>*@
+                <br />
+                <p>Create a Once Off Payment or Recurring Debit Order</p>
+                <p>1.	Select the dropdown <strong>“Bank Account”</strong>, and select your preferred account type you would like to make payment with.</p>
+                <p>2.	Select the dropdown <strong>“Municipal Account No”</strong>,and select the account you would like the debit order to go through.</p>
+                <p>3.	Enter the Amount. (Minimum Amount is R50.00)</p>
+                <p>4.	Click the Radio button <strong>“YES”</strong> for a recurring Debit Order Payment to go off every month, and <strong>"NO"</strong> if you would like to make a Once-Off Payment.</p>
+                <p>5.	Enter the Debit Order Day. (Enter days between the 1st – 31st)</p>
+                <p>6.	Select the Start Date.</p>
+                <p>7.	Click Pay when done to create the Once Off Payment or Debit Order Instruction.</p>
+                <p>8.	Click Reset to clear all fields.</p>
+                <br />
+                @*<p>
+                    <h2><strong>Please Note:</strong></h2>  Your bank account will be <b>Debited</b> according to your <b>Monthly Consumption</b> which will be populated automatically in the <b>Debit Amount</b> field.
+                    You may change this amount at any time and set up a recurring or once off payment.
+                </p>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Current Once Off Payments & Debit Orders</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="ordersTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Bank Name
+                        </th>
+                        <th>
+                            Bank Account No
+                        </th>
+                        <th>
+                            Municipal Account No
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <th>
+                            Debit Order Day
+                        </th>
+                        <th>
+                            Start Date
+                        </th>
+                        <th>
+                            Recurring
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("Index", "DebitOrder", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.DebitOrder.Id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="panel-group" id="newLinkedAccount">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                        <span>Create a Once Off Payment or Recurring Debit Order</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                        @ViewBag.AccountsMessage
+                    </div>
+                    <div class="form-horizontal">
+
+                        <div class="form-group">
+                            @Html.Label("Bank Account", new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.DebitOrder.BankAccountId, (SelectList)ViewBag.BankAccounts, "Select type ...", htmlAttributes: new { @class = "form-control", id = "BankAccountDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.BankAccountId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label("Municipal Account No", new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.DebitOrder.AccountId, (SelectList)ViewBag.CurrentAccounts, "Select type ...", htmlAttributes: new { @class = "form-control", id = "AccountDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.AccountId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.DebitOrder.Amount, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.DebitOrder.Amount, new { htmlAttributes = new { @class = "form-control"} })
+                                @*@Html.ValidationMessageFor(model => model.DebitOrder.Amount, "", new { @class = "text-danger" })*@
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-2">
+                            </div>
+                            <div class="alert alert-danger col-md-5" id="AMYAlert" style="display:none;margin-left: 15px;">
+                                <p><strong>Please note:</strong>The debit order amount needs to be a minimum of R50,00 and a maximum of R1m (1 Million Rand).</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-2">
+                            </div>
+                            <div class="alert alert-warning col-md-5" id="associatedAlert" style="display:block;margin-left: 15px;">
+                                <p><strong>Please note:</strong>The amount above will be <b>Deducted</b> from your Bank Account.</p>
+                            </div>
+                        </div>
+                        <div class="form-group" id="RecurrOp" style="margin-top:-15px">
+                            @Html.LabelFor(model => model.DebitOrder.IsRecurring, htmlAttributes: new { @class = "control-label col-md-2" })
+
+                            <div class="col-md-10">
+                                <div style="margin-left:0px">
+                                    <label>@Html.RadioButtonFor(model => model.DebitOrder.IsRecurring, "true", new { @name = "DebitOrder.IsRecurring", @onclick = "ShowRecurring()" }) Yes</label>&nbsp;&nbsp;  <label>@Html.RadioButtonFor(model => model.DebitOrder.IsRecurring, "false", new { @name = "DebitOrder.IsRecurring", @id = "NoneRecurring", @onclick = "HideRecurring()" }) No</label>
+                                    @*@Html.ValidationMessageFor(model => model.DebitOrder.IsRecurring, "", new { @class = "text-danger" })*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-2">
+                            </div>
+                            <div class="alert alert-warning col-md-5" id="associatedAlert" style="display:block;margin-left: 15px;">
+                                <p><strong>Please note:</strong> If you select recurring above, your account will be debited every month on the selected <b>Debit Order Day</b> from the the selected <b>Start Date</b> below.</p>
+                            </div>
+                        </div>
+                        <div class="form-group isRecurring">
+                            @Html.LabelFor(model => model.DebitOrder.StrikeDay, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.DebitOrder.StrikeDay, new { htmlAttributes = new { @class = "form-control", @required = true, min = "1", max = "31" } })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.StrikeDay, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group isRecurring">
+                            @Html.LabelFor(model => model.DebitOrder.StartDateTime, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.DebitOrder.StartDateTime, new { htmlAttributes = new { @class = "form-control", @id = "startD", @placeholder = "Select Date", @required = true } })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.StartDateTime, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="submitBtn" type="button" value="Submit" onclick="submitpopup()" )" class="btn btn-primary" />
+                                <input id="submitBtnFinal" type="submit" value="Pay" style="display: none;" class="btn btn-primary" />
+
+                                @*<input id="submitBtn" type="submit" value="Pay" onclick="return confirm('Are you sure you would like to continue with this Debit Order Instruction?')" class="btn btn-primary" />*@
+                                <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    <div id="SubmitModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitleText"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div id="modalContentText"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="submitBtn" type="button" onclick="ArtificialSubmit()"value="Okay" class="btn btn-primary" />
+
+
+                    @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+        var isrecCheck = false;
+        $('#startD').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            minDate: 0,
+            scrollMonth: false,
+            scrollInput: false,
+            onSelectDate: function (dt, i) {
+
+            }
+        });
+        function submitpopup() {
+
+            if ($("#DebitOrder_Amount").val()<50||$("#DebitOrder_Amount").val()>1000000){
+            validateAmt($("#DebitOrder_Amount").val());
+        }
+            else {
+                var DAmit = $("#DebitOrder_Amount").val()
+                DAmit = DAmit.replace(".", ",")
+                $("#DebitOrder_Amount").val(DAmit);
+
+//add check
+                checkDuplicate();
+                //if (DailyDups == true || MonthDups==true) {
+                //    checkDuplicate();
+                //}
+                // else {
+
+                //    $("#modalTitleText").html("Confirm Payment.");
+                //    $("#modalContentText").html("Are you sure you want to continue with this payment?");
+                //    $("#SubmitModal").modal("show");
+                //}
+            }
+        }
+           function ShowRecurring() {
+               $(".isRecurring").show();
+               $("#startD").val("");
+               $("#DebitOrder_StrikeDay").val("");
+               isrecCheck = true;
+            //$("#DebitOrder_IsRecurring").val(true);
+            //$("#NoneRecurring").val(false);
+           
+        }
+        function HideRecurring() {
+             $(".isRecurring").hide();
+                    var strikeDate =@DateTime.Now.Day;
+                    
+                    $("#DebitOrder_StrikeDay").val(strikeDate);
+                    //alert($("#DebitOrder_StrikeDay").val());
+                        //alert(strikeDate);
+                    var StartYear =@DateTime.Now.Year.ToString();
+                    var StartMonth =@DateTime.Now.Month.ToString();
+                    if (StartMonth < 10) {
+                        StartMonth = "0" + StartMonth;
+                    }
+                    var StartDay =@DateTime.Now.Day.ToString();
+                    var startDateFormat = StartYear + "/" + StartMonth + "/" + StartDay;
+            $("#startD").val(startDateFormat);
+            isrecCheck = false;
+            //$("#DebitOrder_IsRecurring").val(false);
+            //        $("#NoneRecurring").val(true);
+                    //var test = $("#NoneRecurring").val();
+                    //alert(test);
+                    //var test2 = $("#DebitOrder_IsRecurring").val();
+                    //alert(test2);
+        }
+
+        function ArtificialSubmit() {
+            document.getElementById("submitBtnFinal").click(); 
+        }
+        function validateAmt(ValAmt) {
+
+            if (ValAmt< 50||ValAmt>1000000){
+              //  AMYAlert
+                $("#submitBtn").prop('disabled', true);//$("#btnSubmit").prop('disabled', true);
+                $("#AMYAlert").show();
+            }
+            else {
+                $("#submitBtn").prop('disabled', false);//$("#btnSubmit").prop('disabled', false);
+                $("#AMYAlert").hide();
+                var DAmit = $("#DebitOrder_Amount").val()
+                DAmit = DAmit.replace(".", ",")
+                $("#DebitOrder_Amount").val(DAmit);
+              //  alert($("#DebitOrder_Amount").val());
+            }
+               
+        }
+  
+        function convertToDate(data) {
+            @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+            var dtStart = new Date(parseInt(data.substr(6)));
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        function formatDate(data) {
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(data);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+        $(document).ready(function () {
+       $("#DebitOrder_Amount").focusin(function () {
+
+        });
+            $("#DebitOrder_Amount").focusout(function () {
+            var DAmit = $("#DebitOrder_Amount").val();
+               // alert(DAmit[DAmit.length - 1]);
+             if (DAmit[DAmit.length - 1] == ".") {
+                //alert(DAmit[DAmit.length - 1]);
+                DAmit += "00";
+            }
+            else if (DAmit[DAmit.length - 1] == ",") {
+                //alert(DAmit[DAmit.length - 1]);
+                DAmit += "00";
+            }
+             else if (DAmit.indexOf(".") !== -1) {
+                 if (DAmit.toString().split(".")[1].length == 1) {
+                     DAmit += "0";
+                 }
+                }
+             else if (DAmit.indexOf(",") !== -1) {
+                 if (DAmit.toString().split(",")[1].length == 1) {
+                     DAmit += "0";
+                 }
+             } 
+             else 
+             {
+                 DAmit += ",00";
+             }
+            DAmit = DAmit.replace(",", ".")
+            $("#DebitOrder_Amount").val(DAmit);
+            //alert($("#DebitOrder_Amount").val());
+            validateAmt($("#DebitOrder_Amount").val());
+            });      
+        });
+    </script>
+    <script type="text/javascript">
+        var striked=0;
+        var recurred=0;
+        var today = new Date();
+        //var mm = String(today.getMonth() + 1).padLeft(2, '0'); //January is 0! Commented out by AAK - Not IE friendly
+         var mm =@DateTime.Now.Month.ToString();
+            if (mm < 10) {
+                mm = "0" + mm;
+                    }
+        var yyyy = today.getFullYear();
+        var minStrike = 1;
+
+        var key =@ViewBag.limit;
+
+        function loadOrders() {
+            $('#ordersTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadOrders", "DebitOrder", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "BankAccount.Bank.Name", "autoWidth": true },
+                    { "data": "BankAccount.HiddenBankAccountNumber", "autoWidth": true },
+                    { "data": "Account.AccountNumber", "autoWidth": true },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+                    { "data": "StrikeDay", "autoWidth": true,
+                        "render": function (data) {
+
+                            var strikedated = new Date();
+                            var dd = data;
+
+                            strikedated = yyyy +"-"+ mm +"-"+ dd;
+                            
+                            striked= new Date(strikedated);
+                            //console.log("Striked in table - "+striked);
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "StartDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                     {
+                         "data": "IsRecurring", "autoWidth": true,
+                         // `data` refers to the data for the cell (defined by `mData`, which
+                         // defaults to the column being worked with, in this case is the first
+                         // Using `row[0]` is equivalent.
+                         "render": function (data, type, row) {
+                             recurred=data;
+                             if (data == '1') {
+                                 return 'Yes';
+                             } else {
+                                 return 'No';
+                             }
+
+                         }
+                     },
+                    { "data": "Status.Name", "autoWidth": true },
+                    {
+                        "data": "Data",
+                        "autoWidth":true,
+                        "title": "Action",
+                        "render": function (data, type, row) {
+                            var edit = '<a id=\"editOrder\" title=\"Edit Payment Details\" style=\"display: inline-grid;\" href=\"#\" onclick=\"getDebitOrder(\'' + data + '\');\"><span class=\"glyphicon glyphicon-edit\" style=\"text-align: center;\"></span>Edit</a>';
+                            var remove = '<a id=\"removeOrder\" title=\"Remove Payment\" style=\"display: inline-grid;\" href=\"#\" onclick=\"deleteItem(\'' + data + '\');\"><span class=\"glyphicon glyphicon-remove\" style=\"text-align: center;\"></span>Cancel</a>';
+                             //commented by ash
+                            if (recurred == 1) {
+                                var strikedaythismonth= new Date(striked);
+                                var strikedaythismonthToday= new Date(striked);
+                                strikedaythismonth.setDate(strikedaythismonth.getDate()-key);
+                                if(today.getDate()==strikedaythismonthToday.getDate())
+                                {
+                                    striked=0;
+                                    return '&nbsp;';
+
+                                }
+                                 if(today<strikedaythismonth)// check if strike day on debit order is 5 days before
+                                {
+                                    
+                                    striked=0;
+                                    return edit + '&nbsp;'+remove;
+
+                                }
+                                 else if(today>strikedaythismonthToday){ // check if the strike day of the Debit order is after today
+                                  
+                                    striked=0;
+                                     return '&nbsp;&nbsp;'+edit + '&nbsp;'+remove;
+                                 }
+                                else{
+                                    
+                                    striked=0;
+
+                                    return '&nbsp;';
+                                }
+                            }
+                            else{
+                                striked=0;
+                                return '&nbsp;';
+                            }
+                            //end
+                            return '&nbsp;';
+                        }
+                        
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No debit orders.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function getDebitOrder(data) {
+            resetControls();
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LoadOrder", "DebitOrder")?q=" + data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response != null) {
+                        resetControls();
+                        //alert(JSON.stringify(response));
+                        $("#DebitOrder_Id").val(response.data.Id);
+                        $("#BankAccountDdl").val(response.data.BankAccountId).change();
+                        //$("#BankAccountDdl").prop('selectedIndex', response.data.BankAccountId);
+                        $("#AccountDdl").val(response.data.AccountId).change();
+                        //$("#AccountDdl").prop('selectedIndex', response.data.AccountId);
+                        $("#DebitOrder_Amount").val(response.data.Amount);
+                        $("#DebitOrder_StrikeDay").val(response.data.StrikeDay);
+                        $("#DebitOrder_StrikeDay").attr({
+                            "max": 31,
+                            "min": response.data.StrikeDay
+                        });
+                        $("#DebitOrder_StrikeDay").data("original-value", response.data.StrikeDay);
+                        minStrike = response.data.StrikeDay;
+                        console.log(minStrike);
+                        $("#startD").val(convertDate(response.data.StartDateTime));
+                        $("#DebitOrder_IsRecurring").prop("checked", response.data.IsRecurring);
+                        if (response.data.IsRecurring == true) {
+                            $(".isRecurring").show();
+                            //$("#DebitOrder_IsRecurring").val(true);
+                            
+                            $("#NoneRecurring").prop('disabled', "disabled");
+                           // $("#txtGenFemale").prop('disabled', "disabled");
+                        }
+                        else {
+                            $(".isRecurring").hide();
+                            var strikeDate =@DateTime.Now.Day;
+
+                            $("#DebitOrder_StrikeDay").val(strikeDate);
+                            //alert($("#DebitOrder_StrikeDay").val());
+                            //alert(strikeDate);
+                            var StartYear =@DateTime.Now.Year.ToString();
+                            var StartMonth =@DateTime.Now.Month.ToString();
+                            if (StartMonth < 10) {
+                                StartMonth = "0" + StartMonth;
+                            }
+                            var StartDay =@DateTime.Now.Day.ToString();
+                            var startDateFormat = StartYear + "/" + StartMonth + "/" + StartDay;
+                            $("#startD").val(startDateFormat);
+                            //$("#DebitOrder_IsRecurring").val(false);
+                            //alert($("#startD").val());
+                            // alert(startDateFormat);
+                            $("#DebitOrder_IsRecurring").prop('disabled', "disabled");
+                        }
+                        $("#RecurrOp").hide();
+                        $("#DebitOrder_Id").val(response.data.Id);
+                        $("#BankAccountDdl").prop('disabled', "disabled");
+                        $("#AccountDdl").prop('disabled', "disabled");
+                        $("#DebitOrder_Amount").val(response.data.Amount);
+                        $("#DebitOrder_StrikeDay").val(response.data.StrikeDay);
+                        $("#startD").prop('disabled', "disabled");
+                        
+
+
+                    } else {
+                        alert("Unfortunately there is no such debit order in the system.");
+                    }
+                },
+                failure: function (response) {
+                    //alert('f: ' + response.responseText);
+                },
+                error: function (response) {
+                    //alert('e: ' + response.responseText);
+                }
+            });
+        }
+
+        function deleteItem(data) {
+            if (confirm("Are you sure you want to remove this account?")) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("DeleteOrder", "DebitOrder")?q=" + data,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+            }
+
+            loadOrders();
+            return false;
+        }
+
+        function resetControls() {
+            $("#BankAccountDdl option:eq(0)").prop("selected", true);
+            $("#AccountDdl option:eq(0)").prop("selected", true);
+            $("#DebitOrder_Id").val("");
+            $("#DebitOrder_Amount").val("");
+            $("#DebitOrder_StrikeDay").val("");
+            $("#DebitOrder_StrikeDay").attr({
+                "max": 31,
+                "min": 1
+            });
+            $("#DebitOrder_StrikeDay").data("original-value",1);
+            $("#startD").val("");
+            var r = document.getElementsByName("DebitOrder.IsRecurring");
+            for (var i = 0; i < r.length; i++) {
+                r[i].checked = false;
+            }
+            $("#DebitOrder_IsRecurring").prop('checked', false);
+            $("#BankAccountDdl").prop('disabled', "");
+            $("#AccountDdl").prop('disabled', "");
+            $("#startD").prop('disabled', "");
+            $("#DebitOrder_IsRecurring").prop('disabled', "");
+            $("#NoneRecurring").prop('disabled', "");
+            HideRecurring();
+            minStrike = 1;
+            console.log(minStrike);
+            $("#RecurrOp").show();
+        }
+
+        $(function () {
+            loadOrders();
+
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        });
+
+        $('#DebitOrder_StrikeDay').change(function () {
+            if ($(this).val() < $(this).data("original-value")) {
+                $(this).val($(this).data("original-value"));
+            }
+        });
+
+         function checkDuplicate() {
+       $.ajax({
+                type: "POST",
+                url: '@Url.Action("CheckDuplicatePayments", "DebitOrder")',
+           data: { AccId: $("#AccountDdl").val(), isRecc: isrecCheck, Amt: $("#DebitOrder_Amount").val() }
+            }).success(function (data) {
+                var accountN = $("#AccountDdl option:selected").text();
+                var amountN = $("#DebitOrder_Amount").val();
+               
+                if (data.isValid) {
+                    $("#modalTitleText").html("Confirm - Duplicate Payment Detected!");
+                    $("#modalContentText").html("<h6 style='color:red'>Are you sure you want to continue with this payment?<br>An active payment for this <br>municipal account (" + accountN +"), <br>for the current month, <br>with the same amount(R" + amountN +") already exists!<br>If you proceed, you will be deducted for all active payments on this account!");
+                    $("#SubmitModal").modal("show"); 
+                }
+                else if (data.isValidNoAmt) {
+                    $("#modalTitleText").html("Confirm - Duplicate Payment Detected!");
+                    $("#modalContentText").html("<h6 style='color:red'>Are you sure you want to continue with this payment?<br>An active payment for this <br>municipal account (" + accountN + "), <br>for the current month already exists!<br>If you proceed, you will be deducted for all active payments on this account!");
+                    $("#SubmitModal").modal("show");
+                }
+                    else {
+
+                    $("#modalTitleText").html("Confirm Payment");
+                    $("#modalContentText").html("Are you sure you want to continue with this payment?");
+                    $("#SubmitModal").modal("show"); 
+            }
+
+
+            });
+        }
+
+    </script>
+    <script>
+        var minStrike = 1;
+        console.log(minStrike);
+        setInputFilter(document.getElementById("DebitOrder_Amount"), function (value) {
+            return /^\d*[,.]?\d{0,2}$/.test(value);
+        });
+        setInputFilter(document.getElementById("DebitOrder_StrikeDay"), function (value) {
+            return /^\d*$/.test(value) && (value === "" || (parseInt(value) >0 && parseInt(value) <= 31));
+        });
+        //setInputFilter(document.getElementById("BankAccHold"), function (value) {
+        //return /^([a-zA-Z _-]*)$/.test(value);
+        //});
+        function setInputFilter(textbox, inputFilter) {
+            ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+                textbox.addEventListener(event, function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    }
+                });
+            });
+        }
+
+        function blockSpecialChar(e) {
+            var k;
+            document.all ? k = e.keyCode : k = e.which;
+            return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+        }
+    </script>
+}
+

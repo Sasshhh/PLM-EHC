@@ -1,0 +1,262 @@
+.col-left.helpdesk-content {
+  margin-right: 230px !important;
+}
+
+.col-left.helpdesk-content .chart-wrapper {
+  width: 100px;
+  margin: auto;
+}
+
+.col-right.helpdesk-aside {
+  width: 220px;
+  background-color: #262733;
+}
+
+.col-right.helpdesk-aside .sub-text {
+  color: #9294ae;
+}
+
+.col-right.helpdesk-aside .tab-content {
+  color: #f7f7f7;
+}
+
+.col-right.helpdesk-aside .item-title {
+  font-weight: normal;
+}
+
+.col-right.helpdesk-aside .divider {
+  background-color: rgba(150, 150, 150, 0.4);
+}
+
+.col-right.helpdesk-aside .leaderboard {
+  margin-left: -15px;
+}
+
+.col-right.helpdesk-aside .leaderboard .list-group-item {
+  padding-right: 0;
+}
+
+.col-right.helpdesk-aside .timeline a {
+  color: #00b0ff;
+}
+
+.col-right.helpdesk-aside .timeline a:hover {
+  color: #00b0ff;
+  text-decoration: underline;
+}
+
+.stat-bar-item {
+  height: 60px;
+  border-left: 2px solid rgba(150, 150, 150, 0.5);
+}
+
+.stat-bar-item .key {
+  position: absolute;
+  bottom: 0px;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.stat-bar-item .value {
+  font-size: 28px;
+  font-weight: normal;
+  line-height: 1.1;
+  margin-top: 12px;
+  text-shadow: 1px 1px 2px rgba(150, 150, 150, 0.6);
+}
+
+.stat-bar-item .stat-link {
+  position: absolute;
+  top: 4px;
+  right: 14px;
+  font-size: 17px;
+}
+
+.stat-bar-item .response-time {
+  line-height: 1.1;
+}
+
+.stat-bar-item p {
+  margin: 0;
+}
+
+.ticket-settings .input-group {
+  max-width: 140px;
+}
+
+.ticket-update {
+  font-size: 0;
+}
+
+.ticket-update .tu-item {
+  display: inline-block;
+  width: 50%;
+  text-align: center;
+}
+
+.ticket-update .tu-item .text-display-2 {
+  line-height: normal;
+}
+
+#gaugeServiceLevel text {
+  fill: #ccc;
+}
+
+.card-reveal > .paper {
+  height: 97%;
+}
+
+.expanding-card {
+  top: 4px;
+  width: 130px;
+  max-width: 130px;
+  height: 33px;
+  margin-left: 110px;
+}
+
+.expanding-card.expand {
+  height: 550px;
+}
+
+.expanding-card .button-expand {
+  width: 130px;
+  height: 34px;
+  line-height: 34px;
+}
+
+.expanding-card .button-expand.expand {
+  width: 280px;
+  font-size: 24px;
+  color: #eceffa;
+  text-transform: none;
+  padding: 18px 20px 0;
+  transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expanding-card .button-expand:not(.expand) {
+  background-color: #ff9800 !important;
+}
+
+.expanding-card .button-expand:not(.expand) .mdi {
+  font-size: 16px;
+}
+
+.expanding-card .btn-close {
+  line-height: 5px;
+}
+
+.expanding-card .content .body {
+  background-color: transparent;
+  color: #212121;
+}
+
+.expanding-card .nav-tabs > li > a,
+.expanding-card .nav-tabs > li.active > a {
+  color: rgba(0, 0, 0, 0.7) !important;
+  padding: 10px;
+}
+
+.expanding-card .tab-active-border {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.expanding-card .form-group {
+  background-color: rgba(250, 250, 250, 0.4);
+  margin-bottom: 22px;
+  padding: 14px 10px 0;
+}
+
+.expanding-card .form-group.active {
+  background-color: rgba(250, 250, 250, 0.8);
+}
+
+.expanding-card form .input-field {
+  line-height: normal;
+}
+
+.expanding-card form .input-field input {
+  font-size: 15px;
+  color: #000;
+  border-bottom: 0;
+}
+
+.expanding-card form .input-field label {
+  top: 0px;
+  font-size: 15px;
+}
+
+.expanding-card form .input-field label.active {
+  transform: translateY(-60%);
+  font-size: 13px;
+}
+
+.expanding-card .textarea {
+  height: 96px;
+  padding-top: 26px;
+}
+
+.expanding-card .textarea textarea {
+  height: auto;
+  resize: none;
+  color: #000;
+  font-size: 15px;
+  padding: 0;
+}
+
+.expanding-card .textarea .input-field label {
+  top: -12px;
+}
+
+.expanding-card .form-group.select {
+  padding: 0;
+}
+
+.expanding-card .input-group-btn {
+  border-bottom: 0;
+  vertical-align: top;
+}
+
+.expanding-card .bootstrap-select .filter-option, .expanding-card .bootstrap-select span.text {
+  font-size: 15px;
+}
+
+.expanding-card .link-button {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(250, 250, 250, 0.8) !important;
+  font-size: 14px;
+}
+
+.expanding-card #btnNewClient {
+  line-height: 42px;
+}
+
+.expanding-card .dropup .bootstrap-select .dropdown-menu {
+  top: auto;
+}
+
+.dark-skin .expanding-card label, .dark-skin .expanding-card .bootstrap-select .btn {
+  color: #212121;
+}
+
+@media only screen and (max-width: 768px) {
+  .col-left.helpdesk-content {
+    margin-right: 0px !important;
+  }
+  .expanding-card.expand {
+    width: 100%;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+}
+
+.theme-dark .expanding-card .nav-tabs > li > a,
+.theme-dark .expanding-card .nav-tabs > li.active > a {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+}
+
+.theme-dark .expanding-card .tab-active-border {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}

@@ -1,0 +1,246 @@
+﻿@using System.ComponentModel.DataAnnotations.Schema
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Models.Audits;
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+@model object
+
+@{
+    var ctx = new eServicesDbContext();
+    var names = new List<string>();
+    var modelName = Model.GetType().Name;
+    var space = Model.GetType().Namespace;
+    var audits = new List<BaseModelAudit>();
+    var props = new PropertyInfo[ 1 ];
+    var order = new List<PropertyInfo>();
+    var type = Type.GetType( string.Format( "{0}.Audits.{1}Audit, C8.eServices.Mvc", space, modelName ) );
+
+    object audit = null;
+
+    if ( type != null )
+    {
+        audit = Activator.CreateInstance( type );
+
+        props = audit.GetType().GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy );
+
+        order = PropertyHelper.OrderProperties( props );
+
+        foreach ( var prop in props )
+        {
+            var attrName = prop.GetCustomAttributes( typeof( DisplayAttribute ), true );
+
+            var attrName1 = prop.GetCustomAttributes( typeof( ColumnAttribute ), true ).FirstOrDefault();
+
+            if ( attrName.Any() )
+            {
+                names.Add( ( ( DisplayAttribute ) attrName.First() ).Name );
+            }
+        }
+    }
+
+    switch ( modelName )
+    {
+        case "Account":
+            var accounts = ctx.AccountAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = accounts.Cast<BaseModelAudit>().ToList();
+            break;
+        case "AccountType":
+            var accountTypes = ctx.AccountTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = accountTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "AdditionalPropertyOwner":
+            var addPropOwners = ctx.AdditionalPropertyOwnerAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = addPropOwners.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Agent":
+            var agents = ctx.AgentAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = agents.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "AgentCustomer":
+            var agentCustomers = ctx.AgentCustomerAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = agentCustomers.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Application":
+            var applications = ctx.ApplicationAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = applications.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "ApplicationRole":
+            var appRoles = ctx.ApplicationRoleAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = appRoles.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "ApplicationUserRole":
+            var appUserRoles = ctx.ApplicationUserRoleAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = appUserRoles.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "AppSetting":
+            var appSettings = ctx.AppSettingAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = appSettings.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Country":
+            var countries = ctx.CountryAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = countries.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Customer":
+            var customers = ctx.CustomerAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = customers.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "CustomerType":
+            var customertypes = ctx.CustomerTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = customertypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Document":
+            var documents = ctx.DocumentAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = documents.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "DocumentType":
+            var docTypes = ctx.DocumentTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = docTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "DocumentCheckList":
+            var docCheckLists = ctx.DocumentCheckListAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = docCheckLists.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "DocumentReference":
+            var docReferences = ctx.DocumentReferenceAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = docReferences.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Domicilium":
+            var domiciliums = ctx.DomiciliumAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = domiciliums.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Entity":
+            var entities = ctx.EntityAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = entities.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "EntityType":
+            var entTypes = ctx.EntityTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = entTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Executor":
+            var executors = ctx.ExecutorAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = executors.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "IdentificationType":
+            var idTypes = ctx.IdentificationTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = idTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "LinkedAccount":
+            var linkedAccounts = ctx.LinkedAccountAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = linkedAccounts.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "LinkedEmail":
+            var linkedEmails = ctx.LinkedEmailAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = linkedEmails.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "LocationType":
+            var locTypes = ctx.LocationTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = locTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Log":
+            var logs = ctx.LogAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = logs.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "LogType":
+            var logTypes = ctx.LogTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = logTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Note":
+            var notes = ctx.NoteAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = notes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "NoteType":
+            var noteTypes = ctx.NoteTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = noteTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Property":
+            var properties = ctx.PropertyAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = properties.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "PropertyAccount":
+            var propAccounts = ctx.PropertyAccountAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = propAccounts.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "RatesRebate":
+            var ratesRebates = ctx.RatesRebateAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = ratesRebates.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "RatesRebateProperty":
+            var rrProperties = ctx.RatesRebatePropertyAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = rrProperties.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "RecipientType":
+            var recTypes = ctx.RecipientTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = recTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "ReferenceType":
+            var refTypes = ctx.ReferenceTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = refTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "Status":
+            var status = ctx.StatusAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = status.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "StatusType":
+            var statusTypes = ctx.StatusTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = statusTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "SystemUser":
+            var sysUsers = ctx.SystemUserAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = sysUsers.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "SystemUserType":
+            var sysUserTypes = ctx.SystemUserTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = sysUserTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+        case "TitleType":
+            var titleTypes = ctx.TitleTypeAudits.Where( a => a.Id == ( ( BaseModel ) Model ).Id ).OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            audits = titleTypes.Cast<BaseModelAudit>().OrderByDescending( a => a.ModifiedDateTime ).ToList();
+            break;
+    }
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Audits</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                @foreach ( var name in names )
+                {
+                    <th style="font-size: small; text-align: center;">@Html.Raw( name )</th>    
+                }
+            </tr>
+            @foreach ( var a in audits )
+            {
+                <tr>
+                    @foreach ( var p in props )
+                    {
+                        switch ( p.Name )
+                        {
+                            case "CreatedBySystemUser":
+                            case "ModifiedBySystemUser":
+                                break;
+                            case "CreatedBySystemUserId":
+                            case "ModifiedBySystemUserId":
+                                if ( p.GetValue( a ) != null )
+                                {
+                        <td style="font-size: x-small; text-align: center;">@Html.Raw( ctx.SystemUsers.Find( p.GetValue( a ) ).FullName )</td>
+                                }
+                                else
+                                {
+                        <td style="font-size: x-small; text-align: center;">&nbsp;</td>
+                                }
+                                break;
+                            default:
+                        <td style="font-size: x-small; text-align: center;">@Html.Raw( p.GetValue( a ) )</td>
+                                break;
+                        }
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+</div>

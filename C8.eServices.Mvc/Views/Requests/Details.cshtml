@@ -1,0 +1,258 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.Models.Request
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountReqsCollapse">
+                    Account Access Request Details
+                </a>
+            </h4>
+        </div>
+        <div id="accountReqsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ReferenceAlpha)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ReferenceAlpha)
+                    </dd>
+
+                    @*<dt>
+                            @Html.DisplayNameFor(model => model.RecipientContact)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RecipientContact)
+                        </dd>*@
+
+                    <dt>
+                        @Html.DisplayName("Date of Request")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CreatedDateTime)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Status.Name)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Status.Name)
+                    </dd>
+
+                    @if (Model.Status.Key == StatusKeys.IncentivePolicyApplicationDeclined)
+                    {
+                        <dt>
+                            @Html.DisplayName("Reason for Rejection")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Comment.Comments)
+                        </dd>
+                    }
+                    else
+                    {
+                        <dt>
+                            @Html.DisplayName("Reason for Request")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Comment.Comments)
+                        </dd>
+                    }
+                </dl>
+            </div>
+            <div id="RequestActions">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button id="SendAcceptRequest" onclick="sendRQSTAccept()" class="btn btn-primary btn-sm">Approve</button>&nbsp; <button id="SendRejRequest" onclick="sendRQSTRej()" class="btn btn-primary btn-sm">Decline</button>
+            </div>
+            <br />
+            <br/>
+            @*<p>
+                    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+                    @Html.ActionLink("Back to List", "Index")
+                </p>*@
+        </div>
+    </div>
+</div>
+<div>
+    @Html.EncodedActionLink("Back", "AccountRequests", "Profile", new { customerId = Model.CustomerId }, new { @class = "btn btn-primary" })
+</div>
+<br />
+<br />
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width: 650px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <a class="btn btn-primary" href="@Url.Action("AccountRequests", "Profile")">Okay</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="RejectRequestModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="RejectRQSmodalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="RejectRQSTmodalContentText">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @*@Html.Label("Municipal Account", htmlAttributes: new { @class = "control-label col-md-2" })*@
+                                <div class="col-md-3">
+                                    @Html.Hidden("Requestid", new { htmlAttributes = new { @class = "form-control", @id = "Requestid", @readonly = true } })
+                                </div>
+                            </div>
+                            <div class="form-group" id="WarningDiv">
+                                <div class="col-md-6">
+                                    <span><b>Please note:</b> If you approve the request to access the municipal account, this will grant the requesting user full access to your Municipal Account including the ability to: <br /> View statements <br /> Make payments towards the account<br /> View Payment History <br />Lodge queries for the account</span>
+                                </div>
+                            </div>
+                            <div class="form-group" id="CommentDiv">
+                                @Html.Label("Reason for Rejection", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextArea("Comment", new { @class = "form-control", @id = "Comment" })
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="AcceptRequestAccount">Approve Request</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RejectRequestAccount">Decline Request</button>
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+
+    });
+
+    function sendRQSTRej() {
+        debugger;
+        $("#RejectRQSmodalTitleText").html("Reject Request for Municipal Account Access");
+        $("#AcceptRequestAccount").hide();
+        $("#WarningDiv").hide();
+        $("#RejectRequestAccount").show();
+
+        $("#CommentDiv").show();
+        $("#RejectRequestModal").modal("show");
+        var id = '@Model.Id';
+        $("#Requestid").val(id);
+        $("#Comment").val("");
+    }
+    function sendRQSTAccept() {
+        debugger;
+        $("#RejectRQSmodalTitleText").html("Approve Request for Municipal Account Access");
+        $("#AcceptRequestAccount").show();
+        $("#WarningDiv").show();
+        $("#RejectRequestAccount").hide();
+        $("#CommentDiv").hide();
+        $("#RejectRequestModal").modal("show");
+        var id = '@Model.Id';
+        $("#Requestid").val(id);
+        $("#Comment").val("Request for access has been approved.");
+
+    }
+
+    $('#RejectRequestAccount').on('click', function () {
+        debugger;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("RejectRequest", "Comments")',
+                data: { ReqNo: $('#Requestid').val(), Comment: $('#Comment').val() }
+            }).success(function (data) {
+
+                $('#Comment').val("");
+                $('#Requestid').val("");
+               
+                if (data.isValid) {
+                    var accNo ="";
+                    var span = document.createElement("span");
+                    span.setAttribute("id", "spanContent");
+                    span.innerHTML = 'Request for access has been rejected.';
+
+                    $("#modalTitleText").html("Request Rejected Successfully");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrModal").modal("show");
+                }
+                    else {
+
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Request failed to send! Please try again late. ");
+                    $("#ErrModal").modal("show");
+
+                }
+
+
+            });
+        });
+     $('#AcceptRequestAccount').on('click', function () {
+        debugger;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AcceptRequest", "Comments")',
+                data: { ReqNo: $('#Requestid').val(), Comment: $('#Comment').val() }
+            }).success(function (data) {
+
+                $('#Comment').val("");
+                $('#Requestid').val("");
+                if (data.isValid) {
+                    var accNo ="";
+                    var span = document.createElement("span");
+                    span.setAttribute("id", "spanContent");
+                    span.innerHTML = 'Request for access has been approved. <br> The municipal account will now be linked to both your profile, <br> as well as the requesting users profile.';
+
+                    $("#modalTitleText").html("Request Approved Successfully");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrModal").modal("show");
+                }
+                    else {
+
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Request failed to approve! Please try again late. ");
+                    $("#ErrModal").modal("show");
+
+            }
+
+            });
+        });
+</script>
+
+
+
+
+

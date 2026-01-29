@@ -1,0 +1,80 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.TemporaryDisplayModel>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    @ViewBag.ViewFrom
+                </div>
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Queue Date</th>
+                        <th>Reference Number</th>
+                        <th>Queue Position</th>
+                        <th>Complex Area(s)</th>
+                        <th>Bedroom Type</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.ApplicantFullName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.WaitingListQueueDate)</td>
+                            <td>@Html.DisplayFor(modelItem => item.ApplicationReferenceNo)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Position)</td>
+                            <td>@Html.DisplayFor(modelItem => item.ComplexAreas)</td>
+                            <td>@Html.DisplayFor(modelItem => item.BedRooms)</td>
+                            <td>
+                                @if (item.AvailabilityKey == FlagKeys.AvailableMatchingUnit)
+                                {
+                                    @Html.ActionLink("Allocate Available Unit", "AllocateAvailableUnitMatch", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ApplicationId=" + item.HumanSettlementApplicationId.ToString() + "&Data=" + item.Data) }, new { @class = "btn btn-primary" }) <br />
+                                }
+                                @if (!item.WaitingQueueChangedDisapproved && !item.WaitingQueueChangedApproved && item.AvailabilityKey != FlagKeys.AvailableMatchingUnit)
+                                {
+                                }                                    
+                                @Html.ActionLink("Request Application Change", "WaitingQueueChangeRequest", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("WaitingListQueueId=" + item.WaitingListQueueId.ToString() + "&HumanSettlementApplicationId=" + item.HumanSettlementApplicationId.ToString() + "&ApplicantFullName=" + item.ApplicantFullName + "&Position=" + item.Position + "&data=" + item.Data) }, new { @class = "btn btn-primary" }) <br />
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+<br />
+<script>
+    $(document).ready(function () {
+        $('#RCSTable').DataTable({ searching: true, paging: true, info: true });
+              @*var display = "/**************/";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+        else {
+            $('#MessageModal4').modal('hide');
+            var result = "/******************/"@ViewBag.Message@ViewBag.MessageBody;*@
+    });
+</script>
+<script>
+    function RemoveQueueItem(val) {
+        debugger;
+        var vali = val;
+    }
+</script>

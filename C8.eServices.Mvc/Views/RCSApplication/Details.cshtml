@@ -1,0 +1,226 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.DepartmentsApproval>
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Application Details</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Reference Number
+                        </th>
+                        <th>
+                            Department
+                        </th>
+                        <th>
+                            Failure from Dept /System Validation
+                        </th>
+                        <th>
+                            Failure Reason
+                        </th>
+                        <th>
+                            Captured Date
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Assigned To
+                        </th>
+                    </tr>
+                </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @item.RCSApplicationStatus.ApplicationReferenceNumber
+                                </td>
+                                <td>
+                                    @*@item.RCSDepartment.Name*@
+                                </td>
+                                <td>
+                                    System
+                                </td>
+                                <td>
+                                    @item.FailureReason
+                                </td>
+                                <td>
+                                    @item.CapturedDate
+                                </td>
+                                <td>
+                                    @item.Status.Name
+                                </td>
+                                <td>
+                                    @*@item.AssignedToCustomer.FullName*@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            //loadAccounts();
+
+        });
+
+    </script>
+
+}
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <br />
+
+    if (ViewBag.BO != true)
+    {
+        if (ViewBag.ApprovalStatus != null)
+        {
+            <div class="form-group">
+                @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
+                <div class="col-md-2">
+                    @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", onchange = "StatusChange()" })
+                    @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+
+        <br />
+
+        if (ViewBag.ReAssignDep != null)
+        {
+            <div id="divReAssign" style="display:none">
+                <div class="form-group">
+                    @Html.Label("Re-Assign", htmlAttributes: new { @class = "control-label col-md-1" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("ReAssignDep", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ReAssignddl" })
+                        @Html.ValidationMessage("ReAssignDep", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <br />
+            <div id="divReAssign" style="display:none">
+                <h4 style="color:red">**Cannot re-assign to another department**</h4>
+            </div>
+        }
+
+        <div id="divReAllocate" style="display:none">
+            <br />
+            <h4 style="color:red">**Application is Re-Allocated using Round Robin**</h4>
+        </div>
+
+        <br />
+        <br />
+
+        @*if (ViewBag.BOAllAppsApproved != null)
+        {
+            <div id="divbtn" style="display:block">
+                <input type="submit" value="Print RCS Certificate" name="btnApprovalStatus" class="button1" onclick="return confirm('Are you sure you want to Proceed?');" />
+            </div>
+        }
+        else
+        {
+            <div id="divbtn" style="display:block">
+                <input type="submit" value="Generate Assessment Report" name="btnApprovalStatus" class="button1" disabled="disabled" onclick="return confirm('Are you sure you want to Proceed?');" />
+            </div>
+        }*@
+    }
+}
+
+<script>
+    function StatusChange() {
+        var Status = $("#ApprovalStatus option:selected").text();
+        if (Status == "Re-Assign") {
+            jQuery('#divReAssign').css("display", "block")
+            jQuery('#divReAllocate').css("display", "none")
+        }
+        else if (Status == "Re-Allocate") {
+            jQuery('#divReAssign').css("display", "none")
+            jQuery('#divReAllocate').css("display", "block")
+        }
+        else {
+            jQuery('#divReAssign').css("display", "none")
+            jQuery('#divReAllocate').css("display", "none")
+        }
+    }
+</script>
+
+
+
+<script>
+    $(function () {
+        $('#FailureTable').DataTable();
+    });
+</script>

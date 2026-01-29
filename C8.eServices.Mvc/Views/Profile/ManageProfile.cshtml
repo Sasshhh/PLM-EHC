@@ -1,0 +1,1134 @@
+﻿@using System.Web.Optimization
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Helpers
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+
+    var db = new eServicesDbContext();
+    var identityManager = new IdentityManager(db);
+}
+
+<h4>Manage Profile Details</h4>
+
+<div id="profileResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Manage Profile</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @if (TempData["IDError"] != null)
+                    {
+                        <strong>@Html.Raw(TempData["IDError"])</strong>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="verifyEntityModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Verify Entity</h4>
+            </div>
+            <div class="modal-body">
+                <span id="verifyResponseText"></span>
+            </div>
+            <div class="modal-footer">
+                <input type="button" value="OK" class="button1" data-dismiss="modal" />
+            </div>
+        </div>
+    </div>
+</div>
+<div id="verifyAttroneyCodeModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Verify Attorney Code</h4>
+            </div>
+            <div class="modal-body">
+                <span id="verifyAttorneyCodeText"></span>
+            </div>
+            <div class="modal-footer">
+                <input type="button" value="OK" class="button1" data-dismiss="modal" />
+            </div>
+        </div>
+    </div>
+</div>
+<style type="text/css">
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+@using (Html.BeginForm("ManageProfile", "Profile", FormMethod.Post, new { id = "manageProfileForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Customer.Id)
+        @{
+            if (ViewBag.ViewCode != null)
+            {
+                @Html.Hidden("ViewCode", (int)ViewBag.ViewCode)
+            }
+        }
+
+        <div class="panel-group" id="instructions">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                            <span>Instructions</span>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseInstructions" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <p>
+                            Manage Profile allows you to capture/edit your Convayencer and Firm details. Please see steps below to complete/edit your profile.
+                            <ol>
+                                <li>Enter the customer details fields. You will be notified with a tooltip if the field is required or not. Once all required fields have been entered then click the "Save" button.</li>
+                                <li>Once the details has been been saved, you will be redirected to the customer document(s) upload page <strong>if you are a new customer or your profile is pending documentation.</strong></li>
+                            </ol>
+                        </p>
+
+                        <br />
+                        <br />
+
+
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (Model != null)
+        {
+            if (Model.Customer != null@*&& Model.CustomerDocuments != null*@)
+{
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                    Uploaded Customer Documents
+                </a>
+            </h4>
+        </div>
+        @if (Model.Document != null)
+        {
+            <div id="documentsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="currentDocumentsGrp">
+
+                        <div class="form-group">
+                            @Html.Partial("~/Views/Shared/_DocumentsPartialRegister.cshtml", Model.Document)
+
+                            @if (!Model.DocumentsVerified)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-offset-3 col-md-10">
+                                        @Html.EncodedActionLink("Edit", "Register", "Document", new
+                                        {
+                                            referenceId = Model.Customer.Id,
+                                            customerId = Model.Customer.Id,
+                                            referenceTypeId = @ViewBag.ReferenceTypeId,
+                                            applicationId = @ViewBag.ApplicationId,
+                                            returnUrl = Url.Action("Index", "Profile", new { customerId = Model.Customer.Id, agentId = 0 }
+                                               )
+                                        }, new { @class = "btn btn-primary" })
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+}
+}
+
+        @if (TempData["Success"] != null)
+        {
+            if (TempData["Success"].Equals(true))
+            {
+                <div class="alert alert-success">
+                    <a href="#" class="close" data-dismiss="alert">&times;</a>
+                    <strong>Successfully received customer information !</strong> @*@ViewBag.AccountsMessage*@
+                </div>
+            }
+
+        }
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#profileCollapse">
+                            Customer Details
+                        </a>
+                    </h4>
+                </div>
+                <div id="profileCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div id="profileDetailsGrp">
+                            <div class="form-group">
+                                <span>@Html.LabelFor(model => model.Customer.CustomerTypeId, "Customer Type", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                <div class="col-md-4">
+                                    @Html.DropDownList("CustomerTypeId", null, "Select Customer Type", new { id = "ddlCustomerTypes", @class = "form-control", @required = true })
+                                    @*@Html.ValidationMessageFor(model => model.Customer.CustomerTypeId)*@
+                                </div>
+                            </div>
+
+
+                            <div id="entityGroup">
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Entity.EntityTypeId, "Entity Type", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.DropDownList("EntityTypeId", null, "Select Entity Type", new { id = "ddlEntityId", @class = "form-control" })
+                                        @*@Html.ValidationMessageFor(model => model.Entity.EntityTypeId)*@
+                                    </div>
+                                </div>
+
+                                @*<div class="form-group">
+                                        @Html.Label("Attorney Code", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-4">
+                                            @Html.TextBoxFor(model => model.Customer.AttorneyCode, null, new { id = "txtAttorneyCode", @class = "form-control", @onfocusout = "ValidateAttorneyCode(this.value)", @maxlength = "6" })
+                                        </div>
+                                    </div>*@
+
+                                @*<div>
+                                        <div class="form-group">
+                                            <div id="verifyEntityGrp" style="display: none;">
+                                                @Html.LabelFor(model => model.Entity.EntityRegistrationNumber, new { @class = "control-label col-md-2" })
+                                                <div class="col-md-4">
+                                                    @Html.TextBoxFor(model => model.Entity.EntityRegistrationNumber, new { id = "txtEntityRegNo", @class = "form-control", maxlength = 12 })
+
+                                                </div>
+                                            </div>
+                                            <div id="verifyEntitySubmitGrp" style="display: none;margin-left:50%;">
+                                                <input type="button" disabled value="Verify Firm" id="verifyEntity" class="button1" />
+                                                &nbsp;&nbsp;
+                                                <input type="button" disabled value="Edit Firm" id="editRegNo" class="button1" />
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+
+
+
+
+
+                            </div>
+
+                            <div id="customerDetailsGrp">
+                                <div class="form-group">
+                                    <span>@Html.Label("First Name", new { @id = "lblFirstName", @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.FirstName, new { id = "txtFirstName", @class = "form-control", @required = true, @pattern = @"[A-Za-z]+(\s[A-Za-z]+)?", @title = "First Name. should contain characters only without any leading or trailing spaces e.g. John Mark" })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.FirstName)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.LastName, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.LastName, new { id = "txtLastName", @class = "form-control", @required = true, @pattern = @"^[a-zA-Z0-9_ ]*$", @title = "Last Name. should contain characters only without any leading or trailing spaces e.g. Van Buren" })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.LastName)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.TitleTypeId, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.DropDownList("TitleTypeId", null, "Select a Title", new { id = "ddlTitleTypeId", @class = "form-control", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.TitleTypeId)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Customer.IdentificationTypeId, new { @class = "control-label col-md-2" })
+
+                                    <div class="col-md-4">
+                                        @Html.DropDownList("IdentificationTypeId", null, "Select Identification Type", new { id = "ddlIdentificationTypes", @class = "form-control", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.IdentificationTypeId)*@
+
+                                    </div>
+                                </div>
+
+                                <div id="countryOfIssueType" class="form-group">
+                                    @Html.LabelFor(model => model.Customer.CountryOfIssueTypeId, new { @class = "control-label col-md-2" })
+
+                                    <div class="col-md-4">
+                                        @Html.DropDownList("CountryOfIssueTypeId", null, "Select Country of Issue", new { id = "ddlCountryOfIssueTypeId", @class = "form-control" })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.CountryOfIssueTypeId)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Customer.IdentificationNumber, new { @id = "lblIdNumber", @class = "control-label col-md-2" })
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.IdentificationNumber, new { id = "txtIdNumber", @class = "form-control", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.IdentificationNumber)*@
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    @Html.Label("Gender", new { @class = "control-label col-md-2" })
+
+                                    <div class="col-md-10">
+                                        <div style="margin-left:0px">
+                                            <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Male", new { @id = "txtGenMale", @required = true }) Male</label>&nbsp;&nbsp;  <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Female", new { @id = "txtGenFemale" }) Female</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="isDeceasedGrp" class="form-group" style="display: none;">
+                                    <span>@Html.Label("Is Deceased ?", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;"></b></span>
+
+                                    <div class="col-md-3">
+                                        @Html.CheckBox("IsDeceased", new { id = "chkIsDeceased" })&nbsp; Yes
+                                        @*@Html.ValidationMessageFor(model => model.Customer.IsDeceased)*@
+                                    </div>
+                                </div>
+
+                                <div id="emailGrp" class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.EmailAddress, new { @class = "control-label col-md-2", @required = true })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        <input id="email" name="emailAddress" class="form-control" type="email" placeholder="example@gmail.com" pattern="^[a-zA-Z0-9._+-]+&#64;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$">
+                                        @*@Html.ValidationMessageFor(model => model.Customer.EmailAddress)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.CellPhoneNumber, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.CellPhoneNumber, new { @class = "form-control", @id = "txtCellNumber", @pattern = @"^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$", @title = "Cellphone number. should contain numbers only with a length of 10 e.g. 0812345690", maxlength = 10, @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.CellPhoneNumber)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.HomePhoneNumber, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.HomePhoneNumber, new { @class = "form-control", @id = "txtHomeNumber", @pattern = @"^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$", @title = "Home number. should contain numbers only with a length of 10 e.g. 0314612345", maxlength = 10 })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.HomePhoneNumber)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.WorkPhoneNumber, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.WorkPhoneNumber, new { @class = "form-control", @pattern = @"^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$", @title = "Work number. should contain numbers only with a length of 10 e.g. 0314612345", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.WorkPhoneNumber)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddress1, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddress1, new { @class = "form-control", @pattern = "^[0-9]*$", @id = "PhysicalAddress1", maxlength = 7, @required = true }) @*, pattern = @"^\d+$", title = "Door No. should contain numbers only with no empty spaces. e.g. 100"*@
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PhysicalAddress1)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddress2, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddress2, new { @class = "form-control", @id = "PhysicalAddress2", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PhysicalAddress2)*@
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddress3, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddress3, new { @class = "form-control", @pattern = "^[0-9]*$", @id = "PhysicalAddress3", @title = "Street No. should contain numbers only with a length of 10 e.g. 1234567890", @required = true })
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddress4, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddress4, new { @class = "form-control", @id = "PhysicalAddress4", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PhysicalAddress4)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddress5, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddress5, new { @class = "form-control", @id = "PhysicalAddress5", @required = true, @pattern = "^[ a-zA-Z0-9]+$" })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PhysicalAddress5)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PhysicalAddressCode, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PhysicalAddressCode, new { @class = "form-control", pattern = @"\d{4}", @title = "Postal address code. should contain numbers only with a length of 4. e.g. 4000", @maxlength = 4, @id = "PhysicalAddressCode", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PhysicalAddressCode)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.IsSameAddress, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-4">
+                                        @Html.CheckBox("isSameAddressChk", new { @style = "width:30px!important;height:20px!important;margin-left: 4px!important;" })&nbsp;Yes
+                                        @*@Html.ValidationMessageFor(model => model.IsSameAddress)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddress1, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddress1, new { @class = "form-control", @pattern = "^[0-9]*$", @id = "PostalAddress1", maxlength = 7, @required = true }) @*, pattern = @"^\d+$", title = "Door No. should contain numbers only with no empty spaces. e.g. 100"*@
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PostalAddress1)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddress2, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddress2, new { @class = "form-control", @id = "PostalAddress2", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PostalAddress2)*@
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddress3, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddress3, new { @class = "form-control", @id = "PhysicalAddress3Id", @pattern = "^[0-9]*$", @title = "Street No. should contain numbers only", @required = true })
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddress4, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddress4, new { @class = "form-control", @id = "PostalAddress4", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PostalAddress4)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddress5, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddress5, new { @class = "form-control", @id = "PostalAddress5", @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PostalAddress5)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <span>@Html.LabelFor(model => model.Customer.PostalAddressCode, new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(model => model.Customer.PostalAddressCode, new { @class = "form-control", @id = "PostalAddressCode", @title = "Postal address code. should contain numbers only with a length of 4. e.g. 4000", @maxlength = 4, @required = true })
+                                        @*@Html.ValidationMessageFor(model => model.Customer.PostalAddressCode)*@
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-offset-2 col-md-10">
+
+                                        <div class="g-recaptcha" data-sitekey="6LdC7bArAAAAAH4THl0Wg9YL5yN-8diTxUMvZHx8" data-callback="validateCaptcha"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-offset-2 col-md-10">
+                                        <input id="btnSave" type="submit" disabled value="Save" class="button1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#email").prop('required', false);
+
+        var viewCode = '@ViewBag.ViewCode';
+        var customerDetails = JSON.parse('@Html.Raw( Json.Encode( ViewBag.CustomerDetails ) )');
+        var sysFirstName, sysLastName, sysEmailAddress, sysMobileNumber;
+        $("#entityGroup").hide();
+        $("#verifyEntityGrp").hide();
+        $("#verifyEntitySubmitGrp").hide();
+        $("#countryOfIssueType").hide();
+
+        $("#customerDetailsGrp").show();
+        if ('@ViewBag.ViewSuccess'.toString().toLowerCase() == "false") {
+            $("#profileResponseModal").modal('show');
+        }
+
+        switch (parseInt(viewCode)) {
+            case 0: case 4:
+                $("#emailGrp").hide();
+                sysFirstName = '@identityManager.CurrentUser( User ).FirstName';
+                sysLastName = '@identityManager.CurrentUser( User ).LastName';
+                sysEmailAddress = '@identityManager.CurrentUser( User ).EmailAddress';
+                sysMobileNumber = '@identityManager.CurrentUser( User ).MobileNumber';
+                sysIdNo = '@ViewBag.CusManIDNo.IdentificationNumber';
+                break;
+            case 2:
+                $("#isDeceasedGrp").show();
+                break;
+            default:
+                $("#isDeceasedGrp").hide();
+        }
+
+
+        if (customerDetails.length > 0) {
+
+            var customerTypeElem = $("#ddlCustomerTypes");
+            var entityTypeElem = $("#ddlEntityId");
+            var identificationTypeElem = $("#ddlIdentificationTypes");
+
+            countryOfIssueDetails(customerDetails[0].identificationTypeId);
+            $("#ddlCustomerTypes").val(customerDetails[0].customerTypeId).change();
+            @*//readonly(customerTypeElem, true);*@
+
+            $("#ddlIdentificationTypes").val(customerDetails[0].identificationTypeId).change();
+            @*//readonly(identificationTypeElem, true);*@
+
+            $("#ddlCountryOfIssueTypeId").val(customerDetails[0].countryOfIssueTypeId).change();
+            $("#ddlTitleTypeId").val(customerDetails[0].titleTypeId).change();
+            $("#ddlIdentificationTypes").prop('disabled', true);
+            $("#txtIdNumber").prop('readonly', true);
+            $("#txtGenMale").prop('disabled', "disabled");
+           $("#txtGenFemale").prop('disabled', "disabled");
+            var idNumberGen = $('#txtIdNumber').val();
+            var genderCode = idNumberGen.substring(6, 10);
+            if (parseInt(genderCode) < 5000) {
+               // $("#txtGenMale").prop('Checked', false);
+                $("#txtGenFemale").prop('checked', true);
+
+            }
+            else {
+                $("#txtGenMale").prop('checked', true);
+               // $("#txtGenFemale").prop('Checked', false);
+            }
+            $("#email").val(customerDetails[0].emailAddress);
+
+            $("#chkIsDeceased").prop('checked', customerDetails[0].isDeceased);
+            isDeceasedDetails(customerDetails[0].isDeceased);
+
+            @*//$("#txtIdNumber").prop('readonly', true);*@
+
+            if (customerDetails[0].customerTypeId === '@CustomerTypeKeys.ManagingAgent' || customerDetails[0].customerTypeId === '@CustomerTypeKeys.Entity') {
+                $("#verifyEntitySubmitGrp").show();
+                $("#verifyEntityGrp").show();
+                readonly(customerTypeElem, true);
+                customerTypeElem.prop('title', 'Please contact the administrator to change customer type');
+
+                $("#lblFirstName").html("Contact Person First Name");
+
+                if (customerDetails[0].entityTypeId == 0) {
+                    readonly(entityTypeElem, false);
+                    $("#ddlEntityId").prop('required', true);
+                    $("#txtEntityName").prop('required', true);
+                    $("#customerDetailsGrp").hide();
+                }
+                else {
+                    $("#ddlEntityId").val(customerDetails[0].entityTypeId).change();
+                    readonly(entityTypeElem, true);
+
+                    $("#txtEntityRegNo").prop('readonly', true);
+                    $("#ddlEntityId").prop('required', true);
+                    $("#txtEntityName").prop('readonly', true);
+                    $("#txtTradingName").prop('readonly', true);
+                    $("#txtBranchName").prop('readonly', true);
+                }
+            }
+            else {
+                $("#verifyEntitySubmitGrp").hide();
+                $("#verifyEntityGrp").hide();
+                $("#entityGroup").hide();
+            }
+        }
+        else {
+            $("#txtFirstName").val(sysFirstName);
+            $("#txtLastName").val(sysLastName);
+            $("#txtCellNumber").val(sysMobileNumber);
+            $("#email").val(sysEmailAddress);
+            $("#txtIdNumber").val(sysIdNo);
+            $("#txtIdNumber").prop('readonly', true);
+            $("#ddlTitleTypeId option:eq(0)").prop("selected", true);
+            var idNumberGen = $('#txtIdNumber').val();
+            var genderCode = idNumberGen.substring(6, 10);
+            if (parseInt(genderCode) < 5000) {
+                $("#txtGenFemale").prop('checked', true);
+            }
+            else {
+                $("#txtGenMale").prop('checked', true);
+            }
+            $("#txtGenMale").prop('disabled', "disabled");
+            $("#txtGenFemale").prop('disabled', "disabled");
+            $("#ddlIdentificationTypes").prop('selectedIndex', "1");
+            $("#ddlIdentificationTypes").prop('disabled', "disabled");
+        }
+
+        $("#manageProfileForm").on('submit', function (evt) {
+            var cellNumber = $("#txtCellNumber");
+            var homeNumber = $("#txtHomeNumber");
+            //alert("Hi");
+            if ((cellNumber.val() == "" && homeNumber.val() == "") && $('input[name="IsDeceased"]:checked').length == 0)
+            {
+                evt.preventDefault();
+                bootbox.alert("Please enter at least one primary contact number. (Cellphone or Home)");
+                return false;
+            }
+
+            var identificationType = $("#ddlIdentificationTypes").val();
+            console.log(identificationType);
+
+            if (identificationType == '@IdentificationTypeKey.SouthAfricanID') {
+                @*// assume everything is correct and if it later turns out not to be, just set this to false*@
+                var correct = true;
+                var idNumber = $('#txtIdNumber').val();
+                HoldOn.close();
+                //alert("hi");
+                @*//Ref: http://www.sadev.co.za/content/what-south-african-id-number-made*@
+                if (idNumber.length != 13 || !isNumber(idNumber)) {
+                    correct = false;
+                }
+
+                @*// get first 6 digits as a valid date*@
+                var tempDate = new Date(idNumber.substring(0, 2), idNumber.substring(2, 4) - 1, idNumber.substring(4, 6));
+                var id_date = tempDate.getDate();
+                var id_month = tempDate.getMonth();
+                var id_year = tempDate.getFullYear();
+                var fullDate = id_date + "-" + (id_month + 1) + "-" + id_year;
+
+                if (!((tempDate.getYear() == idNumber.substring(0, 2)) && (id_month == idNumber.substring(2, 4) - 1) && (id_date == idNumber.substring(4, 6)))) {
+                    correct = false;
+                }
+
+                @*// get the gender*@
+                var genderCode = idNumber.substring(6, 10);
+                var gender = parseInt(genderCode) < 5000 ? "Female" : "Male";
+
+                @*// get country ID for citzenship*@
+                var citzenship = parseInt(idNumber.substring(10, 11)) == 0 ? "Yes" : "No";
+
+                @*// apply Luhn formula for check-digits*@
+                var tempTotal = 0;
+                var checkSum = 0;
+                var multiplier = 1;
+                for (var i = 0; i < 13; ++i) {
+                    tempTotal = parseInt(idNumber.charAt(i)) * multiplier;
+                    if (tempTotal > 9) {
+                        tempTotal = parseInt(tempTotal.toString().charAt(0)) + parseInt(tempTotal.toString().charAt(1));
+                    }
+                    checkSum = checkSum + tempTotal;
+                    multiplier = (multiplier % 2 == 0) ? 1 : 2;
+                }
+                if ((checkSum % 10) != 0) {
+                    correct = false;
+                };
+
+                @*// if no error found, hide the error message*@
+                if (!correct) {
+                    evt.preventDefault();
+                    bootbox.alert("Please enter valid RSA ID Number");
+                    return false;
+                }
+            }
+        });
+
+        function isNumber(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+        function entityTypeDetails(value, actionId) {
+            try {
+                var entityTypeElem = $("#ddlEntityId");
+
+                switch (value) {
+                    case "ct_entity": case "ct_managing_agent":
+                        $("#lblFirstName").html("Contact Person First Name");
+                        $("#entityGroup").show();
+                        $("#verifyEntityGrp").show();
+
+                        $("#txtEntityRegNo").prop('readonly', false);
+                        $("#txtEntityName").prop('readonly', true);
+                        $("#txtTradingName").prop('readonly', true);
+                        $("#txtBranchName").prop('readonly', true);
+
+                        $("#customerDetailsGrp").hide();
+                        $("#verifyEntitySubmitGrp").show();
+
+                        $("#txtEntityRegNo").prop('required', true);
+                        $("#ddlEntityId").prop('required', true);
+                        $("#txtEntityName").prop('required', true);
+                        $("#txtTradingName").prop('required', true);
+                        break;
+                    default:
+                        $("#entityGroup").hide();
+                        $("#verifyEntityGrp").hide();
+                        $("#verifyEntitySubmitGrp").hide();
+
+                        $("#lblFirstName").html("First Name");
+
+                        $("#customerDetailsGrp").show();
+
+                        readonly(entityTypeElem, false);
+
+                        $("#txtEntityRegNo").prop('required', false);
+                        $("#ddlEntityId").prop('required', false);
+                        $("#txtEntityName").prop('required', false);
+                        $("#txtTradingName").prop('required', false);
+
+                        $("#txtEntityRegNo").val("");
+                        $("#txtEntityName").val("");
+                        $("#txtTradingName").val("");
+                        break;
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+
+        function countryOfIssueDetails(value) {
+            try {
+                switch (value) {
+                    case "id_passport_no":
+                        $("#countryOfIssueType").show();
+                        $("#lblIdNumber").html("Passport No");
+                        $("#txtIdNumber").prop('maxlength', '30');
+                        $("#txtIdNumber").prop("pattern", "^[a-zA-Z0-9äöüÄÖÜ]*$");
+                        $("#txtIdNumber").prop('title', 'Passport Number. should contain characters or/and numbers only e.g. LES00598060');
+                        break;
+                    case "id_registration_no":
+                        $("#txtIdNumber").prop('maxlength', '40');
+                        $("#countryOfIssueType").hide();
+                        break;
+                    default:
+                        $("#lblIdNumber").html("RSA ID No");
+                        $("#countryOfIssueType").hide();
+                        $("#txtIdNumber").prop('maxlength', '13');
+                        $("#txtIdNumber").removeAttr("pattern");
+                        $("#txtIdNumber").removeAttr("title");
+
+                           break;
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+
+        function isDeceasedDetails(isChecked) {
+            if (isChecked) {
+                $("#email").prop('required', false);
+            }
+            else {
+                $("#email").prop('required', false);
+            }
+        }
+
+        $('#chkIsDeceased').change(function () {
+            isDeceasedDetails(this.checked);
+        });
+
+        $('#editRegNo').on('click', function () {
+            var entityTypeElem = $("#ddlEntityId");
+
+            $("#ddlEntityId option:eq(0)").prop("selected", true);
+            readonly(entityTypeElem, false);
+            $("#txtEntityRegNo").prop('readonly', false);
+            $("#txtEntityName").prop('readonly', true);
+            $("#txtTradingName").prop('readonly', true);
+            $("#txtBranchName").prop('readonly', true);
+            $("#txtEntityName").val("");
+            $("#txtTradingName").val("");
+            $("#txtBranchName").val("");
+
+            $("#customerDetailsGrp").hide();
+        });
+
+        //$('#ddlCustomerTypes').change(function () {
+        //    var value = $(this).val();
+        //    var i = null;
+
+        //    entityTypeDetails(value);
+        //});
+
+        $('#ddlIdentificationTypes').change(function () {
+            var value = $(this).val();
+            var i = null;
+
+            countryOfIssueDetails(value);
+        });
+
+        $("#isSameAddressChk").change(function () {
+            var isChecked = $(this).is(':checked');
+
+            if (isChecked) {
+                $("#PostalAddress1").val($("#PhysicalAddress1").val());
+                $("#PostalAddress2").val($("#PhysicalAddress2").val());
+                $("#PhysicalAddress3Id").val($("#PhysicalAddress3").val());
+                $("#PostalAddress4").val($("#PhysicalAddress4").val());
+                $("#PostalAddress5").val($("#PhysicalAddress5").val());
+                $("#PostalAddressCode").val($("#PhysicalAddressCode").val());
+
+                $("#PhysicalAddress3Id").val($("#PhysicalAddress3").val());
+            }
+            else {
+                $("#PostalAddress1").val("");
+                $("#PostalAddress2").val("");
+                $("#PhysicalAddress3Id").val("");
+                $("#PostalAddress4").val("");
+                $("#PostalAddress5").val("");
+                $("#PostalAddressCode").val("");
+            }
+        });
+
+        $("#verifyEntity").on('click', function (evt) {
+            var entityRegNo = $('#txtEntityRegNo').val();
+            var custType = $('#ddlCustomerTypes').val();
+            var entityTypeElem = $("#ddlEntityId");
+
+            if (entityRegNo == "") {
+                $("#verifyResponseText").html("Please enter firm practice number");
+                $("#verifyEntityModal").modal('show');
+            }
+            else if (entityTypeElem.val() == "") {
+                $("#verifyResponseText").html("Please select firm type");
+                $("#verifyEntityModal").modal('show');
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action( "VerifyEntity", "Profile" )',
+                    data: { custType: custType, entityRegNo: entityRegNo }
+                }).success(function (data) {
+                    $("#verifyResponseText").html("");
+
+                    $("#txtTradingName").val("");
+                    $("#txtBranchName").val("");
+                    $("#txtEntityRegNo").prop('readonly', true);
+
+                    readonly(entityTypeElem, false);
+
+                    if (data != false) {
+                        $("#txtEntityName").val("");
+                        $("#txtEntityRegNo").val(data.EntityRegistrationNumber);
+                        $("#txtEntityName").val(data.EntityName);
+                        $("#txtTradingName").val(data.TradingName);
+                        $("#txtBranchName").val(data.BranchOrSectionName);
+
+                        if (custType === '@CustomerTypeKeys.Entity') {
+                            @*//Entity found - Alert Customer not to duplicate entity*@
+
+                            $("#verifyResponseText").html("Firm exists, please create your profile as a Conveyancing Attorney. Thereafter verify using entity's registration number");
+                            readonly(entityTypeElem, true);
+                        }
+                        else {
+                            @*//Entity found - Save to Entity Agents*@
+
+                            $("#verifyResponseText").html("Firm exists, details will be pulled from exisiting firm");
+                            $("#customerDetailsGrp").show();
+
+                            $("#ddlEntityId").val(data.EntityTypeId).change();
+                            readonly(entityTypeElem, true);
+                            $("#txtEntityName").prop('readonly', true);
+                            $("#txtTradingName").prop('readonly', true);
+                            $("#txtBranchName").prop('readonly', true);
+
+                            //$("#hiddenEntityId").val(data.Id);
+                        }
+                    }
+                    else {
+                        @*//Entity not found*@
+                        @*//If entity - Save to Entity*@
+                        @*//If agent - Save to Entity and Entity Agent*@
+
+                        readonly(entityTypeElem, true);
+                        $("#verifyResponseText").html("Firm not found, new firm profile will be created.");
+                        $("#customerDetailsGrp").show();
+                        $("#txtEntityName").prop('readonly', false);
+                        $("#txtTradingName").prop('readonly', false);
+                        $("#txtBranchName").prop('readonly', false);
+                    }
+                });
+
+                $("#verifyEntityModal").modal('show');
+            }
+        });
+
+        $("#processResponseBtn").click(function (evt) {
+            window.location = '@Html.Raw( ViewBag.ReturnUrl )';
+        });
+
+        $("#profileResponseModal").on('hidden.bs.modal', function () {
+            window.location = '@Html.Raw( ViewBag.ReturnUrl )';
+        });
+    });
+
+    function validateCaptcha(response) {
+        if (response.length == 0) {
+            $("#btnSave").prop('disabled', true);
+            $("#ddlIdentificationTypes").prop('disabled', true);
+        }
+        else
+        {
+        $("#btnSave").prop('disabled', false);
+            $("#ddlIdentificationTypes").prop('disabled', false);
+            $("#txtGenMale").prop('disabled', false);
+            $("#txtGenFemale").prop('disabled', false);
+    }
+    }
+
+    function ValidateAttorneyCode(AttorneyCode) {
+        //searchAttorneyCode();
+        debugger;
+        if (AttorneyCode.length < 6) {
+            $('#txtAttorneyCode').val('');
+            $("#verifyAttroneyCodeModal").modal('show');
+            $("#verifyAttorneyCodeText").html("Please enter a valid 6 Attorney Code");
+            return false;
+        }
+        else {
+            //searchAttorneyCode();
+            $.getJSON("../Capture/GetAttorneyDetails?id="
+                + AttorneyCode,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+
+
+                            if (result == "Duplicate") {
+                                $('#txtAttorneyCode').val('');
+                                $("#verifyAttroneyCodeModal").modal('show');
+                                $("#verifyAttorneyCodeText").html("Please enter a unique attorney code");
+                            }
+
+                            else {
+
+
+                                $.getJSON("../Profile/GetAttorneyDetails?id="
+                                    + AttorneyCode,
+
+
+                                    function (result) {
+                                        if (result != null) {
+                                            try {
+                                                if (result == "Error")
+                                                {
+                                                    $('#txtAttorneyCode').val('');
+                                                    $("#verifyAttroneyCodeModal").modal('show');
+                                                    $("#verifyAttorneyCodeText").html("Attorney Code Not Found");
+
+                                                }
+                                                else if (result.Status == "Attorney does not exists") {
+                                                    //alert(result.Status);
+                                                    $('#txtAttorneyCode').val('');
+                                                    $("#verifyAttroneyCodeModal").modal('show');
+                                                    $("#verifyAttorneyCodeText").html("Attorney Code Not Found");
+
+                                                }
+                                                else{
+                                                    $('#txtEntityName').val(result.AttorneyName);
+
+                                                    $('#PostalAddress4').val(result.POBox);
+
+                                                    $('#PhysicalAddress4').val(result.StreetName);
+
+                                                    $('#PhysicalAddress5').val(result.Suburb);
+                                                    $('#PostalAddress5').val(result.Suburb);
+                                                    $('#PostalAddressCode').val(result.Postcode);
+                                                    $('#PhysicalAddressCode').val(result.Postcode);
+
+                                                    $('#Customer_WorkPhoneNumber').val(result.WorkNumber);
+                                                    $("#verifyEntity").prop('disabled', false);
+                                                    $("#editRegNo").prop('disabled', false);
+
+                                                }
+
+
+
+
+
+
+
+                                            }
+                                            catch (cat) { }
+                                        }
+                                        else {
+                                            $("#txtAttorneyCode").modal('show');
+                                            $("#verifyAttorneyCodeText").html("Error, Please contact system administrator!");
+                                        }
+                                    });
+
+
+                                //$("#verifyEntity").prop('disabled', false);
+                                //$("#editRegNo").prop('disabled', false);
+                            }
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+                        //$('#txtEntityName').val(result.AttorneyName);
+
+                        //$('#PostalAddress4').val(result.POBox);
+
+                        //$('#PhysicalAddress4').val(result.StreetName);
+
+                        //$('#PhysicalAddress5').val(result.Suburb);
+                        //$('#PostalAddress5').val(result.Suburb);
+                        //$('#PostalAddressCode').val(result.Postcode);
+                        //$('#PhysicalAddressCode').val(result.Postcode);
+
+                        //$('#Customer_WorkPhoneNumber').val(result.WorkNumber);
+                        //$("#verifyEntity").prop('disabled', false);
+                        //$("#editRegNo").prop('disabled', false);
+                        $("#txtAttorneyCode").modal('show');
+                        $("#verifyAttorneyCodeText").html("Error, Please contact system administrator!");
+                    }
+                });
+        }
+
+    }
+    function searchAttorneyCode() {
+        var AttorneyCode = document.getElementById('txtAttorneyCode').value;
+        $.getJSON("/Capture/GetAttorneyDetails?id="
+            + AttorneyCode,
+
+            function (result) {
+                if (result != "Error") {
+                    try {
+                        if (result.length == 0) {
+                            $("#verifyEntityModal").modal('show');
+                            $("#verifyResponseText").html("No Results found!");
+                            $('#txtAttorneyCode').val('');
+                            $("#verifyEntity").prop('disabled', true);
+                            $("#editRegNo").prop('disabled', true);
+                        }
+
+                        else {
+                            $("#verifyEntity").prop('disabled', false);
+                            $("#editRegNo").prop('disabled', false);
+                        }
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    $("#verifyEntityModal").modal('show');
+                    $("#verifyResponseText").html("No Results found!");
+                }
+            });
+    }
+
+</script>
+<script>
+    setInputFilter(document.getElementById("txtFirstName"), function (value) {
+        return /^([a-zA-Z _-]*)$/.test(value);
+    });
+    setInputFilter(document.getElementById("txtLastName"), function (value) {
+        return /^([a-zA-Z _-]*)$/.test(value);
+    });
+    setInputFilter(document.getElementById("txtCellNumber"), function (value) {
+        return /^\d*$/.test(value);
+    });
+    setInputFilter(document.getElementById("txtHomeNumber"), function (value) {
+        return /^\d*$/.test(value);
+    });
+    setInputFilter(document.getElementById("Customer_WorkPhoneNumber"), function (value) {
+        return /^\d*$/.test(value);
+    }); setInputFilter(document.getElementById("txtEntityRegNo"), function (value) {
+        return /^[a-zA-Z0-9]*$/.test(value);
+    });
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+
+    function blockSpecialChar(e) {
+        var k;
+        document.all ? k = e.keyCode : k = e.which;
+        return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+    }
+</script>
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryvalidate")
+    }*@

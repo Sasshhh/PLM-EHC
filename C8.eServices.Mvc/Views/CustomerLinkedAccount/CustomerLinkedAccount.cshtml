@@ -1,0 +1,740 @@
+@using System.Collections.Specialized
+@model C8.eServices.Mvc.ViewModels.CustomerLinkedAccountViewModel
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Keys
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var db = new eServicesDbContext();
+}
+
+@using (Html.BeginForm("Index", "CustomerLinkedAccount", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.CustomerId)
+    @*@Html.HiddenFor(model => model.AgentId)
+        @Html.HiddenFor(model => model.CustomerEmail)
+        @Html.HiddenFor(model => model.LinkedEmail.EmailAddress, new { Value = @Model.CustomerEmail })*@
+    @Html.HiddenFor(model => model.isRms, new { @id = "hiddenIsRms" })
+
+    <h4>Link Municipal Account</h4>
+    <hr />
+
+    if (TempData["Success"] != null)
+    {
+        if (TempData["Success"].Equals(true))
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Success!</strong> @Html.Raw(ViewBag.CompletedAction)
+                @if (ViewBag.AccountStatus == StatusKeys.DocumentPending)
+                {
+                    <span> Please</span>
+                    @Html.EncodedActionLink(" Upload documentation", "EditLinkedAccount", "CustomerLinkedAccount", new
+                    {
+                        id = @ViewBag.LinkedAccountId
+                    }, null)
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Failed - </strong> @ViewBag.CompletedAction
+            </div>
+        }
+    }
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>Select <strong> Associated Accounts </strong> to view accounts currently associated to your profile/ID Number and link them</p>
+                    <p>1.  A list of accounts associated with your profile/ID Number will be displayed in the <strong>Account Number</strong> drop down list. Select the account you wish to link</p>
+                    <p>2.  Select the type of email recipient ie Emails or View only. from the <strong>Recipient Type</strong> dropdown list  </p>
+                    <p>3.  If you selected Emails the <strong>Email Address</strong> field will allow you to add multiple email recipients by clicking the add email button.<br />Please note activation emails will only be sent out to valid email addresses.</p>
+                    <p>4.  Click <strong>Submit</strong> when done</p>
+                    <br />
+                    <br />
+                    <p>Select <strong>Unassociated Accounts</strong> to link accounts that are not associated with your profile/ID Number</p>
+                    <p>1.  Enter the account number of the account you wish to link in the <strong>Account Number</strong> field and click the <strong>Verify Account</strong> button
+                    <p>2.  If the account number is valid a green tick will appear next to the <strong>Account Number</strong> textbox. If a red cross appears return to step 1.</p>
+                    <p>3.  Select the type of email recipient ie Emails or View only. from the <strong>Recipient Type</strong> dropdown list  </p>
+                    <p>4.  If you selected Emails the <strong>Email Address</strong> field will allow you to add multiple email recipients by clicking the add email button.<br />Please note activation emails will only be sent out to valid email addresses.</p>
+                    <p>5.  Once all fields has been entered, click <strong>Submit</strong>. A response bar will appear, indicating if the linked account was added successfully or not.</p>
+                    <p>6.  Once linked account has been successfully saved, A copy of your ID document and letter of authority will need to be uploaded. Do this by clicking the <strong>"Upload documentation"</strong> link.</p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group" id="currentLinkedAccounts">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseCurrentLinkedAccounts">
+                        <span>Current Linked Municipal Accounts</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseCurrentLinkedAccounts" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table table-striped" id="tableLinkedAccounts"
+                           data-toggle="table"
+                           data-height="350"
+                           data-search="true"
+                           data-pagination="true"
+                           data-page-list="[10,25, 50, 100, ALL]">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">
+                                    Municipal Account Number
+                                </th>
+                                <th data-sortable="true">
+                                    Status
+                                </th>
+                                <th data-sortable="true">
+                                    Date Created
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewBag.CurrentAccounts)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.Account.Description
+                                    </td>
+                                    <td>
+                                        @item.Status.Name
+                                    </td>
+                                    <td>
+                                        @item.CreatedDateTime
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group" id="newLinkedAccount">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                        <span>Link New Municipal Account</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+                <div class="panel-body">
+                   
+                    <div class="alert alert-warning" id="associatedAlert1">
+                        <h5 style="color: black;">If Municipal account number is linked to the spouse ID Number, this profile will be activated by the Siyakhokha Administrator within an hour once verification is completed. Please note no documentation is required from the property owner.This account will need to be linked using the Unassociated Option.</h5>
+                       <br />
+                        <h6>If your municipal accounts are not listed under the Associated municipal account option.</h6>
+                        <h6>Please use the Unassociated option to link those accounts.</h6>
+                    </div>
+
+                    <div class="alert alert-warning" id="associatedAlert">
+                        @ViewBag.AccountsMessage
+                    </div>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                @{
+                                    var linkedAccountTypes = db.LinkedAccountTypes.ToList();
+
+                                    foreach (var accountType in linkedAccountTypes)
+                                    {
+                                        <label>@Html.RadioButtonFor(la => la.LinkedAccountType, accountType.Key) &nbsp; @accountType.Name</label><br />
+                                    }
+                                }
+                            </div>
+                            @*<label title="View accounts currently associated to your profile/ID Number and link them">@Html.RadioButton("accountType", "Associated") &nbsp; Associated Account</label><br />
+                <label title="Link accounts that are not associated with your profile/ID Number">@Html.RadioButton("accountType", "Unassociated") &nbsp; Unassociated Account</label>*@
+                        </div>
+
+                        <hr />
+
+                        <div id="mainGrp" style="display:none;">
+                            <div id="associatedAccountGrp">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.AccountNumber, "Municipal Account Number", htmlAttributes: new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        @*@Html.DropDownListFor(model => model.AccountNumber, (SelectList)ViewBag.Accounts,"--Select Account--", new {@class = "form-control", @id = "ddlAccountId" })*@
+                                        @Html.DropDownList("Accounts", null, "--Select Account--", new { @class = "form-control", @id = "ddlAccountId" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="unassociatedAccountGrp">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.AccountNumber, "Municipal Account Number", htmlAttributes: new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        @Html.TextBox("CustomerAccNum", null, htmlAttributes: new { @class = "form-control", @id = "custAccountNum", maxlength = 10 })
+                                        @*@Html.ValidationMessageFor(model => model.AccountNumber, "", new { @class = "text-danger" })*@
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div id="statusIcon">
+                                            <span id="statusTrue" class="glyphicon glyphicon-ok" title="Account number valid" style="color:green;display:none;"></span>
+                                            <span id="statusFalse" class="glyphicon glyphicon-remove" title="Account number invalid" style="color:red;display:none;"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <input type="button" value="Verify" id="verifyAccount" class="btn btn-primary" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.Label("Account Holder", new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        @Html.TextBox("AccountHolder", null, htmlAttributes: new { @class = "form-control", @id = "txtAccountHolder", @readonly = true })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display:none;">
+                                @Html.Label("Account Type", new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("AccountType", null, htmlAttributes: new { @class = "form-control", @id = "txtAccountType", @readonly = true })
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="form-group">
+                                @Html.Label("Notification Type", new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.DropDownListFor(model => model.LinkedAccount.RecipientTypeId, (SelectList)ViewBag.RecipientTypes, "Select type ...", htmlAttributes: new { @class = "form-control", id = "RecipientDdl", @required = true })
+                                    @*@Html.ValidationMessageFor(model => model.LinkedEmail.RecipientTypeId)*@
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="primaryEmailGrp">
+                                @Html.Label("Email Address", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("PrimaryEmail", null, new { @class = "form-control", @id = "txtPrimaryEmail" })
+                                    @*@Html.ValidationMessageFor(model => model.LinkedEmail.EmailAddress, "", new { @class = "text-danger" })*@
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="secondaryEmailGrp" style="display:none;">
+                                @Html.Label("Email Addresses", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("SecondaryEmails", null, new { @class = "form-control", @id = "txtSecondaryEmail" })
+                                </div>
+                                <div class="col-md-3"><input id="Add" type="button" value="Add Email" class="btn btn-primary btn-sm" /></div>
+                            </div>
+
+                            <div class="form-group" id="mobileNumberGrp" style="display:none;">
+                                @Html.Label("Mobile Numbers", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    <div class="phone-list">
+
+                                        <div class="input-group phone-input">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="type-text">Type</span> <span class="caret"></span></button>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    @*<li><a class="changeType" href="javascript:;" data-type-value="phone">Phone</a></li>
+                                        <li><a class="changeType" href="javascript:;" data-type-value="fax">Fax</a></li>*@
+                                                    <li><a class="changeType" href="javascript:;" data-type-value="mobile">Mobile</a></li>
+                                                </ul>
+                                            </span>
+                                            <input type="hidden" name="phone[1][type]" class="type-input" value="" />
+                                            <input type="text" name="phone[1][number]" id="MobileNumber" class="form-control" placeholder="0888888888" />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-success btn-sm btn-add-phone"><span class="glyphicon glyphicon-plus"></span> Add More</button>
+                            </div>
+
+                            @*<div class="form-group" id="securityQuestionGrp">
+                    <div class="col-md-12">
+                        <hr />
+                        <h5>Security Questions:</h5>
+                    </div>
+                </div>
+
+                <div class="form-group" id="securityQuestionGrp01">
+                    <div class="col-md-6">
+                        @Html.Label("Please enter an associated meter no for the account?", htmlAttributes: new { @class = "control-label", @for = "txtSecurityQuestion01" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBox("SecurityQuestion01", null, new { @class = "form-control", @id = "txtSecurityQuestion01" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="securityQuestionGrp02">
+                    <div class="col-md-6">
+                        @Html.Label("Please enter the date when payment was last made for the account?", htmlAttributes: new { @class = "control-label", @for = "txtSecurityQuestion02" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBox("SecurityQuestion02", null, new { @class = "form-control", @id = "txtSecurityQuestion02" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="securityQuestionGrp04">
+                    <div class="col-md-6">
+                        @Html.Label("Please enter the name addressed as per this account bill?", htmlAttributes: new { @class = "control-label", @for = "txtSecurityQuestion04" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBox("SecurityQuestion03", null, new { @class = "form-control", @id = "txtSecurityQuestion04" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="securityQuestionGrp05">
+                    <div class="col-md-6">
+                        @Html.Label("Please enter the last amount paid for this account?", htmlAttributes: new { @class = "control-label", @for = "txtSecurityQuestion03" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBox("SecurityQuestion04", null, new { @class = "form-control", @id = "txtSecurityQuestion03" })
+                    </div>
+                </div>*@
+
+                            <br />
+
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input id="submitBtn" disabled="disabled" type="submit" value="Submit" class="btn btn-primary" />
+                                    <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.EncodedActionLink("Back", "Index2", "Profile", new { agentId = Model.AgentId, customerId = (Model.AgentId != 0) ? Model.AgentCustomerId : Model.CustomerId }, new { @class = "btn btn-primary" })
+</div>
+
+<div id="ErrorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="RequestModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="RQSmodalTitleText">Request Municipal Account Access</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="RQSTmodalContentText">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @Html.Label("Municipal Account", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.Editor("MunicipalAccount", new { htmlAttributes = new { @class = "form-control", @id = "MunicipalAccount", @readonly = true } })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-2">
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Reason for Request", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextArea("Comment", new { @class = "form-control", @id = "Comment" })
+                                </div>
+                            </div>
+                            
+                        </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RequestAccount">Send Request</button>
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    setInputFilter(document.getElementById("custAccountNum"), function (value) {
+        return /^\d*$/.test(value);
+    });
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+
+    function blockSpecialChar(e) {
+        var k;
+        document.all ? k = e.keyCode : k = e.which;
+        return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+    }
+</script>
+<style>
+
+    .phone-input {
+        margin-bottom: 8px;
+    }
+</style>
+
+<script type="text/javascript">
+    $(function () {
+        $("#txtSecondaryEmail").multiple_emails();
+
+        $("#txtSecondaryEmail").change(function () {
+            validateEmails();
+        });
+
+        $("input[name=LinkedAccountType]:radio").change(function () {
+            if ($("input:radio[name='LinkedAccountType']:checked").val() == '@LinkedAccountTypeKeys.Associated') {
+                $("#associatedAlert").show();
+
+                $("#associatedAccountGrp").show();
+                $("#unassociatedAccountGrp").hide();
+
+                $("#securityQuestionGrp").hide();
+                $("#securityQuestionGrp01").hide();
+                $("#securityQuestionGrp02").hide();
+                $("#securityQuestionGrp03").hide();
+                $("#securityQuestionGrp04").hide();
+                $("#securityQuestionGrp05").hide();
+
+                $("#ddlAccountId").prop('required', true);
+                $("#custAccountNum").prop('required', false);
+            }
+            else {
+                $("#associatedAlert").hide();
+                $("#unassociatedAccountGrp").show();
+                $("#associatedAccountGrp").hide();
+
+                $("#custAccountNum").prop('required', true);
+                $("#ddlAccountId").prop('required', false);
+
+                $("#securityQuestionGrp").show();
+                $("#securityQuestionGrp01").show();
+                $("#securityQuestionGrp02").show();
+                $("#securityQuestionGrp03").show();
+                $("#securityQuestionGrp04").show();
+                $("#securityQuestionGrp05").show();
+            }
+
+            resetControls();
+            $("#mainGrp").show();
+        });
+
+        $("#ddlAccountId").change(function () {
+            $("#submitBtn").prop('disabled', false);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("VerifyAccount", "CustomerLinkedAccount")',
+                data: { accountNo: $(this).val() }
+            }).success(function (data) {
+                $("#txtAccountType").val(data.accountType);
+
+                if (data.accountType == '@BillingAccountTypeKeys.RMS')
+                    $("#hiddenIsRms").val(true);
+            });
+        });
+
+        $('#RecipientDdl').change(function () {
+            var selected = $('#RecipientDdl option:selected');
+            $("#txtPrimaryEmail").val("");
+
+            @*//use keys later
+            //if (selected.val() == "rt_to_primary") {*@
+            switch (selected.val()) {
+                case "1":
+                    $("#txtPrimaryEmail").val('@Model.CustomerEmail');
+                    $("#txtPrimaryEmail").prop("readonly", true);
+                    $("#secondaryEmailGrp").hide();
+                    $("#mobileNumberGrp").hide();
+                    $("#primaryEmailGrp").show();
+                    break;
+                case "9":
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").hide();
+                    $("#mobileNumberGrp").hide();
+                    $("#submitBtn").prop('disabled', false);
+                    break;
+                case "10":
+                    // JK.20190622a - TODO: Add validation for mobile here.
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").hide();
+                    $("#mobileNumberGrp").show();
+                    $("#submitBtn").prop('disabled', false);
+                    break;
+                default:
+                    validateEmails();
+                    $("#primaryEmailGrp").hide();
+                    $("#mobileNumberGrp").hide();
+                    $("#secondaryEmailGrp").show();
+                    $("#txtPrimaryEmail").prop("readonly", false);
+                    break;
+            }
+        });
+
+        $('#verifyAccount').on('click', function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("VerifyAccount", "CustomerLinkedAccount")',
+                data: { accountNo: $('#custAccountNum').val() }
+            }).success(function (data) {
+                $("#custAccountNum").attr('readonly', true);
+
+                if (data.isValid) {
+                    $("#statusTrue").show();
+                    $("#statusFalse").hide();
+
+                    $("#txtAccountType").val(data.accountType);
+                    $("#txtAccountHolder").val(data.accountHolder);
+
+                    if (data.accountType == '@BillingAccountTypeKeys.RMS')
+                        $("#hiddenIsRms").val(true);
+
+                    $("#submitBtn").prop('disabled', false);
+
+                }
+                       else if (data.taken1) {
+                    var custAccNo = "No Municipal Account entered";
+                    if ($("input:radio[name='LinkedAccountType']:checked").val() == '@LinkedAccountTypeKeys.Associated') {
+                        custAccNo = $('#ddlAccountId').val();
+            }
+                    else {
+                        custAccNo = $("#custAccountNum").val();
+               
+            }
+                    var span = document.createElement("span");
+                        span.setAttribute("id", "spanContent");
+                        span.innerHTML = 'Account Number Already Linked to your Profile!';
+
+                    $("#modalTitleText").html("Account Number Linked");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrorModal").modal("show"); 
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+                }
+                else if (data.taken) {
+                    var custAccNo = "No Municipal Account entered";
+                    if ($("input:radio[name='LinkedAccountType']:checked").val() == '@LinkedAccountTypeKeys.Associated') {
+                        custAccNo = $('#ddlAccountId').val();
+            }
+                    else {
+                        custAccNo = $("#custAccountNum").val();
+               
+            }
+                    var span = document.createElement("span");
+                        span.setAttribute("id", "spanContent");
+                        span.innerHTML = 'Account Number Already Linked to Another User!<br/> <br/>Would you like to send a request to access this Municipal Account: <b>' + custAccNo + '</b>. <br><br><button type="button" class="btn btn-primary" data-dismiss="modal" id="SendRequest" onclick="sendRQST(' + custAccNo+')" >Request Access</button><br>';
+
+                    $("#modalTitleText").html("Account Number Linked");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrorModal").modal("show"); 
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+                }
+
+                else {
+                   
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Invalid Account Number!");
+                    $("#ErrorModal").modal("show"); 
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+                }
+
+            });
+        });
+            $('#RequestAccount').on('click', function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("RequestAccountAccess", "Comments")',
+                data: { accountNo: $('#MunicipalAccount').val(), Comment: $('#Comment').val() }
+            }).success(function (data) {
+                
+                $('#Comment').val("");
+                if (data.isValid) {
+                    var accNo =$('#MunicipalAccount').val();
+                    $("#RequestModal").modal("hide");
+                    var span = document.createElement("span");
+                    span.setAttribute("id", "spanContent");
+                    span.innerHTML = '<br>Your request to gain access to the Municipal Account <b>'+accNo+'</b> <br>has been sent to the account holder for approval.<br>';
+
+                    $("#modalTitleText").html("Request Sent Successfully");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrorModal").modal("show");
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+                    $('#MunicipalAccount').val("");
+                }
+                else if (data.isRequested)
+                       {
+
+                    $("#modalTitleText").html("Request Already Exists");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("You already have an active request pending on this account.");
+                    $("#ErrorModal").modal("show");
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+
+                }
+                    else {
+
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Request failed to send! Please try again later. ");
+                    $("#ErrorModal").modal("show");
+                    $("#statusFalse").show();
+                    $("#statusTrue").hide();
+
+                    $("#submitBtn").prop('disabled', true);
+               
+            }
+                   
+                
+            });
+        });
+        $('#btnReset').on('click', function () {
+            $("#submitBtn").prop('disabled', true);
+            $("#custAccountNum").attr('readonly', false);
+            resetControls();
+        });
+
+        function resetControls() {
+            $("#ddlAccountId option:eq(0)").prop("selected", true);
+            $('input[name="correctAnswer"]').prop('checked', false);
+            $("#custAccountNum").val("");
+            $("#RecipientDdl option:eq(0)").prop("selected", true);
+            $("#txtPrimaryEmail").val("");
+            $("#txtPrimaryEmail").prop("readonly", false);
+            $("#chkEmailBill").prop('checked', false);
+            $("#submitBtn").prop('disabled', true);
+            $("#statusTrue").hide();
+            $("#statusFalse").hide();
+            $("#txtAccountType").val("");
+            $("#txtAccountHolder").val("");
+        }
+
+        function validateEmails() {
+            var value = $("#txtSecondaryEmail").val();
+
+            if (value === "[]" || value === "") {
+                $("#submitBtn").prop('disabled', true);
+            }
+            else {
+                $("#submitBtn").prop('disabled', false);
+            }
+        }
+
+
+    });
+
+    $(function () {
+
+        $(document.body).on('click', '.changeType', function () {
+            $(this).closest('.phone-input').find('.type-text').text($(this).text());
+            $(this).closest('.phone-input').find('.type-input').val($(this).data('type-value'));
+        });
+
+        $(document.body).on('click', '.btn-remove-phone', function () {
+            $(this).closest('.phone-input').remove();
+        });
+
+
+        $('.btn-add-phone').click(function () {
+
+            var index = $('.phone-input').length + 1;
+
+            $('.phone-list').append('' +
+                '<div class="input-group phone-input">' +
+                '<span class="input-group-btn">' +
+                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="type-text">Type</span> <span class="caret"></span></button>' +
+                '<ul class="dropdown-menu" role="menu">' +
+                //'<li><a class="changeType" href="javascript:;" data-type-value="phone">Phone</a></li>' +
+                //'<li><a class="changeType" href="javascript:;" data-type-value="fax">Fax</a></li>' +
+                '<li><a class="changeType" href="javascript:;" data-type-value="mobile">Mobile</a></li>' +
+                '</ul>' +
+                '</span>' +
+                '<input type="text" name="phone[' + index + '][number]" id="phone[' + index + '][number]" class="form-control" placeholder="0888888888" />' +
+                '<input type="hidden" name="phone[' + index + '][type]" class="type-input" value="" />' +
+                '<span class="input-group-btn">' +
+                '<button class="btn btn-danger btn-remove-phone" type="button"><span class="glyphicon glyphicon-remove"></span></button>' +
+                '</span>' +
+                '</div>'
+            );
+
+        });
+
+    });
+    function sendRQST(id) {
+        //debugger;
+        $("#ErrorModal").modal("hide");
+        $("#RequestModal").modal("show");
+        
+        $("#MunicipalAccount").val(id);
+    }
+</script>

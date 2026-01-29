@@ -1,0 +1,263 @@
+﻿@model C8.eServices.Mvc.Models.PropertyLeaseApplication
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Materia - Admin Template">
+    <meta name="keywords" content="materia, webapp, admin, dashboard, template, ui">
+    <meta name="author" content="solutionportal">
+    <style>
+        .buttonIcon {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 7px 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .tablecss {
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        th {
+            /* font-size: 12px;
+            font-weight: 600;*/
+            background-color: #1e8449;
+            color: white;
+        }
+
+        .site-head {
+            background-color: #1e8449;
+        }
+
+        .main-container .nav-wrap .nav-head {
+            background: #1e8449;
+        }
+
+        .btn {
+            color: #1e8449;
+            border-color: #1e8449;
+            background-color: white;
+        }
+
+            .btn:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .btn12 {
+            color: #af7b0b;
+            border-color: #af7b0b;
+            background-color: white;
+        }
+
+            .btn12:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+            color: #ffffff;
+            background-color: grey;
+            border-color: #ffffff;
+        }
+
+        .BoToDoHide {
+            display: none;
+        }
+
+        .button1 {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .step-app > .step-steps > li.active a {
+            background-color: darkgrey !important;
+            color: #fff;
+        }
+
+
+        .sk-cube-grid {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 10px;
+            background-color: grey;
+        }
+
+            .sk-cube-grid .sk-cube-child {
+                width: 33%;
+                height: 33%;
+                background-color: white;
+                float: left;
+                -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+                animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out
+            }
+
+            .sk-cube-grid .sk-cube-grid9 {
+                -webkit-animation-delay: .2s;
+                animation-delay: .2s
+            }
+
+
+        .modal-dialog {
+            position: relative;
+            display: table; /* This is important */
+            overflow-y: auto;
+            overflow-x: auto;
+            width: auto;
+            min-width: 300px;
+        }
+        .page-content{
+
+        }
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 1cm auto;
+            border: 1px #D3D3D3 solid;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .table-row{
+            padding-bottom:190px;
+        }
+        
+    </style>
+</head>
+<body id="app" class="app off-canvas">
+    <div class="main-container clearfix" id="page">
+        <div class="page-content">
+            <div class="page">
+                <div>
+                    <div class="table-row">
+
+                        <table border="1" cellspacing="0" cellpadding="0" align="right">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" width="292">
+                                        <p><img src="~/Content/Images/Ekuruhleni_img.jpg" /></p>
+                                        <p><strong>HUMAN SETTLEMENTS DEPARTMENT SOUTH:</strong></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="132">
+                                        <p><strong>Works Order Number</strong></p>
+                                    </td>
+                                    <td width="160">
+                                        <p>E7</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    <p>
+                        <strong>
+                            Quotation number:  e1   Complaint Registration Date:  e2 <br />
+                            Complaint receiving official: e3 Tel: e4<br />
+                            Status of rental account:   e23<br />
+                            Tenant's Name and Surname: e5 Tenant's contact number: e6<br />
+                            Physical Address of Complaint: e19 &nbsp;Unit/Room No: e18<br />
+                            Nature/Description of complaint<u>: </u>e7
+                        </strong>
+                    </p>
+                    <p>
+                        <strong style="color:red; font-style:italic; font-size:smaller;">(Indicate category by marking X) </strong>
+                        <br />
+                        <strong>Plumbing: <input type="checkbox" alt="" width="30" height="28"></strong>
+                        <strong>Electrical: <input type="checkbox" alt="" width="30" height="28"></strong>
+                        <strong>Grass cutting: <input type="checkbox" alt="" width="30" height="28"></strong>
+                        <strong>Cleaning:<input type="checkbox" alt="" width="30" height="28"></strong>
+                        <strong>Carpentry:<input type="checkbox" alt="" width="30" height="28"></strong>
+                        <strong> Installations:<input type="checkbox" alt="" width="30" height="28"></strong>
+                    </p>
+
+
+
+                    <p>
+                        <strong>
+                            <em>
+                                In response to the complaint received, a site inspection was conducted
+                                <strong style="color:red; font-style:italic;">(see before pictures)</strong> and such a complaint confirmed by:
+                            </em>
+                        </strong>
+                    </p>
+                    <p><strong>(CCC HLO) Name and Surname: e8  Tel: e9 </strong> </p>
+                    <br />
+
+                    <p style="color:black; height:2px; width:100%;"><hr /></p>
+                    <br />
+
+                    <p><strong><u>COMPLETION OF WORK</u></strong></p>
+                    <p style="color:red;"><em>PLEASE TAKE NOTE THAT BY SIGNING THIS FORM YOU TAKE RESPONSIBILITY THAT THE WORK HAS BEEN EXECUTED SATISFACTORY, COMPLY WITH SPECIFICATIONS AND QUALITY AND THAT THE INVOICE CAN BE SEND THROUGH TO FINANCE FOR PAYMENT.</em></p>
+                    <p><strong>e20.       In my capacity as     e21    &nbsp;From the       e22</strong></p>
+                    <p><strong>CCC, am satisfied that the above work was adequately completed in accordance with the attached quote </strong><strong style="color: red; font-style: italic;">(see after pictures attached)</strong></p>
+                    <p><strong>and can be paid for on the presentation of the relevant invoice.</strong></p>
+                    <br />
+                    <table border="0" cellspacing="0" cellpadding="0" align="left" width="100%" style="padding-bottom:30px; text-align:center;">
+                        <tr>
+                            <td><u>e10</u></td>
+                            <td><u>e11</u></td>
+                            <td><u>e12</u></td>
+                        </tr>
+                        <tr>
+                            <td><strong>NAME</strong></td>
+                            <td><strong>SIGNATURE</strong></td>
+                            <td><strong>DATE</strong></td>
+                        </tr>
+                    </table>
+                    <table border="0" cellspacing="0" cellpadding="0" align="left" width="100%" style="padding-top:30px; text-align:left;">
+                        <tr>
+                            <td><strong>SIGNATURE OF TENANT</strong>: &nbsp;<u>e13</u></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>DATE: </strong>e14</td>
+                        </tr>
+                    </table>
+
+                    <br />
+                    <p style="color: red; font-style: italic;"><em>Confirming that the work was completed as reported (Please only sign if satisfied with the work done)</em></p>
+                    <p></p>
+                    <p></p>
+                    <p><strong>SIGNATURE OF CARETAKER / COMMITTEE MEMBER / INDUNA: </strong> e15 <strong>&nbsp;DATE</strong>: E16</p>
+                    <p style="color: red; font-style: italic;">Confirming that the work was completed to his/her satisfaction (Please only sign if satisfied with the work done)</p>
+                    <p><strong>GENERAL COMMENTS: </strong><u>      e17   </u></p>
+                    <br />
+
+                    <br />
+                </div>
+            </div>
+        </div>
+   </div>
+</body>
+</html>
+
+
+
+

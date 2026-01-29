@@ -1,0 +1,98 @@
+﻿@model C8.eServices.Mvc.Models.LinkedAccount
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Edit Linked Account</h4>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @*<h4>LinkedAccount</h4>*@
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.IsActive)
+        @Html.HiddenFor(model => model.IsDeleted)
+        @Html.HiddenFor(model => model.IsLocked)
+        @Html.HiddenFor(model => model.CreatedBySystemUserId)
+        @Html.HiddenFor(model => model.CreatedDateTime)
+        @Html.HiddenFor(model => model.ModifiedBySystemUserId)
+        @Html.HiddenFor(model => model.ModifiedDateTime)
+
+        <div class="form-group">
+            @Html.Label("Customer ID/Passport No:", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.Customer.IdentificationNumber, new { @readonly = true, @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Customer.IdentificationNumber)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Account No:", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.Account.AccountNumber, new { @readonly = true, @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Account.AccountNumber)
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+
+    @* Modal form for confirmation*@
+
+    <div class="modal fade" id="confirmUnlink" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+        @using (Ajax.BeginForm("UnLinkAccount", "CustomerLinkedAccount", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "unlinkAccount" }))
+        {
+            @*@Html.HiddenFor(model => model.ApplicantCapacityId)
+                @Html.HiddenFor(model => model.RatesRebate.Id)*@
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Confirm Unlinking Account</h4>
+                    </div>
+                    <div class="modal-body" id="noteToDelete">
+                        Are you sure you want to unlink this account ?
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="unLinkAccount">Unlink Account</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+}
+    <script>
+        $('#confirmUnlink').on('click', function() {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UnLinkAccount", "CustomerLinkedAccount", new {id = @Model.Id})',
+            }).success(function(data) {
+            });
+        });
+
+    </script>

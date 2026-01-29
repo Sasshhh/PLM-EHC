@@ -1,0 +1,95 @@
+﻿   thead {
+        font-size: 12px;
+    }
+ 
+    tbody {
+        font-size: 12px;
+    }
+
+    .input-sm {
+        width: 150px;
+        height: 25px;
+    }
+
+    .control-label {
+        font-size: 12px;
+    }
+
+    .btn.btn-default {
+        color: #333333;
+        background-color: #FFFFFF;
+        background-image: linear-gradient(to bottom, #FFFFFF, #E0E0E0);
+        border-color: #CCCCCC #CCCCCC #CCCCCC;
+    }
+
+        .btn.btn-default:hover {
+            color: #333333;
+            background-color: #E0E0E0;
+            background-image: linear-gradient(to bottom, #E0E0E0, #E0E0E0);
+            border-color: #CCCCCC #CCCCCC #CCCCCC;
+        }
+
+
+    .dataTables_wrapper .dataTables_scroll {
+        border: 1px solid #ccc;
+        margin: 1.5rem 0;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+
+
+
+    div.dataTables_scrollHead table.dataTable {
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+        border: none;
+
+    }
+
+    .dataTables_scrollBody {
+        /*overflow-x: hidden !important;*/
+         border-top: 1px solid #ccc;
+    }
+    
+    
+
+table.dataTable tbody th,
+table.dataTable tbody td {
+    white-space: nowrap;
+}
+
+.table {
+    border-left:0px !important;
+    border-right:0px !important;
+}
+
+#headings {
+    text-align: left;
+    padding-left: 10px;
+}
+
+
+.table th {
+border-bottom: 0 !important;
+}
+
+    /*.propText {
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    dd {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    dt {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }*/
+

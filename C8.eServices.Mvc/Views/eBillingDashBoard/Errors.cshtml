@@ -1,0 +1,236 @@
+﻿@{
+    ViewBag.Title = "Stats";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+
+<h4>Errors</h4>
+<hr/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Search</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse">
+
+
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <form class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Account Number </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Customer Name </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Email Address To </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtAccountNumber" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtCustomerName" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" id="txtEmailAddressName" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Start Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">End Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox1", "Select Date", new { @class = "input-sm" })
+                                </div>
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox2", "Select Date", new { @class = "input-sm " })
+                                </div>
+                                <div class="col-md-4" style="padding-top:0px">
+                                    <button type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-search"></span>Search</button>
+                                    @*<input type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs">*@
+                                    @*<input type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs" />*@
+                                    <button type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapseErrors">Billing Errors</a>
+            </h4>
+        </div>
+        <div id="collapseErrors" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table id="myTable" class="table table-bordered table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th id="headings" class="sorting_asc_disabled">Queue Id</th>
+                            <th id="headings">Bill Date</th>
+                            <th id="headings">Details</th>
+                            <th id="headings">Account Number</th>
+                            <th id="headings">Customer</th>
+                            <th id="headings">Email Address To</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />
+
+@* Load datatable js *@
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script src="@Url.Content("~/scripts/ellipsis.js")"></script>
+    <script src="@Url.Content("~/scripts/moment.js")"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+
+    <script>
+
+
+    $('#txtBox1').datetimepicker({
+        format: 'Y/m/d',
+        timepicker: false,
+        onSelectDate: function (dt, i) {
+            $('#txtBox2').datetimepicker({
+                format: 'Y/m/d',
+                minDate: dt,
+                timepicker: false
+            });
+        }
+    });
+
+    function convertToDate(data) {
+        @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+        var dtStart = new Date(parseInt(data.substr(6)));
+        @*// Format using moment.js.*@
+        var dtStartWrapper = moment(dtStart);
+        return dtStartWrapper.format("YYYY/MM/DD");
+    }
+
+
+    $(document).ready(function () {
+        $('#myTable').DataTable({
+            "processing": true, @*// for show progress bar*@
+            "serverSide": true, @*// for process server side*@
+            "orderMulti": true, @*// for disable multiple column at once*@
+            "orderable": true,
+            "dom": '<"top"i>rt<"bottom"lp><"clear">',
+            "scrollY": "500px",
+            "info": false,
+            "pageLength": 100,
+            "lengthChange": false,
+            "ajax": {
+                "url": "@Url.Action("loadErrorsAll", "eBillingDashBoard", new {id = ViewBag.Id})",
+                "type": "POST",
+                "datatype": "json"
+            },
+            "columns": [
+                {
+                    "data": "QueueId",
+                    "orderable": false,
+                },
+                {
+                    "data": "BillDate",
+                    "name": "BillDate",
+                    "orderable": false,
+                    "render": function (data) {
+                        return convertToDate(data);
+                    },
+
+                },
+
+                {
+                    "data": "Details",
+                    "orderable": false,
+                    "render": $.fn.dataTable.render.ellipsis(50)
+                },
+                     {
+                         "data": "AccountNumber",
+                         "orderable": false
+                     },
+
+                {
+                    "data": "CustomerAccountName",
+                    "orderable": false,
+                    "width": "20%",
+                    "render": $.fn.dataTable.render.ellipsis(30)
+                },
+                  {
+                      "data": "EmailAddressTo",
+                      "orderable": false,
+                      "render": $.fn.dataTable.render.ellipsis(40)
+                  }
+            ]
+
+        });
+
+        oTable = $('#myTable').DataTable();
+
+        function submitParams() {
+            oTable.columns(0).search($('#txtAccountNumber').val().trim());
+            oTable.columns(1).search($('#txtCustomerName').val().trim());
+            oTable.columns(2).search($('#txtEmailAddressName').val().trim());
+            oTable.columns(3).search($('#txtBox1').val().trim());
+            oTable.columns(4).search($('#txtBox2').val().trim());
+            oTable.draw();
+        };
+
+
+        $('#btnSearch').click(function () {
+            submitParams();
+        });
+
+        $('#btnClear').click(function () {
+            $('#txtAccountNumber').val('');
+            $('#txtCustomerName').val('');
+            $('#txtEmailAddressName').val('');
+            $('#txtBox1').val('Select Date');
+            $('#txtBox2').val('Select Date');
+            submitParams();
+        });
+    });
+</script>
+
+}
+
+

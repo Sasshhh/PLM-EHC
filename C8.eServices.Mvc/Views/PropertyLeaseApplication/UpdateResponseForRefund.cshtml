@@ -1,0 +1,143 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <br />
+        <div class="panel-heading">Documents</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <div style="display:block">
+                @Html.Partial("_DocumentsPartialTerminationLetter", Model.DocumentsViewModelRefundDeposits)
+                <br />
+            </div>
+        </div>
+        <br />
+        <div class="panel-heading">Upload Proff of Banking Details</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <div style="display:block">
+                @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
+                <br />
+            </div>
+        </div>
+
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <br />
+                <br />
+                if (ViewBag.ApprovalStatus != null)
+                {
+                    <div class="form-group">
+                        @Html.Label("Response", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @onchange = "StatusChange()", @Id = "appStatus", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
+                <br />
+                <div id="divComment" style="display:none">
+                    <div class="form-group">
+                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-4">
+                            @Html.TextArea("Comment", new { @class = "form-control", @Id = "Comments" })
+                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to continue?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                debugger;
+                var appStatus = document.getElementById('appStatus').value;
+                var comment = document.getElementById('Comments').value;
+                if ((comment == null || comment == "") && appStatus == "plm_no_refund_due") {
+                    swal("error", "Please enter comment", "warning")
+                }
+                else {
+                    document.getElementById("btnApproval").click();
+                }
+            }
+        });
+    }
+    function StatusChange() {
+        debugger;
+        var appStatus = document.getElementById('appStatus').value;
+        if (appStatus == "plm_no_refund_due") {
+            $("#divComment").css("display", "block");
+        }
+        else
+        {
+            $("#divComment").css("display", "none");
+        }
+    }
+    
+    function opendocumentUploadDiv() {
+        $("#documentuploadModal").modal('show');
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+            var display = "@ViewBag.Message";
+
+            if (display != null && display != "") {
+                $('#MessageModal4').modal('show');
+            }
+
+            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
+            var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }*@
+
+            });
+</script>
+
+

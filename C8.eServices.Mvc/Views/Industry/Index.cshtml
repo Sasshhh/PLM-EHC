@@ -1,0 +1,65 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Industry>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#">
+                <span>Industries</span>
+            </a>
+        </h4>
+    </div>
+    <div class="panel-body">
+        <div class="col-md-8" align="left">
+            @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-primary" })
+        </div>
+        <table class="table table-striped" id="table"
+               data-toggle="table"
+               data-height="500"
+               data-search="true"
+               data-pagination="true"
+               data-page-list="[10,25, 50, 100, ALL]">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.SubSector.SubSectorName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IndustryName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IndustryDescription)
+                    </th>
+                    <th class="col-md-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SubSector.SubSectorName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IndustryName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IndustryDescription)
+                        </td>
+                        <td>
+                            @Html.EncodedActionLink("Edit", "Edit", "Industry", new { id = item.Id }, new { @class = "btn btn-primary" })
+            @Html.EncodedActionLink("Details", "Details", "Industry", new { id = item.Id }, new { @class = "btn btn-primary" })
+            @Html.EncodedActionLink("Delete", "Delete", "Industry", new { id = item.Id }, new { @class = "btn btn-primary" })
+        </td>
+    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,221 @@
+﻿
+@model IEnumerable<C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel>
+@using C8.eServices.Mvc.Keys;
+@{
+    //ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    @@media only screen and (max-width: 1000px) {
+
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    @ViewBag.ViewFrom
+                </div>
+            </div>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference Number</th>
+                        @if (ViewBag.ViewName == ViewCodeKeys.PreInspection || ViewBag.ViewName == ViewCodeKeys.ScheduleInspectionSlots)
+                        {
+                            <th>Application Created Date</th>
+                        }
+                        else
+                        {
+                           <th> Agreement Created Date</th>
+                        }
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                    <tr>
+                        <td>@item.HumanSettlementApplication.ApplicantFullName</td>
+                        <td>@item.HumanSettlementApplication.PurchaserType.Name</td>
+                        <td>@item.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                        @if (ViewBag.ViewName == ViewCodeKeys.PostInspection)
+                        {
+                            <td>@item.HumanSettlementLeaseMaster.CreatedDateTime.Value</td>
+                            <td>@item.HumanSettlementLeaseMaster.Status.Name</td>
+                            <td>
+                                @Html.ActionLink("Exit Inspection", "HumanApplicationInspection", "HumanSettlementApplication", new { q = new AesCrypto().Encrypt("ApplicationId=" + item.HumanSettlementApplication.Id.ToString() + "&ViewName=" + ViewCodeKeys.PostInspection) }, new { @class = "btn btn-primary" })
+                            </td>
+                        }
+                        else if (ViewBag.ViewName == ViewCodeKeys.MaintananceJobSheet)
+                        {   
+                            <td>@item.HumanSettlementApplication.CreatedDateTime.Value</td>
+                            <td>@item.HumanSettlementApplication.Status.Name</td>
+                            <td>
+                                @Html.ActionLink("Maintenance Job Sheet", "HumanApplicationInspection", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ApplicationId=" + item.HumanSettlementApplication.Id.ToString() + "&ViewName=" + ViewCodeKeys.MaintananceJobSheet) }, new { @class = "btn btn-primary" })
+                            </td>
+                        }
+                        else if (ViewBag.ViewName == ViewCodeKeys.PreInspection)
+                        {
+                            <td>@item.HumanSettlementApplication.CreatedDateTime.Value</td>
+                            <td>@item.HumanSettlementApplication.Status.Name</td>
+                            <td>
+                                @Html.ActionLink("Conduct Unit Inspection", "HumanApplicationInspection", new { q = new AesCrypto().Encrypt("ApplicationId=" + item.HumanSettlementApplication.Id.ToString() + "&ViewName=" + ViewCodeKeys.PreInspection) }, new { @class = "btn btn-primary" })
+                            </td>
+                        }
+                        else if (ViewBag.ViewName == ViewCodeKeys.ScheduleInspectionSlots)
+                        {
+                            <td>@item.HumanSettlementApplication.CreatedDateTime.Value</td>
+                            <td>@item.HumanSettlementApplication.Status.Name</td>
+                            <td>
+                                @Html.ActionLink("Inspection Schedule Slots", "HumanApplicationInspection", new { q = new AesCrypto().Encrypt("ApplicationId=" + item.HumanSettlementApplication.Id.ToString() + "&Data=" + item.HumanSettlementApplication.Data + "&ViewName=" + ViewCodeKeys.ScheduleInspectionSlots) }, new { @class = "btn btn-primary" })
+                            </td>
+                        }
+
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+<div id="notice_success" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText">Succcess</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p><strong>Succcessfully Actioned</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        var NoticeSuccess = "@ViewBag.PostSuccess";
+
+        if (NoticeSuccess != null && NoticeSuccess != "") {
+            $('#notice_success').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        }
+        $.ajax({
+            url: "@Url.Action("ClearViewBags", "home")",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+            }
+        });
+
+
+        $('#RCSTable').DataTable();
+        var display = "@ViewBag.Display";
+
+        if (display != null && display != "") {
+            $('#MessageModal3').modal('show');
+        }
+        else {
+            $('#MessageModal3').modal('hide');
+            var result = "@ViewBag.MessageBody";
+            if (result != null && result != "") {
+                $('#MessageModal').modal('show');
+            }
+            else {
+                $('#MessageModal').modal('hide');
+                var result5 = "@ViewBag.MessageBody5";
+                if (result5 != null && result5 != "") {
+                    $('#MessageModal5').modal('show');
+                }
+                else {
+                    $('#MessageModal5').modal('hide');
+                }
+            }
+        }
+    });
+
+    function OpenChatModal() {
+
+        $('#MessageModal').modal('show');
+    };
+
+</script>

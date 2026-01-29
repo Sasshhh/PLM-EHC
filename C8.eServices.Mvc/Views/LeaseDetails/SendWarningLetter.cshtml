@@ -1,0 +1,134 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Warning Letter";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+
+
+    var randNo = new Random();
+    Model.DocumentsViewModel.docRandId = randNo.Next();
+
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+
+        <br />
+        <div class="panel-heading">Warning Letter History</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <div style="display:block">
+                @Html.Partial("_DocumentsPartialWarningLetterHistory", Model)
+                <br />
+            </div>
+        </div>
+
+        <br />
+        <br />
+        <div class="panel-heading">Upload Warning Letter Document</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <div style="display:block">
+                @Html.Partial("_DocumentsPartialWarningLetter", Model.DocumentsViewModel)
+                <br />
+            </div>
+        </div>
+        
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <br />
+                <br />
+                <div class="form-group">
+                    <div id="diveComment" style="display:none">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <input type="text" name="docRandId" value="@Model.DocumentsViewModel.docRandId" />
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div id="divComment" style="display:block">
+                        <div class="form-group">
+                            <span> @Html.Label("Warning Reason", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.TextArea("WarningComment", new { @class = "form-control", @Id = "Comments", @required = "required" })
+                                @Html.ValidationMessage("WarningComment", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                    </div>
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this recommendation?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                var comment = document.getElementById('Comments').value;
+                if (comment == null || comment == "") {
+                    swal("error", "Please enter warning reason", "warning")
+                }
+                else {
+                    document.getElementById("btnApproval").click();
+                }
+            }
+        });
+    }
+
+    function opendocumentUploadDiv() {
+        $("#documentuploadModal").modal('show');
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+            var display = "@ViewBag.Message";
+
+            if (display != null && display != "") {
+                $('#MessageModal4').modal('show');
+            }
+            });
+</script>
+
+

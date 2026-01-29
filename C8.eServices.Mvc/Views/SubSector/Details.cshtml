@@ -1,0 +1,49 @@
+﻿@model C8.eServices.Mvc.Models.SubSector
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Details</h4>
+<hr />
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Sub-Sector Details
+                </a>
+            </h4>
+        </div>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.FocusArea.FocusAreaName)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.FocusArea.FocusAreaName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.SubSectorName)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.SubSectorName)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.SubSectorDescription)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.SubSectorDescription)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<p>
+    @Html.EncodedActionLink("Edit", "Edit", "SubSector", new { id = Model.Id }, new { @class = "btn btn-primary" })
+    @Html.ActionLink("Back to List", "Index", "SubSector", new { @class = "btn btn-primary" })
+</p>

@@ -1,0 +1,483 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+
+        .require::after {
+            content: "*";
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+
+            @*<span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>*@
+            Instructions
+
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+       
+                
+                <p>
+                    <b><u>  Instructions for approving proof of payment</u></b>
+
+                    <br />
+                    1)Check the document, Add Comment, Select status Approved to approve that the document is aligning,
+                    <br />
+                    2)Click on dropdown labeled approval status and select the option "approve"" to approve the application to proceed with the process
+                    <br />
+                    3) then click submit
+                    <br />
+                    <br />
+                    <br />
+                    <b><u>   Instructions for rejecting proof of payment</u></b>
+
+                    <br />
+                    1)Check the document, add a comment and select status rejected if you wish to reject the document and wish the user to resubmit it using your comment
+                    <br />
+                    2)Click on dropdown labeled approval status and select the option "Reject"" to reject the applicant allow them to view your comment and re-upload their proof of payment.
+                    <br />
+                    3) then click submit
+                    <br />
+
+                </p>
+                
+            </div>
+        </div>
+    </div>
+</div>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Reference Number
+                        </th>
+                        <th>
+                            Appicant Type
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Captured Date
+                        </th>
+                        <th>
+                            Customer Name
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>
+                            @Model.PropertyLeaseApplications.ApplicationReferenceNumber
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.PurchaserType.Name
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.Status.Name
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.CreatedDateTime
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.Customer.FullName
+                        </td>
+                        <td>
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplications.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+
+
+        </div>
+
+        <br />
+
+        <div class="panel-heading">Attached Documents</div>
+        <div id="documentsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="currentDocumentsGrp">
+                    <div class="form-group">
+                        @Html.Partial("~/Views/Shared/_DocumentsPartialRcsBo.cshtml", Model.Document)
+                        <div class="form-group">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*<div class="panel-heading">CoE Financial System - Payment History</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                    <thead>
+                        <tr>
+                            <th>
+                                Customer Name
+                            </th>
+                            <th>
+                                Reference
+                            </th>
+                            <th>
+                                Processed Date
+                            </th>
+                            <th>
+                                Amount
+                            </th>
+
+
+                        </tr>
+                    </thead>
+                    @if (Model.paymentDetails.PaymentDetailsList != null && Model.paymentDetails.Status == "Success")
+                    {
+                        <tbody>
+                            @foreach (var item in Model.paymentDetails.PaymentDetailsList)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.CustomerFirstName @item.CustomerLastName
+                                    </td>
+
+                                    <td>
+                                        @item.Ref
+                                    </td>
+                                    <td>
+                                        @if (item.ConvertedDate != null)
+                                        {
+                                            @item.ConvertedDate
+                                        }
+                                        else
+                                        {
+                                            @item.Date
+                                        }
+
+                                    </td>
+                                    <td>
+                                        @item.Amt
+                                    </td>
+
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    }
+                    else
+                    {
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    @Model.paymentDetails.Status
+                                </td>
+
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+
+                                </td>
+                                <td>
+                                    -
+                                </td>
+
+                            </tr>
+
+
+
+                        </tbody>
+                    }
+                </table>
+
+
+
+            </div>*@
+        <br />
+        @*@if (Model.OnlinePaymentHistory.Count > 0)
+            {
+                <div class="panel-heading">Siyakhokha Payment History</div>
+                <div style="width: 90%;margin: 0 auto;">
+                    <br />
+                    <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Account Number
+                                </th>
+
+                                <th>
+                                    Payment Method
+                                </th>
+                                <th>
+                                    Date
+                                </th>
+                                <th>
+                                    Amount
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.OnlinePaymentHistory)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @Model.PropertyLeaseApplications.TransferInformation.RatesNumber
+                                    </td>
+                                    <td>
+                                        @item.PaymentMethod
+                                    </td>
+                                    <td>
+
+                                        @item.CreatedDateTime
+
+
+                                    </td>
+                                    <td>
+                                        @item.Amount
+                                    </td>
+
+                                    <td>
+                                        @item.Status
+                                    </td>
+
+                                </tr>
+                            }
+
+
+
+
+                        </tbody>
+
+
+                    </table>
+
+                    <br />
+                    <br />
+
+
+                </div>
+
+            }*@
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <br />
+
+                if (ViewBag.ApprovalStatus != null)
+                {
+                    <div class="form-group">
+                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
+
+                <br />
+
+
+
+                <div id="divComment" style="display:none">
+                    <div class="form-group">
+                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-4">
+                            @Html.TextArea("Comment", new { @class = "form-control" })
+                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function clickSubmit() {
+        //Swal.fire({
+        //    title: 'Are you sure?',
+        //    text: "You won't be able to revert this!",
+        //    icon: 'warning',
+        //    showCancelButton: true,
+        //    confirmButtonColor: '#3085d6',
+        //    cancelButtonColor: '#d33',
+        //    confirmButtonText: 'Yes, delete it!'
+        //}).then((result) => {
+        //    if (result.value) {
+        //        Swal.fire(
+        //            'Deleted!',
+        //            'Your file has been deleted.',
+        //            'success'
+        //        )
+        //    }
+        //})
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this application for validation?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+
+                document.getElementById("btnApproval").click();
+            }
+        });
+        ////$(".swal-overlay").css('background-color', 'rgba(50, 170, 145 , 0.45');
+        //swal({
+        //    icon: "info",
+        //    title: "Are you sure you want to submit the following document approval?",
+        //    buttons: [
+        //        'No!',
+        //        'Yes, I am sure!'
+        //    ]
+
+        //}).then(function (isConfirm) {
+        //    if (isConfirm) {
+
+        //        document.getElementById("btnApproval").click();
+        //    }
+        //});
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+
+            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
+             var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }*@
+
+        });
+</script>
+
+

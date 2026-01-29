@@ -1,0 +1,111 @@
+﻿@*@model IEnumerable<C8.eServices.Mvc.Models.DepartmentsApproval>*@
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<h2>Department Approval</h2>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Failed Approvals</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="DepartmentsTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Reference Number
+                        </th>
+                        <th>
+                            Department
+                        </th>
+                        <th>
+                            FailureReason
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            CreatedDateTime
+                        </th>
+
+                        <th>
+                            AssignedTo
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            debugger;
+            $('#DepartmentsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "ApprovalsLoad", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "RCSApplicationStatus.ApplicationReferenceNumber", "autoWidth": true },
+                    { "data": "RCSDepartment.Name", "autoWidth": true },
+                    { "data": "FailureReason", "autoWidth": true },
+                    { "data": "Status.Name", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true },
+                    {
+                        "data": "Id",
+                        "autoWidth": true,
+                        "render": function (data) {
+                            var myUrl = '@Url.Action( "Details", "DepartmentsApprovals" )/' + data;
+                            return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; ';
+                        }
+                    }],
+                "language": {
+                    "emptyTable": "No payment history.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            loadAccounts();
+
+        });
+
+    </script>
+
+}

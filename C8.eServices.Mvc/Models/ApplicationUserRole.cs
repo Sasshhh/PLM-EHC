@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Web;
+using Microsoft.AspNet.Identity.EntityFramework;
+
+
+namespace C8.eServices.Mvc.Models
+{
+    public class ApplicationUserRole:BaseModel
+    {
+        [Column(Order = 10)]
+        public int ApplicationId { get; set; }
+        [ForeignKey("ApplicationId")]
+        public Application Application { get; set; }
+
+        [Column(Order = 11)]
+        public int SystemUserId { get; set; }
+        [ForeignKey("SystemUserId")]
+        public SystemUser SystemUser { get; set; }
+
+        [Column(Order = 12)]
+        public string RoleId { get; set; }
+        [ForeignKey("RoleId")]
+        public IdentityRole IdentityRole { get; set; }
+        [Column(Order = 13)]
+        public int? CCCId { get; set; }
+        [ForeignKey("CCCId")]
+        public CCC CCC { get; set; }
+    }
+}

@@ -1,0 +1,454 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Query>
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Customer queries";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var listItems = new List<ListItem> { new ListItem { Text = "Excel", Value = "Excel" },
+                                         new ListItem { Text = "Word", Value = "Word" },
+                                         new ListItem { Text = "PDF", Value = "PDF" }};
+    var reportTypeKey = ReportTypeKeys.CustomerQuery;
+}
+
+<hr />
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>Customer queries allows the Administrator/Super Administrator to attend to and resolve queries. Please see steps below explaining each action.</p>
+                <p>1. "Action" - Allows the Administrator/Super Administrator to view the query details. Once clicked popup screen will show, where you change status of the query and/or add comments. When adding comments, you can choose not to send notification to the customer by un-tick the checkbox below Comment. </p>
+                <p>2. "Email Trail" - Allows the Administrator/Super Administrator view history of comments for the query. Click on Email Trail to expand the panel.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="customerQuery">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    Customer Queries
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="fixed-table-toolbar">
+                    <div class="pull-left">
+                        <input type="text" id="startDate" class="form-control" />
+                    </div>
+                    <div class="pull-left">
+                        <input type="text" id="endDate" class="form-control" />
+                    </div>
+                    <div class="pull-left">
+                        &nbsp;
+                        <div class="col-lg-11">
+                            @Html.DropDownList("QueryStatuses", null, "Select Status", new { id = "ddlStatusId", @class = "form-control", @style = "width: 160px;" })
+                        </div>
+                    </div>
+                    <div class="pull-left">
+                        &nbsp;
+                        <button id="btnFilter" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <div style="float: right">
+                    @Html.DropDownList("format", new SelectList(listItems), "Export To", new { @class = "btn-primary form-control col-md-2 BoToDoHide", id = "format" })
+                </div>
+                <div style="clear: both"></div>
+                <table class="table table-striped" id="queriesTable"
+                       data-toggle="table"
+                       data-pagination="true"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadQueries", "Query")"
+                       data-query-params-type="Else"
+                       data-side-pagination="server"
+                       data-page-list="[10, 100, 250]"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            @*<th data-field="queryId" data-formatter="queryIdFormatter">Query ID</th>*@
+                            <th data-field="Name" data-sortable="true">Query Type</th>
+                            <th data-field="CaseNumber" data-sortable="true">Reference Number</th>
+                            <th data-field="Description" data-sortable="true">Description</th>
+                            <th data-field="Status" data-sortable="true">Status</th>
+                            <th data-field="CreatedDate" data-sortable="true">Date Created</th>
+                            <th data-formatter="resolveQuery">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modifyQueryModal" class="modal fade" role="dialog">
+
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="panel-heading modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Customer Query Status Change</h4>
+            </div>
+            <div class="modal-body">
+                <form id="modifyQueryForm">
+                    @*<div class="alert alert-info">
+                            <strong>Info!</strong> Please include comment when resolving queries.
+                        </div>*@
+                    @Html.Hidden("queryId")
+                    <p><label> Reference Number:</label>&nbsp; @Html.Label("ReferenceNumber", new { id = "lblReferenceNo", @style = "font-weight: normal" })</p>
+                    <p><label>Email:</label>&nbsp; @Html.Label("Email", new { id = "lblEmailAddress", @style = "font-weight: normal" })</p>
+                    <p><label>FullName:</label>&nbsp; @Html.Label("FullName", new { id = "lblFullName", @style = "font-weight: normal" })</p>
+                    <p><label>Query:</label>&nbsp; @Html.Label("Comment", new { id = "lblComment", @style = "font-weight: normal;font-size:xsmall" })</p>
+                    <p>
+                        <label> Status:</label> &nbsp;<select id="queryStatus" required="required"></select>
+                    </p>
+                    <p>
+                        @Html.Label("Comment:")
+                        @Html.TextArea("resolutionComment", null, new { id = "resolutionComment", @class = "form-control", @style = "height:160px" })
+                    <p>
+                    <p>
+                        <input type="checkbox" id="isSendNotification" name="isSendNotification" checked="checked" /><label style="font-weight:lighter;color:green"> &nbsp;Uncheck if you don't want to notify the customer.</label>
+                    </p>
+                    <div class="select-checkbox"></div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseEmailTrail">
+                                    Email Trail
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseEmailTrail" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="historyTable"
+                                           data-toggle="table"
+                                           data-pagination="true"
+                                           data-url="@Url.Action("GetCommentHistory", "Query", new { queryId = 0 })"
+                                           data-query-params-type="Else"
+                                           data-side-pagination="server"
+                                           data-height="300"
+                                           data-page-list="[10, 100, 250]">
+                                        <thead>
+                                            <tr>
+                                                <th data-field="ModifiedByUser">Created By</th>
+                                                <th data-field="Comment">Comment</th>
+                                                <th data-field="ModifiedDate">Date Created</th>
+                                                @*<th data-field="Status">Query Status</th>*@
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btnSaveQuery" type="button" class="btn btn-primary">Save</button>
+                <button id="btnCancel" type="button" class="btn btn-primary">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript" src="@Url.Content( "~/Scripts/jquery.datetimepicker.js" )"></script>
+
+    <script type="text/javascript">
+        var $table = $('#queriesTable'),
+        $button = $('#btnRefresh'),
+        $buttonSearch = $("#btnSearch"),
+        $btnFilter = $('#btnFilter');
+
+        var today = new Date();
+        var day = ("0" + today.getDate()).slice(-2);
+        var month = ("0" + (today.getMonth() + 1)).slice(-2);
+        var year = today.getFullYear();
+
+
+        $(document).ready(function () {
+            $("#format").on('change', function (event) {
+                var startDate = $('#startDate').val(),
+                    endDate = $('#endDate').val(),
+                    searchValue = $('.fixed-table-toolbar').find('.search > :input').val(),
+                    type = getSelectedFormat(),
+                    statusId = $("#ddlStatusId").val(),
+                    url;
+
+                console.log(startDate);
+                console.log(endDate);
+                if (type === "Excel") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                    {
+                        searchText = "searchValue",
+                        title = "Customer Queries",
+                        reportKey = reportTypeKey,
+                        format = "Excel",
+                        startDate = "_startDate",
+                        endDate = "_endDate",
+                        referenceId = "_status"
+                    }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate).replace("_status",statusId);
+                    window.location.href = url;
+                } else if (type === "PDF") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                      {
+                          searchText = "searchValue",
+                          title = "Customer Queries",
+                          reportKey = reportTypeKey,
+                          format = "PDF",
+                          startDate = "_startDate",
+                          endDate = "_endDate",
+                          referenceId = "_status"
+                      }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate).replace("_status", statusId);
+                    window.location.href = url;
+                } else if (type === "Word") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                    {
+                        searchText = "searchValue",
+                        title = "Customer Queries",
+                        reportKey = reportTypeKey,
+                        format = "Word",
+                        startDate = "_startDate",
+                        endDate = "_endDate",
+                        referenceId = "_statusId"
+                    }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate).replace("_status", statusId);
+                    window.location.href = url;
+                } else {
+                    bootbox.alert("Please select format first.");
+                    event.preventDefault();
+                }
+            });
+        });
+
+        function getSelectedFormat() {
+            //Get selected value of the dropdown list
+            var inp = $("select[name='format'] option:selected").val();
+            return inp;
+        }
+
+        $(function () {
+            $button.click(function () {
+                resetSearch();
+            });
+
+            $buttonSearch.click(function () {
+                customSearch();
+            });
+
+            $btnFilter.click(function () {
+                customSearch();
+            });
+
+            $('#startDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: '2016/09/07',
+                onShow: function (ct) {
+                    this.setOptions({
+                        maxDate: jQuery('#endDate').val() ? jQuery('#endDate').val() : false
+                    });
+                }
+            });
+
+            $('#endDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: year + "/" + month + "/" + day,
+                onShow: function (ct) {
+                    this.setOptions({
+                        minDate: jQuery('#startDate').val() ? jQuery('#startDate').val() : false
+                    });
+                }
+            });
+
+            $("#btnSaveQuery").on("click", function () {
+                var comment = $("#resolutionComment").val();
+                var queryId = $("#queryId").val();
+                var statusId = $("#queryStatus").val(),
+                    x = $("#isSendNotification").val(),
+                    isSendNotification = x == 'on';
+
+                $.ajax({
+                    type: 'POST',
+                    url: "@Url.Action("ResolveQuery", "Query")",
+                    data: { id: queryId, statusId: statusId, comment: comment, isSendNotification: isSendNotification },
+                    success: function (response) {
+                        $("#modifyQueryModal").modal('hide');
+
+                        resetFields();
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log(response.result);
+                    }
+                });
+            });
+
+            $("#btnCancel").on("click", function () {
+                $("#modifyQueryModal").modal('hide');
+                resetFields();
+            });
+
+        });
+
+        function resetFields() {
+            $("#queryId").val('');
+            $("#lblReferenceNo").text('');
+            $("#lblFullName").text('');
+            $("#lblEmailAddress").text('');
+            $("#lblComment").text('');
+        }
+
+        function resetFilters() {
+            $('#startDate').val('2016/09/07');
+            $('#endDate').val(year + "/" + month + "/" + day);
+            $('#ddlStatusId').prop('selectedIndex', 0);
+        }
+
+        function customSearch() {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var statusId = $('#ddlStatusId').val();
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadQueries", "Query")/?startDate=' + startDate + '&endDate=' + endDate +
+                     '&queryStatus=' + statusId,
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            resetFilters();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadQueries", "Query")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        window.queryIdFormatter = function (value, row) {
+            var myUrl = '@Url.Action("Details", "Query")/' + '?q=' + row.data;
+            return '<a href=\"' + myUrl + '\">' + row.queryId + '</a>';
+        }
+
+        window.resolveQuery = function (value, row, index) {
+            console.log(row.Resolved);
+            //return "<input type='button' value='Action' onclick='modifiyQueryStatus(" + row.queryId + ");' class= 'btn-sm btn-primary'>";
+            // if (row.Resolved.replace(/^\s+/, '').replace(/\s+$/, '') == "No") {
+
+//AJC Direct to Deactivate only if it is a deactivate account request
+            if (row.Name == "Deactivate Account") {
+                return "<input type='button' value='Go To User' onclick='RedirectEdit(\"" + row.Id + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+            }
+            else {
+                if (!row.Resolved) {
+                    return "<input type='button' value='Resolve' onclick='modifiyQueryStatus(" + row.queryId + ");' class= 'btn-sm btn-primary'>";
+
+                }
+            else {
+                        return "<span>-</span>";
+                    }
+            }
+            
+
+        }
+      //AJC Deactivate Account
+         window.RedirectEdit = function (Id) {
+            try {
+                window.open(
+                    '@Url.Action("Edit", "Customer")/?q=' + Id,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+
+        window.modifiyQueryStatus = function (queryId) {
+            try {
+                $.ajax({
+                    type: 'POST',
+                    url: "@Url.Action("GetQuery", "Query")",
+                    data: { queryId: queryId },
+                    cache: false,
+                    success: function (data) {
+                        $("#queryId").val(data.query.Id);
+                        $("#lblReferenceNo").text(data.query.ReferenceNumber);
+                        $("#lblFullName").text(data.query.FullName);
+                        $("#lblEmailAddress").text(data.query.Email);
+                        $("#lblComment").text(data.query.Comment);
+
+                        //Default text
+                        $("#queryStatus").empty();
+                        $("#queryStatus").append($('<option />', { 'value': data.query.Status.Id, 'text': data.query.Status.Name }));
+
+                        for (var i = 0; i < data.statuses.length; i++) {
+                            if (data.statuses[i].Id != data.query.Status.Id) {
+                                $("#queryStatus").append($('<option />', { 'value': data.statuses[i].Id, 'text': data.statuses[i].Name }));
+                            }
+                        }
+
+                        // Load History
+                        $(function () {
+                            var queryId = data.query.Id,
+                                $table = $("#historyTable");
+
+                            $table.bootstrapTable('refresh', {
+                                url: '@Url.Action("GetCommentHistory", "Query")',
+                                query: {
+                                    searchText: '',
+                                    pageNumber: 1,
+                                    queryId: queryId
+                                }
+                            });
+                        });
+                    },
+                    error: function (response) {
+                        console.log(response.result);
+                    }
+                });
+
+                $("#modifyQueryModal").modal({
+                    show: 'show',
+                    backdrop: 'static', // This disable for click outside event
+                    keyboard: false // This disables for keyboard event (esc)
+                });
+            } catch (ex) {
+                console.log(ex);
+            }
+        }
+    </script>
+}
+

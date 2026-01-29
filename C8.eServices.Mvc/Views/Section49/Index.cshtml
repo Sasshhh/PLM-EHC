@@ -1,0 +1,419 @@
+﻿@model C8.eServices.Mvc.ViewModels.Section49ViewModel
+
+@{
+
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/VideoLayout.cshtml";
+}
+<link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Content/VideoTheme/plugins/jQuery/jquery.min.js"></script>
+<link href="~/Content/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+
+<link href="~/Content/DataTables/css/select.jqueryui.min.css" rel="stylesheet" />
+<script src="~/Content/VideoTheme/js/jquery-2.2.4.min.js"></script>
+<script src="~/Content/VideoTheme/js/jquery-ui.min.js"></script>
+@*<link href="~/Content/VideoTheme/coe_obj/objectionperiodstylesheet.css" rel="stylesheet" />
+    <link href="~/Content/VideoTheme/coe_obj/css/objectionperiodstylesheet.css" rel="stylesheet" />*@
+<link href="~/Content/VideoTheme/coe_obj/css/objectionperiodstylesheet.css" rel="stylesheet" />
+
+<link href="@Url.Content("~/Content/DataTables/css/select.jqueryui.min.css")" rel="stylesheet" />
+<!-- Required jQuery and jQuery UI Javascript references -->
+<script src="@Url.Content("~/Content/VideoTheme/js/jquery-2.2.4.min.js")"></script>
+<script src="@Url.Content("~/Content/VideoTheme/js/jquery-ui.min.js")"></script>
+
+
+@*<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>*@
+@*<h2>Create</h2>*@
+
+<link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Content/VideoTheme/plugins/jQuery/jquery.min.js"></script>
+<link href="~/Content/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+
+<link href="~/Content/DataTables/css/select.jqueryui.min.css" rel="stylesheet" />
+<script src="~/Content/VideoTheme/js/jquery-2.2.4.min.js"></script>
+<script src="~/Content/VideoTheme/js/jquery-ui.min.js"></script>
+@*<link href="~/Content/VideoTheme/coe_obj/objectionperiodstylesheet.css" rel="stylesheet" />
+    <link href="~/Content/VideoTheme/coe_obj/css/objectionperiodstylesheet.css" rel="stylesheet" />*@
+<link href="~/Content/VideoTheme/coe_obj/css/objectionperiodstylesheet.css" rel="stylesheet" />
+
+
+@*<link href="~/Content/VideoTheme/coe_obj/objectionperiodstylesheet.css" rel="stylesheet" />*@
+<link href="~/Content/VideoTheme/coe_obj/css/objectionperiodstylesheet.css" rel="stylesheet" />
+
+<link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Content/VideoTheme/plugins/jQuery/jquery.min.js"></script>
+@*<link href="~/Content/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-datepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>*@
+
+<link href="~/Content/DataTables/css/select.jqueryui.min.css" rel="stylesheet" />
+<script src="~/Content/VideoTheme/js/jquery-2.2.4.min.js"></script>
+<script src="~/Content/VideoTheme/js/jquery-ui.min.js"></script>
+
+
+
+
+<link href="~/Content/JqueryUI.css" rel="stylesheet" />
+<link href="~/Content/TimePickerAddOn.css" rel="stylesheet" />
+<style>
+
+/*    {
+        color: white;
+    }*/
+
+    .form-control {
+        background: #f2f2f2;
+    }
+    .btn-success-custom {
+        background-color: #5cb85c !important;
+    }
+
+    .sec49-btn-danger {
+        float: left;
+        top: 0px;
+        position: relative;
+        left: 235px;
+        background-color: #ff1010bf !important;
+        border-radius: 50px;
+        cursor: pointer;
+        width: 135px;
+        height: 43px;
+    }
+    .sec49-link {
+        font-size: 14px;
+        margin-top: 3px;
+        color: white;
+    }
+    a:hover{
+        color:white !important;
+    }
+</style>
+
+
+
+
+@using (Html.BeginForm("Index", "Section49", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="login-page">
+            <div class="form">
+                @*<h2 style="font-family:Arial"> Login</h2>*@
+
+                <form class="login-form" method="post">
+                    <br />
+
+                    <h2>Section 49 Letter Generation</h2>
+                    <hr />
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-4">
+
+                        </div>
+                        <div class="col-lg-4">
+                            <span></span>
+                        </div>
+                        <div class="col-lg-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.Label("Generation Type", new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.DropDownListFor(model => model.Type, (SelectList)ViewBag.LetterType, "Select type ...", htmlAttributes: new { @class = "form-control", id = "BankAccountTypeDdl", @required = true })
+                                    @Html.ValidationMessageFor(model => model.Type)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.GVRNo, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.GVRNo, new { htmlAttributes = new { @class = "form-control", @min=0 } })
+                                    @Html.ValidationMessageFor(model => model.GVRNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.GenerationDate, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.GenerationDate, new { htmlAttributes = new { @class = "form-control datepicker", @readonly = "readonly", @Value = @DateTime.Now.ToString("dd'/'MM'/'yyyy"), @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.GenerationDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ValuationPlacedDate, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.ValuationPlacedDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.ValuationPlacedDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.EffectiveDateFrom, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.EffectiveDateFrom, new { htmlAttributes = new { @class = "form-control datepicker", @id = "EffectiveDateFrom", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.EffectiveDateFrom, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.EffectiveDateTo, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.EffectiveDateTo, new { htmlAttributes = new { @class = "form-control datepicker", @id = "EffectiveDateTo", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.EffectiveDateTo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.PublishedDate, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.PublishedDate, new { htmlAttributes = new { @class = "form-control datepicker" } })
+                                    @Html.ValidationMessageFor(model => model.PublishedDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ImplementionDate, htmlAttributes: new { @class = "control-label col-md-4 rr" })
+                                <div class="col-md-4">
+                                    @Html.EditorFor(model => model.ImplementionDate, new { htmlAttributes = new { @class = "form-control datepicker", @autocomplete = "off" } })
+                                    @Html.ValidationMessageFor(model => model.ImplementionDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <br />
+
+                    @*<div class="sec49-btn-danger">
+                    </div>*@
+
+                    <div class="form-group">
+                        @Html.ActionLink("BACK TO LIST", "Index", "Home", htmlAttributes: new { @class = "sec49-link sec49-btn-danger btn" })
+
+                        @*<div class="btn btn-primary next-step mix">*@
+                        <input type="submit" style="color: white !important;" value="Create " class="btn btn-primary next-step mix" />
+                        @*</div>*@
+                    </div>
+                    <br />
+                </form>
+            </div>
+        </div>
+
+        @*<div class="form-group">
+                @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.EditorFor(model => model.IsActive)
+                        @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IsDeleted, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.EditorFor(model => model.IsDeleted)
+                        @Html.ValidationMessageFor(model => model.IsDeleted, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IsLocked, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.EditorFor(model => model.IsLocked)
+                        @Html.ValidationMessageFor(model => model.IsLocked, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.CreatedBySystemUserId, "CreatedBySystemUserId", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("CreatedBySystemUserId", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.CreatedBySystemUserId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.CreatedDateTime, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.CreatedDateTime, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.CreatedDateTime, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.ModifiedBySystemUserId, "ModifiedBySystemUserId", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("ModifiedBySystemUserId", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.ModifiedBySystemUserId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.ModifiedDateTime, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.ModifiedDateTime, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.ModifiedDateTime, "", new { @class = "text-danger" })
+                </div>
+            </div>*@
+
+
+    </div>
+}
+
+
+<section class="buy-pro" style="padding: 100px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+
+
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@*<script type="text/javascript">
+        $(function () {
+            // This should targe the element generated by your EditorFor() Helper
+
+            $('#EndDate').datepicker();
+
+            $('#StartDate').datepicker();
+
+        })
+
+
+
+
+
+        //$(function () {
+        //    // This will make every element with the class "date-picker" into a DatePicker element
+        //    $('.date-picker').datepicker();
+        //})
+
+
+        //$(function () {
+        //    $(".date").datepicker({
+        //        dateFormat: 'dd/mm/yy',
+        //        showOn: "both",
+        //        buttonImage: "b_calendar.png",
+        //        buttonImageOnly: true,
+        //        buttonText: "Select date",
+        //        changeMonth: true,
+        //        changeYear: true,
+        //        yearRange: "-100:+0"
+        //    });
+        //});
+
+    </script>*@
+<script src="~/Scripts/JqueryUi.js"></script>
+<script src="~/Scripts/TimePickerAddOn.js"></script>
+<script>
+
+    $("#EffectiveDateFrom").datepicker({
+        dateFormat: "dd/mm/yy",
+        minDate: 0,
+
+        onSelect: function (date) {
+            var dt2 = $('#EffectiveDateTo');
+            var dt1 = $('#EffectiveDateFrom');
+            var startDate = $(this).datepicker('getDate');
+            var minDate = $(this).datepicker('getDate');
+            /*dt2.datepicker('setDate', minDate);*/
+            startDate.setDate(startDate.getDate() + 365);
+            //sets dt2 maxDate to the last day of 30 days window
+            dt2.datepicker('option', 'maxDate', startDate);
+            dt2.datepicker('option', 'minDate', minDate);
+            dt1.datepicker('option', 'maxDate', minDate)
+            //$(this).datepicker('option', 'minDate', minDate);
+        }
+    });
+    $('#EffectiveDateTo').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+    $('#ValuationPlacedDate').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+    //$('#PublishedDate').datepicker({
+    //    dateFormat: "dd/mm/yy"
+    //});
+    //$('#GenerationDate').datepicker({
+    //    dateFormat: "dd/mm/yy"
+    //});
+    $('#ImplementionDate').datepicker({
+        dateFormat: "dd/mm/yy"
+    });
+
+    //    $('.datepicker').datepicker();
+
+
+    function checkTime(i) {
+        if (i < 10) {
+            i = "0" + i;
+        }
+        return i;
+    }
+
+    function startTime() {
+        var today = new Date();
+        var h = today.getHours();
+        var m = today.getMinutes();
+        var s = today.getSeconds();
+        var day = today.getDay().toString();
+        var month = today.getMonth().toString();
+
+        var year = today.getFullYear();
+        // add a zero in front of numbers<10 m=checkTime(m);
+        s = checkTime(s);
+        var mo = month.length < 2 ? '0' + month : month;
+        var d = day.length < 2 ? '0' + day : day;
+
+
+        document.getElementById('date').value = d + "/" + mo + "/" + year;
+        t = setTimeout(function () {
+            startTime()
+        }, 500);
+        //document.getElementById('AgentDate2').value = d + "/" + mo + "/" + year + " " + h + ":" + m + ":" + s;
+        //t = setTimeout(function () {
+        //    startTime()
+        //}, 500);
+    }
+   // startTime();
+</script>
+

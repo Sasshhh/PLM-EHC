@@ -1,0 +1,146 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RCSApplicationStatus>
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    .rowCrit {
+        color: red !important;
+    }
+</style>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        Rates Clearance Certificate
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+
+                <div style="width: 90%; margin: 0 auto;">
+                    <br />
+                    <table id="DepartmentsTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Reference Number
+                                </th>
+                                <th>
+                                    AttorneyCode
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+                                <th>
+                                    Created Date
+                                </th>
+                                @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin") || User.IsInRole("Back Office System Administrator")))
+
+                                {
+                                    <th>Clerk</th>
+                                }
+                                <th>
+
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Customer.AttorneyCode)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Status.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                    </td>
+                                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+
+                                    {
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Data)
+                                        </td>
+                                    }
+                                    <td style="background-color:@item.ColorCode">
+                                    </td>
+                                    <td>
+                                        @if (Request.IsAuthenticated && User.IsInRole("Issue Certificate"))
+                                        {
+                                            @Html.ActionLink("Upload Rates Clearance Certificate", "RCCertificate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                        }
+
+                                        @Html.ActionLink("Application Details", "Details", "Capture", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.Id.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                                        @*@if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                        {
+                                            @Html.ActionLink("Re-Allocate", "RCCertificateReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" });
+                                        }*@
+
+                                        @if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin") || User.IsInRole("Back Office System Administrator")))
+                                        {
+                                            @Html.ActionLink("Re-Allocate Manual", "ManualReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&rrqID=" + item.RoundRobinQueueId + "&ResponsibilityType=" + ResponsibilityTypeKeys.IssueCertificates + "&ViewName=RCCertificateDashboard" + "&TitleName=RCCRedistributionTitle&BodyName=RCCRedistribution") }, new { @class = "btn btn-primary" });
+                                        }
+                                        @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })
+
+
+
+
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+}
+
+
+<script>
+    $(function () {
+        $('#DepartmentsTable').DataTable();
+
+              var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>

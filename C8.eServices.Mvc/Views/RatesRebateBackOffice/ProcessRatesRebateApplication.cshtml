@@ -1,0 +1,1131 @@
+﻿@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.ViewModels
+@using Microsoft.Ajax.Utilities
+@model C8.eServices.Mvc.ViewModels.RatesRebateViewModel
+
+@{
+    ViewBag.Title = "ProcessRatesRebateApplication";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+@*<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />*@
+
+<style>
+
+    .table {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+    body .modal-dialog {
+        width: 800px;
+    }
+
+    #ah1{
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    #ahb1 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    #ah2{
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 12px;
+    }  
+
+        #ahb2{
+        font-weight: bold;
+        font-size: 12px;
+    }  
+</style>
+
+<br />
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Expand/Collapse panels by clicking on their titles. The functions of each panel are as follows :
+                    <ol>
+                        <li>Application Details - View applicant information here</li>
+                        <li>Property Details - A list of all properties associated with the rates rebate application is provided. Select a property by using the drop down  list
+                            The properties details from value assist, adittional owners list and a list of assocaited accounts will be displayed for the respective property. A list of documents 
+                            uploaded pertaining to the selcted property will also be displayed. Click the document name to download and view it. Details of each associated account van be viewed by clicking the 
+                            account number in the accounts table. The details will be displayed in a new window.  </li>
+                        <li>Notes - Add notes, pertaining to the application here by clicking the 'Add Note' button. </li>
+  
+                    </ol>
+                    Set the application status by choosing an option from the 'Application Status' dropdown list and then clicking the 'Save' button.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default ">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <a data-toggle="collapse" href="#applicationdetails">Application Details</a>
+            </div>
+        </div>
+        <div id="applicationdetails" class="panel-collapse collapse">
+            <div class="panel-body">
+                <dl class="dl-horizontal ">
+                    <dt id="ah1">
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicationNumber)
+                    </dt>
+                    <dd id="ahb1">
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicationNumber)
+                    </dd>   
+                    <dt id="ah1">
+                       Applicant Details
+                    </dt>                   
+                    <dd id="ahb1">
+                        &nbsp;
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.TitleType)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.TitleType.Name)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.FullName)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.FullName)
+                    </dd>
+                    <dt>
+                        &nbsp;
+                    </dt>
+                    <dd>
+                        &nbsp;
+                    </dd> 
+                    <dt id="ah2">
+                        Domicillium
+                    </dt>
+                    
+                    <dd id="ahb2">
+                        &nbsp;
+                    </dd>
+
+                    @if (Model.RatesRebate.Domicilium.Address1 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.Address1)
+                        </dt>
+
+                        <dd>
+
+                            @Html.DisplayFor(model => model.RatesRebate.Domicilium.Address1)
+
+                        </dd>
+                    }
+                    @if (Model.RatesRebate.Domicilium.Address2 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.Address2)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.Domicilium.Address2)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.Domicilium.Address3 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.Address3)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.Domicilium.Address3)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.Domicilium.Address4 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.Address4)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.Domicilium.Address4)
+                        </dd>
+                    }
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.Address5)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.Domicilium.Address5)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.Domicilium.AddressCode)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.Domicilium.AddressCode)
+                    </dd>
+                    <dt>
+                        &nbsp;
+                    </dt>
+                    <dd>
+                        &nbsp;
+                    </dd> 
+                    @if (Model.RatesRebate.ApplicantCustomer.PostalAddress3 != null)
+                    {
+                        @*<dt id="ah2">
+                            Postal Address
+                        </dt>
+                            <dd id="ah2">
+                                &nbsp;
+                            </dd>*@
+                        @*<dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress1)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress1)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.PostalAddress2 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress2)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress2)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.PostalAddress3 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress3)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress3)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.PostalAddress4 != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress4)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress4)
+                        </dd>
+                    }
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress5)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress5)
+                    </dd>*@
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PhysicalAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PhysicalAddress)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.PostalAddress)
+                        </dd>
+                    }
+               
+                    <dt>
+                        &nbsp;
+                    </dt>
+                    <dd>
+                        &nbsp;
+                    </dd> 
+                    @*<dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.IdentificationType)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.IdentificationType.Name)
+                    </dd>*@
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.Identification)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.Identification)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.IdentificationNumber)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.IdentificationNumber)
+                    </dd>
+
+                    @if (Model.RatesRebate.ApplicantCustomer.HomePhoneNumber != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.HomePhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.HomePhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.WorkPhoneNumber != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.WorkPhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.WorkPhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.CellPhoneNumber != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.CellPhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.CellPhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.RatesRebate.ApplicantCustomer.EmailAddress != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomer.EmailAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.RatesRebate.ApplicantCustomer.EmailAddress)
+                        </dd>
+                    }
+                    <dt>
+                        @Html.DisplayNameFor(model => model.RatesRebate.InOwnCapacity)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RatesRebate.InOwnCapacity)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IsAgent)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IsAgent)
+                    </dd>
+
+
+                </dl>
+               
+                @* If Application is for Entity *@
+                @*@if (Model.RatesRebate.ApplicantCustomer.CustomerType.Name == CustomerTypeKeys.Entity || Model.RatesRebate.OwnerCustomer.CustomerType.Name == CustomerTypeKeys.Entity)*@
+                @if (Model.Entity != null)
+                {
+             <dl class="dl-horizontal">
+                <dt id="ah1">
+                    Entity Details
+                </dt>
+                 <dd id="ahb1">
+                     &nbsp;
+                 </dd>
+                @if (Model.Entity.EntityFullName != null)
+                {
+                <dt>
+                    @Html.DisplayNameFor(model => model.Entity.EntityFullName)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Entity.EntityFullName)
+                </dd>
+                }
+                @if (Model.Entity.EntityRegistrationNumber != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Entity.EntityRegistrationNumber)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Entity.EntityRegistrationNumber)
+                    </dd>
+        }
+                @if (Model.Entity.EntityRegistrationNumber != null)
+        {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Entity.EntityRegistrationNumber)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Entity.EntityRegistrationNumber)
+                    </dd>
+        }
+
+                @if (Model.Entity.EntityType != null)
+        {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Entity.EntityType.Name)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Entity.EntityType.Name)
+                    </dd>
+        }
+
+
+            </dl>
+                }
+
+
+
+                @* If owner is not customer *@
+                
+                @if (Model.RatesRebate.InOwnCapacity != true)
+                {
+               <dl class="dl-horizontal">
+                         @if (Model.RatesRebate.OwnerCustomer.FirstName != null)
+                         {
+                            <dt id="ah1">
+                                Owner Details
+                            </dt>
+                             <dd id="ahb1">
+                                 &nbsp;
+                             </dd>
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.TitleType)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.TitleType.Name)
+                            </dd>
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.FirstName)
+                            </dt>
+                         
+                             <dd>
+                                 @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.FirstName)
+                             </dd>
+                         }
+                         @if (Model.RatesRebate.OwnerCustomer.LastName != null)
+                         {
+                             <dt>
+                                 @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.LastName)
+                             </dt>
+
+                             <dd>
+                                 @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.LastName)
+                             </dd>
+                         }
+                         @if (Model.RatesRebate.OwnerCustomer.Identification != null)
+                         {
+                             <dt>
+                                 @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.Identification)
+                             </dt>
+
+                             <dd>
+                                 @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.Identification)
+                             </dd>
+                         }
+                   @if (Model.RatesRebate.OwnerCustomer.IdentificationNumber != null)
+                   {
+                       <dt>
+                           @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.IdentificationNumber)
+                       </dt>
+
+                       <dd>
+                           @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.IdentificationNumber)
+                       </dd>
+                   }
+                   <dt>
+                       &nbsp;
+                   </dt>
+                   <dd>
+                       &nbsp;
+                   </dd> 
+                        @if (Model.RatesRebate.OwnerCustomer.PhysicalAddress != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.PhysicalAddress)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.PhysicalAddress)
+                            </dd>
+                        }
+                   @if (Model.RatesRebate.OwnerCustomer.PostalAddress != null)
+                   {
+                       <dt>
+                           @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.PostalAddress)
+                       </dt>
+
+                       <dd>
+                           @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.PostalAddress)
+                       </dd>
+                   }
+                   <dt>
+                       &nbsp;
+                   </dt>
+                   <dd>
+                       &nbsp;
+                   </dd> 
+                        @if (Model.RatesRebate.OwnerCustomer.EmailAddress != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.EmailAddress)
+                            </dt>
+                      
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.EmailAddress)
+                            </dd>
+                        }
+                        @if (Model.RatesRebate.OwnerCustomer.HomePhoneNumber != null)
+                        {
+
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.HomePhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.HomePhoneNumber)
+                            </dd>
+                        }
+                        
+                        @if (Model.RatesRebate.OwnerCustomer.WorkPhoneNumber != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.WorkPhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.WorkPhoneNumber)
+                            </dd>
+                        }
+                        @if (Model.RatesRebate.OwnerCustomer.CellPhoneNumber != null)
+                        {
+
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.CellPhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.CellPhoneNumber)
+                            </dd>
+                        }
+                        @if (Model.RatesRebate.OwnerCustomer.IsDeceased != null)
+                        {
+
+                            <dt>
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomer.IsDeceased)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.RatesRebate.OwnerCustomer.IsDeceased)
+                            </dd>
+                        }
+                        
+                    </dl>
+                        
+                    }
+                    
+                @*@If there are executors*@
+
+                @if (Model.RatesRebate.ExecutorId != null)
+                {
+                        <dl class="dl-horizontal">
+                               @if (Model.RatesRebate.Executor.FirstName != null)
+                               {
+                                <dt id="ah1">
+                                    Executor Details
+                                </dt>
+                                <dd id="ahb1">
+                                    &nbsp;
+                                </dd>
+                                    <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.FirstName)
+                                   </dt>
+
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.FirstName)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.LastName != null)
+                               {
+
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.LastName)
+                                   </dt>
+
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.LastName)
+                                   </dd>
+                               }
+                               @*@if (Model.RatesRebate.ExecutorCustomer.IdentificationType != null)
+                               {
+                                  
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.ExecutorCustomer.IdentificationType)
+                                   </dt>
+
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.ExecutorCustomer.IdentificationType.Name)
+                                   </dd>
+                               }*@
+                               @*@if (Model.RatesRebate.ExecutorCustomer.IdentificationNumber != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.ExecutorCustomer.IdentificationNumber)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.ExecutorCustomer.IdentificationNumber)
+                                   </dd>
+                               }*@
+                               @*@if (Model.RatesRebate.Executor.PostalAddress1!= null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.PostalAddress1)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress1)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.PostalAddress2 != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.PostalAddress2)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress2)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.PostalAddress3 != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.PostalAddress3)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress3)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.PostalAddress4 != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.PostalAddress4)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress4)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.PostalAddress5 != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.PostalAddress5)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress5)
+                                   </dd>
+                               }*@
+                               @if (Model.RatesRebate.Executor.PostalAddressCode != null)
+                               {
+                                   <dt>
+                                      Postal Address
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress1) 
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress2)
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress3)
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress4)
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddress5)
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.PostalAddressCode)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.ContactNumber != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.ContactNumber)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.ContactNumber)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.Executor.EmailAddress != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.Executor.EmailAddress)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.Executor.EmailAddress)
+                                   </dd>
+                               }
+                               @*@if (Model.RatesRebate.ExecutorCustomer.HomePhoneNumber != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.ExecutorCustomer.HomePhoneNumber)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.ExecutorCustomer.HomePhoneNumber)
+                                   </dd>
+                               }
+
+                               @if (Model.RatesRebate.ExecutorCustomer.WorkPhoneNumber != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.ExecutorCustomer.WorkPhoneNumber)
+                                   </dt>
+
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.ExecutorCustomer.WorkPhoneNumber)
+                                   </dd>
+                               }
+                               @if (Model.RatesRebate.ExecutorCustomer.CellPhoneNumber != null)
+                               {
+                                   <dt>
+                                       @Html.DisplayNameFor(model => model.RatesRebate.ExecutorCustomer.CellPhoneNumber)
+                                   </dt>
+                                   <dd>
+                                       @Html.DisplayFor(model => model.RatesRebate.ExecutorCustomer.CellPhoneNumber)
+                                  </dd>
+                               }*@ 
+                           </dl>
+                           }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default ">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <a data-toggle="collapse" href="#PropDetails">Property Details</a>
+            </div>
+        </div>
+        <div id="PropDetails" class="panel-collapse collapse">
+            <div class="panel-body">
+                <div class="row">
+                    <div>
+                        @using (Html.BeginForm())
+                        {
+                            <div class="form-group" style="margin-left: 10px ">
+                                @Html.Label("Property", new { @class = "control-label col-md-2", style ="text-align:right; margin-left: 10px"  })
+                                <div class="col-md-4">
+                                    @Html.DropDownList("Property", ((IEnumerable<SelectListItem>)ViewBag.Props), "Select Property", new { @class = "form-control " })
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div id="PropertyPartial" >
+                    @{ Html.RenderPartial("_PropertyListPartial", new RatesRebatePropertyViewModel());}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="panel-group">
+    <div class="panel panel-default ">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <a data-toggle="collapse" href="#notes">Notes</a>
+            </div>
+        </div>
+        <div id="notes" class="panel-collapse collapse">
+            <div class="dl-horizontal panel-body">
+                <div>
+                    <div style="padding-bottom: 10px">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#notesModal" data-id="" id="test">
+                            Add Note
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modalEmail" data-target="#emailModal" data-id="" id="email">
+                            Send Mail
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modalHistory" data-target="#historyModal" data-id="" id="history">
+                            Application History
+                        </button>
+                    </div>
+                    <div>
+                        <table id="NotesGrid" class="table table-bordered " width="100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Date Created
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                    <th>
+                                        Note
+                                    </th>
+                                    <th> Note Type</th>
+                                    <th> Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using (Html.BeginForm())
+{
+
+    @Html.HiddenFor(model => model.ApplicantCapacityId)
+    @Html.HiddenFor(model => model.ApplicantCustomerId)
+    @Html.HiddenFor(model => model.CurrentCustomerProfileViewModel)
+    @Html.HiddenFor(model => model.OwnerCustomerProfileViewModel)
+    @Html.HiddenFor(model => model.RatesRebate.Id)
+    @Html.HiddenFor(model => model.RatesRebate.Domicilium.Address1)
+    @Html.HiddenFor(model => model.RatesRebate.Domicilium.Address2)
+    @Html.HiddenFor(model => model.RatesRebate.Domicilium.Address3)
+    @Html.HiddenFor(model => model.RatesRebate.Domicilium.Address4)
+    @Html.HiddenFor(model => model.RatesRebate.Domicilium.Address5)
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+
+        <div class="form-group" style="margin-left: 10px">
+            @Html.LabelFor(model => model.RatesRebateStatusId, new { @class = "control-label col-md-2", style = "text-align:right; margin-left: 10px" })
+            <div class="col-md-4">
+                @Html.DropDownListFor(model => model.RatesRebate.StatusId, (SelectList)ViewBag.Statuses, "Select status ...", new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.RatesRebateStatusId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-primary" style="margin-left: 30px" />
+            </div>
+        </div>
+    </div>
+}
+
+
+@* Modal form for creating note*@
+
+<div class="modal fade" id="NotesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("AddNote", "RatesRebateBackOffice", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "note-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCapacityId)
+        @Html.HiddenFor(model => model.RatesRebate.Id)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Add Note</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Notes, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(m => m.Notes, new { htmlattributes = new { @class = "form-control", rows = 10, colulmns = 250, id = "noteEditor"} })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveNote">Save Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@* Modal form for creating email*@
+
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("AddEmail", "RatesRebateBackOffice", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "email-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCapacityId)
+        @Html.HiddenFor(model => model.ApplicantCustomerId)
+        @Html.HiddenFor(model => model.RatesRebate.Id)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create Email</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.Label("Email Address", new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Model.RatesRebate.ApplicantCustomer.EmailAddress
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Notes, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">          
+                            @Html.EditorFor(m => m.Notes, new { htmlattributes = new { @class = "form-control", rows = 10, colulmns = 250 , id = "emailEditor"} })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="sendEmail">Send Email</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+@* Modal form for yes/no note*@
+
+<div class="modal fade" id="NotesOkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("DeleteNote", "RatesRebateBackOffice", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "noteOk-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCapacityId)
+        @Html.HiddenFor(model => model.RatesRebate.Id)
+        @Html.HiddenFor(model => model.RatesRebate)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Delete Note</h4>
+                </div>
+                <div class="modal-body" id="noteToDelete">
+                    Are you sure you want to delete this note ?
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="delNote">Delete Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@* Modal form for history *@
+
+<div class="modal fade" id="HistoryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("ViewHistory", "RatesRebateBackOffice", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "History-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCapacityId)
+        @Html.HiddenFor(model => model.RatesRebate.Id)
+        @Html.HiddenFor(model => model.RatesRebate)
+    <div class="modal-dialog" role="document" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Application History</h4>
+            </div>
+            <div class="modal-body" id="historyText">
+
+                @*<p id="historyText">
+
+            </p>*@
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+
+@section scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+
+
+    <script type="text/javascript">
+        $('#test').on('click', function() {
+            console.log("IN add");
+            $("#noteEditor").val('');
+            $('#NotesModal').modal('show');
+        });
+
+
+        $('#email').on('click', function() {
+            $("#emailEditor").val('');
+            $('#emailModal').modal('show');
+        });
+
+
+        var oTable;
+        $(document).ready(function() {
+
+            oTable = $('#NotesGrid').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("LoadNotes", "RatesRebateBackOffice", new {id = Model.RatesRebate.Id})",
+                    "type": "GET",
+                    "datatype": "json",
+                    "scrollY": "200px",
+                },
+                "columns": [
+                    {
+                        "data": "CreatedDate",
+                        "width": "15%"
+                    },
+                    { "data": "SystemUser", "width": "15%" },
+                    {
+                        "data": "Note",
+                        "width": "25%",
+                        "render": function(data, type, row) {
+                            if (data != null) {
+                                return '<div class="test" style="text-overflow:ellipsis;">' + data + '</div>';
+                            } else {
+                                return '';
+                            };
+                        }
+                    },
+                    { "data": "NoteType", "width": "15%" },
+                    {
+                        "data": "Id",
+                        "title": "Delete",
+                        "render": function(data, type, row) {
+                            if (row.NoteType != "Email") {
+                                return "<button type=\"button\" class=\"btn btn-primary btn-sm\" data-id=\"" + data + "\" id=\"delete" + data + "\">Delete Note</button>";
+                            } else
+                                return "";
+                        },
+                        "autoWidth": true
+
+                    }
+                ],
+                "drawCallback": function(settings) {
+                    $('#NotesGrid tbody td:nth-child(3)').each(function() {
+                        var $td = $(this);
+                        $td.attr('title', $td.text());
+                    });
+                    $('#NotesGrid tbody td[title]').tooltip({
+                        "container": 'body',
+                        'placement': 'top'
+                    });
+                }
+
+            });
+        });
+
+        $(document).on('click', '[id^=delete]', function() {
+            var nId = $(this).attr('data-id');
+            $('#NotesOkModal').modal('show');
+            $('#delNote').on('click', function() {
+                $.ajax({
+                    type: "POST",
+                    dataType: 'html',
+                    url: '@Url.Action("DeleteNote", "RatesRebateBackOffice")',
+                    data: { id: nId }
+                }).success(function(data) {
+                    oTable.ajax.reload();
+                    nId = "";
+                    $('#NotesOkModal').modal('hide');
+                });
+            });
+        });
+
+        $('#saveNote').on('click', function() {
+            var form = $('#note-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddNote", "RatesRebateBackOffice")',
+                data: form.serialize()
+            }).success(function(data) {
+                $("#noteEditor").val('');
+                $('#NotesModal').modal('hide');
+                oTable.ajax.reload();
+            });
+        });
+
+
+        $('#sendEmail').on('click', function() {
+            var form = $('#email-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SendEmail", "RatesRebateBackOffice")',
+                data: form.serialize()
+            }).success(function(data) {
+                $("#emailEditor").val('');
+                $('#emailModal').modal('hide');
+                oTable.ajax.reload();
+            });
+        });
+
+        $('#history').on('click', function() {
+            var form = $('#history-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ViewHistory", "RatesRebateBackOffice", new {id = Model.RatesRebate.Id})',
+                data: form.serialize()
+            }).success(function(data) {
+
+                $('#HistoryModal').modal('show');
+                console.log(data);
+                $("#historyText").html(data);
+            });
+            console.log("IN history");
+
+
+        });
+
+    </script>
+
+    <script>
+        $("#Property").change(function(e) {
+
+            var data = $('#Property').val();
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("Populate", "RatesRebateBackOffice")",
+                dataType: 'html',
+                data: { id: data },
+                success: function(result) {
+                    $('#PropertyPartial').html(result);
+                },
+                error: function(data) {
+                }
+            }); 
+        });
+
+    </script>
+}

@@ -1,0 +1,130 @@
+﻿@model C8.eServices.Mvc.Models.EmailQueueProcessed
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>EmailQueueProcessed</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ApplicationId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ApplicationId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EmailAccountId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EmailAccountId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.QueueDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.QueueDateTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ToList)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ToList)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CcList)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CcList)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BccList)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BccList)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Subject)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Subject)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Body)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Body)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsHtml)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsHtml)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FailureCount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FailureCount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceTypeId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceTypeId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HasAttachments)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HasAttachments)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ProcessedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProcessedDateTime)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.EmailQueueId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

@@ -1,0 +1,221 @@
+﻿@model C8.eServices.Mvc.Models.Customer
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../../Images/calender-4021509_960_720.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+    }
+</style>
+
+<body>
+    <div class="tab">
+        <button class="tablinks" onclick="openCity(event, 'London')">London</button>
+        <button class="tablinks" onclick="openCity(event, 'Paris')">Paris</button>
+        <button class="tablinks" onclick="openCity(event, 'Tokyo')">Tokyo</button>
+
+        <button class="tablinks" onclick="openCity(event, 'Londone')">Londone</button>
+        <button class="tablinks" onclick="openCity(event, 'Parise')">Parise</button>
+        <button class="tablinks" onclick="openCity(event, 'Tokyoe')">Tokyoe</button>
+
+        <button class="tablinks" onclick="openCity(event, 'Londond')">Londond</button>
+        <button class="tablinks" onclick="openCity(event, 'Parisd')">Parisd</button>
+        <button class="tablinks" onclick="openCity(event, 'Tokyod')">Tokyod</button>
+    </div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div id="London" class="tabcontent">
+            <fieldset>
+                <div class="form-horizontal">
+                    <h4>Customer</h4>
+                    <hr />
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IdentificationTypeId, "IdentificationTypeId", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-4">
+                            @Html.DropDownList("IdentificationTypeId", null, htmlAttributes: new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.IdentificationTypeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.FirstName, "First Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-4">
+                            @Html.TextAreaFor(model => model.FirstName, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="md-checkbox">
+                        <label>
+                            <input type="checkbox">
+                            <span>Checkbox 2 (warn)</span>
+                        </label>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p class="mb15">Radios</p>
+
+                        <div class="md-radio md-warn">
+                            <label>
+                                <input type="radio" name="radioDemo">
+                                <span>Banana</span>
+                            </label>
+                        </div>
+                        <div class="md-radio">
+                            <label>
+                                <input type="radio" name="radioDemo">
+                                <span>Mango</span>
+                            </label>
+                        </div>
+                        <div class="md-radio">
+                            <label>
+                                <input type="radio" name="radioDemo">
+                                <span>Orange</span>
+                            </label>
+                        </div>
+                        <div class="md-radio">
+                            <label>
+                                <input type="radio" name="radioDemo">
+                                <span>Pineapple</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Create" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div id="Paris" class="tabcontent">
+            <h3>Paris</h3>
+            <p>Paris is the capital of France.</p>
+        </div>
+
+        <div id="Tokyo" class="tabcontent">
+            <h3>Tokyo</h3>
+            <p>Tokyo is the capital of Japan.</p>
+        </div>
+    }
+
+
+</body>
+
+<script>
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
+
+

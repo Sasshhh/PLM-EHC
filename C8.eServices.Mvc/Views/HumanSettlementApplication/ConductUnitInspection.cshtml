@@ -1,0 +1,254 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+
+        .require::after {
+            content: "*";
+            font-weight: bold;
+            color: red;
+        }
+
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.HumanSettlementApplication.FullName</td>
+                        <td>@Model.HumanSettlementApplication.PurchaserType.Name</td>
+                        <td>@Model.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                        <td>@Model.HumanSettlementApplication.Status.Name</td>
+                        <td>@Model.HumanSettlementApplication.CreatedDateTime</td>
+                        <td>
+                            @Html.ActionLink("View", "Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br />
+    <div class="panel-heading">Conduct Unit Inspection Template</div>
+    <div style="width: 90%;margin: 0 auto;">
+        @Html.Partial("_DocumentsPartialDisplayPLMTemplates", Model.DocumentsViewModelTemplate)
+    </div>
+    <br />
+    <div class="panel-heading">Upload Completed Unit Inspection</div>
+    @Html.Partial("_DocumentsPartialPrePostInspectionHSD", Model.DocumentsViewModel)
+    <br />
+    <div style="width: 90%;margin: 0 auto;">
+        @using (Html.BeginForm("ConductUnitInspection", "HumanSettlementApplication", FormMethod.Post, new { id = "clientInfo-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(c => c.HumanSettlementApplication.Id, new { @Name = "ApplicationId" })
+            @Html.HiddenFor(c => c.HumanSettlementApplication.Data, new { @Name = "Data" })
+            <br />
+            if (ViewBag.ApprovalStatus != null)
+            {
+                <div class="form-group">
+                    @Html.Label("Outcome", htmlAttributes: new { @class = "control-label col-md-1 require" })
+                    <div class="col-md-3">
+                        @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", onchange = "ChangeStatus()", @Name = "ApprovalStatusddl", @required = "required" })
+                        @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            }
+            <br />
+            <div id="divCommentRequired" style="display:none">
+                <div class="form-group">
+                    @Html.Label("Inspection Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                    <div class="col-md-3">
+                        @Html.TextArea("UnitInspectionComment", null, new { @class = "form-control" })
+                        @Html.ValidationMessage("UnitInspectionComment", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+                <br />
+                <br />
+            </div>
+            <br />
+            <br />
+
+            <div id="divbtn" style="display:block">
+                <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                <br />
+                <br />
+                <br />
+            </div>
+        }
+    </div>
+</div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function clickSubmit() {
+        //Swal.fire({
+        //    title: 'Are you sure?',
+        //    text: "You won't be able to revert this!",
+        //    icon: 'warning',
+        //    showCancelButton: true,
+        //    confirmButtonColor: '#3085d6',
+        //    cancelButtonColor: '#d33',
+        //    confirmButtonText: 'Yes, delete it!'
+        //}).then((result) => {
+        //    if (result.value) {
+        //        Swal.fire(
+        //            'Deleted!',
+        //            'Your file has been deleted.',
+        //            'success'
+        //        )
+        //    }
+        //})
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this unit inspection?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+
+                document.getElementById("btnApproval").click();
+            }
+        });
+        ////$(".swal-overlay").css('background-color', 'rgba(50, 170, 145 , 0.45');
+        //swal({
+        //    icon: "info",
+        //    title: "Are you sure you want to submit the following document approval?",
+        //    buttons: [
+        //        'No!',
+        //        'Yes, I am sure!'
+        //    ]
+
+        //}).then(function (isConfirm) {
+        //    if (isConfirm) {
+
+        //        document.getElementById("btnApproval").click();
+        //    }
+        //});
+    }
+
+</script>
+<script>
+    function ChangeStatus() {
+        var statuskey = document.getElementById("ApprovalStatus").value;
+        if (statuskey == "plm_habitable") {
+            $('#divComment').css("display", "block");
+            $('#divCommentRequired').css("display", "none");
+            $("UnitInspectionComment").prop("required", false);
+        } else if (statuskey == "plm_habitable_minor_defects" || statuskey == "plm_not_habitable") {
+            $('#divCommentRequired').css("display", "block");
+            $('#divComment').css("display", "none");
+            $("UnitInspectionComment").prop("required", true);
+        }
+    }
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+
+            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
+             var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }*@
+
+        });
+</script>
+
+

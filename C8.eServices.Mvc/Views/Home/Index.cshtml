@@ -1,0 +1,390 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<style>
+    .row-spaces {
+        margin-top: 30px;
+    }
+
+    .infoPanel {
+        height: 350px;
+    }
+
+    .tbcheader {
+        color: white !important;
+    }
+</style>
+
+@if (ViewBag.Status != null)
+{
+    <div>
+        <div class="alert alert-success">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> @ViewBag.Status.
+        </div>
+    </div>
+}
+
+@*<div class="form-group">
+
+    <div class="alert alert-danger col-md-12" id="AMYAlert" style="display:block;margin-left: 15px;">
+        <p>
+            <h4>
+                Please be advised that the call centre service is not available due to technical issues.<br /> This notice will be removed when the call centre service is available.<br>
+                In the interim please utilise the Siyakhokha support email address: siyakhokha@ekurhuleni.gov.za.<br>
+                We apologise for any inconvenience caused.
+            </h4>
+</p>
+    </div>
+</div>
+<br>*@
+@section Banners {
+    <div id="carousel-main" class="carousel slide" data-ride="carousel" style="
+    margin-top: -2%;">
+        <ol class="carousel-indicators">
+            <li data-target="#carousel-main" data-slide-to="0" class="active"></li>
+            <li data-target="#carousel-main" data-slide-to="1"></li>
+            <li data-target="#carousel-main" data-slide-to="2"></li>
+            <li data-target="#carousel-main" data-slide-to="3"></li>
+            <li data-target="#carousel-main" data-slide-to="4"></li>
+            <li data-target="#carousel-main" data-slide-to="5"></li>
+            <li data-target="#carousel-main" data-slide-to="6"></li>
+            <li data-target="#carousel-main" data-slide-to="7"></li>
+            <li data-target="#carousel-main" data-slide-to="8"></li>
+        </ol>
+
+        <div class="carousel-inner">
+            <div class="item active">
+                <a href="#">
+                    <img src="~/Content/Images/germiston-lake-banner.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner01.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner02.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner03.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner04.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner05.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner06.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner01.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+            <div class="item">
+                <a href="#">
+                    <img src="~/Content/Images/banner02.jpg" />
+                </a>
+                @*<div class="carousel-caption">
+                    </div>*@
+            </div>
+        </div>
+
+        <a class="left carousel-control" href="#carousel-main" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+        </a>
+        <a class="right carousel-control" href="#carousel-main" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </a>
+    </div>
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            @*<img src="~/Content/Images/ethekwini_header.jpeg" height="125" />*@
+            <h1 class="page-header">
+                City of Ekurhuleni
+            </h1>
+        </div>
+
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 400px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">What is Siyakhokha</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Siyakhokha is the City of Ekurhuleni’s online system, designed to make it faster and easier to interact with the City. We are proud to introduce an efficient and effective online service for your own convenience.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 400px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">How to use Siyakhokha</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        1.	Access the Website <a href="https://siyakhokha.ekurhuleni.gov.za">Siyakhokha</a>
+                        <br />2.	@Html.ActionLink("Register", "Register", "Account") on the Siyakhokha Portal
+                        <br />3.	Complete the Registration Form
+                        <br />4.	Activate your profile via Email link or SMS Activation Code
+                        <br />5.	@Html.ActionLink("Login", "Login", "Account") to the Siyakhokha Portal
+                        <br />6.	Update your Profile Details
+                        <br />7.	Link your Municipal Accounts
+                        <br />8.	Add your Banking Details
+                        <br />9.	View your Municipal Statements
+                        <br />10.	Make Payment for your Municipal Account (Once-Off Payment/ Recurring Debit Order/ Masterpass)
+                        <br />11.	View Payment History/Status
+                        <br />12.	View Consumption (Water/ Electricity)
+                        <br />13.	Log a Complaints/ Compliments
+                    </p>
+
+                    @*<p>
+                            Each page in Siyakhokha has an expandable Instruction panel to help you.
+                            <br />
+                            <br />
+                            <strong>NB.</strong> It is important to respond to any activation email sent by Siyakhokha.
+                        </p>*@
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 400px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Siyakhokha Benefits</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Siyakhokha offers our residents, businesses, government, and the City, the convenience of online services, while at the same time reducing the carbon footprint, and saving time and money.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height:250px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Service Benefits</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Siyakhokha makes it easy to receive, pay an account anytime and anywhere - 24/7/365. Queries can be lodged, your account history checked and much more. Siyakhokha ensures that our customers do not stay in long queues and be able to interact with City at their own pace.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height:250px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Payment Benefits</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        It is convenient and payment is made on a secure site. Payment confirmation is received immediately. However, payments made through online banking reflects within 48 hours.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height:250px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">One-stop to receive & pay your accounts</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Anyone can securely pay their bill/s from the City’s Siyakhokha service. Choose from a wide variety of secure payments - instructed debit, credit/debit card, Standard Bank MyBills and Nedbank My eBills.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">For our customers</h4>
+                </div>
+                <div class="panel-body">
+
+
+                    <p>
+                        <ul>
+                            <li>No more waiting in queues, finding parking or worrying about office hours.</li>
+                            <li>Convenience of checking your account and making payment anytime and anywhere - 24 hours a day, 7 days a week, 365 days a year.</li>
+                            <li>Full history and reporting of statements, payments and electronic correspondence at the click of a button.</li>
+                            <li>Reliable, guaranteed delivery with fully authenticated confirmation for each communication and payment.</li>
+                            <li>Completely paperless and almost instantaneous communication with the City.</li>
+                            <li>Increased quality of service through faster turnaround time on queries and responses.</li>
+                            <li>Improved accuracy of customer records and transactions assist in speedier resolution.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">More For our customers</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <ul>
+
+                            <li>Customers can easily correct/update their information that ensures better communication with the City.</li>
+                            <li>Additional payment methods and payment points.</li>
+                            <li>Electronically delivered statements with notification of statement delivery.</li>
+                            <li>Electronic reconciliation of payments against invoices/statements into our billing system ensures customer services are not terminated erroneously.</li>
+                            <li>Increased efficiency and reduced turnaround times on the processing of payments made to the City.</li>
+                            <li>Improved service levels by ensuring that all electronic payments are updated and reconciled to the correct accounts.</li>
+                            <li>Payment and statement history allows for track and trace functionality and flow of funds for all Siyakhokha payments.</li>
+
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">For the City</h4>
+                </div>
+                <div class="panel-body">
+
+                    <p>
+                        <ul>
+                            <li>Improved debt collections and reduced debtors days provides better funding to improve services.</li>
+                            <li>Improved account reconciliation reduces errors and costs.</li>
+                            <li>Faster query resolution.</li>
+                            <li>Reduction in costs related to termination/reconnection of services caused by payment delays and errors in referencing.</li>
+                            <li>Reduced turnaround between distribution of bill and payment.</li>
+                            <li>Reduced bank charges and third party service fees.</li>
+                            <li>Savings on postage and printing costs, thus reducing our carbon footprint.</li>
+                            <li>Personnel cost savings as staff are better utilised to offer pro-active service to consumers.</li>
+                            <li>Updated and accurate information provided from ratepayers.</li>
+
+                        </ul>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Service Security</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        The Siyakhokha team has made every effort to ensure that your personal and business information is protected by using the highest forms of browser security available today. The site is secured by Thawte Consulting cc, which ensures the security certificates generated by the site are valid and secure. Every time a Siyakhokha user connects to the site, an encrypted and completely secure connection is made between your browser and the Siyakhokha servers, ensuring that your Siyakhokha experience is safe and secure. When accessing the Siyakhokha site, look for the "s" in https:// at the beginning of the Siyakhokha Services web address https://Siyakhokha.Ekurhuleni.gov.za/, and (on most browsers) the golden lock symbol padlock will appear in the address bar. Visitors and users need only ensure the address typed in to access the site is the correct website address, and that there is a lock symbol on their browser. For more information on privacy and security, please refer to our terms and conditions.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Lodge a Complaint</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Siyakhokha offers the capability to lodge a query or complaint that will be routed to an agent for either web query response, or service/complaint resolution. Please use the appropriate option. Users must be registered to use this service as all contacts are linked to a municipal account for better tracking and management. Please register for the service or if you are already registered login to lodge a complaint. If you have received excellent service you can also use this service to compliment our staff or service. We appreciate all feedback.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default infoPanel" style="height: 500px;">
+                <div class="panel-heading">
+                    <h4 class="text-center tbcheader">Contact us</h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Siyakhokha Support Desk:<strong> 011 999 5102</strong>
+                    <p>
+                        Siyakhokha Support Email:<strong> <a href="mailto: siyakhokha@ekurhuleni.gov.za">siyakhokha@ekurhuleni.gov.za</a></strong>
+                    </p>
+                    </p>
+                    <h3>
+                        <b> Office Hours:</b>
+                    </h3>
+                    <p>
+                        Monday to Friday:<strong> 08:00 to 17:00</strong>
+                    <p>
+                        Saturdays and Sundays:<strong> 08:00 to 13:00</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (ViewBag.ShowUpdate.Equals(true))
+    {
+        <div class="row">
+            <div class="panel-group" id="updatesPanel">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseNews">
+                                <span>Siyakhokha Updates</span>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseNews" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="control-label col-sm-2">@ViewBag.UpdateTime</label>
+                                <div class="col-sm-10">
+                                    @ViewBag.UpdateMessage
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('#carousel-main').removeClass("container");
+    });
+</script>

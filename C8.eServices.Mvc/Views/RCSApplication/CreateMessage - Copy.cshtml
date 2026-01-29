@@ -1,0 +1,72 @@
+﻿
+@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.CommunicationViewModel
+@{
+    ViewBag.Title = "CreateMessage";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<center>
+    <h2>Application Comments </h2>
+</center>
+<head>
+    <style>
+        body {
+            font-size: 14px !important;
+            font-family: "Arial" !important;
+            color: black !important;
+        }
+
+        header {
+            line-height: 0px !important;
+        }
+        img {
+    width: 99px !important;
+    height: 60px !important;
+    margin: -30px !important;
+}
+    </style>
+</head>
+
+@*@{ Html.RenderAction("MessageTimeline"); }*@
+@{
+    Html.RenderAction("MessageTimeline", "RCSApplication", new { RCSApplicationID = Model.Communications.RCSApplicationStatusId, CommunicationType = Model.Communications.CommunicationTypeId});
+}
+
+<body>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Communications.RCSApplicationStatusId, new {@style = "width:100%;", @class = "form-control"@*, @Value = ViewBag.Id*@ })
+        @Html.HiddenFor(model => model.Communications.CommunicationTypeId, new { @style = "width:100%;", @class = "form-control"@*, @Value = ViewBag.Id*@ })
+
+        <div class="form-horizontal">
+            <center>
+                <h4>Message to Back Office</h4>
+            </center>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Comments.Comments, "Type a message", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-8">
+                    @Html.TextAreaFor(model => model.Comments.Comments, new { @cols = "100", @rows = "8", @style = "width:100%;", @class = "form-control", @required = "required" })
+                    @Html.ValidationMessageFor(model => model.Comments.Comments, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Send" class="button1" />
+                </div>
+            </div>
+
+        </div>
+    }
+
+</body>
+
+

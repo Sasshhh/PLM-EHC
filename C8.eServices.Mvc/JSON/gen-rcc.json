@@ -1,0 +1,94 @@
+{
+
+  "SolarERP": {
+
+    "Header": {
+
+      "Version": "3.1",
+
+      "TimeStamp": "{1}",
+
+      "CorrelationID": "{2}",
+
+      "TransactionID": "{3}",
+
+      "MessageID": "{4}",
+
+      "SenderID": " RCS",
+
+      "ReceipientID": "Solar Revenue",
+
+      "Action": "query",
+
+      "SolarUser": "SOLARBPI",
+
+      "Message": {
+
+        "Name": "Gen RCC",
+
+        "Type": "Request"
+
+      },
+
+      "Result": {
+
+        "Status": "Success",
+
+        "ErrorCode": "",
+
+        "ErrorDescription": ""
+
+      },
+
+      "Context": [
+
+        {
+
+          "Property": {
+
+            "Name": "",
+
+            "Value": ""
+
+          }
+
+        }
+
+      ]
+
+    },
+
+    "Payload": {
+      "LookupRoutine": "WBS5012D",
+      "UserId": "SOLARBPI",
+      "Input": [
+        {
+          "AccountNumber": "{0}"
+        },
+        {
+          "ClearanceDate": 0
+        }
+
+      ]
+    }
+
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

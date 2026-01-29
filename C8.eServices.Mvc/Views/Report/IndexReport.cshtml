@@ -1,0 +1,363 @@
+﻿@*@model C8.eServices.Mvc.ViewModels.ConsumptionViewModel*@
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Generate Reports</h4>
+
+@*<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+
+            <div class="panel-body">
+                <p>To view your utility consumption</p>
+                <p>1. Select the dropdown  <strong>“Meter Type”</strong>, and choose between Water and Electricity to view the consumption.</p>
+                <p>2. Select the dropdown <strong>“Account No.”</strong>, and select the account to view the consumption.</p>
+                <p>3. Enter the Start Date.</p>
+                <p>4. Enter the End Date.</p>
+                <p>5. Click Show when done.</p>
+
+            </div>
+        </div>
+    </div>
+</div>*@
+
+<div class="panel-group" id="newConsumption">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                    <span>Generate Report for Specific Period</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                    @ViewBag.AccountsMessage
+                    <p id="ErrCon"></p>
+                </div>
+                <div class="form-horizontal">
+                    @*<div class="col-md-12">*@
+                    <form class="">
+                        <div class="row">
+
+                            <div class="col-xs-3">
+                                <label class="control-label">Start Date </label>
+
+                            </div>
+                            <div class="col-xs-3">
+                                <label class="control-label">End Date </label>
+
+                            </div>
+                            <div class="col-xs-2">
+
+
+                            </div>
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-xs-3">
+
+                                @Html.TextBox("startDate", "Select Date", new { @class = "form-control", @id = "startDate" })
+                            </div>
+                            <div class="col-xs-3">
+
+                                @Html.TextBox("endDate", "Select Date", new { @class = "form-control", id = "endDate" })
+                            </div>
+                            <div class="col-xs-2" style="padding-top:0px">
+                                <button id="submitDownloadDRReport" type="button" class="btn btn-primary">Generate Download Link</button>
+                            </div>
+
+                        </div>
+                    </form>
+                    @*</div>*@
+                    <br />
+                    <div class="row">
+                        <table data-toggle="table" data-pagination="true" data-page-size="20" class="table table-bordered table-hover table-striped panel panel-default" id="MultiplePDFLinks">
+                            <thead>
+                                <tr>
+                                    <th data-field="IdentificationNumber">
+                                        Report Name
+                                    </th>
+
+                                    <th data-field="EmailAddress">
+                                        PDF Download Link
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="MultipleLinksTBL"></tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="newSRDConsumption">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                    <span>Generate Siyakhokha Statistics Report</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                    @ViewBag.AccountsMessage
+                    <p id="ErrCon"></p>
+                </div>
+                <div class="form-horizontal">
+                    @*<div class="col-md-12">*@
+                    <form class="">
+                        <div class="row">
+                            @*<div class="col-xs-2" style="padding-top:0px">
+                                <button id="submitStatReport" type="button" class="btn btn-primary">Generate Download Link</button>
+                            </div>*@
+                            <ul class="list-inline">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <li>@Html.ActionLink("Download Report", "GenerateDetailedReport", "Report", new { @class = "btn btn-primary" })</li>
+                                <li></li>
+                            </ul>
+                        </div>
+                    </form>
+                    @*</div>*@
+                    @*<br />
+                    <div class="row">
+                        <table data-toggle="table" data-pagination="true" data-page-size="20" class="table table-bordered table-hover table-striped panel panel-default" id="MultipleSRLinks">
+                            <thead>
+                                <tr>
+                                    <th data-field="IdentificationNumber">
+                                        Report Name
+                                    </th>
+
+                                    <th data-field="EmailAddress">
+                                        PDF Download Link
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="MultipleSRLinksTBL"></tbody>
+
+                        </table>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+@section Scripts {
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+
+        $('#startDate').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            onSelectDate: function (dt, i) {
+                $('#endDate').datetimepicker({
+                    format: 'Y/m/d',
+                    minDate: dt,
+                    maxDate:0,
+                    timepicker: false
+                });
+            }
+        });
+
+        function convertToDate(data) {
+            @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+            var dtStart = new Date(parseInt(data.substr(6)));
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        function formatDate(data) {
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(data);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+    </script>
+    <script type="text/javascript">
+
+        @*$(function () {
+            $("#submitDownloadDRReport").click(function () {
+                var startDate = $('#startDate').val();
+                var endDate = $('#endDate').val();
+                var date1 = $('#startDate').val();
+                var date2 = $('#endDate').val();
+                date1 = date1.split('/');
+                date2 = date2.split('/');
+                date1 = new Date(date1[0], date1[1], date1[2]);
+                date2 = new Date(date2[0], date2[1], date2[2]);
+                date1_unixtime = parseInt(date1.getTime() / 1000);
+                date2_unixtime = parseInt(date2.getTime() / 1000);
+                var timeDifference = date2_unixtime - date1_unixtime;
+                var timeDifferenceInHours = timeDifference / 60 / 60;
+                var timeDifferenceInDays = timeDifferenceInHours / 24;
+                var data = "{ 'meterType': '" + meterType + "', 'accountNumber': '" + accountNumber + "', 'startDate': '" + startDate + "', 'endDate': '" + endDate + "' }";
+
+                if (startDate != "Select Date" && endDate != "Select Date") {
+                    $('#associatedAlert').hide();
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GenerateDateRangeReport", "Report")",
+                        data: data,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (dataPoints) {
+                            if (dataPoints != null) {
+                                var dp = $.parseJSON(dataPoints);
+
+                                var options = {
+                                    animationEnabled: true,
+                                    title: {
+                                        text: "Meter Consumption - " + @DateTime.Now.Year
+                                    },
+                                    axisY: {
+                                        title: "Consumption",
+                                        includeZero: false
+                                    },
+                                    axisX: {
+                                        title: "Dates"
+                                    },
+                                    data: [{
+                                        type: "column",
+                                        dataPoints: dp
+                                    }]
+                                };
+
+                                $("#chartContainer").CanvasJSChart(options);
+                            } else {
+                                alert("No consumption data found.");
+                            }
+                        },
+                        failure: function (response) {
+                            //alert('f: ' + response.responseText);
+                            alert("Date range is out of bounds")
+                        },
+                        error: function (response) {
+                            //alert('e: ' + response.responseText);
+                            alert("No consumption data found. Please check your date range is correct.");
+                        }
+                    });
+                }
+                else {
+                    document.getElementById("ErrCon").innerHTML = "";
+                    if (meterType == "" ||accountNumber == "" || startDate == "Select Date"||endDate == "Select Date") {
+                    if (meterType =="") {
+                        document.getElementById("ErrCon").innerHTML += "Please select a Meter Type.<br/>";
+                    }
+                    if (accountNumber =="" ) {
+                        document.getElementById("ErrCon").innerHTML += "Please select an Account No.<br/>";
+                    }
+                    if (startDate == "Select Date") {
+                        document.getElementById("ErrCon").innerHTML += "Please select a Start Date.<br/>";
+
+                    }
+                    if (endDate == "Select Date") {
+                        document.getElementById("ErrCon").innerHTML += "Please select an End Date.<br/>";
+
+
+                        }
+                        }
+                    else {
+                        document.getElementById("ErrCon").innerHTML += "Please select a date range that is more than a month.<br/>";
+
+                    }
+                    $('#associatedAlert').show();
+                }
+            });
+        });*@
+        $('#submitDownloadDRReport').on('click', function () {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+        //    if (startDate == "" || startDate == null) {
+        //    $("#AccAlert").show();
+        //    $("#YearAlert").hide();
+        //    $("#MonAlert").hide();
+        //}
+        //else if (Year == "" || Year == null || Year > currentYear) {
+        //    $("#AccAlert").hide();
+        //    $("#YearAlert").show();
+        //    $("#MonAlert").hide();
+        //}
+        //else if (Month == "0" || Month == null)
+        //{
+        //    $("#MonAlert").show();
+        //    $("#AccAlert").hide();
+        //    $("#YearAlert").hide();
+        //}
+        //else {
+        //    $("#AccAlert").hide();
+        //    $("#YearAlert").hide();
+        //    $("#MonAlert").hide();
+            var ur = "";
+        var Item = "";
+
+        var old_tbody = document.getElementById('MultipleLinksTBL');
+        var new_tBody = document.createElement('tbody');
+        new_tBody.setAttribute("id", "MultipleLinksTBL");
+        var currMonth =@DateTime.Now.Month;
+        var currYear=@DateTime.Now.Year;
+            url = '@Url.Action("GenerateDateRangeReport", "Report")?startDate=' + startDate + '&endDate=' + endDate;
+           Item = '<tr><td> Siyakhokha Date Comparision Report</td><td><a href=\"' + url + '\" class=\"download\"></a></td></tr>';
+            new_tBody.innerHTML += Item;
+            old_tbody.parentNode.replaceChild(new_tBody, old_tbody);
+      // window.open(url, target = "_blank"); target=\"_blank\"
+        //}
+        });
+
+        $('#submitStatReport').on('click', function () {
+            var ur = "";
+        var Item = "";
+
+        var old_tbody = document.getElementById('MultipleSRLinksTBL');
+        var new_tBody = document.createElement('tbody');
+        new_tBody.setAttribute("id", "MultipleSRLinksTBL");
+        var currMonth =@DateTime.Now.Month;
+        var currYear=@DateTime.Now.Year;
+            url = '@Url.Action("GenerateDetailedReport", "Report")';
+           Item = '<tr><td> Siyakhokha Statistics Report</td><td><a href=\"' + url + '\" class=\"download\"></a></td></tr>';
+            new_tBody.innerHTML += Item;
+            old_tbody.parentNode.replaceChild(new_tBody, old_tbody);
+      // window.open(url, target = "_blank"); target=\"_blank\"
+        //}
+        });
+        
+    //function resetControls() {
+    //    $('#MunicipalAcc').val("");
+    //    $('#StatemYear').val("");
+    //    $("#MultipleLinksTBL").html("");
+    //    $("#StatemMon").val("0");
+    // //   var old_tbody = document.getElementById('MultipleLinksTBL');
+    //    //var new_tBody = document.createElement('tbody');
+    //    //new_tBody.setAttribute("id", "MultipleLinksTBL");
+    //}
+    //$(function () {
+
+    //    $('#btnReset').on('click', function () {
+    //        resetControls();
+    //    });
+    //});
+    </script>
+}

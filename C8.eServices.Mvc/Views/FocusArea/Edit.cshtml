@@ -1,0 +1,129 @@
+﻿@model C8.eServices.Mvc.Models.FocusArea
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Edit Focus Area</h4>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                          Focus Area Information
+                        </a>
+                    </h4>
+                </div>
+                <br/>
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.IsActive)
+        @Html.HiddenFor(model => model.IsDeleted)
+        @Html.HiddenFor(model => model.IsLocked)
+        @Html.HiddenFor(model => model.CreatedBySystemUserId)
+        @Html.HiddenFor(model => model.CreatedDateTime)
+        @Html.HiddenFor(model => model.ModifiedBySystemUserId)
+        @Html.HiddenFor(model => model.ModifiedDateTime)
+        @Html.HiddenFor(model => model.Key)
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FocusAreaName, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.FocusAreaName, new {@class="form-control"})
+                @Html.ValidationMessageFor(model => model.FocusAreaName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FocusAreaDescription, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.FocusAreaDescription, new {@class="form-control"})
+                @Html.ValidationMessageFor(model => model.FocusAreaDescription)
+            </div>
+        </div>
+
+       @* <div class="form-group">
+            @Html.LabelFor(model => model.Key, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Key)
+                @Html.ValidationMessageFor(model => model.Key)
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsActive, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsActive)
+                @Html.ValidationMessageFor(model => model.IsActive)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsDeleted, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsDeleted)
+                @Html.ValidationMessageFor(model => model.IsDeleted)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsLocked, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsLocked)
+                @Html.ValidationMessageFor(model => model.IsLocked)
+            </div>
+        </div>
+
+        @*<div class="form-group">
+            @Html.LabelFor(model => model.CreatedBySystemUserId, "CreatedBySystemUserId", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("CreatedBySystemUserId", String.Empty)
+                @Html.ValidationMessageFor(model => model.CreatedBySystemUserId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreatedDateTime, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreatedDateTime)
+                @Html.ValidationMessageFor(model => model.CreatedDateTime)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ModifiedBySystemUserId, "ModifiedBySystemUserId", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("ModifiedBySystemUserId", String.Empty)
+                @Html.ValidationMessageFor(model => model.ModifiedBySystemUserId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ModifiedDateTime, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ModifiedDateTime)
+                @Html.ValidationMessageFor(model => model.ModifiedDateTime)
+            </div>
+        </div*@>
+
+        <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index",null,new{@class= "btn btn-primary"})
+</div>

@@ -1,0 +1,329 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.EmisCaseViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>EMIS Cases - Issue Reporting</h4>
+
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>Select <strong> Associated Accounts </strong> to view accounts currently associated to your profile/ID Number and link them</p>
+                <p>1.  A list of accounts associated with your profile/ID Number will be displayed in the <strong>Account Number</strong> drop down list. Select the account you wish to link</p>
+                <p>2.  Select the type of email recipient eg. Primary, Carbon Copy etc. from the <strong>Recipient Type</strong> dropdown list  </p>
+                <p>3.  If you selected Primary Email the <strong>Email Address</strong> field will automatically be populated with the email address from your profile.
+                <p>4.  If any of the other Recipient Types were selected you will need to enter an email address in the <strong>Email Address</strong> field
+                <p>5.  Click <strong>Submit</strong> when done
+
+                <p>Select <strong>Unassociated Accounts</strong> to link accounts that are not associated with your profile/ID Number</p>
+                <p>1.  Enter the account number of the account you wish to link in the <strong>Account Number</strong> field and click the <strong>Verify Account</strong> button
+                <p>2.  If the account number is valid a green tick will appear next to the <strong>Account Number</strong> textbox. If a red cross appears return to step 1.
+                <p>3.  Select the type of email recipient eg. Primary, Carbon Copy etc. from the <strong>Recipient Type</strong> dropdown list  </p>
+                <p>4.  If you selected Primary Email the <strong>Email Address</strong> field will automatically be populated with the email address from your profile.</p>
+                <p>
+                    5.  If any of the other Recipient Types were selected you will need to enter each email address in the <strong>Email Address</strong> field followed by a space. Each email entered will be validated. If the email entered is not valid, a red outline will appear on the field.
+                    Please note activation emails will only be sent out to valid email addresses.
+                <p>6.  Once all fields has been entered, click <strong>Submit</strong>. A response bar will appear, indicating if the Bank account was added successfully or not.
+                <p>7.  Once Bank account has been successfully saved, A copy of your ID document and letter of authority will need to be uploaded. Do this by clicking the <strong>"Upload documentation"</strong> link.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="casesPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Current Bank Accounts</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="casesTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Case No.
+                        </th>
+                        <th>
+                            Department
+                        </th>
+                        <th>
+                            Call Type
+                        </th>
+                        <th>
+                            Description
+                        </th>
+                        <th>
+                            Street
+                        </th>
+                        <th>
+                            Created On
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("Index", "EmisCase", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.EmisCase.Id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="panel-group" id="newLinkedAccount">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                        <span>Create an EMIS case - Report an issue</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                        @ViewBag.CasesMessage
+                    </div>
+                    <div class="form-horizontal">
+
+                        @*<div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.CaseNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.CaseNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.EmisCase.CaseNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>*@
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.Department, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.EmisCase.Department, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.Department, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.Division, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.Division, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.Division, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.Category, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.Category, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.Category, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.CallType, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.CallType, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.EmisCase.CallType, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.Description, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.StreetNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.StreetNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.EmisCase.StreetNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.StreetName, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.StreetName, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.StreetName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.Township, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.Township, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.Township, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.TelephoneNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.TelephoneNumber, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.TelephoneNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmisCase.NearestCCC, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.EmisCase.NearestCCC, new { htmlAttributes = new { @class = "form-control"} })
+                                @Html.ValidationMessageFor(model => model.EmisCase.NearestCCC, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="submitBtn" type="submit" value="Submit" class="btn btn-primary" />
+                                <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadOrders() {
+            $('#ordersTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadCases", "EmisCase", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "CaseNumber", "autoWidth": true },
+                    { "data": "Department", "autoWidth": true },
+                    { "data": "CallType", "autoWidth": true },
+                    { "data": "Description", "autoWidth": true },
+                    { "data": "Street", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    }
+                    //{
+                    //    "data": "Data",
+                    //    "title": "",
+                    //    "render": function (data, type, row) {
+                    //        //var edit = '<a id=\"editOrder\" href=\"#\" onclick=\"getDebitOrder(\'' + data + '\');\"><span class=\"glyphicon glyphicon-edit\"></span></a>';
+                    //        //var remove = '<a id=\"removeOrder\" href=\"#\" onclick=\"deleteItem(\'' + data + '\');\"><span class=\"glyphicon glyphicon-remove\"></span></a>';
+                    //        return ''; //edit + '&nbsp;' + remove;
+                    //    }
+                    //}
+                ],
+                "language": {
+                    "emptyTable": "No EMIS cases.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function getDebitOrder(data) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LoadOrder", "DebitOrder")?q=" + data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response != null) {
+                        $("#DebitOrder_Id").val(response.data.Id);
+                        $("#BankAccountDdl").val(response.data.BankAccountId);
+                        $("#AccountDdl").val(response.data.AccountId);
+                        $("#DebitOrder_Amount").val(response.data.Amount);
+                        $("#DebitOrder_StrikeDay").val(response.data.StrikeDay);
+                        $("#DebitOrder_StartDateTime").val(convertDate(response.data.StartDateTime));
+                        $("#DebitOrder_IsRecurring").prop("checked", response.data.IsRecurring);
+                    } else {
+                        alert("Unfortunately there is no such debit order in the system.");
+                    }
+                },
+                failure: function (response) {
+                    alert('f: ' + response.responseText);
+                },
+                error: function (response) {
+                    alert('e: ' + response.responseText);
+                }
+            });
+        }
+
+        function deleteItem(data) {
+            if (confirm("Are you sure?")) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("DeleteOrder", "DebitOrder")?q=" + data,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+            }
+
+            loadOrders();
+            return false;
+        }
+
+        function resetControls() {
+            $("#EmisCase_Id").val("");
+            $("#EmisCase_CaseNumber").val("");
+            $("#EmisCase_Department").val("");
+            $("#EmisCase_Division").val("");
+            $("#EmisCase_Category").val("");
+            $("#EmisCase_CallType").val("");
+            $("#EmisCase_Description").val("");
+            $("#EmisCase_StreetNumber").val("");
+            $("#EmisCase_StreetName").val("");
+            $("#EmisCase_Township").val("");
+            $("#EmisCase_TelephoneNumber").val("");
+            $("#EmisCase_NearestCCC").val("");
+        }
+
+        $(function () {
+            loadOrders();
+
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        });
+
+    </script>
+
+}
+

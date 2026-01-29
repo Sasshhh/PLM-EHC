@@ -1,0 +1,331 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.LinkedAccount>
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Keys
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var db = new eServicesDbContext();
+    var listItems = new List<ListItem> { new ListItem { Text = "Excel", Value = "Excel" },
+                                         new ListItem { Text = "Word", Value = "Word" },
+                                         new ListItem { Text = "PDF", Value = "PDF" }};
+    var reportTypeKey = ReportTypeKeys.CustomerLinkedAccount;
+}
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <strong>@TempData["Success"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <strong>@TempData["Error"].ToString()</strong>
+    </div>
+}
+
+<h4>@ViewBag.LinkedAccountsType</h4>
+<hr />
+
+@if (@ViewBag.LinkedAccountsType == "Pending Linked Accounts")
+{
+    <div class="panel-group" id="pendingInstructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#pendingCollapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="pendingCollapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>Pending Linked Accounts allows the Administrator/Super Administrator to link (approve) and view customer linked account details. Please see steps below explaining each action.</p>
+                    <p>1. "Details" - Allows the Administrator/Super Administrator to view the customer linked account details. Once clicked it will redirect to the Link Account Details page, where it show the summary of the customer account details, the documents uploaded by the customer and any linked emails for that linked account.</p>
+                    <p>2. "Link Account" - Allows the Administrator/Super Administrator to link an account to the customer. Once clicked it will process that linked account and then refresh the table list.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="panel-group" id="activeInstructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#activeCollapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="activeCollapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>Active Linked Accounts allows the Administrator/Super Administrator to unlink and view customer linked account details. Please see steps below explaining each action.</p>
+                    <p>1. "Details" - Allows the Administrator/Super Administrator to view the customer linked account details. Once clicked it will redirect to the Link Account Details page, where it show the summary of the customer account details, the documents uploaded by the customer and any linked emails for that linked account.</p>
+                    <p>2. "Unlink" - Allows the Administrator/Super Administrator to unlink an account to the customer. Once clicked it will redirect to the Unlink Account page, where it show a summary of that linked account and request for confirmation to unlink the account. Once the "Unlink" button is clicked, it will unlink the account and redirect to the Pending Linked Accounts page.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Linked Account Details
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="fixed-table-toolbar">
+                    <div class="pull-left">
+                        <input type="text" id="startDate" class="form-control" />
+                    </div>
+                    <div class="pull-left">
+                        <input type="text" id="endDate" class="form-control" />
+                    </div>
+                    <div class="pull-left">
+                        &nbsp;
+                        <button id="btnFilter" class="btn btn-primary">Filter</button>
+                    </div>
+                    @if (ViewBag.ShowNotification.Equals(true))
+                    {
+                        <div class="pull-left" id="accountHistoryGrp">
+                            &nbsp;
+                            <strong>**Last 6 Months Linked accounts history is loaded. Modify dates if you require further than 6 months. </strong>
+                        </div>
+                    }                    
+                </div>
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnReset" class="btn btn-primary">Reset</button>
+                </div>
+                <div style="float: right">
+                    @Html.DropDownList("format", new SelectList(listItems), "Export To", new { @class = "btn-primary form-control col-md-2 BoToDoHide", id = "format" })
+                </div>
+                <div style="clear: both"></div>
+                <table id="linkedAccountsTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadLinkedAccounts", "LinkedAccount", new { id = @ViewBag.LinkedAccountTypeId })"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="50"
+                       data-height="1400"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="IDNumber">ID Number/Business Reg Number</th>
+                            <th data-field="AccountNumber">Account Number</th>
+                            <th data-field="DateCreated">Date Created</th>
+                            <th data-field="DateModified">Date Modified</th>
+                            <th data-formatter="linkedAccountActions">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="@Url.Content( "~/Scripts/jquery.datetimepicker.js" )"></script>
+
+    <script type="text/javascript">
+        var $table = $('#linkedAccountsTable'),
+        $button = $('#btnReset'),
+        $btnSearch = $('#btnSearch'),
+        $btnFilter = $('#btnFilter'),
+        xhr = new XMLHttpRequest();
+
+        var today = new Date();
+        var day = ("0" + today.getDate()).slice(-2);
+        var month = ("0" + (today.getMonth() + 1)).slice(-2);
+        var year = today.getFullYear();
+        var filterDate = '@ViewBag.CalendarDate'.replace(/\-/g,'/');
+        console.log(filterDate);
+
+        $(document).ready(function () {
+            $("#format").on('change', function (event) {
+                var startDate = $('#startDate').val(),
+                    endDate = $('#endDate').val(),
+                    searchValue = $('.fixed-table-toolbar').find('.search > :input').val(),
+                    type = getSelectedFormat(),
+                    url;
+
+                console.log(startDate);
+                console.log(endDate);
+                if (type === "Excel") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                      {
+                          searchText = "searchValue",
+                          title = ViewBag.LinkedAccountsType,
+                          reportKey = reportTypeKey,
+                          format = "Excel",
+                          startDate = "_startDate",
+                          endDate = "_endDate",
+                          referenceId = ViewBag.LinkedAccountTypeId
+                      }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate);
+                    window.location.href = url;
+                } else if (type === "PDF") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                      {
+                          searchText = "searchValue",
+                          title = ViewBag.LinkedAccountsType,
+                          reportKey = reportTypeKey,
+                          format = "PDF",
+                          startDate = "_startDate",
+                          endDate = "_endDate",
+                          referenceId = ViewBag.LinkedAccountTypeId
+                      }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate);
+                    window.location.href = url;
+                } else if (type === "Word") {
+                    url = "@Html.Raw(@Url.Action("AsMsOffice","Report", new
+                      {
+                          searchText = "searchValue",
+                          title = ViewBag.LinkedAccountsType,
+                          reportKey = reportTypeKey,
+                          format = "Word",
+                          startDate = "_startDate",
+                          endDate = "_endDate",
+                          referenceId = ViewBag.LinkedAccountTypeId
+                      }))";
+                    url = url.replace("searchValue", searchValue).replace("_startDate", startDate).replace("_endDate", endDate);
+                    window.location.href = url;
+                } else {
+                    bootbox.alert("Please select format first.");
+                    event.preventDefault();
+                }
+            });
+        });
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState < 4)                         // while waiting response from server
+                HoldOn.open({
+                    message: 'Loading..Please Wait',
+                    textColor: "white"
+                });
+            else {
+                HoldOn.close();
+            }
+        }
+        $(document).ajaxStart(function () {
+            $('#format').prop('selectedIndex', 0);
+        });
+        $(function () {
+            $(function () {
+                $button.click(function () {                  
+                    resetSearch();
+                });
+
+                $btnSearch.click(function () {
+                    customSearch();
+                });
+
+                $btnFilter.click(function () {
+                    customSearch();
+                });
+            });
+
+            $('#startDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: filterDate,
+                onShow: function (ct) {
+                    this.setOptions({
+                        maxDate: jQuery('#endDate').val() ? jQuery('#endDate').val() : false
+                    });
+                }
+            });
+
+            $('#endDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: year + "/" + month + "/" + day,
+                onShow: function (ct) {
+                    this.setOptions({
+                        minDate: jQuery('#startDate').val() ? jQuery('#startDate').val() : false
+                    });
+                }
+            });
+
+            window.linkedAccountActions = function (value, row, index) {
+                return "<input type='button' value='Details' onclick='RedirectDetails(\"" + row.LinkedAccountId + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+            }
+
+            $("[data-toggle='tooltip']").tooltip();
+        });
+
+        window.RedirectDetails = function (Id) {
+            try {
+                window.open(
+                    '@Url.Action("Details", "LinkedAccount")/?q=' + Id,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+
+        function customSearch() {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadLinkedAccounts", "LinkedAccount")/?id=' + '@ViewBag.LinkedAccountTypeId' + '&startDate=' + startDate
+                    + '&endDate=' + endDate,
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function getSelectedFormat() {
+            //Get selected value of the dropdown list
+            var inp = $("select[name='format'] option:selected").val();
+            return inp;
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            resetFilters();
+            
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadLinkedAccounts", "LinkedAccount")/?id=' + '@ViewBag.LinkedAccountTypeId',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetFilters() {
+            $('#startDate').val(filterDate);
+            $('#endDate').val(year + "/" + month + "/" + day);
+            $('#ddlStatusId').prop('selectedIndex', 0);
+        }
+
+    </script>
+}
+

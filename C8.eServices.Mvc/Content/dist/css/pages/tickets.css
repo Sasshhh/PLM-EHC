@@ -1,0 +1,211 @@
+.ticket-menu {
+  width: 230px;
+  min-height: 100%;
+  padding-bottom: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  top: 0;
+  right: 10px;
+  position: absolute;
+  margin-right: -10px;
+}
+
+.ticket-menu .header {
+  height: 216px;
+  width: 100%;
+  padding-top: 150px;
+}
+
+.main-wrapper.side-menu .ticket-menu .header {
+  height: 176px;
+  padding-top: 116px;
+}
+
+.ticket-content .input-field.hidden-xs {
+  width: 240px;
+}
+
+.ticket-content .table-wrapper {
+  min-height: 500px;
+}
+
+.ticket-content thead:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 49px;
+  width: 100%;
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+}
+
+.ticket-content th {
+  height: 49px;
+  color: #dedede;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 14px 12px;
+  border-bottom: none;
+}
+
+.light-skin .ticket-content th {
+  background-color: #3B3D51;
+}
+
+.dark-skin .ticket-content th {
+  background-color: #262733;
+}
+
+.dark-skin .expanding-card label, .dark-skin .expanding-card .bootstrap-select .btn {
+  color: #212121;
+}
+
+.expanding-card {
+  top: 4px;
+  width: 100px;
+  max-width: 100px;
+  height: 33px;
+  margin-left: 110px;
+}
+
+.expanding-card.expand {
+  height: 550px;
+}
+
+.expanding-card .button-expand {
+  width: 100px;
+  height: 34px;
+  line-height: 34px;
+}
+
+.expanding-card .button-expand.expand {
+  width: 280px;
+  font-size: 24px;
+  color: #eceffa;
+  text-transform: none;
+  padding: 18px 20px 0;
+  transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expanding-card .btn-close {
+  line-height: 5px;
+}
+
+.expanding-card .content .body {
+  background-color: transparent;
+  color: #212121;
+}
+
+.expanding-card .nav-tabs > li > a,
+.expanding-card .nav-tabs > li.active > a {
+  color: rgba(0, 0, 0, 0.7) !important;
+  padding: 10px;
+}
+
+.expanding-card .tab-active-border {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.expanding-card .form-group {
+  background-color: rgba(250, 250, 250, 0.4);
+  margin-bottom: 22px;
+  padding: 14px 10px 0;
+}
+
+.expanding-card .form-group.active {
+  background-color: rgba(250, 250, 250, 0.8);
+}
+
+.expanding-card form .input-field {
+  line-height: normal;
+}
+
+.expanding-card form .input-field input {
+  font-size: 15px;
+  color: #000;
+  border-bottom: 0;
+}
+
+.expanding-card form .input-field label {
+  top: 0px;
+  font-size: 15px;
+}
+
+.expanding-card form .input-field label.active {
+  transform: translateY(-60%);
+  font-size: 13px;
+}
+
+.expanding-card .textarea {
+  height: 96px;
+  padding-top: 26px;
+}
+
+.expanding-card .textarea textarea {
+  height: auto;
+  resize: none;
+  color: #000;
+  font-size: 15px;
+  padding: 0;
+}
+
+.expanding-card .textarea .input-field label {
+  top: -12px;
+}
+
+.expanding-card .form-group.select {
+  padding: 0;
+}
+
+.expanding-card .input-group-btn {
+  border-bottom: 0;
+  vertical-align: top;
+}
+
+.expanding-card .bootstrap-select .filter-option, .expanding-card .bootstrap-select span.text {
+  font-size: 15px;
+}
+
+.expanding-card .link-button {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: rgba(250, 250, 250, 0.8) !important;
+  font-size: 14px;
+}
+
+.expanding-card #btnNewClient {
+  line-height: 42px;
+}
+
+.expanding-card .dropup .bootstrap-select .dropdown-menu {
+  top: auto;
+}
+
+@media (max-width: 768px) {
+  .page-content .col-aside {
+    position: relative;
+    width: 100%;
+    right: auto;
+  }
+  .page-content .col-aside .header {
+    height: auto;
+    padding-top: 10px;
+  }
+  .page-content .col-content.col-left {
+    margin-right: 0px;
+  }
+  .expanding-card.expand {
+    width: 100%;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+}
+
+.theme-dark .expanding-card .nav-tabs > li > a,
+.theme-dark .expanding-card .nav-tabs > li.active > a {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+}
+
+.theme-dark .expanding-card .tab-active-border {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}

@@ -1,0 +1,580 @@
+﻿@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.ViewModels
+@using Microsoft.Ajax.Utilities
+@model C8.eServices.Mvc.ViewModels.IncentivePolicyApplicationViewModel
+@{
+    ViewBag.Title = "ProcessIncentivePolicyApplication";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/Images/eThekwini_ico.ico" />
+    <title>eThekwini eServices</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <style type="text/css">
+        .table {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        body .modal-dialog {
+            width: 800px;
+        }
+
+        #ah1 {
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #ahb1 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #ah2 {
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        #ahb2 {
+            font-weight: bold;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h3 align="center">
+            Economic Development Incentive Policy Application <br />Financial Incentives <br />
+            (@Model.IncentivePolicy.ApplicationNumber)
+        </h3>
+    </div>
+    <div class="panel-group" id="property">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                        Property
+                    </a>
+                </h4>
+            </div>
+            <div id="collapse1" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @Html.Partial("_PropertyPartial", Model.Property)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group">
+        <div class="panel panel-default ">
+            <div class="panel-heading">
+                <div class="panel-title">
+                    <a data-toggle="collapse" href="#applicationdetails">Application Details</a>
+                </div>
+            </div>
+            <div id="applicationdetails" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <dl class="dl-horizontal ">
+                        <dt id="ah1">
+                            Applicant Details
+                        </dt>
+                        <dd id="ahb1">
+                            &nbsp;
+                        </dd>
+                        <dt>Title</dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.TitleType.Name)
+                        </dd>
+                        <dt>Name</dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.FullName)
+                        </dd>
+
+                        @if (Model.IncentivePolicy.Customer.PostalAddress3 != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.PhysicalAddress)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.IncentivePolicy.Customer.PhysicalAddress)
+                            </dd>
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.PostalAddress)
+                            </dt>
+
+                                <dd>
+                                    @Html.DisplayFor(model => model.IncentivePolicy.Customer.PostalAddress)
+                                </dd>
+                                <dt>
+                                    &nbsp;
+                                </dt>
+                                <dd>
+                                    &nbsp;
+                                </dd>
+                        }
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.Identification)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.Identification)
+                        </dd>
+
+                        @if (Model.IncentivePolicy.Customer.HomePhoneNumber != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.HomePhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.IncentivePolicy.Customer.HomePhoneNumber)
+                            </dd>
+                        }
+
+                        @if (Model.IncentivePolicy.Customer.WorkPhoneNumber != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.WorkPhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.IncentivePolicy.Customer.WorkPhoneNumber)
+                            </dd>
+                        }
+
+                        @if (Model.IncentivePolicy.Customer.CellPhoneNumber != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.CellPhoneNumber)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.IncentivePolicy.Customer.CellPhoneNumber)
+                            </dd>
+                        }
+
+                        @if (Model.IncentivePolicy.Customer.EmailAddress != null)
+                        {
+                            <dt>
+                                @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.EmailAddress)
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.IncentivePolicy.Customer.EmailAddress)
+                            </dd>
+                        }
+                    </dl>
+
+                <dl class="dl-horizontal">
+                    <dt id="ah1">
+                        Entity Details
+                    </dt>
+                    <dd id="ahb1">
+                        &nbsp;
+                    </dd>
+                    @if (Model.Customer.Entity.EntityFullName != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityFullName)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityFullName)
+                        </dd>
+                    }
+                    @if (Model.Customer.Entity.EntityRegistrationNumber != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityRegistrationNumber)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityRegistrationNumber)
+                        </dd>
+                    }
+
+                    @if (Model.Customer.Entity.EntityType != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityType.Name)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityType.Name)
+                        </dd>
+                    }
+                </dl>
+                    @if (Model.AdditionalPropertyContacts.Any())
+                    {
+                        <dl class="dl-horizontal">
+                            <dt id="ah1">
+                                Additional Contacts
+                            </dt>
+                            <dd id="ahb1">
+                                &nbsp;
+                            </dd>
+                            @foreach (var c in Model.AdditionalPropertyContacts)
+                            {
+                                <dt>
+                                    Name
+                                </dt>
+                                <dd>
+                                    @c.ContactFullName
+                                </dd>
+                                <dt>
+                                    Position
+                                </dt>
+                                <dd>
+                                    @c.Position
+                                </dd>
+                                <dt>
+                                    Contacts
+                                </dt>
+                                <dd>
+                                    @c.ContactNumbers
+                                </dd>
+                                <dd> &nbsp; </dd>
+                            }
+
+                        </dl>
+                    }
+                    <div class="form-horizontal">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Nature Of Investment </div>
+                            <div class="panel-body">
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.PropertyRatesNumber, "Municipal Property Rates No.", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(model => model.PropertyRatesNumber, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.IncentivePolicy.CategoryType.Name, "Category of Incentive", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(model => model.IncentivePolicy.CategoryType.Name, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.Label("Industry Sector", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Model.IndustrySector
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.PropertyInvestment.VatNumber, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.VatNumber, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.VatNumber)
+                                        </div>
+                                        @Html.LabelFor(model => model.PropertyInvestment.TaxNumber, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.TaxNumber, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.TaxNumber)
+                                        </div>
+                                    </div>
+                                    <div class="form-group textareaContent">
+                                        @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextAreaFor(model => model.PropertyInvestment.InvestmentDescription, new { @class = "form-control textarea" })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.InvestmentDescription)
+                                        </div>
+                                    </div>
+                                    <div class="form-group textareaContent">
+                                        @Html.LabelFor(model => model.PropertyInvestment.TypeOfServices, "Please provide full description of the type of manufacturing or industrial product or services", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextAreaFor(model => model.PropertyInvestment.TypeOfServices, new { @class = "form-control textarea" })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.InvestmentDescription)
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.PropertyInvestment.BbbeeStatus, "BBBEE Status", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.BbbeeStatus, new { @class = "form-control" })
+                                            <h4 class="small">(points as per DTI BBBEE scorecard)</h4>
+                                        </div>
+                                        @Html.LabelFor(model => model.PropertyInvestment.SupplierNumber, "eThekwini Municipality supplier No.", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.SupplierNumber, new { @class = "form-control" })
+                                            <h4 class="small">(where applicable)</h4>
+                                        </div>
+                                        @Html.LabelFor(model => model.PropertyInvestment.SicCode, "Standard Industrial Classification", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.SicCode, new { @class = "form-control" })
+                                            <h4 class="small">SIC code (where applicable)</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-horizontal">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Investment Details</div>
+                            <div class="panel-body">
+                                <div class="panel-body">
+                                    <h6 style="color:red">NB: Rates will move back to normal rates if the development has not been completed within the specified timeframe.</h6>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.PropertyInvestment.DevelopmentPeriod, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.DevelopmentPeriod, new { @class = "form-control", placeholder = "e.g 2 years 8 months" })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.DevelopmentPeriod)
+                                        </div>
+                                        @Html.LabelFor(model => model.PropertyInvestment.ProjectedStartDateTime, "Projected Start Date", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.ProjectedStartDateTime, new { @class = "form-control datePicker", id = "ProjectedStartDateTime" })
+                                        </div>
+                                        @Html.LabelFor(model => model.PropertyInvestment.ProjectedEndDateTime, "Projected End Date", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PropertyInvestment.ProjectedEndDateTime, new { @class = "form-control datePicker", id = "ProjectedEndDateTime" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.LandSize,"Land Size", new { @class = "control-label col-md-2" }) (@Model.LandSizeUnitofMeasureDisplay)
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.LandSize, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.LandSize)
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.BuildingSize,"Building Size", new { @class = "control-label col-md-2" }) (@Model.BuildingSizeUnitofMeasureDisplay)
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.BuildingSize, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.BuildingSize)
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h6 class="col-md-offset-1 col-md-10" style="font-weight: bold;text-decoration: underline;">Percentage of operational expenditure (of Rand value) procured from:</h6>
+                                        @Html.LabelFor(model => model.BuildingSize, "Outside RSA (%)", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.OperationalExpanditureForeign, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.OperationalExpanditureForeign)
+                                        </div>
+                                        @Html.LabelFor(model => model.BuildingSize, "Inside RSA: outside eThekwini (%)", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.OperationalExpanditureOutBound, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.OperationalExpanditureOutBound)
+                                        </div>
+                                        @Html.LabelFor(model => model.BuildingSize, "Inside RSA: within eThekwini (%)", new { @class = "control-label col-md-2" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(model => model.OperationalExpanditureInBound, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.OperationalExpanditureInBound)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Value Of Investment </div>
+                        <div class="panel-body">
+                            <div class="panel-body">
+                                <table class="table table-bordered">
+                                    <colgroup span="2"></colgroup>
+                                    <colgroup span="2"></colgroup>
+                                    <tr>
+                                        <td rowspan="2"></td>
+                                        <th rowspan="2">Capital expenditure <br/> (Rand value)</th>
+                                        <th colspan="2" scope="colgroup" style="text-align: center">Number of jobs to be created</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col">Permanent</th>
+                                        <th scope="col">Temporary</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 1</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear1, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear1, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear1, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 2</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear2, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear2, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear2, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 3</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear3, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear3, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear3, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 4</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear4, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear4, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear4, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 5</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear5, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear5, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear5, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Total</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureTotal, new {@class = "form-control", @style = "width:200px", id = "capitalTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsTotal, new {@class = "form-control", @style = "width:200px", id = "perTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsTotal, new {@class = "form-control", @style = "width:200px", id = "tempTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="form-group form-inline">
+                                    @Html.Label("Has the applicant previously benefitted, or currently benefitting, from other investment incentive programmes within eThekwini Municipality", new {@class = "control-label col-md-6"})
+                                    <div class="col-md-4 button-group">
+                                        <input type="radio" name="option" id="radio1" value="yes"> Yes
+                                        <input type="radio" name="option" id="radio2" value="no"> No
+                                        <h6>If Yes, please specify</h6>
+                                    </div>
+                                </div>
+                                <div id="benefitsGrp" style="display: none;">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            @Html.TextAreaFor(model => model.PropertyInvestment.IncentiveProgrammeCurrentBenefits, new {@class = "form-control", @id = "radBenefits", rows = 5})
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.IncentiveProgrammeCurrentBenefits)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, "What positive impacts wil the investment have on skills development and training", new {@class = "control-label col-md-4"})
+                                    <div class="col-md-8">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.ImpactOnSkillDevelopment, new {@class = "form-control", rows = 5 })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.ImpactOnSkillDevelopment)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, "Please list any support services you may require from eThekwini Municipality E.g. Revenue Clearance Certificates", new {@class = "control-label col-md-4"})
+                                    <div class="col-md-8">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.SupportServices, new {@class = "form-control", rows = 5 })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.SupportServices)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr/>                
+                    <dl class="dl-horizontal">
+                        <dt id="ahb1">
+                            Declaration
+                        </dt>
+                        <dd>
+                            <p>
+                                I, @Html.Raw( Model.IncentivePolicy.DeclarationName == null ? MvcHtmlString.Empty : Html.Label(Model.IncentivePolicy.DeclarationName))  , do hereby declare that the information supplied is to the best of my knowledge, true and correct.
+                                I acknowledge that the Municipality reserves the right to prosecute anyone who willfully provides false information with the intention to benefit unlawfully from the rebates awarded.
+                            </p>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+        var benefits = $("#radBenefits").val();
+
+        if (benefits === null || benefits === '') {
+            $("#radio1").prop("checked", false);
+            $("#radio2").prop("checked", true);
+            $("#benefitsGrp").show();
+        } else {
+            $("#radio2").prop("checked", false);
+            $("#radio1").prop("checked", true);
+            $("#benefitsGrp").show();
+        }
+
+        //Ensures the context of text area fits
+        $(".textarea").each(function () {
+            do_resize(this);
+        });
+    });
+
+    function do_resize(textarea) {
+
+        var maxrows = 5;
+        var txt = textarea.value;
+        var cols = textarea.cols;
+
+        var arraytxt = txt.split('\n');
+        var rows = arraytxt.length;
+
+        for (var i = 0; i < arraytxt.length; i++)
+            rows += parseInt(arraytxt[i].length / cols);
+
+        if (rows > maxrows) textarea.rows = maxrows;
+        else textarea.rows = rows;
+    }
+
+</script>

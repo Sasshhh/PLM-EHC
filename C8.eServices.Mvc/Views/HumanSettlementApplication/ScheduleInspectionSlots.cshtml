@@ -1,0 +1,1985 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+
+@{
+
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+
+
+</head>
+
+<style>
+
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    Select the day and hours of your availability.<br />
+                    Then click "Add timeslots".<br />
+                    To delete schedule click the "row" on the schedule table.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Application Details
+                </div>
+
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.FullName)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.PurchaserType.Name)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.CreatedDateTime.Value)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.Status.Name)</td>
+                        <td>@Html.ActionLink("View", "Details", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + ViewBag.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+<body>
+    <br />
+    @using (Html.BeginForm("ScheduleInspectionSlots", "HumanSettlementApplication", FormMethod.Post, new { id = "clientInfo-form" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(lodel => lodel.HumanSettlementApplication.ApplicationReferenceNumber)
+            @Html.HiddenFor(lodel => lodel.HumanSettlementApplication.Id)
+            @Html.HiddenFor(lodel => lodel.HumanSettlementApplication.Data, new { @Name = "Data" })
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                                Unit Inspection Slot
+                            </a>
+                        </h4>
+                    </div>
+
+                    <div id="userRoleCollapse" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <div class="row" style="padding:15px;">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        @Html.Label("First Name:", new { @class = "control-label col-md-4" })
+                                        <div class="col-md-7">
+                                            @Html.TextBox("firstName", null, new { @class = "form-control", @readonly = true })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.Label("Surname:", new { @class = "control-label col-md-4" })
+                                        <div class="col-md-7">
+                                            @Html.TextBox("lastName", null, new { @class = "form-control", @readonly = true })
+                                        </div>
+                                    </div>
+
+                                    <br />
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label require">
+                                            Day Available
+                                        </label>
+
+                                        <div class="col-md-7">
+                                            @Html.Editor("DateToSchedule", "Date", new { htmlAttributes = new { @class = "form-control", onchange = "ChangeDate()", @Name = "DateToSchedule", @Id = "DateToSchedule", @required = "required" } })
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label require">
+                                            Hours Available
+                                        </label>
+
+                                        <div class="col-md-7">
+                                            @foreach (var item in Model.Features)
+                                            {
+                                                <input type="checkbox" name="SelectedRoles" checked="@item.Selected" value="@item.Value" id="SelectedRoles+@item.Selected" class="checkbox-inline" />
+                                                @Html.Label(item.Text, new { @class = "control-label" })
+                                                <br />
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+                                @if (Model.InspectionScheduleList.Count > 0)
+                                {
+                                    <div class="col-sm-6">
+                                        <table id="RCSTable2" class="table table-bordered table-hover table-striped panel panel-default cards">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        Date To Schedule
+                                                    </th>
+                                                    <th>
+                                                        Time Slot
+                                                    </th>
+                                                    <th>
+                                                        Action
+                                                    </th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @foreach (var item in Model.InspectionScheduleList)
+                                                {
+                                                    <tr value="@item.Id">
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.DateToSchedule.ShecduleDate)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.TimeSlot.Name)
+                                                        </td>
+                                                        <td>
+                                                            <span onclick="DeleteTimeSlot(@item.Id)" style="font-size: 20px; cursor:pointer;"><b class="fa fa-trash buttonIcon"></b></span>
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                        <br />
+                                    </div>
+                                }
+
+                            </div>
+
+
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-offset-1 col-md-10">
+                                    <button class="button1" onclick="Cancel()">Cancel</button>
+                                    <input type="submit" value="Add Timeslots" onclick="ValivateSelectedSlots()" class="button1" />
+                                    <input type="button" id="btnExternal" class="button1" value="Submit" onclick="ChangeApplicationStatus()" />
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+</body>
+<script type="text/javascript">
+    $(function () {
+        var firstName = '@ViewBag.UserFName';
+        var lastName = '@ViewBag.UserLName';
+        var userName = '@ViewBag.UserName';
+        var email = '@ViewBag.UserEmail';
+
+        $("#firstName").val(firstName);
+        $("#lastName").val(lastName);
+        $("#userName").val(userName);
+        $("#email").val(email);
+    });
+
+
+
+
+
+
+        $(function () {
+
+        var display = "@ViewBag.Display";
+
+        if (display != null && display != "") {
+        $('#MessageModal3').modal('show');
+        }
+        else {
+        $('#MessageModal3').modal('hide');
+
+
+        var result = "@ViewBag.MessageBody";
+        if (result != null && result != "") {
+        $('#MessageModal').modal('show');
+        }
+        else {
+        $('#MessageModal').modal('hide');
+        var result5 = "@ViewBag.MessageBody5";
+        if (result5 != null && result5 != "") {
+        $('#MessageModal5').modal('show');
+        }
+        else {
+        $('#MessageModal5').modal('hide');
+        }
+        }
+
+        }
+        //var element = document.getElementById("RCSTable_wrapper");
+        //element.classList.add("tablecss");
+
+        });
+
+        function OpenChatModal() {
+
+        $('#MessageModal').modal('show');
+        };
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+<script>
+
+    function ChangeApplicationStatus() {
+        var list = '@Model.InspectionScheduleList.Count';
+        if (list == 0) {
+            swal("Error!", "Please add at least 1 timeslot!", "warning");
+        } else {
+            window.location.href = "@Url.Action("InspectionNotificationApplicant", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Id=" + Model.HumanSettlementApplication.Id.ToString()) })";
+        }
+    }
+
+    function ValivateSelectedSlots() {
+        //debugger;
+        var i = 3;
+        var list = false;
+        while (i < 11) {
+            //var oo = document.getElementById("SelectedRoles" + (i).toString()).checked;
+            if (list == false) {
+                list = document.getElementById("SelectedRoles" + (i).toString()).checked;
+            }
+            i++;
+        }
+
+    }
+
+    function DeleteTimeSlot(val) {
+        debugger;
+        var newval = '@ViewBag.Id';
+        swal({
+            icon: "info",
+            title: "Are you sure you want to delete the schedule date?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                $.getJSON("../PropertyLeaseApplication/DeleteSchedule?id=" + val, "PrpId=" + newval,
+                    function (result) {
+                        location.reload();
+                    });
+            }
+        });
+    }
+    $('#RCSTable2').DataTable({ searching: false, paging: true, info: true });
+
+    $('#TransferInformation.DateOfFinal').datetimepicker({
+        format: 'Y/m/d',
+        timepicker: false,
+        minDate: 0,
+        scrollMonth: false,
+        scrollInput: false,
+        onSelectDate: function (dt, i) {
+
+        }
+    });
+</script>
+
+
+<script>
+    function ChangeDate() {
+        debugger;
+        var Startdate = document.getElementById("DateToSchedule").value;
+        var thisDate = new Date(Startdate);
+        var Today = new Date();
+        if (Today >= thisDate) {
+            swal("Error!", "Please select upcoming date!", "warning");
+            $('#DateToSchedule').val('');
+        }
+    }
+    //Masking amount fields
+    $(document).ready(function ($) {
+
+        $('#Watertbl').DataTable({ searching: false, paging: false, info: false });
+
+        $('#Electricitytbl').DataTable({ searching: false, paging: false, info: false });
+        var form = $("#clientInfo-form");
+        form.children("div").steps({
+
+            onFinish: function () {
+                var Purchaser = document.getElementById("PurchaserInformation_PurchaseType").value;
+
+                if (Purchaser != '' && Purchaser != null) {
+
+                    $("#clientInfo-form").submit();
+                }
+                else if ($("#NaturalPersontbl tr").length > 1) {
+                    $("#clientInfo-form").submit();
+
+                }
+                else {
+                    swal("Error!", "Please Select An Applicant Type", "warning");
+
+                }
+
+            },
+            onChange: function (event, currentIndex, newIndex) {
+
+                //submit(currentIndex, newIndex)
+
+                if (newIndex < currentIndex) {
+                    return true;
+                }
+                form.validate().settings.ignore = ":disabled,:hidden";
+                return form.valid();
+
+            }
+        });
+
+
+
+        function submit(currentIndex, newIndex) {
+
+
+            isValid = true;
+            var step = "";
+            if (currentIndex == 1) {
+                step = "DivTransferInformation"
+            }
+
+            $('input,select', $("#" + step)).each(
+                function () {
+                    if ($(this).attr('required') == "required" || $(this).attr('required') == true) {
+                        if (document.getElementById($(this).attr('id')).value == "") {
+                            document.getElementById($(this).attr('id')).style.border = '1px solid red'
+                            if (isValid == true) {
+                                isValid = false;
+                                //
+                            }
+                        }
+
+                        else {
+                            document.getElementById($(this).attr('id')).style.border = ''
+                        }
+                    }
+
+
+
+                    if (isValid == true) {
+                        alert("sbumit");
+
+                        if (btn == "Save") {
+
+                            document.getElementById("btnSave2").click()
+                        }
+                        else {
+
+                            if (newIndex < currentIndex) {
+                                return true;
+                            }
+                            var form = $("#clientInfo-form");
+                            form.validate().settings.ignore = ":disabled,:hidden";
+                            return form.valid();
+
+                        }
+
+                    }
+                    else {
+                        document.getElementById("Erroralert").hidden = false;
+                        document.getElementById("error2").innerHTML = "Please fill in all Required Fields marked with an (*)";
+
+
+
+                    }
+
+                });
+        }
+
+        $('#TransferInformationSellingPrice').mask('#,##0.00', { reverse: true });
+
+        var CurrUrl = window.location.href;
+
+        jQuery('#returnUrl').val("" + CurrUrl);
+    });
+</script>
+
+<script>
+
+            function servicesCheckedFn() {
+                var servicesChecked = document.getElementById("MunicipalAccountInformation_ServicesOnProperty");
+                if (servicesChecked.checked) {
+                    servicesChecked.value = true;
+                    jQuery('#divServices').css("display", "block")
+                }
+                else {
+                    servicesChecked.value = false;
+                    jQuery('#divServices').css("display", "none")
+                }
+            }
+
+            function ValidateRatesNumber(rateNo) {
+
+                if (rateNo.length != 10) {
+                    $('#TransferInformation_RatesNumber').val('');
+                    //swal("Our First Alert");
+                    swal("Error!", "Please enter a valid 10 digit Rate Number!", "warning");
+                    //alert("Please enter a valid 10 digit Rate Number");
+                    //swal({
+                    //    title: "Good job!",
+                    //    text: "Please enter a valid 10 digit Rate Number!",
+                    //    icon: "success",
+                    //});
+                    jQuery('#divInformationFields').css("display", "none")
+                    return false;
+                }
+                else {
+                    searchrate(rateNo);
+                    //searchmeters(rateNo);
+                    jQuery('#divInformationFields').css("display", "block")
+
+                }
+
+            }
+            function searchrate(rateNo) {
+
+                var MunicipalAccNo = document.getElementById('rate').value;
+                $.getJSON("../Capture/LimsPropertyDetails?MunicipalAccNo="
+                    + MunicipalAccNo,
+
+                    function (result) {
+
+                        if (result != "Error" && result != "") {
+
+                            try {
+
+                                if (result.Status != "Success") {
+
+                                    if (result.StatusKey == "r_rcs_ccc_doesn't_exist") {
+                                        swal(result.Title, result.Status, "error");
+                                        $('#rate').val('');
+                                        jQuery('#divInformationFields').css("display", "none")
+
+                                    }
+                                    else if (result.StatusKey == "r_rcs_ccc_not_setup") {
+                                        swal(result.Title, result.Status, "error");
+                                        $('#rate').val('');
+                                        jQuery('#divInformationFields').css("display", "none")
+
+                                    }
+                                    else {
+                                        swal("Error!", "No Results found!", "error");
+                                        $('#rate').val('');
+                                        jQuery('#divInformationFields').css("display", "none")
+
+                                    }
+
+
+
+                                }
+
+                                else {
+                                    $('#SellerInformation_OwnerName').val(result.registeredownernames);
+                                    $('#TransferInformation_Town').val(result.regionname);
+                                    $('#TransferInformation_Suburb').val(result.regionname);
+                                    $('#TransferInformation_PhysicalAddress').val(result.streetaddress);
+                                    $('#SellerInformation_OwnerIdNumber').val(result.registeredownerids);
+
+                                    $('#TransferInformation_ErfDescription').val(result.erfnumber);
+
+                                    $('#TransferInformation_ExtentSize').val(result.deedextents);
+                                    $('#TransferInformation_Extent').val(result.ssourceaccountnumber);
+
+                                    $('#TransferInformation_PropertyKey').val(result.ssourceaccountnumber);
+                                    jQuery('#TransferInformation_Category').val(result.categoryname)
+                                    //var ownernames = result.Initials + " " + result.Surname
+                                    //$('#TransferInformation_Extent').val(result.UnitNo);
+                                    //$('#TransferInformation_PhysicalAddress').val(result.StreetAddr);
+                                    //$('#TransferInformation_NewSubConfirm').val(result.PostalCode);
+
+                                    //$('#SellerInformation_OwnerIdNumber').val(result.IDNo);
+                                    //$('#SellerInformation_CellNo').val(result.CellNo);
+                                    //$('#SellerInformation_HomeNo').val(result.HomeTel);
+                                    //$('#SellerInformation_WorkNo').val(result.WorkTel);
+                                    //$('#SellerInformation_EmailAddress').val(result.EmailAddr);
+                                    //$('#TransferInformation_Suburb').val(result.PostalAddress2);
+                                    //$('#TransferInformation_Town').val(result.PostalAddress3);
+                                    //alert("Beforre search owner");
+                                    searchowner(rateNo);
+                                    //alert("after search owner");
+                                    searchmeters(rateNo);
+                                    //alert("after search meters");
+                                }
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+                            //alert("Unsuccessfully captured!");
+                            jQuery('#divInformationFields').css("display", "none")
+                            $('#rate').val('');
+                            swal("Error", "Service Unavailable ", "error");
+
+
+
+                        }
+                    });
+            }
+
+            function searchowner(rateNo) {
+
+                var MunicipalAccNo = document.getElementById('rate').value;
+                $.getJSON("../Capture/VAInformation?MunicipalAccNo="
+                    + MunicipalAccNo,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+
+
+                                var ownernames = result.Initials + " " + result.Surname
+                                $('#SellerInformation_OwnerName').val(ownernames);
+
+                                $('#TransferInformation_NewSubConfirm').val(result.PostalCode);
+
+                                $('#SellerInformation_OwnerIdNumber').val(result.IDNo);
+
+                                $('#SellerInformation_CellNo').val(result.CellNo);
+                                if (result.CellNo == " ") {
+                                    $('#SellerInformation_CellNo').val('');
+                                }
+
+                                $('#SellerInformation_HomeNo').val(result.HomeTel);
+                                if (result.HomeTel == " ") {
+                                    $('#SellerInformation_HomeNo').val('');
+                                }
+                                $('#SellerInformation_WorkNo').val(result.WorkTel);
+                                if (result.WorkTel == " ") {
+
+                                    $('#SellerInformation_WorkNo').val('');
+                                }
+                                $('#SellerInformation_EmailAddress').val(result.EmailAddr);
+                                if (result.EmailAddr == " ") {
+
+                                    $('#SellerInformation_EmailAddress').val('');
+                                }
+
+
+
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+                            //alert("Unsuccessfully captured!");
+                            swal("Error!", "Unsuccessfully captured.", "error");
+                        }
+                    });
+            }
+
+            function Cancel() {
+                window.location.href = "@Url.Action("Inbox", "HumanSettlementApplication")";
+            }
+
+            var ElectricitySession = [];
+            var ElectricitySessionDelete = [];
+            var ElectricitySessionCount = 0;
+            var ElectricityDeleteCount = 0;
+            function ElectricityDeleteSession(counter) {
+                //alert("Counter" + counter);
+                //ElectricitySessionDelete = new [];
+                var watert = $('#Electricitytbl').DataTable();
+                ElectricitySessionDelete = [];
+                watert.clear().draw();
+
+
+
+                ElectricityDeleteCount = 0;
+                //alert(ElectricitySession.length);
+                for (var i = 0; i < ElectricitySession.length; i++) {
+                    // alert(ElectricitySession[i].SessionNumber);
+                    if (ElectricitySession[i].Count != counter) {
+                        ElectricityDeleteCount++;
+                        //alert(counter + "counter + fees count " + ElectricitySession[i].Count + " ");
+                        ElectricitySession[i].Count = ElectricityDeleteCount;
+                        // alert(counter + "new fees count " + ElectricitySession[i].Count + " ");
+                        ElectricitySessionDelete.push(ElectricitySession[i]);
+
+
+                        if (ElectricitySession[i].DeleteEnabled == true) {
+                            watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                        }
+                        else {
+                            watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+                        }
+
+                        //watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].SessionNumber, ElectricitySession[i].StartDateString, ElectricitySession[i].EndDateString, ElectricitySession[i].sessionStartTime, ElectricitySession[i].sessionEndTime, ElectricitySession[i].TicketSaleEndDate, "<a onclick = 'DeleteEventSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+
+                        // alert("Fees Length " + ElectricitySession.length);
+
+                    }
+                    else {
+                        //alert(counter + "counter + fees count " + ElectricitySession[i].Count + " not equal to");
+
+                    }
+
+
+
+                }
+                ElectricitySessionCount = ElectricityDeleteCount;
+                ElectricitySession = ElectricitySessionDelete;
+                //alert("ElectricitySession OLength " + ElectricitySession.length);
+                //alert("ElectricitySession Delete Length " + ElectricitySessionDelete.length);
+                document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySessionDelete);
+
+
+            }
+
+            function ElectricityAddSession() {
+                debugger;
+
+                var ElectricityMeterInformation_ElectricityMeterNo = document.getElementById("ElectricityMeterInformation_ElectricityMeterNo").value;
+                var ElectricityMeterInformation_ElectricityMeterReading = document.getElementById("ElectricityMeterInformation_ElectricityMeterReading").value;
+                var ElectricityMeterInformation_ElectricityMeterReadingDateTaken = document.getElementById("ElectricityMeterInformation_ElectricityMeterReadingDateTaken").value;
+
+
+
+
+                var SessionList = document.getElementById("ElectricityMeterList").value;
+
+
+                var iNum2 = parseInt(ElectricitySessionCount)
+                //alert("Original count: " + iNum2);
+                //alert("New count: " + ElectricitySessionCount)
+                var i2 = iNum2 + 1;
+                ElectricitySessionCount = i2;
+
+                var currSessionList = {
+                    "ElectricityMeterNo": ElectricityMeterInformation_ElectricityMeterNo,
+                    "ElectricityMeterReading": ElectricityMeterInformation_ElectricityMeterReading,
+                    "DateString": ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+                    "Status": "Unprocessed",
+                    "DeleteEnabled": true,
+                    "Count": i2
+
+                };
+
+                if (SessionList == "") {
+                    ElectricitySession.push(currSessionList);
+                    document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+                    console.log(ElectricitySession);
+                }
+                else {
+                    ElectricitySession.push(currSessionList);
+                    document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+                    console.log(ElectricitySession);
+                }
+
+                console.log(document.getElementById("ElectricityMeterList").value);
+                var watert = $('#Electricitytbl').DataTable();
+                watert.clear().draw();
+
+
+
+
+
+                //alert(ElectricitySession.length);
+                for (var i = 0; i < ElectricitySession.length; i++) {
+
+                    if (ElectricitySession[i].DeleteEnabled == true) {
+                        watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                    }
+                    else {
+                        watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+                    }
+                    // alert(ElectricitySession.length);
+                    //watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].WaterMeterNo, ElectricitySession[i].WaterMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'DeleteEventSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+                }
+
+
+
+
+
+                swal("Success!", "Added successfully. A picture of your meter will be required!", "success");
+                jQuery('#divElectricitytbl').css("display", "block")
+                clearElectricity();
+
+
+            }
+
+            function ElectricityAddSessionApi(ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status) {
+                debugger;
+
+
+                var SessionList = document.getElementById("ElectricityMeterList").value;
+
+                jQuery('#divPrepaid').css("display", "none")
+                jQuery('#divMunicipal').css("display", "block")
+                jQuery('#ElectricityMeterInformation_ElectricityMeterType').val("Municipal")
+                jQuery('#divElectricitytbl').css("display", "block")
+
+                var iNum2 = parseInt(ElectricitySessionCount)
+                //alert("Original count: " + iNum2);
+                //alert("New count: " + ElectricitySessionCount)
+                var i2 = iNum2 + 1;
+                ElectricitySessionCount = i2;
+                //alert("Past counter processing");
+                var currSessionList = {
+                    "ElectricityMeterNo": ElectricityMeterInformation_ElectricityMeterNo,
+                    "ElectricityMeterReading": ElectricityMeterInformation_ElectricityMeterReading,
+                    "DateString": ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+                    "Status": status,
+                    "DeleteEnabled": false,
+                    "Count": i2
+
+                };
+
+                if (SessionList == "") {
+                    ElectricitySession.push(currSessionList);
+                    document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+                    console.log(ElectricitySession);
+                }
+                else {
+                    ElectricitySession.push(currSessionList);
+                    document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+                    console.log(ElectricitySession);
+                }
+
+                console.log(document.getElementById("ElectricityMeterList").value);
+                var watert = $('#Electricitytbl').DataTable();
+                watert.clear().draw();
+
+
+
+
+
+                //alert(ElectricitySession.length);
+                for (var i = 0; i < ElectricitySession.length; i++) {
+
+                    if (ElectricitySession[i].DeleteEnabled == true) {
+                        watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                    }
+                    else {
+                        watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+                    }
+                    // alert(ElectricitySession.length);
+
+                }
+                swal("Success!", "Added successfully.", "success");
+                jQuery('#divElectricitytbl').css("display", "block")
+
+
+
+            }
+
+
+
+            var Session = [];
+            var SessionDelete = [];
+            var SessionCount = 0;
+            var DeleteCount = 0;
+            function DeleteEventSession(counter) {
+                //alert("Counter" + counter);
+                //SessionDelete = new [];
+                var watert = $('#Watertbl').DataTable();
+                SessionDelete = [];
+                watert.clear().draw();
+
+
+
+                DeleteCount = 0;
+                //alert(Session.length);
+                for (var i = 0; i < Session.length; i++) {
+                    // alert(Session[i].SessionNumber);
+                    if (Session[i].Count != counter) {
+                        DeleteCount++;
+                        //alert(counter + "counter + fees count " + Session[i].Count + " ");
+                        Session[i].Count = DeleteCount;
+                        // alert(counter + "new fees count " + Session[i].Count + " ");
+                        SessionDelete.push(Session[i]);
+
+
+                        if (Session[i].DeleteEnabled == true) {
+                            watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                        }
+                        else {
+                            watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, ""]).draw(false);
+
+                        }
+
+                        //watert.row.add([/*Session[i].Count,*/ Session[i].SessionNumber, Session[i].StartDateString, Session[i].EndDateString, Session[i].sessionStartTime, Session[i].sessionEndTime, Session[i].TicketSaleEndDate, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+
+                        // alert("Fees Length " + Session.length);
+
+                    }
+                    else {
+                        //alert(counter + "counter + fees count " + Session[i].Count + " not equal to");
+                        swal("Success!", "Director Deleted successfully!", "success");
+                    }
+
+
+
+                }
+                SessionCount = DeleteCount;
+                Session = SessionDelete;
+                //alert("Session OLength " + Session.length);
+                //alert("Session Delete Length " + SessionDelete.length);
+                document.getElementById("WaterMeterList").value = JSON.stringify(SessionDelete);
+
+
+            }
+
+            function AddSession2() {
+                debugger;
+                var WaterMeterInformation_WaterMeterNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var WaterMeterInformation_WaterMeterReading = document.getElementById("WaterMeterInformation_WaterMeterReading").value;
+                var WaterMeterInformation_WaterMeterReadingDateTaken = document.getElementById("WaterMeterInformation_WaterMeterReadingDateTaken").value;
+
+                //Applicant details
+                var ApplicantFirstName = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var ApplicantSurname = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var ApplicantGender = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var ApplicantTittle = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var ApplicantNationality = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+                var ApplicantIdentityNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+
+                //alert("Past water textboxes");
+                var SessionList = document.getElementById("WaterMeterList").value;
+
+                //alert("getting water session list processing");
+
+                var iNum2 = parseInt(SessionCount)
+                //alert("Original count: " + iNum2);
+                //alert("New count: " + SessionCount)
+                var i2 = iNum2 + 1;
+                SessionCount = i2;
+                //alert("Past counter processing");
+                var currSessionList = {
+                    "WaterMeterNo": WaterMeterInformation_WaterMeterNo,
+                    "WaterMeterReading": WaterMeterInformation_WaterMeterReading,
+                    "DateString": WaterMeterInformation_WaterMeterReadingDateTaken,
+                    "Status": "Unprocessed",
+                    "DeleteEnabled": true,
+                    "Count": i2
+
+                };
+
+                if (SessionList == "") {
+                    Session.push(currSessionList);
+                    document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+                    console.log(Session);
+                }
+                else {
+                    Session.push(currSessionList);
+                    document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+                    console.log(Session);
+                }
+
+                console.log(document.getElementById("WaterMeterList").value);
+                var watert = $('#Watertbl').DataTable();
+                watert.clear().draw();
+
+
+
+
+
+                //alert(Session.length);
+                for (var i = 0; i < Session.length; i++) {
+
+                    if (Session[i].DeleteEnabled == true) {
+                        watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                    }
+                    else {
+                        watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, ""]).draw(false);
+
+                    }
+                    // alert(Session.length);
+                    //watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+                }
+
+
+
+
+
+                swal("Success!", "Director Added successfully!", "success");
+                jQuery('#divWatertbl').css("display", "block")
+                clearWater();
+
+
+            }
+
+            function AddSessionApi(WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status) {
+                debugger;
+
+                //alert("Past water textboxes");
+                var SessionList = document.getElementById("WaterMeterList").value;
+
+
+                var iNum2 = parseInt(SessionCount)
+                //alert("Original count: " + iNum2);
+                //alert("New count: " + SessionCount)
+                var i2 = iNum2 + 1;
+                SessionCount = i2;
+                //alert("Past counter processing");
+                var currSessionList = {
+                    "WaterMeterNo": WaterMeterInformation_WaterMeterNo,
+                    "WaterMeterReading": WaterMeterInformation_WaterMeterReading,
+                    "DateString": WaterMeterInformation_WaterMeterReadingDateTaken,
+                    "Status": status,
+                    "DeleteEnabled": false,
+                    "Count": i2
+
+                };
+
+                if (SessionList == "") {
+                    Session.push(currSessionList);
+                    document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+                    console.log(Session);
+                }
+                else {
+                    Session.push(currSessionList);
+                    document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+                    console.log(Session);
+                }
+
+                console.log(document.getElementById("WaterMeterList").value);
+                var watert = $('#Watertbl').DataTable();
+                watert.clear().draw();
+
+
+
+
+
+                //alert(Session.length);
+                for (var i = 0; i < Session.length; i++) {
+
+                    if (Session[i].DeleteEnabled == true) {
+                        watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                    }
+                    else {
+                        watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, ""]).draw(false);
+
+                    }
+                    // alert(Session.length);
+
+                }
+                swal("Success!", "Added successfully.", "success");
+                jQuery('#divWatertbl').css("display", "block")
+
+
+
+            }
+            function searchmeters(rateNo) {
+                //alert("in search meters");
+                Session = [];
+                SessionDelete = [];
+                SessionCount = 0;
+                DeleteCount = 0;
+
+                ElectricitySession = [];
+                ElectricitySessionDelete = [];
+                ElectricitySessionCount = 0;
+                ElectricityDeleteCount = 0;
+                //alert("middle search meters");
+                document.getElementById("ElectricityMeterList").value = "";
+                document.getElementById("WaterMeterList").value = "";
+                //alert(" search meters before wtable");
+                // $("#Watertbl > tbody").html("");
+                //$('#Watertbl').DataTable().clear().draw();
+                //$('#Electricitytbl').DataTable().clear().draw();
+                var wtable = $('#Watertbl').DataTable();
+
+                wtable.clear().draw();
+
+                var etable = $('#Electricitytbl').DataTable();
+
+                etable.clear().draw();
+                //alert(" search meters before json");
+
+                var MunicipalAccNo = document.getElementById('rate').value;
+                $.getJSON("../Capture/MeterDetails?MunicipalAccNo="
+                    + rateNo,
+
+                    function (result) {
+
+
+                        if (result != "Error") {
+                            try {
+
+                                if (result.length == 0) {
+
+                                    swal("Error!", "No Results found!", "error");
+
+                                    //$('#rate').val('');
+                                }
+
+                                else {
+                                    var Active = false;
+                                    if (result.RefuseServiceExist == "Yes") {
+                                        $('#MunicipalAccountInformation_Refusechk').prop('checked', true);
+                                        Active = true;
+
+                                    }
+                                    if (result.SewerServiceExist == "Yes") {
+                                        $('#MunicipalAccountInformation_Sewerchk').prop('checked', true);
+                                        Active = true;
+
+                                    }
+                                    if (result.RatesServiceExist == "Yes") {
+                                        $('#MunicipalAccountInformation_RatesandTaxeschk').prop('checked', true);
+                                        Active = true;
+
+                                    }
+
+                                    // if (result.MetersList != null) {
+                                    //     result.MetersList.forEach(function (item) {
+
+                                    //         // create an unordered list node
+                                    //         alert(item);
+                                    //     )}
+                                    //}
+                                    for (var i = 0; i < result.MetersList.length; i++) {
+                                        //alert("here" + result.MetersList[i].Service);
+                                        if (result.MetersList[i].Service == "WA") {
+                                            Active = true;
+
+                                            if (result.MetersList[i].hasPreviousMeter == true) {
+                                                AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].PreviousMeterReading, result.MetersList[i].PreviousMeterReadingDate, "Processed-SOLAR");
+
+                                            }
+
+
+                                            AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].MeterReading, result.MetersList[i].MeterReadingDate, "Processed-SOLAR");
+
+
+                                            if (result.MetersList[i].hasUnprocessedMeter == true) {
+                                                AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].UnprocessedMeterReading, result.MetersList[i].UnprocessedMeterReadingDate, "Unprocessed-SOLAR");
+
+                                            }
+
+
+                                            //AddWaterApi(MeterNumber, MeterReading, MeterReadingDate);
+                                        }
+                                        if (result.MetersList[i].Service == "EL") {
+                                            Active = true;
+
+                                            if (result.MetersList[i].hasPreviousMeter == true) {
+                                                ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].PreviousMeterReading, result.MetersList[i].PreviousMeterReadingDate, "Processed-SOLAR");
+
+                                            }
+
+                                            ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].MeterReading, result.MetersList[i].MeterReadingDate, "Processed-SOLAR");
+
+                                            if (result.MetersList[i].hasUnprocessedMeter == true) {
+                                                ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].UnprocessedMeterReading, result.MetersList[i].UnprocessedMeterReadingDate, "Unprocessed-SOLAR");
+
+                                            }
+                                            //AddWaterApi(MeterNumber, MeterReading, MeterReadingDate);
+                                        }
+                                    }
+                                    if (Active == true) {
+
+                                        $('#MunicipalAccountInformation_ServicesOnProperty').trigger('click');
+
+                                    }
+
+
+                                }
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+                            //alert("Unsuccessfully captured!");
+                            swal("Error!", "Unsuccessfully captured.", "error");
+                        }
+                    });
+            }
+            function ValidateRSAIDNo(id) {
+                try {
+                    if (id.length != 13) {
+                        $('#PurchaserInformation_IDNo').val('');
+                        //alert("Please enter a valid 13 digit ID no.");
+                        swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                        return false;
+                    }
+                    var y1o = id.substring(0, 1)
+                    var y2e = id.substring(1, 2)
+                    var m1o = id.substring(2, 3)
+                    var m2e = id.substring(3, 4)
+                    var d1o = id.substring(4, 5)
+                    var d2e = id.substring(5, 6)
+                    var go = id.substring(6, 7)
+                    var s1e = id.substring(7, 8)
+                    var s2o = id.substring(8, 9)
+                    var s3e = id.substring(9, 10)
+                    var co = id.substring(10, 11)
+                    var ae = id.substring(11, 12)
+                    var z = id.substring(12, 13)
+
+                    var A = 0;
+                    A = parseInt(A) + parseInt(y1o) + parseInt(m1o) + parseInt(d1o) + parseInt(go) + parseInt(s2o) + parseInt(co);
+                    var B1 = y2e + m2e + d2e + s1e + s3e + ae;
+                    var B2 = B1 * 2;
+                    var i = 0;
+                    var B3 = 0;
+                    var B2string = B2.toString();
+                    while (B2string.length > i) {
+                        var x = B2string.substring(i, i + 1);
+                        B3 = B3 + parseInt(x);
+                        i = i + 1;
+                    }
+
+                    var C = A + B3;
+                    var Cstring = C.toString();
+                    var secNo = Cstring.substring(1, 2);
+                    var D = 10 - parseInt(secNo);
+                    while (D >= 10) D = D - 10;
+                    if (D == z) {
+                        //test for valid date in 1900
+                        var valid = true;
+                        var bd = new Date('19' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                        if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                        else if (bd.getFullYear() != parseInt('19' + y1o + y2e)) valid = false;
+                        else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                        else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+                        //if invalid test again in 2000
+                        valid = true;
+                        bd = new Date('20' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                        if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                        else if (bd.getFullYear() != parseInt('20' + y1o + y2e)) valid = false;
+                        else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                        else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+
+
+                        var tempDate = new Date(id.substring(0, 2), id.substring(2, 4) - 1, id.substring(4, 6));
+
+                        var id_date = tempDate.getDate();
+                        var id_month = tempDate.getMonth();
+                        var id_year = tempDate.getFullYear();
+
+                        var fullDate = (id_month + 1) + "/" + id_date + "/" + id_year;
+
+                        $('#DOBAuto').val(fullDate);
+
+
+
+                        var today_date = new Date();
+                        var today_year = today_date.getFullYear();
+                        var today_month = today_date.getMonth();
+                        var today_day = today_date.getDate();
+                        var age = today_year - id_year;
+
+                        if (today_month < (id_month - 1)) {
+                            age--;
+                        }
+                        if (((id_month - 1) == today_month) && (today_day < id_date)) {
+                            age--;
+                        }
+
+                        $('#AgeAuto').val(age);
+
+
+                        if (!((tempDate.getYear() == id.substring(0, 2)) && (id_month == id.substring(2, 4) - 1) && (id_date == id.substring(4, 6)))) {
+                            error.append('<p>ID number does not appear to be authentic - date part not valid</p>');
+                            correct = false;
+                        }
+
+
+                        return valid;
+                    }
+                    else {
+                        $('#PurchaserInformation_IDNo').val('');
+                        //alert("Please enter a valid 13 digit ID no.");
+                        swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                        return false;
+                    }
+                }
+                catch (e) {
+                    //alert(bd+"Catch");
+                    return false;
+                }
+            }
+
+            function isNumber(evt) {
+                evt = (evt) ? evt : window.event;
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                    return false;
+                }
+                return true;
+            }
+
+
+            function switchDivsMeterType() {
+                var Purchaser = document.getElementById("ElectricityMeterInformation_ElectricityMeterType").value;
+
+                if (Purchaser == "Pre-Paid") {
+                    jQuery('#divPrepaid').css("display", "block")
+                    jQuery('#divMunicipal').css("display", "none")
+                }
+                else if (Purchaser == "Municipal") {
+                    jQuery('#divPrepaid').css("display", "none")
+                    jQuery('#divMunicipal').css("display", "block")
+                }
+
+                else {
+                    jQuery('#divPrepaid').css("display", "none")
+                    jQuery('#divMunicipal').css("display", "none")
+                }
+            }
+
+            function switchDivsTransfer() {
+
+                var Transfer = document.getElementById("TransferInformation_TransferType").value;
+
+                if (Transfer == "tt_SectionalTitle") {
+                    jQuery('#divST').css("display", "block")
+
+                }
+                else if (Transfer != "tt_SectionalTitle") {
+
+                    jQuery('#divST').css("display", "none")
+
+                }
+
+
+
+
+            }
+            function switchDiveSassa() {
+                var Option = document.getElementById("IncomeSource").value;
+                if (Option == "3") {
+                    jQuery('#divSassa').css("display", "block")
+                }
+
+            }
+
+            function switchDivsPurchaserInfo() {
+                var Purchaser = document.getElementById("PurchaserInformation_PurchaseType").value;
+
+                if (Purchaser == "reac") {
+                    jQuery('#RecommendDFC').css("display", "none")
+                    jQuery('#RecommendREAC').css("display", "block")
+
+                }
+                else if (Purchaser == "dfc") {
+                    jQuery('#RecommendDFC').css("display", "block")
+                    jQuery('#RecommendREAC').css("display", "none")
+
+                }
+
+            }
+
+            function JuristicTypeChange() {
+                var JuristicType = document.getElementById("JuristicType").value;
+                if (JuristicType == 11) {
+                    jQuery('#divDeemed').css("display", "block")
+                    jQuery('#divCC').css("display", "none")
+
+                    jQuery('#divTrust').css("display", "none")
+                    jQuery('#divSpecify').css("display", "none")
+                }
+                else if (JuristicType == 6) {
+                    jQuery('#divDeemed').css("display", "none")
+                    jQuery('#divCC').css("display", "block")
+
+                    jQuery('#divTrust').css("display", "none")
+                    jQuery('#divSpecify').css("display", "none")
+                }
+                else if (JuristicType == 7) {
+                    jQuery('#divDeemed').css("display", "none")
+                    jQuery('#divCC').css("display", "block")
+
+                    jQuery('#divTrust').css("display", "none")
+                    jQuery('#divSpecify').css("display", "none")
+                }
+
+                else if (JuristicType == 9) {
+                    jQuery('#divTrust').css("display", "block")
+                    jQuery('#divDeemed').css("display", "none")
+
+                    jQuery('#divCC').css("display", "none")
+                    jQuery('#divSpecify').css("display", "none")
+                }
+                else if (JuristicType == 15) {
+                    jQuery('#divSpecify').css("display", "block")
+                    jQuery('#divTrust').css("display", "none")
+
+                    jQuery('#divDeemed').css("display", "none")
+                    jQuery('#divCC').css("display", "none")
+                }
+
+                else {
+                    jQuery('#divTrust').css("display", "none")
+                    jQuery('#divDeemed').css("display", "none")
+
+                    jQuery('#divCC').css("display", "none")
+                    jQuery('#divSpecify').css("display", "none")
+                }
+
+            }
+
+
+</script>
+
+<script>
+
+    function IdentitificationTypesChange() {
+        var Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+
+        if (Nationality == 3) {
+            jQuery('#PassportDiv').css("display", "block")
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "block")
+            jQuery('#PassportDatediv').css("display", "block")
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#IDDatedivdiv').css("display", "none")
+        }
+        else if (Nationality == 1) {
+            jQuery('#IdNoDiv').css("display", "block")
+            jQuery('#IDDatedivdiv').css("display", "block")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDatediv').css("display", "none")
+        }
+        else {
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDatediv').css("display", "none")
+        }
+    }
+    function AddElectricity() {
+
+
+
+        var ElectricityMeterInformation_ElectricityMeterNo = document.getElementById("ElectricityMeterInformation_ElectricityMeterNo").value;
+        var ElectricityMeterInformation_ElectricityMeterReading = document.getElementById("ElectricityMeterInformation_ElectricityMeterReading").value;
+        var ElectricityMeterInformation_ElectricityMeterReadingDateTaken = document.getElementById("ElectricityMeterInformation_ElectricityMeterReadingDateTaken").value;
+
+
+        if (ElectricityMeterInformation_ElectricityMeterNo == "" || ElectricityMeterInformation_ElectricityMeterReading == "") {
+            //alert("Please enter all required fields!");
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+        //else if (ElectricityMeterInformation_ElectricityMeterNo.length < 11) {
+        //    swal("Error!", "Please enter 11 digits!.", "warning");
+        //}
+
+        else {
+
+            $.getJSON("../Capture/AddElectricity?ElectricityMeterInformation_ElectricityMeterNo=" + ElectricityMeterInformation_ElectricityMeterNo
+                + '&ElectricityMeterInformation_ElectricityMeterReading=' + ElectricityMeterInformation_ElectricityMeterReading
+                + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully. A picture of your meter will be requried!  ", "success");
+                            jQuery('#divElectricitytbl').css("display", "block")
+                            //var row = $("<tr/>")
+                            //$("#Electricitytbl").append(row);
+
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterNo + "</td>"));
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReading + "</td>"));
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken + "</td>"));
+
+
+
+                            var electricityt = $('#Electricitytbl').DataTable();
+
+                            electricityt.row.add([ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, "Unprocessed"]).draw(false);
+
+                            clearElectricity();
+                            //$('#Electricitytbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+    function AddElectricityApi(ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status) {
+
+
+
+
+        if (ElectricityMeterInformation_ElectricityMeterNo == "" /*|| ElectricityMeterInformation_ElectricityMeterReading == ""*/) {
+            //alert("Please enter all required fields!");
+
+
+            //if (ElectricityMeterInformation_ElectricityMeterNo == "" && ElectricityMeterInformation_ElectricityMeterReading == "") {
+            //    swal("Error!", "Electricity meter number and water meter reading are blank!.", "warning");
+            //}
+
+
+
+            if (ElectricityMeterInformation_ElectricityMeterNo == "") {
+                swal("Error!", "Electricity meter number is blank!.", "warning");
+            }
+            //else if (ElectricityMeterInformation_ElectricityMeterNo != "" && ElectricityMeterInformation_ElectricityMeterReading == "") {
+            //    swal("Error!", "Electricity meter reading is blank!.", "warning");
+            //}
+            else {
+                swal("Error!", "Please enter all required fields!.", "warning");
+
+
+            }
+
+
+        }
+        //else if (ElectricityMeterInformation_ElectricityMeterNo.length < 11) {
+        //    swal("Error!", "Please enter 11 digits!.", "warning");
+        //}
+
+        else {
+
+            $.getJSON("../Capture/AddElectricityApi?ElectricityMeterInformation_ElectricityMeterNo=" + ElectricityMeterInformation_ElectricityMeterNo
+                + '&ElectricityMeterInformation_ElectricityMeterReading=' + ElectricityMeterInformation_ElectricityMeterReading
+                + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divPrepaid').css("display", "none")
+                            jQuery('#divMunicipal').css("display", "block")
+                            jQuery('#ElectricityMeterInformation_ElectricityMeterType').val("Municipal")
+                            jQuery('#divElectricitytbl').css("display", "block")
+
+                            var electricityt = $('#Electricitytbl').DataTable();
+
+                            electricityt.row.add([ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status]).draw(false);
+
+
+
+                            //var row = $("<tr/>")
+                            //$("#Electricitytbl").append(row);
+
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterNo + "</td>"));
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReading + "</td>"));
+                            //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken + "</td>"));
+                            clearElectricity();
+                            //$('#Electricitytbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+    function clearElectricity() {
+        $('#ElectricityMeterInformation_ElectricityMeterNo').val('');
+        $('#ElectricityMeterInformation_ElectricityMeterReading').val('');
+        $('#ElectricityMeterInformation_ElectricityMeterReadingDateTaken').val('');
+
+    }
+
+    function AddWater() {
+        debugger;
+
+
+        var WaterMeterInformation_WaterMeterNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        var WaterMeterInformation_WaterMeterReading = document.getElementById("WaterMeterInformation_WaterMeterReading").value;
+        var WaterMeterInformation_WaterMeterReadingDateTaken = document.getElementById("WaterMeterInformation_WaterMeterReadingDateTaken").value;
+
+        if (WaterMeterInformation_WaterMeterNo == "" || WaterMeterInformation_WaterMeterReading == "") {
+            //alert("Please enter all required fields!");
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+        //else if (WaterMeterInformation_WaterMeterNo.length < 11) {
+        //    swal("Error!", "Please enter 11 digits!.", "warning");
+        //}
+
+        else {
+
+            $.getJSON("../Capture/AddWater?WaterMeterInformation_WaterMeterNo=" + WaterMeterInformation_WaterMeterNo
+                + '&WaterMeterInformation_WaterMeterReading=' + WaterMeterInformation_WaterMeterReading
+                + '&WaterMeterInformation_WaterMeterReadingDateTaken=' + WaterMeterInformation_WaterMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.A picture of your meter will be requried!", "success");
+                            jQuery('#divWatertbl').css("display", "block")
+                            //var row = $("<tr/>")
+                            //$("#Watertbl").append(row);
+
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterNo + "</td>"));
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterReading + "</td>"));
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterReadingDateTaken + "</td>"));
+
+
+                            var watert = $('#Watertbl').DataTable();
+
+                            watert.row.add([WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, "Unprocessed"]).draw(false);
+                            clearWater();
+                            //$('#Watertbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+
+    function AddWaterApi(WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status) {
+
+
+
+
+        if (WaterMeterInformation_WaterMeterNo == "") {
+
+            //if (WaterMeterInformation_WaterMeterNo == "") {
+            //    swal("Error!", "Water meter number and water meter reading are blank!.", "warning");
+            //}
+
+
+
+            if (WaterMeterInformation_WaterMeterNo == "") {
+                swal("Error!", "Water meter number is blank!.", "warning");
+            }
+            //else if (WaterMeterInformation_WaterMeterNo != "") {
+            //    swal("Error!", "Water meter reading is blank!.", "warning");
+            //}
+            else {
+                swal("Error!", "Please enter all required fields!.", "warning");
+
+
+            }
+
+            //swal("Error!", "Please enter all required fields!.", "warning");
+            ////alert("Please enter all required fields!");
+
+        }
+        //else if (WaterMeterInformation_WaterMeterNo.length < 11) {
+        //    alert("2");
+        //    swal("Error!", "Please enter 11 digits!.", "warning");
+        //}
+
+        else {
+            //alert("3");
+            $.getJSON("../Capture/AddWaterApi?WaterMeterInformation_WaterMeterNo=" + WaterMeterInformation_WaterMeterNo
+                + '&WaterMeterInformation_WaterMeterReading=' + WaterMeterInformation_WaterMeterReading
+                + '&WaterMeterInformation_WaterMeterReadingDateTaken=' + WaterMeterInformation_WaterMeterReadingDateTaken,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            var watert = $('#Watertbl').DataTable();
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divWatertbl').css("display", "block")
+                            watert.row.add([WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status]).draw(false);
+                            //var row = $("<tr/>")
+                            //$("#Watertbl").append(row);
+
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterNo + "</td>"));
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterReading + "</td>"));
+                            //row.append($("<td>" + WaterMeterInformation_WaterMeterReadingDateTaken + "</td>"));
+                            //row.append($("<td>" + status + "</td>"));
+                            clearWater();
+
+
+                            //$('#Watertbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+    function clearWater() {
+        $('#WaterMeterInformation_WaterMeterNo').val('');
+        $('#WaterMeterInformation_WaterMeterReading').val('');
+        $('#WaterMeterInformation_WaterMeterReadingDateTaken').val('');
+
+    }
+    function AddNaturalPerson() {
+
+        var Gender = document.getElementById("Gender").value;
+        var TitleType = document.getElementById("TitleType").value;
+        var MaritialStatus = document.getElementById("MaritialStatus").value;
+        var PurchaserInformation_Initial = document.getElementById("PurchaserInformation_Initial").value;
+        var PurchaserInformation_FirstName = document.getElementById("PurchaserInformation_FirstName").value;
+        var PurchaserInformation_LastName = document.getElementById("PurchaserInformation_LastName").value;
+        var PurchaserInformation_IDNo = document.getElementById("PurchaserInformation_IDNo").value;
+        var PurchaserInformation_Passport = document.getElementById("PurchaserInformation_Passport").value;
+        var PurchaserInformation_PurDateExpiry = document.getElementById("PurchaserInformation_PurDateExpiry").value;
+        var PurchaserInformation_Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+        var PurchaserInformation_CellNo = document.getElementById("PurchaserInformation_CellNo").value;
+        var PurchaserInformation_HomeNo = document.getElementById("PurchaserInformation_HomeNo").value;
+        var PurchaserInformation_WorkNo = document.getElementById("PurchaserInformation_WorkNo").value;
+        var PurchaserInformation_PurEmail = document.getElementById("PurchaserInformation_PurEmail").value;
+        var PurchaserInformation_PostAddress = document.getElementById("PurchaserInformation_PostAddress").value;
+        var PurchaserInformation_PostSuburb = document.getElementById("PurchaserInformation_PostSuburb").value;
+        var PurchaserInformation_PostalCity = document.getElementById("PurchaserInformation_PostalCity").value;
+        var PurchaserInformation_PostPostalCode = document.getElementById("PurchaserInformation_PostPostalCode").value;
+        var PurchaserInformation_PurchaseType = document.getElementById("PurchaserInformation_PurchaseType").value;
+        var PurchaserInformation_NominatedAddress = document.getElementById("PurchaserInformation_NominatedAddress").value;
+
+        if (PurchaserInformation_IDNo != "") {
+            var PurchaserInformation_DOB = document.getElementById("DOBAuto").value;
+            var PurchaserInformation_Age = document.getElementById("AgeAuto").value;
+        }
+        else {
+            var PurchaserInformation_DOB = document.getElementById("PurchaserInformation_DOB").value;
+            var PurchaserInformation_Age = document.getElementById("PurchaserInformation_Age").value;
+        }
+
+        if (Gender == "" || TitleType == "" || MaritialStatus == "") {
+            //alert("Please enter all required fields!");
+            swal("Error!", "Please enter all required fields!.", "warning");
+        }
+
+        else {
+
+            $.getJSON("../Capture/AddNaturalPerson?Gender="
+                + Gender + '&TitleType=' + TitleType
+                + '&MaritialStatus=' + MaritialStatus
+                + '&PurchaserInformation_Initial=' + PurchaserInformation_Initial
+                + '&PurchaserInformation_FirstName=' + PurchaserInformation_FirstName
+                + '&PurchaserInformation_LastName=' + PurchaserInformation_LastName
+                + '&PurchaserInformation_IDNo=' + PurchaserInformation_IDNo
+                + '&PurchaserInformation_DOB=' + PurchaserInformation_DOB
+                + '&PurchaserInformation_Age=' + PurchaserInformation_Age
+                + '&PurchaserInformation_Passport=' + PurchaserInformation_Passport
+                + '&PurchaserInformation_PurDateExpiry=' + PurchaserInformation_PurDateExpiry
+                + '&PurchaserInformation_Nationality=' + PurchaserInformation_Nationality
+                + '&PurchaserInformation_CellNo=' + PurchaserInformation_CellNo
+                + '&PurchaserInformation_HomeNo=' + PurchaserInformation_HomeNo
+                + '&PurchaserInformation_WorkNo=' + PurchaserInformation_WorkNo
+                + '&PurchaserInformation_PurEmail=' + PurchaserInformation_PurEmail
+                + '&PurchaserInformation_PostAddress=' + PurchaserInformation_PostAddress
+                + '&PurchaserInformation_PostSuburb=' + PurchaserInformation_PostSuburb
+                + '&PurchaserInformation_PostalCity=' + PurchaserInformation_PostalCity
+                + '&PurchaserInformation_PostPostalCode=' + PurchaserInformation_PostPostalCode
+                + '&PurchaserInformation_PurchaseType=' + PurchaserInformation_PurchaseType
+                + '&PurchaserInformation_NominatedAddress=' + PurchaserInformation_NominatedAddress,
+
+                function (result) {
+                    if (result != "Error") {
+                        try {
+                            //alert("Added successfully !");
+                            swal("Success!", "Added successfully.", "success");
+                            jQuery('#divNaturalPersontbl').css("display", "block")
+                            var row = $("<tr/>")
+                            $("#NaturalPersontbl").append(row);
+                            row.append($("<td>" + PurchaserInformation_FirstName + " " + PurchaserInformation_LastName + "</td>"));
+                            if (PurchaserInformation_IDNo == "") {
+                                row.append($("<td>" + PurchaserInformation_Passport + "</td>"));
+                            }
+                            else {
+                                row.append($("<td>" + PurchaserInformation_IDNo + "</td>"));
+                            }
+                            row.append($("<td>" + PurchaserInformation_PurEmail + "</td>"));
+                            row.append($("<td>" + PurchaserInformation_PostAddress + "</td>"));
+                            row.append($("<td>" + PurchaserInformation_NominatedAddress + "</td>"));
+                            clearNaturalPerson();
+                            $('#NaturalPersontbl').DataTable();
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+
+                        swal("Error!", "Unsuccessfully captured!", "error");
+                    }
+                });
+        }
+    }
+
+    function clearNaturalPerson() {
+        $('#PurchaserInformation_PurchaseType').val('');
+        $('#Gender').val('');
+        $('#TitleType').val('');
+        $('#MaritialStatus').val('');
+        $('#PurchaserInformation_Initial').val('');
+        $('#PurchaserInformation_FirstName').val('');
+        $('#PurchaserInformation_LastName').val('');
+        $('#PurchaserInformation_IDNo').val('');
+        $('#PurchaserInformation_DOB').val('');
+        $('#PurchaserInformation_Age').val('');
+        $('#PurchaserInformation_Passport').val('');
+        $('#PurchaserInformation_PurDateExpiry').val('');
+        $('#PurchaserInformation_Nationality').val('');
+        $('#PurchaserInformation_CellNo').val('');
+        $('#PurchaserInformation_HomeNo').val('');
+        $('#PurchaserInformation_WorkNo').val('');
+        $('#PurchaserInformation_PurEmail').val('');
+        $('#PurchaserInformation_PostAddress').val('');
+        $('#PurchaserInformation_PostSuburb').val('');
+        $('#PurchaserInformation_PostalCity').val('');
+        $('#PurchaserInformation_PostPostalCode').val('');
+        $('#PurchaserInformation_NominatedAddress').val('');
+        $('#DOBAuto').val('');
+        $('#AgeAuto').val('');
+        jQuery('#IdNoDiv').css("display", "none")
+        jQuery('#PassportDiv').css("display", "none")
+        jQuery('#PassportDatediv').css("display", "none")
+        jQuery('#IDDatedivdiv').css("display", "none")
+    }
+
+    function clearJuristics() {
+        $('#CommentsAttachments_BICA_DATE').val('');
+        $('#CommentsAttachments_BICA_COMMENT').val('');
+    }
+
+    function validateEmail(email) {
+        var emailID = document.getElementById(email).value;
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        var isEmail = re.test(emailID);
+        if (isEmail != true) {
+            //alert("Please enter a valid email");
+            swal("Error!", "Please enter a valid email.", "warning");
+            document.getElementById(email).value = "";
+        }
+    }
+</script>

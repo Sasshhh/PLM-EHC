@@ -1,0 +1,494 @@
+﻿
+@using C8.eServices.Mvc.Keys;
+@using C8.eServices.Mvc.Models;
+@model C8.eServices.Mvc.ViewModels.CommunicationViewModel
+
+
+@{
+    ViewBag.Title = "MessengerService";
+    Layout = null;
+
+}
+
+@{
+    int senderid = 0;
+    int Depid = 0;
+    int validate = 0;
+    //var message = ViewBag.LastComment[0] == null ? string.Empty : ViewBag.LastComment[0];
+    Comment message = new Comment();
+    var message2 = ViewBag.LastComment == null ? string.Empty : ViewBag.LastComment;
+    if (message2 != null && message2.Count > 0)
+    {
+        if (message2.Count > 0)
+        {
+            message = message2[0];
+        }
+
+
+    }
+    else
+    {
+        //message = string.Empty;
+    }
+    var test = Model;
+
+
+    var item = ViewBag.requests;
+    var comments = ViewBag.comments;
+    var loggedInUser = ViewBag.LoggedInUser;
+    var DepartmentCounter = (ViewBag.Departments).Count - 1;
+    if (comments.Count > 0)
+    {
+        validate = 1;
+        senderid = comments[0].SenderCustomerId;
+    }
+
+}
+
+
+
+<html>
+<head>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css" rel="stylesheet" />
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link href="~/Content/Messenger/Messenger.css" rel="stylesheet" />
+
+    <style>
+        @@media screen and (max-width: 480px) {
+
+            .Side {
+                display: none !important;
+            }
+
+            .ButtonWidth {
+                margin-right: 30px;
+            }
+
+            .mesgs {
+                padding: 0px 1px 0 1px !important;
+                width: 100% !important;
+            }
+
+            textarea {
+                width: 17em;
+            }
+        }
+
+        @@media screen and (min-width: 280px) and (max-width: 300px) {
+            textarea {
+                width: 14em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 300px) and (max-width: 313px) {
+            textarea {
+                width: 14em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 313px) and (max-width: 330px) {
+            textarea {
+                width: 15em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 330px) and (max-width: 344px) {
+            textarea {
+                width: 16em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 344px) and (max-width: 360px) {
+            textarea {
+                width: 17em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 360px) and (max-width: 375px) {
+            textarea {
+                width: 18em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (max-width: 385px) and (min-width: 375px) {
+            textarea {
+                width: 19em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 385px) and (max-width: 399px) {
+            textarea {
+                width: 19em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (max-width: 415px) and (min-width: 399px) {
+            textarea {
+                width: 21em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 415px) and (max-width: 430px) {
+            textarea {
+                width: 22em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 430px) and (max-width: 450px) {
+            textarea {
+                width: 23em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+        @@media screen and (min-width: 450px) and (max-width: 480px) {
+            textarea {
+                width: 24em !important;
+            }
+
+            .msg_send_btn {
+                right: 2% !important;
+            }
+        }
+
+
+
+        @@media only screen and (max-width: 1000px) {
+
+            .buttonIcon {
+                font-size: 2.5rem !important;
+            }
+
+            .chkboxmargin {
+                margin-left: 30px;
+            }
+
+            .cards tbody tr {
+                float: left;
+                /*width: 20rem;*/
+                width: 90%;
+                margin: 0.5rem;
+                border: 0.0625rem solid rgba(0,0,0,.125);
+                border-radius: .25rem;
+                box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+            }
+
+            .cards thead tr {
+                float: left;
+                /*width: 25rem;*/
+                width: 90%;
+                margin: 0.5rem;
+                border: 0.0625rem solid rgba(0,0,0,.125);
+                border-radius: .25rem;
+                box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+            }
+
+
+            .cards tbody td {
+                display: block;
+                word-wrap: break-word;
+            }
+
+            .cards thead th {
+                display: none;
+            }
+
+            .table tbody label {
+                display: block;
+            }
+
+            .cards tbody label {
+                display: inline;
+                position: relative;
+                font-size: 85%;
+                top: -0.5rem;
+                color: #808080;
+                min-width: 4rem;
+                margin-left: 0;
+                margin-right: 1rem;
+                text-align: left;
+            }
+
+            tr.selected label {
+                color: #404040;
+            }
+
+            .table .fa {
+                font-size: 2.5rem;
+                text-align: center;
+            }
+
+            .cards .fa {
+                font-size: 7.5rem;
+            }
+        }
+
+        @@media only screen and (max-width: 1000px) {
+            .step-app > .step-steps {
+                display: inline-block;
+                padding: 1px;
+                color: white;
+                background-color: #848484;
+                text-decoration: none;
+                border-right: 1px solid #fff;
+                word-wrap: break-word;
+                width: 100%;
+            }
+        }
+        .received_withd_msg p {
+            background: #226aa3 none repeat scroll 0 0;
+            border-radius: 3px;
+            color: #ffffff;
+            font-size: 14px;
+            margin: 0;
+            padding: 5px 10px 5px 12px;
+            width: 100%;
+        }
+
+        .sent_msg p {
+            background: #00a5d1 none repeat scroll 0 0;
+            border-radius: 3px;
+            font-size: 14px;
+            margin: 0;
+            color: #fff;
+            padding: 5px 10px 5px 12px;
+            width: 100%;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="messaging">
+            <div class="inbox_msg">
+                <div class="inbox_people">
+                    <div class="headind_srch">
+                        <div class="recent_heading">
+                            <h4>Recent</h4>
+                        </div>
+
+                        <div id="custom-search-input">
+                            <div class="input-group col-md-offset-2">
+                                <input type="text" class="  search-query form-control" placeholder="Search" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-danger" type="button">
+                                        <span class=" glyphicon glyphicon-search"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="inbox_chat">
+                        @foreach (var department in ViewBag.Departments)
+                        {
+
+                            <div class="chat_list">
+                                <div class="chat_people">
+                                    @*<div class="chat_img"> <img src="~/Content/Images/envelop.png" alt="xet"> </div>*@
+                                    <div class="chat_ib">
+
+
+                                        @{ if (validate == 0)
+                                            {
+                                                <div onclick="location.href='@Url.Action("RefundCreateMessage", "RCSApplication", new {q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.RefundApplicationID.ToString() + "&" + "CommunicationType=" + department.Key)  })'">
+                                                    <h5><b>@department.Description </b><span class="chat_date">No Date</span></h5>
+                                                    <p>
+                                                        None
+                                                    </p>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                if (message != null && message.Communication.CommunicationTypeId == department.Id)
+                                                {
+                                                    <div onclick="location.href='@Url.Action("RefundCreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.RefundApplicationID.ToString() + "&" + "CommunicationType=" + department.Key)  })'">
+                                                        <h5><b>@department.Description </b><span class="chat_date">@message.CreatedDateTime</span></h5>
+                                                        <p>
+                                                            @message.Comments
+                                                        </p>
+                                                    </div>
+
+                                                }
+                                                else
+                                                {
+                                                    <div onclick="location.href='@Url.Action("RefundCreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.RefundApplicationID.ToString() + "&" + "CommunicationType=" + department.Key)  })'">
+                                                        <h5><b>@department.Description </b><span class="chat_date">No Date</span></h5>
+                                                        <p>
+                                                            None
+                                                        </p>
+
+                                                    </div>
+                                                }
+
+
+                                            }
+                                        }
+
+                                        @{
+                                            if (Depid < DepartmentCounter)
+                                            {
+                                                Depid = Depid + 1;
+
+
+                                            }
+                                            if (validate == 1)
+                                            {
+                                                message = ViewBag.LastComment[Depid];
+                                            }
+
+                                        }
+
+
+
+
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @*<div class="chat_list active_chat">
+                                <div class="chat_people">
+                                    <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                                    <div class="chat_ib">
+                                        <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                        <p>
+                                            Test, which is a new approach to have all solutions
+                                            astrology under one roof.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>*@
+
+                    </div>
+                </div>
+
+                <div class="mesgs">
+                    <div class="msg_history">
+                        @if (senderid != 0)
+                        {
+                            for (int i = 0; i < comments.Count; i++)
+                            {
+                                if (comments[i].SenderCustomerId == loggedInUser)
+                                {
+
+                                    <div class="outgoing_msg">
+                                        <div class="sent_msg">
+                                            <p>
+                                                @comments[i].Comments
+                                            </p>
+                                            <span class="time_date"> @comments[i].CreatedDateTime</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="incoming_msg">
+                                        @*<div class="incoming_msg_img"> <img src="~/Content/Images/envelop.png" alt="xet"> </div>*@
+                                        <div class="received_msg">
+                                            <div class="received_withd_msg">
+                                                <p>
+                                                    @comments[i].Comments
+                                                </p>
+                                                <span class="time_date">Sent By @comments[i].SenderCustomer.FullName at @comments[i].CreatedDateTime,</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="type_msg">
+                        <div class="input_msg_write">
+                            @*<input id="Comments_Comments" type="text" class="write_msg" placeholder="Type a message" />*@
+                            @Html.TextAreaFor(model => model.Comments.Comments, new { @cols = "80", @rows = "4", @class = "write_msg", @required = "required", @id = "Comment" })
+                            <button class="msg_send_btn" type="submit" id="Submit"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@Scripts.Render("~/bundles/jquery")
+
+<script type="text/javascript">
+
+    $('#Submit').click(function ()
+            alert("Working");
+    Test();
+        });
+
+    function Test() {
+
+        var message = $("#Comment").val();
+
+        $.ajax({
+            url: "/RCSApplication/RefundCreateMessage",
+            method: "POST",
+            data: {
+                Comments: message
+            },
+            success: function (data) {
+                alert(data);
+            },
+            error: function () {
+                alert("Ajax call failed");
+            }
+        })
+    }
+
+</script>
+
+

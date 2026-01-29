@@ -1,0 +1,426 @@
+﻿@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.AdditionalPropertyOwner
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var propertyId = ViewBag._PropertyId;
+    var referenceTypeId = ViewBag.ReferenceTypeId;
+    var applicationId = ViewBag.ApplicationId;
+    var customerId = ViewBag.CustomerId;
+    var ratesRebateId = ViewBag.RatesRebateId;
+    var property = (Property)ViewData["Property"];
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="1">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-done">Properties</li>
+        <li class="progtrckr-done">Accounts</li>
+        <li class="progtrckr-here">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+        <li class="progtrckr-todo">Submit</li>
+    </ol>
+</div>*@
+<br />
+
+
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseProperty">
+                    Property
+                </a>
+            </h4>
+        </div>
+        <div id="collapseProperty" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial("_PropertyPartial", property)
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 4:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li><strong>Additional Owners - Update information about the additional owners of a property.</strong></li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    If you would like to go back to the additional owners listing page, you may click the "Back" button on the "Navigation" panel.
+                </p>
+                <p>
+                    You may change an additional owners details by editing the respective fields in the "Edit Additional Owner" panel.
+                </p>
+                <p>
+                    You may click the "Save" button in the "Navigation" panel to save your information, which will take you back to the additional owners listing page.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "additionalPropertyOwnerForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                        Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">
+                                @*<a href="@Url.Action( "Index", "Property", new { customerId, ratesRebateId = ViewBag.RatesRebateId } )" class="btn btn-primary">Properties</a>
+                                &nbsp;*@
+                                @Html.EncodedActionLink("Back", "Index","AdditionalPropertyOwner", new { propertyId, ratesRebateId }, new { @class = "btn btn-primary" })
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group" id="additionalOwner">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAdditionalOwner">
+                        Edit Addtional Owner
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseAdditionalOwner" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.PropertyId)
+                        @Html.HiddenFor(model => model.IsActive)
+                        @Html.HiddenFor(model => model.IsDeleted)
+                        @Html.HiddenFor(model => model.IsLocked)
+                        @Html.HiddenFor(model => model.CountryOfIssueTypeId)
+                        @Html.HiddenFor(model => model.IdentificationTypeId)
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Property.RatesNumber, "Rate No", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.Property.RatesNumber, new { @class = "form-control", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PropertyId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.OwnerName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.OwnerName, new { @class = "form-control", @id = "txtOwner", @required = true })
+                                @Html.ValidationMessageFor(model => model.OwnerName)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IdentificationTypeId, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.DropDownList("IdentificationTypeId", null, "Select Identification Type", new { id = "ddlIdentificationTypes", @class = "form-control", @required = true })
+                                @*@Html.DropDownListFor(model => model.IdentificationTypeId, (SelectList)ViewBag.IdentificationTypeId, "Select Identification Type", new { id = "ddlIdentificationTypes", @class = "form-control", @required = true })*@
+                            </div>
+                        </div>
+                        <div id="countryOfIssueType" class="form-group">
+                            @Html.LabelFor(model => model.CountryOfIssueTypeId, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.DropDownList("CountryOfIssueTypeId", null, "Select Country of Issue", new { id = "ddlCountryOfIssueTypeId", @class = "form-control" })
+                                @*  @Html.DropDownListFor(model => model.CountryOfIssueTypeId, (SelectList)ViewBag.CountryOfIssueTypeId, "Select Country of Issue", new {@class = "form-control", id = "ddlCountryOfIssueTypeId"})*@
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.OwnerIdentificationNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.OwnerIdentificationNumber, new { @class = "form-control", id = "txtIdNumber", @required = true })
+                                @Html.ValidationMessageFor(model => model.OwnerIdentificationNumber)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsRegisteredOwner, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.IsRegisteredOwner)
+                                @Html.Raw("(Registered owner as per title deed)")
+                                @Html.ValidationMessageFor(model => model.IsRegisteredOwner)
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="noLongerRegisteredOwner" style="display: none;">
+                            @Html.LabelFor(model => model.NoLongerRegisteredOwnerReason, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextAreaFor(model => model.NoLongerRegisteredOwnerReason, new { @class = "form-control", @id = "txtReason" })
+                                @Html.ValidationMessageFor(model => model.NoLongerRegisteredOwnerReason)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsDeceased, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.IsDeceased, new { id = "isDeceased" })
+                                @Html.ValidationMessageFor(model => model.IsDeceased)
+                            </div>
+                        </div>
+                        <div id="executor">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ExecutorName, "Executor Name", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBoxFor(model => model.ExecutorName, new { @class = "form-control", id = "executorName" })
+                                    @Html.ValidationMessageFor(model => model.ExecutorName)
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ExecutorContactNumber, "Executor Contact No", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBoxFor(model => model.ExecutorContactNumber, new { @class = "form-control", id = "executorContact", @pattern = @"^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$", @title = "Contact number. should contain numbers only with a length of 10 e.g. 0314612345", @placeholder = "0310000000", maxlength = 10 })
+                                    @Html.ValidationMessageFor(model => model.ExecutorContactNumber)
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*<div>
+        @Html.ActionLink( "Back to List Of Property Owners", "Index", new { propertyId, rateRebateId = ViewBag.RatesRebateId } )
+    </div>*@
+
+@section Scripts {
+    @*@Scripts.Render( "~/bundles/jqueryval" )*@
+
+
+    <script type="text/javascript">
+
+    function toggleExecutorValidation(isRequired) {
+
+        $("#executorName").prop("required", isRequired);
+        $("#executorContact").prop("required", isRequired);
+    }
+
+    $(document).ready(function () {
+        $("#txtOwner").prop("pattern", "^[a-zA-Z ]+$");
+        $("#txtOwner").prop('title', 'Billed First Name. should contain characters only without any leading or trailing spaces e.g. John Mark');
+
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+
+        $("#IsRegisteredOwner").change(function () {
+            if ($("#IsRegisteredOwner").prop("checked") == true) {
+                $("#noLongerRegisteredOwner").hide();
+                $("#txtReason").attr("required", false);
+            } else {
+                $("#txtReason").attr("required", true);
+                $("#noLongerRegisteredOwner").show();
+            }
+        });
+
+        @*//Default view*@
+        $("#IsDeceased").change(function () {
+            if ($("#IsDeceased").prop("checked") == true) {
+                $("#executor").show();
+
+                toggleExecutorValidation(true);
+
+            } else {
+                $("#executor").hide();
+
+                toggleExecutorValidation(false);
+            }
+        });
+
+
+        var idtype = $("#ddlIdentificationTypes").val();
+        countryOfIssueDetails(idtype);
+
+        @*        //
+        //$("#IsDeceased").change(function () {
+        //    if ($("#IsDeceased").prop("checked") == true) {
+        //        $("#executor").show();
+        //        $("#executorName").prop("required", true);
+        //        $("#executorContact").prop("required", true);
+        //        var isDeceased = $("#IsDeceased").val();
+
+        //        // Validate executor contact number if IsDeceased =True
+        //        // validateContactNo(isDeceased);
+
+        //    } else {
+        //        $("#executor").hide();
+        //        $("#executorName").prop("required", false);
+        //        $("#executorContact").prop("required", false);
+        //    }
+
+        //});*@
+
+        $("#IsRegisteredOwner").trigger("change");
+        $("#IsDeceased").trigger("change");
+
+        $("#additionalPropertyOwnerForm").on('submit', function (evt) {
+            var identificationType = $("#ddlIdentificationTypes").val();
+
+            if (identificationType == '@IdentificationTypeKey.SouthAfricanID') {
+                @*// assume everything is correct and if it later turns out not to be, just set this to false*@
+                var correct = true;
+                var idNumber = $('#txtIdNumber').val();
+
+                @*//Ref: http://www.sadev.co.za/content/what-south-african-id-number-made*@
+                if (idNumber.length != 13 || !isNumber(idNumber)) {
+                    correct = false;
+                }
+
+                @*// get first 6 digits as a valid date*@
+                var tempDate = new Date(idNumber.substring(0, 2), idNumber.substring(2, 4) - 1, idNumber.substring(4, 6));
+                var id_date = tempDate.getDate();
+                var id_month = tempDate.getMonth();
+                var id_year = tempDate.getFullYear();
+                var fullDate = id_date + "-" + (id_month + 1) + "-" + id_year;
+
+                if (!((tempDate.getYear() == idNumber.substring(0, 2)) && (id_month == idNumber.substring(2, 4) - 1) && (id_date == idNumber.substring(4, 6)))) {
+                    correct = false;
+                }
+
+                @*// get the gender*@
+                var genderCode = idNumber.substring(6, 10);
+                var gender = parseInt(genderCode) < 5000 ? "Female" : "Male";
+
+                @*// get country ID for citzenship*@
+                var citzenship = parseInt(idNumber.substring(10, 11)) == 0 ? "Yes" : "No";
+
+                @*// apply Luhn formula for check-digits*@
+                var tempTotal = 0;
+                var checkSum = 0;
+                var multiplier = 1;
+                for (var i = 0; i < 13; ++i) {
+                    tempTotal = parseInt(idNumber.charAt(i)) * multiplier;
+                    if (tempTotal > 9) {
+                        tempTotal = parseInt(tempTotal.toString().charAt(0)) + parseInt(tempTotal.toString().charAt(1));
+                    }
+                    checkSum = checkSum + tempTotal;
+                    multiplier = (multiplier % 2 == 0) ? 1 : 2;
+                }
+                if ((checkSum % 10) != 0) {
+                    correct = false;
+                };
+
+                @*// if no error found, hide the error message*@
+                if (!correct) {
+                    evt.preventDefault();
+                    bootbox.alert({ title: "Error", messege: "Please enter valid RSA ID Number" });
+                }
+            }
+
+        });
+
+        function isNumber(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+
+
+        $('#ddlIdentificationTypes').change(function () {
+            var value = $(this).val();
+            var i = null;
+
+            countryOfIssueDetails(value);
+        });
+
+        function countryOfIssueDetails(value) {
+            try {
+                switch (value) {
+                    case "id_passport_no":
+                        $("#ddlCountryOfIssueTypeId").prop("required", true);
+                        $("#countryOfIssueType").show();
+                        $("#txtIdNumber").prop('maxlength', '30');
+                        $("#txtIdNumber").prop("pattern", "^[a-zA-Z0-9äöüÄÖÜ]*$");
+                        $("#txtIdNumber").prop('title', 'Passport Number. should contain characters or/and numbers only e.g. LES00598060');
+                        break;
+                    case "id_registration_no":
+                        $("#txtIdNumber").prop('maxlength', '40');
+                        $("#countryOfIssueType").hide();
+                        $("#ddlCountryOfIssueTypeId").prop("required", false);
+                        break;
+                    default:
+                        $("#ddlCountryOfIssueTypeId").prop("required", false);
+                        $("#countryOfIssueType").hide();
+                        $("#txtIdNumber").prop('maxlength', '13');
+                        break;
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+
+
+        function validateContactNo(value) {
+            if (value) {
+                $("#executorContact").prop('maxlength', "10");
+                $("#executorContact").prop('minlength', "10");
+                $("#executorContact").prop("pattern", "/^((\+)?[1-9]{1,2})?([-\s\.])?((\(\d{1,4}\))|\d{1,4})(([-\s\.])?[0-9]{1,12}){1,2}$/");
+                $("#executorContact").prop('title', 'Contact number. should contain numbers only with a length of 10 e.g. 0812345690');
+                $("#executorContact").prop('placeholder', '0810000000');
+            } else {
+                $("#executorContact").removeAttr("title");
+                $("#executorContact").removeAttr("pattern");
+                $("#executorContact").removeAttr("maxlength");
+            }
+        }
+    });
+
+
+
+</script>
+}
+

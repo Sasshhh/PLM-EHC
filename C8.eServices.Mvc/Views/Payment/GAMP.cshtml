@@ -1,0 +1,204 @@
+﻿@*//@model List<C8.eServices.Mvc.Models.MasterpassTransaction>*@
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<h2>Masterpass Payments</h2>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Masterpass Payments</div>
+        <div style="width: 90%; margin: 0 2%;">
+            <br />
+            <table id="ordersTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Municipal Account
+                        </th>
+                        <th>
+                            Customer Name
+                        </th>
+                        <th>
+                            Customer ID
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                        <th>
+                            Mobile Number
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <th>
+                            Reference
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th> Created On</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@*<div class="row">
+            <table data-toggle="table" data-url="Payment/GAMP" data-search="true" data-pagination="true" data-page-size="15" class="table table-bordered table-hover table-striped panel panel-default" id="tblgamp">
+                <thead>
+                    <tr>
+
+
+                        <th data-sortable="true" data-field="Reference">
+                            Municipal Account Number
+                        </th>
+                        <th data-sortable="true" data-field="Name">
+                            Customer Name
+                        </th>
+                        <th data-sortable="true" data-field="CustomerID">
+                            Customer ID
+                        </th>
+                        <th data-sortable="true" data-field="Email">
+                            Email Address
+                        </th>
+                        <th data-sortable="true" data-field="Number">
+                           Mobile Number
+                        </th>
+                        <th data-sortable="true" data-field="Amount">
+                            Amount
+                        </th>
+
+                        <th data-sortable="true" data-field="Status">
+                           Status
+                        </th>
+
+                        <th data-sortable="true" data-field="Code">
+                           Reference
+                        </th>
+
+                        <th data-sortable="true" data-field="CreatedDateTime">
+                            Created On
+                        </th>
+
+                    </tr>
+                </thead>
+                @foreach (var item in ViewBag.MasterpassStatusList)
+                {
+                <tr>
+
+                    <td>
+                        @Html.Display(@e2.Account)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Reference)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Reference)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                    </td>
+
+
+                </tr>
+                }
+
+            </table>
+        </div>
+
+
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>*@
+
+@section Scripts {
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+
+    <script type="text/javascript">
+        function loadOrders() {
+            $('#ordersTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "GAMPLoad", "Payment")",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "Account", "autoWidth": true },
+                    { "data": "Name", "autoWidth": true },
+                    { "data": "CustomerID", "autoWidth": true },
+                    { "data": "Email", "autoWidth": true },
+                    { "data": "Number", "autoWidth": true },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+                    { "data": "Code", "autoWidth": true },
+                    { "data": "Status", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No debit orders.",
+                },
+                "order": [[8,"desc"]],
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+
+        $(function () {
+            loadOrders();
+        });
+
+    </script>
+}
+
+

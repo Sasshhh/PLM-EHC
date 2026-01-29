@@ -1,0 +1,261 @@
+﻿@model C8.eServices.Mvc.ViewModels.ConsumptionViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+@*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">*@
+<link href="~/Content/normalize.min.css" rel="stylesheet" />
+@*<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css'>*@
+<link href="~/Content/c3.min.css" rel="stylesheet" />
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>*@
+<script src="~/Scripts/prefixfree.min.js"></script>
+<style>
+    .chart {
+        width: 50%;
+        min-height: 400px;
+    }
+    /*.navbar {
+        display:none
+    }
+    .navbar-default {
+        display: none
+    }*/
+</style>
+<h4>Siyakhokha Statistic Dashboard</h4>
+
+<div class="panel-group" id="newConsumption">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                    <span>Siyakhokha Statistic Dashboard</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <svg id="c3chartspline" class="chart"></svg>
+                    </div>
+                    <div class="col-md-6">
+                        <svg id="c3chartspline1" class="chart"></svg>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <svg class="chart" id="c3chartbar"></svg>
+                    </div>
+                    <div class="col-md-6">
+                        <svg class="chart" id="c3chartbar1"></svg>
+                    </div>
+                </div>
+               
+               
+
+                <br />
+
+                <!-- partial -->
+
+            </div>
+            </div>
+    </div>
+</div>
+
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+@section Scripts {
+    @*<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js'></script>*@
+    <script src="~/Scripts/d3.min.js"></script>
+    @*<script src='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js'></script>*@
+    <script src="~/Scripts/c3.min.js"></script>
+    @*<script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>*@
+    <script type="text/javascript">
+        var WebvisitsArray = ["Web Visits"];
+        var RegisteredArray = ["Registered Customers"];
+        var LinkedArray = ["Linked"];
+        var AmountProcessedArray = ["Amount Processed"];
+        var XAxisMonths = ["x"];
+
+        $(function () {
+            "use strict";
+            function initC3Chart() {
+
+                console.log(WebvisitsArray);
+                console.log(RegisteredArray);
+                console.log(LinkedArray);
+                console.log(AmountProcessedArray);
+                console.log(XAxisMonths);
+
+                //c3.generate({
+                //    bindto: d3.select('#c3chartspline'),
+                //    data: {
+                //        columns: [
+                //            WebvisitsArray,
+                //            RegisteredArray,
+                //            LinkedArray,
+                //            AmountProcessedArray
+                //        ],
+                //        type: "spline"
+                //    }
+                //}), c3.generate({
+                //    bindto: "#c3chartbar",
+                //    data: {
+                //        columns: [
+                //            WebvisitsArray,
+                //            RegisteredArray
+                //        ],
+                //        type: "bar"
+                //    },
+                //    bar: {
+                //        width: {
+                //            ratio: .5
+                //        }
+                //    }
+                //    });
+                console.log("test done");
+            }
+                     function getBankAccount() {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LoadReportData", "Report")",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    debugger;
+                    if (response != null) {
+                        for (var i = 0; i < response.rows.length; i++) {
+                            XAxisMonths.push(response.rows[i].Month);
+                            WebvisitsArray.push(response.rows[i].Webvisits);
+                            RegisteredArray.push(response.rows[i].RegisteredCustomers);
+                            LinkedArray.push(response.rows[i].Linked);
+                            AmountProcessedArray.push(response.rows[i].AmountProcessed);
+
+                        }
+
+                        c3.generate({
+                            bindto: d3.select('#c3chartspline'),
+                            data: {
+                                columns: [
+                                    WebvisitsArray,
+                                    RegisteredArray,
+                                    LinkedArray,
+                                    AmountProcessedArray
+                                ],
+                                type: "spline"
+                            }
+                        }), c3.generate({
+                            bindto: "#c3chartbar",
+                            data: {
+                                columns: [
+                                    WebvisitsArray,
+                                    RegisteredArray
+                                ],
+                                type: "bar"
+                            },
+                            bar: {
+                                width: {
+                                    ratio: .5
+                                }
+                            }
+                        }), c3.generate({
+                            bindto: d3.select('#c3chartspline1'),
+                            data: {
+                                columns: [
+                                    WebvisitsArray,
+                                    RegisteredArray,
+                                    LinkedArray,
+                                    AmountProcessedArray
+                                ],
+                                type: "spline"
+                            }
+                            }), c3.generate({
+                            bindto: "#c3chartbar1",
+                            data: {
+                                columns: [
+                                    WebvisitsArray,
+                                    RegisteredArray
+                                ],
+                                type: "bar"
+                            },
+                            bar: {
+                                width: {
+                                    ratio: .5
+                                }
+                            }
+                        });
+                        console.log(response.rows);
+                      
+                       
+                    } else {
+                        alert("Unfortunately an error orrcured.");
+                    }
+                },
+                failure: function (response) {
+                    alert('f: ' + response.responseText);
+                },
+                error: function (response) {
+                    alert('e: ' + response.responseText);
+                }
+            });
+        }
+            function _init() {
+
+                //getBankAccount();
+                var executeFirst = getBankAccount();
+                $.when(executeFirst).done(function () {
+                    initC3Chart();
+
+                });
+                //Call your controller here to return JSON data :
+                //Example
+                //var jdata = [
+                //    {
+                //        "Month": "July",
+                //        "Webvisits": 5000,
+                //        "RegisteredCustomers": 15000,
+                //        "Linked": 7000,
+                //        "AmountProcessed": 1000000
+                //    },
+                //    {
+                //        "Month": "August",
+                //        "Webvisits": 900,
+                //        "RegisteredCustomers": 15000,
+                //        "Linked": 7000,
+                //        "AmountProcessed": 1000000
+                //    },
+                //    {
+                //        "Month": "September",
+                //        "Webvisits": 3000,
+                //        "RegisteredCustomers": 15000,
+                //        "Linked": 7000,
+                //        "AmountProcessed": 1000000
+                //    },
+                //    {
+                //        "Month": "October",
+                //        "Webvisits": 6000,
+                //        "RegisteredCustomers": 15000,
+                //        "Linked": 7000,
+                //        "AmountProcessed": 1000000
+                //    }
+                //];
+                //for (var i = 0; i < jdata.length; i++) {
+                //    XAxisMonths.push(jdata[i].Month);
+                //    WebvisitsArray.push(jdata[i].Webvisits);
+                //    RegisteredArray.push(jdata[i].RegisteredCustomers);
+                //    LinkedArray.push(jdata[i].Linked);
+                //    AmountProcessedArray.push(jdata[i].AmountProcessed);
+
+                //}
+
+                //console.log(jdata);
+
+
+                //initC3Chart();	
+             
+            }
+            //initC3Chart();
+            _init()
+        });
+    </script>
+}

@@ -1,0 +1,115 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.BillDirectory>
+
+@{
+    ViewBag.Title = "BillDirectoryArchive";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Archive</h4>
+<br/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#statsCollapse">
+                    RMS Bills Archive
+                </a>
+            </h4>
+        </div>
+        <div id="statsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table id="archiveTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadBillDirectoryArchive", "RmsDashBoard")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="10"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="BillDate">Bill Date</th>
+                            <th data-field="AccountNumber">Account Number</th>
+                            <th data-formatter="archiveActions">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        var $table = $('#archiveTable'),
+            $button = $('#btnRefresh'),
+            $btnSearch = $('#btnSearch');
+
+        $table.bootstrapTable({
+                formatNoMatches: function () {
+                    return 'Please enter search criteria';
+                }
+        });
+
+        $(function () {
+            $(function () {
+                $button.click(function () {
+                    resetSearch();
+                });
+
+                $btnSearch.click(function () {
+                    customSearch();
+                });
+            });
+
+            window.archiveActions = function (value, row, index) {
+                return "<input type='button' value='Download' onclick='DownloadBill(\"" + row.Id + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+            }
+        });
+
+        function customSearch() {
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadBillDirectoryArchive", "RmsDashBoard")',
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadBillDirectoryArchive", "RmsDashBoard")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        window.DownloadBill = function (id) {
+            try {
+                window.open(
+                    '@Url.Action("DownloadBill", "RmsDashBoard")/?id=' + id,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+    </script>
+}

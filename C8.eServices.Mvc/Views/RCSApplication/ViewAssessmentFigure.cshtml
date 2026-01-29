@@ -1,0 +1,108 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+
+@{
+    ViewBag.Title = "UploadAssessmentFigure";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel-group" id="documentsUpload">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    View Rates Clearance Figures
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+
+                <br />
+
+
+                @Html.Partial("_DocumentsPartialBOAssessmentCustomer", Model)
+
+
+            </div>
+        </div>
+        <hr />
+        <br />
+        @if (Model.OnlinePaymentHistory.Count > 0)
+        {
+            <div class="panel-heading">Online Payment History</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                    <thead>
+                        <tr>
+                            <th>
+                                Account Number
+                            </th>
+                            <th>
+                                Payment Method
+                            </th>
+                            <th>
+                                Date
+                            </th>
+                            <th>
+                                Amount
+                            </th>
+                            <th>
+                                Status
+                            </th>
+
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.OnlinePaymentHistory)
+                        {
+                        <tr>
+
+                            <td>
+                                @Model.RCSApplicationStatus.TransferInformation.RatesNumber
+                            </td>
+                            <td>
+                                @item.PaymentMethod
+                            </td>
+                            <td>
+
+                                @item.CreatedDateTime
+
+
+                            </td>
+                            <td>
+                                @item.Amount
+                            </td>
+
+                            <td>
+                                @item.Status
+                            </td>
+
+                        </tr>
+                        }
+
+
+                    </tbody>
+
+                </table>
+
+                <br />
+                <br />
+
+
+            </div>
+        }
+    </div>
+
+</div>
+
+
+
+

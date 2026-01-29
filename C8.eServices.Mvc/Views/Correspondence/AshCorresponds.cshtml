@@ -1,0 +1,387 @@
+﻿
+@{
+    ViewBag.Title = "Lodge a Complaint";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<!-- Mirrored from materialdesignadmin.com/form-wizard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 18 Sep 2018 06:47:55 GMT -->
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Form Wizard</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- Steps form-wizard -->
+    <link class="rtl_switch_page_css" href="~/Content/dist/css/plugins/steps.css" rel="stylesheet" type="text/css">
+    <!-- sweet alert-->
+    <link href="~/Content/dist/css/plugins/sweetalert.css" rel="stylesheet" type="text/css">
+
+    @*<link class="rtl_switch_css" href="~/Content/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">*@
+    <link href="~/Content/dist/css/mdicons.min.css" rel="stylesheet" type="text/css">
+    @*<link class="rtl_switch_css" href="~/Content/dist/css/app.min.css" rel="stylesheet" type="text/css">*@
+    <link href="~/Content/dist/css/theme.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/dist/css/skins/light-skin.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/dist/css/skins/dark-skin.css" rel="stylesheet" type="text/css">
+</head>
+<body class="theme-mda light-skin ev-page">
+        <section class="content-wrapper">
+            <!-- =========================================================== -->
+            <!-- Start page content  -->
+            <!-- =========================================================== -->
+            <div class="aside-panel"></div>
+            <div class="container-fluid">
+
+                <div class=" clearfix">
+                    <div class="col-sm-10 col-sm-offset-1 mt20">
+                        <!-- WIZARD  WITH VALIDATION-->
+                        <h2 class="mt40">Lodge a Complaint</h2>
+                        <form id="wizard2" action="#" class="paper mt20">
+                            <h3>General Details</h3>
+                            <fieldset>
+                                <div class="col-sm-8 col-sm-offset-1">
+                                    <div class="form-group">
+                                        <!-- for validation radio and checkbox groups need a extra wrapper to append the help-block to -->
+                                        <div>
+                                            <label for="gender">Anonymous:</label>
+                                            <input name="gender" type="radio" id="male" class="with-gap">
+                                            <label for="male" class="inline">Yes</label>
+
+                                            <input name="gender" type="radio" id="female" class="with-gap">
+                                            <label for="female">No *</label>
+
+                                            <div id="hidetype" style="display:none">
+                                                <label for="gender">Type:</label>
+                                                <input name="gender" type="radio" id="male" class="with-gap">
+                                                <label for="male" class="inline">Customer</label>
+
+                                                <input name="gender" type="radio" id="female" class="with-gap">
+                                                <label for="female">Third Party *</label>
+
+                                            </div>
+
+                                            <p>(*) Mandatory</p>
+                                        </div>
+                                    </div><!-- /.form-group -->
+                                </div><!-- /.col- -->
+                            </fieldset>
+
+                            <h3>Account Holder</h3>
+                            <fieldset>
+                                <div class="col-sm-11 col-sm-offset-1">
+                                    <h4 class="text-headline">Account Holder</h4>
+                                    <p>(*) Mandatory</p>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group input-field label-float">
+                                                <label for="sl">Title: *</label>
+                                                <select id="sl" name="sl" class="form-control">
+                                                    <option>Please select a Title...</option>
+                                                    <option>Mr</option>
+                                                    <option>Mrs</option>
+                                                    <option>Miss</option>
+                                                </select>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group input-field label-float">
+                                                <label for="firstName">Name: *</label>
+                                                <input type="text" class="form-control" id="firstName" name="firstName">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-4">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName">Surname: *</label>
+                                                <input type="text" class="form-control" id="lastName" name="lastName">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                    </div><!-- /.row -->
+
+
+                                
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group input-field label-float">
+                                                <label for="sl1">Notification Type: *</label>
+                                                <select id="sl1" class="form-control">
+                                                    <option>Status Notification...</option>
+                                                    <option>Email</option>
+                                                    <option>SMS</option>
+                                                    <option>Post</option>
+                                                </select>
+                                            </div><!-- /.form-group -->
+                                        </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field">
+                                                    <label for="email">Email address: *</label>
+                                                    <input type="email" class="form-control" name="email" id="email">
+
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+
+                                            </div><!-- ./col- -->
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="lastName">Contact Number: *</label>
+                                                    <input type="text" class="form-control" id="lastName" name="lastName">
+
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div><!-- ./col- -->
+                                        </div>
+                                        <br />
+                                        <br />
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <h4 class="text-headline">Address Details</h4>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+
+                                            <div class="col-sm-11">
+                                                <label for="gender1">Address Type:</label>
+                                                <input name="gender1" type="radio" id="mal1e" class="with-gap">
+                                                <label for="male1" class="inline">Street Addresss</label>
+
+                                                <input name="gender1" type="radio" id="female1" class="with-gap">
+                                                <label for="female1">Postal Address *</label>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Street Numbe">Street Number: *</label>
+                                                    <input type="text" class="form-control" id="Street Numbe" name="Street Numbe">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="StreetName">Street Name *</label>
+                                                    <input type="text" class="form-control" id="StreetName" name="StreetName">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Suburb/District">Suburb/District: *</label>
+                                                    <input type="text" class="form-control" id="Suburb/District" name="Suburb/District">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Postal Code">Postal Code: *</label>
+                                                    <input type="text" class="form-control" id="Postal Code" name="Postal Code">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Erf">Erf Number: *</label>
+                                                    <input type="text" class="form-control" id="Erf" name="Erf">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Ward">Ward Number: *</label>
+                                                    <input type="text" class="form-control" id="Ward" name="Ward">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                        </div><!-- ./col- -->
+                                    </div><!-- ./col- -->
+</fieldset>
+
+                            <h3>Service Details</h3>
+                            <fieldset>
+                                <div class="col-sm-11 col-sm-offset-1">
+                                    <h4 class="text-headline">Service Details</h4>
+                                    <label for="gender2">Same as Account Holder Address:</label>
+                                    <input name="gender2" type="radio" id="male2" class="with-gap">
+                                    <label for="male2" class="inline">Yes</label>
+
+                                    <input name="gender2" type="radio" id="female2" class="with-gap">
+                                    <label for="female2">No *</label>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group input-field label-float">
+                                                <label for="Street Numbe">Street Number: *</label>
+                                                <input type="text" class="form-control" id="Street Numbe" name="Street Numbe">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="form-group input-field label-float">
+                                                <label for="StreetName">Street Name *</label>
+                                                <input type="text" class="form-control" id="StreetName" name="StreetName">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group input-field label-float">
+                                                <label for="Suburb/District">Suburb/District: *</label>
+                                                <input type="text" class="form-control" id="Suburb/District" name="Suburb/District">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group input-field label-float">
+                                                <label for="Postal Code">Postal Code: *</label>
+                                                <input type="text" class="form-control" id="Postal Code" name="Postal Code">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div>
+                                    </div>
+
+                                    <h5 class="text-headline">Customer Details</h5>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group input-field label-float">
+                                                <label for="firstName1">Customer Name: *</label>
+                                                <input type="text" class="form-control" id="firstName1" name="firstName1">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-6">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName2">Customer ID: *</label>
+                                                <input type="text" class="form-control" id="lastName2" name="lastName2">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group input-field label-float">
+                                                <label for="firstName1">Account No: *</label>
+                                                <input type="text" class="form-control" id="firstName1" name="firstName1">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-6">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName2">Rates No: *</label>
+                                                <input type="text" class="form-control" id="lastName2" name="lastName2">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                    </div>
+                                    <h5 class="text-headline">Location Details</h5>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group input-field label-float">
+                                                <label for="Erf">Erf Number: *</label>
+                                                <input type="text" class="form-control" id="Erf" name="Erf">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group input-field label-float">
+                                                    <label for="Ward">Ward Number: *</label>
+                                                    <input type="text" class="form-control" id="Ward" name="Ward">
+                                                    <div class="input-highlight"></div>
+                                                </div><!-- /.form-group -->
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group input-field label-float">
+                                                <label for="Coms">Comments: *</label>
+                                                <textarea type="text" class="form-control" rows="3" id="Coms" name="Coms"></textarea>
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div>
+                                    </div><!-- /.col- -->
+</fieldset>
+
+                            <h3>Documents <span class="badge">0</span></h3>
+                            <fieldset>
+                                <div class="col-sm-11 col-sm-offset-1">
+                                    <div class="text-headline">Documents</div>
+                                    <p>(*) Mandatory</p>
+                                    <div class="row">
+
+                                        <div class="col-sm-5">
+                                            <div class="form-group input-field label-float">
+                                                <label for="firstName">Date of Correspondence: *</label>
+                                                <input type="date" class="form-control" id="firstName" name="firstName">
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-5">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName">Date Received: *</label>
+                                                <input type="date" class="form-control" id="lastName" name="lastName">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                    </div><!-- /.row -->
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName">Registered Mail No: *</label>
+                                                <input type="text" class="form-control" id="lastName" name="lastName">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                        <div class="col-sm-5">
+                                            <div class="form-group input-field label-float">
+                                                <label for="lastName">Section: *</label>
+                                                <input type="text" class="form-control" id="lastName" name="lastName">
+
+                                                <div class="input-highlight"></div>
+                                            </div><!-- /.form-group -->
+                                        </div><!-- ./col- -->
+                                    </div><!-- /.row -->
+                                    <div class="form-group input-field label-float">
+                                        <label for="Coms">Comments: *</label>
+                                        <textarea type="text" class="form-control" rows="3" id="Coms" name="Coms"></textarea>
+                                        <div class="input-highlight"></div>
+                                    </div><!-- /.form-group -->
+                                    <div class="form-group mt40">
+                                        <!-- for validation radio and checkbox groups need a extra wrapper to append the help-block to -->
+                                        <div>
+                                            <input id="acceptTerms" name="acceptTerms" type="checkbox"> <label for="acceptTerms" class="text-subhead sub-text">I agree with the Terms and Conditions.</label>
+                                        </div>
+                                    </div><!-- /.form-group -->
+                                </div><!-- /.col- -->
+</fieldset>
+                        </form>
+                        <!-- END WIZARD  2-->
+                    </div><!-- /.col- -->
+                </div><!-- /.page-content -->
+          
+
+            </div><!-- /.container-fluid -->
+            <!-- =========================================================== -->
+            <!-- End page content  -->
+            <!-- =========================================================== -->
+
+        </section> <!-- /.content-wrapper -->
+
+    <script src="~/Content/dist/js/jquery.min.js"></script>
+    <script src="~/Content/dist/js/bootstrap.min.js"></script>
+    <script src="~/Content/dist/js/bower.min.js"></script>
+    <!-- wizard jquery-steps-->
+    <script src="~/Content/dist/js/plugins/wizard/jquery.steps.min.js"></script>
+    <!-- validator -->
+    <script src="~/Content/dist/js/plugins/validation/jquery.validate.js"></script>
+    <!-- Sweet alert script -->
+    <script src="~/Content/dist/js/plugins/sweetalert/sweetalert.min.js"></script>
+    <!-- app -->
+    <script src="~/Content/dist/js/app.min.js"></script>
+    <script src="~/Content/demo/demo-wizard.js"></script>
+</body>
+<!-- Mirrored from materialdesignadmin.com/form-wizard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 18 Sep 2018 06:47:56 GMT -->
+</html>

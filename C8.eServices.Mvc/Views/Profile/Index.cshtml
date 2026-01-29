@@ -1,0 +1,271 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+@{
+    /**/
+
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var token = Html.AntiForgeryToken();
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<style>
+    .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -6px;
+        margin-left: -1px;
+        -webkit-border-radius: 0 6px 6px 6px;
+        -moz-border-radius: 0 6px 6px;
+        border-radius: 0 6px 6px 6px;
+        background-color: #d2930b !important;
+        border-color: #d2930b !important;
+    }
+</style>
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">Customer Information</div>
+    <div class="panel-body">
+
+        <form id="quickCustomerLoad" method="post" style="line-height: 0.2;">
+            @token
+            @if (Model.ShowUpdateLink)
+            {
+                <div>
+
+
+                    <div class="form-group row">
+                        <div class="col-xs-12">
+                            <br />
+                            <br /><br />
+                                  <label>Please click <u>@Html.EncodedActionLink("here", "ManageProfile", "Profile", new { agentId = (Model.Agent != null) ? Model.Agent.Id : 0, customerId = Model.Customer.Id, systemUserId = Model.Customer.SystemUserId, viewId = Model.ViewId }, new { @style = "font-size: 16px!important; font-weight:bold!important;" })</u> to update this profile.</label><br />
+                            @*<label>Please click <u>@Html.ActionLink("here", "Manage", "Account", new { @style = "font-size: 16px!important; font-weight:bold!important;" })</u> to update account.</label><br />*@
+                            @*<label>Please click <u><a href="~/Account/Manage" style="font-size: 16px !important; font-weight: bold !important;">here</a></u> to manage account.</label><br />*@
+                            @if ((Model.Customer != null && Model.Customer.Id == 0) || (Model.Agent != null && Model.Agent.Id == 0))
+                            {<br />
+                                <br /><br /><br />
+                                @*<label>If you do not want to link your account please update your profile above to access Siyakhokha services.</label><br /><br /><br />
+            <label>or</label><br /><br /><br /><br /><br />
+            <label>Click submit below to pull your information from our integrated systems and associated accounts:</label><br />*@
+
+                                <br /><br />
+                            }
+                        </div>
+
+                        @*@if ((Model.Customer != null && Model.Customer.Id == 0) || (Model.Agent != null && Model.Agent.Id == 0))
+                        {
+                            <div class="col-xs-3">
+                                <input class="form-control" id="identityOrAccountNo" value="@ViewBag.CusIDNo.IdentificationNumber" type="text" readonly>
+                            </div>
+                            <div class="col-xs-2">
+                                <button id="submitLoadCustomer" type="button" class="btn btn-primary" >Submit</button>
+                            </div>
+                        }*@
+
+                    </div>
+                </div>
+            }
+
+            @Html.Partial("~/Views/Shared/_CustomerPartial.cshtml", Model)
+        </form>
+    </div>
+</div>
+<br />
+
+@*<div class="panel panel-default">
+        <div class="panel-heading">Managing Agent</div>
+        <div class="panel-body">
+            <form>
+                @token
+                <div class="form-group">
+                    <label>Please enter the details of a managing agent that you would like to give permission to manage your accounts and profile. If the managing agent is a user, please use his/ her email address that he/ she registered with.</label>
+                </div>
+                <div class="form-group">
+                    <label for="agentFullName">Agent Full Name</label>
+                    <input type="text" class="form-control" id="agentFullName" placeholder="Managing agent full name">
+                </div>
+                <div class="form-group">
+                    <label for="agentEmailAddress">Email address</label>
+                    <input type="email" class="form-control" id="agentEmailAddress" aria-describedby="emailHelp" placeholder="Enter managing agent's email adress">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+    <br />*@
+@*@if (Model.Customer.Id != 0 && Model.Customer.Status.Key == StatusKeys.CustomerActive)
+{
+    <ul class="list-inline">
+        <li>@Html.EncodedActionLink("Link Municipal Account", "LinkedAccounts", "Profile", new { customerId = Model.Customer.Id }, new { @class = "btn btn-primary" })</li>
+        <li></li>
+    </ul>
+
+    <div id="linkedAcc">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Linked Municipal Accounts</div>
+            <div style="width: 90%; margin: 0 auto;">
+                <br />
+                <table id="accountsTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                    <thead>
+                        <tr>
+                            <th>Municipal Account Number</th>
+                            <th>Status</th>
+                            <th>Date Created</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+  
+
+}*@
+
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width: 650px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+<script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            $("#submitLoadCustomer").click(function () {
+
+                var identityOrAccountNo = $('#identityOrAccountNo').val();
+                if (identityOrAccountNo == null || identityOrAccountNo == '') {
+                    $("#modalTitleText").html("No Customer Information Found");
+                    $("#modalContentText").html("No customer ID number found please update your profile above to access Siyakhokha services ");
+                    $("#ErrModal").modal("show");
+                }
+                var token = $('#__RequestVerificationToken').val();
+                var data = "{ 'identityOrAccountNo': '" + identityOrAccountNo + "' }";
+                if (identityOrAccountNo != null) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("LoadCustomer", "Profile")",
+                        data: data,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status == 'OK') {
+                                window.location.href = data.Url
+                                //alert("The status cannot be updated at this time");
+                            }
+                            else if (data == 'Failed')
+                            {
+                                $("#modalTitleText").html("No Customer Information Found");
+                                $("#modalContentText").html("No customer information found please update your profile above to access Siyakhokha services");
+                                $("#ErrModal").modal("show");
+                                //alert("fail");
+                            }
+                            else {
+                                alert("The status cannot be updated at this time");
+                            }
+                        }
+                    });
+                }
+                else {
+                    alert("The account could not be found. Please update your profile to access Siyakhokha Services. ");
+                }
+            });
+        });
+    </script>
+}
+
+<script>
+
+    $(document).ready(function () {
+        loadAccounts();
+    });
+
+    function loadAccounts() {
+        $('#accountsTable').DataTable({
+            "ajax": {
+                "url": "@Url.Action( "LoadAccounts", "Profile", new { q = Model.Customer.Data } )",
+                "type": "GET",
+                "datatype": "json",
+                "timeout": 60000
+            },
+            "columns": [
+                { "data": "Account.Description", "autoWidth": true },
+                { "data": "Status.Name", "autoWidth": true },
+                {
+                    "data": "CreatedDateTime", "autoWidth": true,
+                    "render": function (data) {
+                        return convertDate(data);
+                    }
+                },
+                {
+                    "data": "Data",
+                    "title": "Linked Account",
+                    "render": function (data, type, row) {
+                        var myUrl = '@Url.Action( "LinkedAccountsDetails", "Profile" )/' + '?q=' + data;
+                        var detailsUrl = '@Url.Action( "DisplayLinkedAccount", "CustomerLinkedAccount" )/' + '?q=' + data;
+                        var delinkUrl = '@Url.Action("DelinkAccount", "Profile" )/' + '?q=' + data;
+                        return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">Edit</a> &nbsp; <a href=\"' + detailsUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; '; //<a href=\"' + delinkUrl + '\" class=\"btn btn-primary btn-sm\">Delink</a>
+                    }
+
+                }
+            ],
+            "language": {
+                "emptyTable": "No linked accounts",
+            },
+            "Initcomplete": "",
+            "destroy": true
+        });
+    }
+
+
+
+    function deleteItem(data) {
+        if (confirm("Are you sure?")) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("DelinkAccount", "Profile")?q=" + data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        loadAccounts();
+        return false;
+    }
+
+    function convertDate(data) {
+        try {
+            var dtStart = new Date(parseInt(data.substr(6)));
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("DD/MM/YYYY");
+        }
+        catch (ex) {
+        }
+    }
+</script>
+
+
+
+

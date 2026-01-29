@@ -1,0 +1,411 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+
+<div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Customer Information</div>
+        <div class="panel-body">
+            <div class="panel-body">
+                @Html.Partial("~/Views/Shared/_CustomerPartial.cshtml", Model)
+            </div>
+        </div>
+    </div>
+    <br />
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                        Uploaded Customer Documents
+                    </a>
+                </h4>
+            </div>
+            <div id="documentsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="currentDocumentsGrp">
+                        <div class="form-group">
+                            @Html.Partial("~/Views/Shared/_DocumentsPartialRegister.cshtml", Model.Document)
+                            <div class="form-group">
+                                <div class="col-md-offset-3 col-md-10">
+                                    @Html.EncodedActionLink("Edit", "Register", "Document", new
+                                    {
+                                        referenceId = Model.Customer.Id,
+                                        customerId = Model.Customer.Id,
+                                        referenceTypeId = @ViewBag.ReferenceTypeId,
+                                        applicationId = @ViewBag.ApplicationId,
+                                        returnUrl = Url.Action("Details", "Customer", SecureActionLinkExtension.Encrypt(new { id = Model.Customer.Id })
+                                            )
+                                    }, new { @class = "btn btn-primary" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Model.Notes.Any())
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#">
+                            Linked Account Notes
+                        </a>
+                    </h4>
+                </div>
+                <div id="notesCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <table class="table table-striped" id="tableEmails"
+                               data-toggle="table"
+                               data-height="300"
+                               data-search="true"
+                               data-pagination="true"
+                               data-page-list="[10,25, 50, 100, ALL]">
+                            <thead>
+                                <tr>
+                                    <th data-sortable="true">
+                                        Date Created
+                                    </th>
+                                    <th data-sortable="true">
+                                        Note
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Notes)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.NoteEntry)
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+<div class="form-group">
+    @if (Model.Customer.IsDeleted == false && Model.Customer.IsActive == true)
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#deactivateAccount">
+                            Deactivate Account
+                        </a>
+                    </h4>
+                </div>
+                <div id="deactivateAccount" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        @Html.ValidationSummary()
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                @Html.ActionLink("Deactivate User Account", "DeactivateUserAccount", new { id = Model.Customer.Id }, new { @onclick = "HoldOn.open({message: 'Loading..Please Wait',textColor:'white'});", @class = "btn btn-warning" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model.Customer.IsDeleted == true && Model.Customer.IsActive == false )
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#ActivateAccount">
+                            Activate Account
+                        </a>
+                    </h4>
+                </div>
+                <div id="ActivateAccount" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        @Html.ValidationSummary()
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                @Html.ActionLink("Activate User Account", "ActivateUserAccount", new { id = Model.Customer.Id }, new { @onclick = "HoldOn.open({message: 'Loading..Please Wait',textColor:'white'});", @class = "btn btn-warning" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+<div class="col-md-offset-0 col-md-10">
+
+    @*<input type="button" onclick="modifyEmail()" id="btnModifyEmail" class="button1" value="Modify Email" />
+        <input type="button" onclick="addNote(@Model.Customer.Id)" id="btnAddNote" class="button1y" value="Add Note" />*@
+
+
+    @*AJC.20190930 Panel For Activation of Account.*@
+
+
+    @if (!Model.Customer.Status.Key.Equals(StatusKeys.CustomerActive))
+    {
+        <input type="button" onclick="activateCustomer(@Model.Customer.Id)" id="btnActivate" class="button1" value="Activate Profile" />
+
+        <input type="button" onclick="IncompleteDocs(@Model.Customer.Id)" id="btnNotifyCon" class="button1" value="Notify Customer Documents Incomplete or Incorrect" />
+
+        @Html.EncodedActionLink("Back", "Index", "Customer", new { id = 0 }, new { @class = "button1" })
+
+    }
+    <div id="QuerySuccess" style="display: none;float:right">
+        <span class="glyphicon glyphicon-ok" style="color: green;"></span> Profile successfully activated.
+    </div>
+    <div id="QueryFailed" style="display: none;float:right">
+        <span class="glyphicon glyphicon-remove" style="color: red;"></span> Unsuccessful, please try again later.
+    </div>
+</div>
+</div>
+<br />
+<div id="modifyEmailModal" class="modal fade" role="dialog">
+
+    <div class="modal-dialog">
+        Modal content
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Modify Customer's Email Address</h4>
+            </div>
+            <div class="modal-body">
+                <form id="modifyEmailForm">
+                    <div class="alert alert-info">
+                        <strong>Info!</strong> Please validate customer's identification/business registration number below before changing customer's email address.
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Please note :</strong> Email address will only be updated once email address has been activated.
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Identification/Business Registration Number:", new { @class = "col-md-8" })
+                        @Html.TextBox("txtIdNo", null, new { @class = "form-control", @readonly = true })
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Full Name:", new { @class = "col-md-8" })
+                        @Html.TextBox("txtFullName", null, new { @class = "form-control", @readonly = true })
+                    </div>
+                    <br /><br />
+
+                    @Html.Hidden("systemUserId")
+                    @Html.Hidden("customerId")
+
+                    <div class="form-group">
+                        @Html.Label("Current Email Address:", new { @class = "col-md-4" })
+                        @Html.TextBox("txtCurrentEmail", null, new { @class = "form-control", @readonly = true })
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("New Email Address:", new { @class = "col-md-4" })
+                        <input id="txtNewEmail" class="form-control" type="email" required placeholder="example@gmail.com" pattern="^[a-zA-Z0-9._+-]+&#64;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btnSaveEmail" type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addNoteModal" class="modal fade" role="dialog">
+
+
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="color:white;background-color:royalblue">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Corrrespondance Note</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addNoteForm">
+                    @Html.Hidden("customerId")
+                    <div class="form-group">
+                        @Html.Label("Note", new { @class = "control-label col-md-2" })
+                        <div class="col-md-12">
+                            @Html.TextArea("Note", null, new { id = "note", @class = "form-control", required = "required", maxlength = 1000, style = "height: 500px" })
+                        </div>
+                    </div>
+                    <br />
+                </form>
+            </div>
+            <hr />
+            <div class="modal-footer">
+                <button id="btnSaveNote" type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var model = @Html.Raw(Json.Encode(ViewBag.CustomerModel))
+
+    $("#btnSaveEmail").on("click", function () {
+        var systemUserId = $("#systemUserId").val(),
+            customerId = $("#customerId").val(),
+            email = $("#txtNewEmail").val();
+        var isValid = $("#txtNewEmail")[0].checkValidity();
+
+        if (!isValid) {
+            bootbox.alert("Please enter valid email address.");
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ModifyCustomerEmail", "Customer")",
+                data: { systemUserId: systemUserId, email: email },
+                success: function (response) {
+                    $("#modifyEmailModal").modal('hide');
+                    resetFields();
+                    console.log(response.result);
+                    bootbox.alert(response.result, function () {
+                        location.reload();
+                    });
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+    });
+
+    window.modifyEmail = function () {
+        try {
+            $("#txtIdNo").val(model.IdentificationNumber);
+            $("#txtFullName").val(model.FullName);
+            $("#txtCurrentEmail").val(model.EmailAddress);
+            $("#systemUserId").val(model.SystemUserId);
+            $("#customerId").val(model.CustomerId);
+
+            $("#modifyEmailModal").modal('show');
+        } catch (ex) {
+            console.log(ex);
+        }
+    };
+
+
+    //////
+    window.IncompleteDocs = function (customerId) {
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("IncompleteDocsMail", "Customer")",
+            data: { customerId: customerId },
+            success: function (data) {
+                if (data.status == "success") {
+                    var result = "Customer Notified to Re-upload correct documents";
+
+                    bootbox.confirm({
+                        message: result,
+                        buttons: {
+                            confirm: {
+                                label: '<i class="fa fa-check"></i> Ok',
+                                className: 'btn-primary'
+                            },
+                            cancel: {
+                                className: 'btn-primary'
+                            }
+                        },
+                        closeButton: false,
+                        callback: function (confirmed) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    };
+    ///////
+    window.activateCustomer = function (customerId) {
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("ActivateCustomerProfile", "Customer")",
+            data: { customerId: customerId },
+            success: function (data) {
+                if (data.status == "success") {
+                    var result = "Profile successfully activated.";
+
+                    bootbox.confirm({
+                        message: result,
+                        buttons: {
+                            confirm: {
+                                label: '<i class="fa fa-check"></i> Ok',
+                                className: 'btn-primary'
+                            },
+                            cancel: {
+                                className: 'btn-primary'
+                            }
+                        },
+                        closeButton: false,
+                        callback: function (confirmed) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    };
+
+    $("#btnSaveNote").on("click", function () {
+        var note = $("#note").val();
+        var customerId = $("#customerId").val();
+
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("AddNote", "Customer")",
+            data: { customerId: customerId, note: note },
+            success: function (response) {
+                $("#addNoteModal").modal('hide');
+                location.reload();
+            },
+            error: function (response) {
+                console.log(response.result);
+            }
+        });
+    });
+
+    window.addNote = function (customerId) {
+        $("#customerId").val(customerId);
+        $("#addNoteModal").modal({ autoOpen: true, position: { my: "center", at: "top+350", of: window } });
+    };
+
+    function resetFields() {
+        $("#txtIdNo").val("");
+        $("#txtFullName").val("");
+        $("#txtCurrentEmail").val("");
+        $("#systemUserId").val("");
+        $("#customerId").val("");
+        $("#txtNewEmail").val("");
+    }
+
+    $("#modifyEmailModal").on('hidden.bs.modal', function () {
+        resetFields();
+    });
+
+
+</script>

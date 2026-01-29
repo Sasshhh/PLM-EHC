@@ -1,0 +1,87 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Payment>
+
+@{
+    ViewBag.Title = "Pay Online";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h2>Pay Online</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor( model => model.AccountNumber )
+        </th>
+        <th>
+            @Html.DisplayNameFor( model => model.BillDate )
+        </th>
+        @*<th>
+                @Html.DisplayNameFor(model => model.BillYear)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BillMonth)
+            </th>*@
+        <th>
+            @Html.DisplayNameFor( model => model.Amount )
+        </th>
+        <th>
+            Paid
+        </th>
+        <th>Status</th>
+    </tr>
+
+    @foreach ( var item in Model )
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor( modelItem => item.AccountNumber )
+            </td>
+            <td>
+                @Html.DisplayFor( modelItem => item.BillDate )
+            </td>
+            @*<td>
+                    @Html.DisplayFor(modelItem => item.BillYear)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BillMonth)
+                </td>*@
+            <td>
+                @Html.DisplayFor( modelItem => item.Amount )
+            </td>
+            <td>
+                @switch ( item.Status )
+                {
+                    case 0:
+                        @Html.Raw( "R 0,00" );
+                        break;
+                    case 1:
+                        @Html.DisplayFor( modelItem => item.Amount );
+                        break;
+                    case 2:
+                        @Html.Raw( "R 0,00" );
+                        break;
+                    default:
+                        @Html.Raw( "R 0,00" );
+                        break;
+                }
+            </td>
+            <td>
+                @switch ( item.Status )
+                {
+                    case 0:
+                        @Html.ActionLink( "Pay", "Details", new { id = item.IdentificationNumber, accountNo = item.AccountNumber, billDate = item.BillDate } );
+                        break;
+                    case 1:
+                        @Html.Raw( "Paid" );
+                        break;
+                    case 2:
+                        @Html.Raw( "Pending" );
+                        break;
+                    default:
+                        @Html.ActionLink( "Pay", "Details", new { id = item.IdentificationNumber, accountNo = item.AccountNumber, billDate = item.BillDate } );
+                        break;
+                }
+            </td>
+        </tr>
+    }
+</table>

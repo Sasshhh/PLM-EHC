@@ -1,0 +1,19 @@
+{
+  "order": 1,
+  "page_no": 2,
+  "field_name": "E-Sign field 2",
+  "display": "VISIBLE",
+  "dimensions": {
+    "x": 480,
+    "y": 715,
+    "width": 100,
+    "height": 100
+  },
+  "authentication": {
+    "enabled": false,
+    "sms_otp": {
+      "enabled": false,
+      "mobile_number": "0725292795"
+    }
+  }
+}

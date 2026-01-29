@@ -1,0 +1,142 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.SmsQueueProcessed>
+
+@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<h4>Email Notifications</h4>
+
+
+
+<div class="row">
+    <table data-toggle="table" data-url="SmsQueueProcessed/Index" data-search="true" data-pagination="true" data-page-size="15" class="table table-bordered table-hover table-striped panel panel-default" id="tblemailnoti">
+        <thead>
+            <tr>
+                @*<th data-sortable="true" data-field="ApplicationId">
+                        @Html.DisplayNameFor(model => model.ApplicationId)
+                    </th>*@
+                @*<th data-sortable="true" data-field="EmailAccountId">
+                        @Html.DisplayNameFor(model => model.EmailAccountId)
+                    </th>*@
+                <th data-sortable="true" data-field="QueueDateTime">
+                    @Html.DisplayNameFor(model => model.QueueDateTime)
+                </th>
+                <th data-sortable="true" data-field="ToList">
+                    @Html.DisplayNameFor(model => model.MobileNumber)
+                </th>
+                @*<th data-sortable="true" data-field="CcList">
+                        @Html.DisplayNameFor(model => model.CcList)
+                    </th>
+                    <th data-sortable="true" data-field="BccList">
+                        @Html.DisplayNameFor(model => model.BccList)
+                    </th>*@
+                <th data-sortable="true" data-field="Subject">
+                    @Html.DisplayNameFor(model => model.TextMessage)
+                </th>
+                @*<th data-sortable="true" data-field="Body">
+                        @Html.DisplayNameFor(model => model.Body)
+                    </th>*@
+                @*<th data-sortable="true" data-field="IsHtml">
+                        @Html.DisplayNameFor(model => model.IsHtml)
+                    </th>*@
+                <th data-sortable="true" data-field="FailureCount">
+                    Status
+                </th>
+                @*<th data-sortable="true" data-field="ReferenceId">
+                        @Html.DisplayNameFor(model => model.ReferenceId)
+                    </th>*@
+                @*<th data-sortable="true" data-field="ReferenceTypeId">
+                        @Html.DisplayNameFor(model => model.ReferenceTypeId)
+                    </th>*@
+                @*<th data-sortable="true" data-field="HasAttachments">
+                        @Html.DisplayNameFor(model => model.HasAttachments)
+                    </th>*@
+                <th data-sortable="true" data-field="ProcessedDateTime">
+                    @Html.DisplayNameFor(model => model.ProcessedDateTime)
+                </th>
+                <th data-sortable="true" data-field="Action">
+                    Action
+                </th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.ApplicationId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EmailAccountId)
+                    </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.QueueDateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MobileNumber)
+                </td>
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.CcList)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BccList)
+                    </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.TextMessage)
+                </td>
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.Body)
+                    </td>*@
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.IsHtml)
+                    </td>*@
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.FailureCount)
+                    </td>*@
+
+                @if (item.FailureCount > @ViewBag.failurecounter)
+                {
+                    <td>
+                        FAILED
+                    </td>
+                }
+
+                @if (item.FailureCount < @ViewBag.failurecounter)
+                {
+                    <td>
+                        SUCCESSFUL
+                    </td>
+                }
+
+
+
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.ReferenceId)
+                    </td>*@
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.ReferenceTypeId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.HasAttachments)
+                    </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProcessedDateTime)
+                </td>
+                <td>
+                    @Html.ActionLink("Resend Notification", "Resend", new {id = item.SmsQueueId })
+
+                    @*@Html.ActionLink("Details", "Details", new { id = item.EmailQueueId }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.EmailQueueId })*@
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+<script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+@section Scripts {
+}
+
+

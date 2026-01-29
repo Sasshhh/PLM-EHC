@@ -1,0 +1,133 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.PreferredComplexArea>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@*<h4>Pending Documents Evaluations</h4>*@
+<div class="panel-group">
+    <div class="panel panel-default">
+
+
+
+
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Ekurhuleni Housing Company Complexes
+                </div>
+
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead>
+                    <tr>
+                        <th>
+                            Complex Name
+                        </th>
+                        <th>
+                            Assigned To HS
+                        </th>
+                        <th>
+                            Assigned To LO
+                        </th>
+                        <th>
+                            Active Status
+                        </th>
+                        <th>
+                            Date Modified
+                        </th>
+                        <th>
+
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.HousingSuper.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.LettingOfficer.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IsActive)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ModifiedDateTime)
+                            </td>
+                            <td>
+                                @*@if (Request.IsAuthenticated && User.IsInRole("Acknowledge RCS Application"))
+
+        {
+            if (item.Status.Key == StatusKeys.PendingDocumentsApproval)
+            {
+                @Html.ActionLink("View", "DocumentVerification", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+            }
+            else if (item.Status.Key == StatusKeys.PendingApplicationFeePaymentValidation)
+            {
+                @Html.ActionLink("View", "ApplicationFeeValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+            }
+        }*@
+
+                                @if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin") || User.IsInRole("Back Office System Administrator")))
+                                {
+                                    @Html.ActionLink("Edit", "EditArea", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&ViewName=EHCComplexAreaDashboard" + "&TitleName=EHCComplexAreaDashboardTitle&BodyName=EHCComplexAreaDashboard") }, new { @class = "btn btn-primary" })
+                                    if (item.IsActive)
+                                    {
+                                        @Html.ActionLink("Hide", "EditIsActive", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&ViewName=EHCComplexAreaDashboard" + "&TitleName=EHCComplexAreaDashboardTitle&BodyName=EHCComplexAreaDashboard") }, new { @class = "btn btn-primary" })
+                                    }
+                                    else
+                                    {
+                                        @Html.ActionLink("Show", "EditIsActive", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&ViewName=EHCComplexAreaDashboard" + "&TitleName=EHCComplexAreaDashboardTitle&BodyName=EHCComplexAreaDashboard") }, new { @class = "btn btn-primary" })
+                                    }
+                                }
+
+                                @*@if (Request.IsAuthenticated && User.IsInRole("Acknowledge RCS Application"))
+        {
+            @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })
+
+        }*@
+                                @*@Html.ActionLink("Message", "CreateMessage", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToBo }, new { @class = "btn btn-primary" })*@
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(function () {
+        $('#RCSTable').DataTable();
+        //"rowCallback": function(row, data) {
+        //    if (data.grade == "A") {
+        //        $('td:eq(4)', row).html('<b>A</b>');
+        //    }
+        //}
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+
+
+</script>

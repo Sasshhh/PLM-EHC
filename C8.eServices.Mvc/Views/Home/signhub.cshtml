@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewBag.Title = "signhub";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+@Html.AntiForgeryToken()
+
+
+
+<div id="Signhub">
+    <div class="panel panel-default">
+        <div class="panel-heading">Signhub</div>
+        <div class="form-horizontal">
+            <br />
+            <div class="form-group">
+                <div class="col-md-offset-1 col-md-4">
+                    @Html.ActionLink("Done", "RCCertificateDashboard","DepartmentsApprovals",new {idss="returns" }, new { @class = "btn btn-primary" })
+                </div>
+            </div>
+        </div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+
+            <iframe src="@Html.Raw(ViewBag.link)" width="100%" height="1000"></iframe>
+
+
+        </div>
+
+        <br />
+
+
+
+    </div>
+
+</div>

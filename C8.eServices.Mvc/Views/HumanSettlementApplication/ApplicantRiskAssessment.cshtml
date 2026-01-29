@@ -1,0 +1,153 @@
+﻿
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Risk Assessment Applications
+                </div>
+            </div>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.HumanSettlementApplicationtList)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.FullName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.PurchaserType.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)</td>
+                            <td>@Html.DisplayFor(modelItem => item.CreatedDateTime.Value)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Status.Name)</td>
+                            <td>@Html.ActionLink("Assess", "ConductAssessment", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+
+
+
+        $('#RCSTable').DataTable();
+        $('#RCSTable2').DataTable();
+        var display = "@ViewBag.Display";
+
+        if (display != null && display != "") {
+            $('#MessageModal3').modal('show');
+        }
+        else {
+            $('#MessageModal3').modal('hide');
+
+
+               var result = "@ViewBag.MessageBody";
+        if (result != null && result != "") {
+            $('#MessageModal').modal('show');
+        }
+        else {
+            $('#MessageModal').modal('hide');
+              var result5 = "@ViewBag.MessageBody5";
+            if (result5 != null && result5 != "") {
+                $('#MessageModal5').modal('show');
+            }
+            else {
+                $('#MessageModal5').modal('hide');
+            }
+        }
+
+        }
+
+    });
+
+    function OpenChatModal() {
+
+        $('#MessageModal').modal('show');
+    };
+
+
+</script>

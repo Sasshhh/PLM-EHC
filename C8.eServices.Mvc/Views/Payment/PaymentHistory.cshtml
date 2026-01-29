@@ -1,0 +1,181 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.PaymentHistoryViewModel
+@{
+    ViewBag.Title = "PaymentHistory";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var db = new eServicesDbContext();
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<h4>Payment History</h4>
+<hr />
+<div id="MasterpassHistoryPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Masterpass Payment History</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="MasterpassPaymentsTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Payment Date
+                        </th>
+                        <th>
+                            Account No.
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <th>
+                           Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="paymentHistoryPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Payment History</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="paymentsTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Payment Date
+                        </th>
+                        <th>
+                            Account No.
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <th>
+                            Payment Type
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#paymentsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadPaymentHistory", "Payment", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    {
+                        "data": "PaymentDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    { "data": "MetroAccountNumber", "autoWidth": true },
+                    {
+                        "data": "AmountPaid", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+                    { "data": "PaymentType", "autoWidth": true }//,
+                    //{
+                    //    "data": "Data",
+                    //    "title": "Linked Account",
+                    //    "render": function (data, type, row) {
+                    //        var edit = '<a id=\"editAccount\" title=\"Edit account details\" style=\"display: inline-grid;\" href=\"#\" onclick=\"getBankAccount(\'' + data + '\');\"><span class=\"glyphicon glyphicon-edit\" style=\"text-align: center;\"></span>Edit</a>';
+                    //        var remove = '<a id=\"removeAccount\" title=\"Remove account\" style=\"display: inline-grid;\" href=\"#\" onclick=\"deleteItem(\'' + data + '\');\"><span class=\"glyphicon glyphicon-remove\" style=\"text-align: center;\"></span>Remove</a>';
+                    //        return edit + '&nbsp;&nbsp;&nbsp;' + remove;
+                    //    }
+                    //}
+                ],
+                "language": {
+                    "emptyTable": "No payment history.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            //resetControls();
+        }
+         function loadMSAccounts() {
+            $('#MasterpassPaymentsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadMPPaymentHistory", "Payment", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    { "data": "Reference", "autoWidth": true },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+                    { "data": "Status", "autoWidth": true }//,
+                    //{
+                    //    "data": "Data",
+                    //    "title": "Linked Account",
+                    //    "render": function (data, type, row) {
+                    //        var edit = '<a id=\"editAccount\" title=\"Edit account details\" style=\"display: inline-grid;\" href=\"#\" onclick=\"getBankAccount(\'' + data + '\');\"><span class=\"glyphicon glyphicon-edit\" style=\"text-align: center;\"></span>Edit</a>';
+                    //        var remove = '<a id=\"removeAccount\" title=\"Remove account\" style=\"display: inline-grid;\" href=\"#\" onclick=\"deleteItem(\'' + data + '\');\"><span class=\"glyphicon glyphicon-remove\" style=\"text-align: center;\"></span>Remove</a>';
+                    //        return edit + '&nbsp;&nbsp;&nbsp;' + remove;
+                    //    }
+                    //}
+                ],
+                "language": {
+                    "emptyTable": "No payment history.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            //resetControls();
+        }
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            loadAccounts();
+            loadMSAccounts();
+            //$('#btnReset').on('click', function () {
+            //   // resetControls();
+            //});
+        });
+
+    </script>
+
+}

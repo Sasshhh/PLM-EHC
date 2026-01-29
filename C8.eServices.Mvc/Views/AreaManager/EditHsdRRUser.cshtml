@@ -1,0 +1,115 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.SystemUser>
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>Edit User Round Robin Details</h4>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("Id", (int)ViewBag.Id)
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                            User Information
+                        </a>
+                    </h4>
+                </div>
+
+                <div id="userRoleCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            @Html.Label("Name:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBox("Name", null, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        @*<div class="form-group">
+                                @Html.Label("Is Active:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-4">
+                                    <div class="checkbox">
+                                        @Html.CheckBox("rrIsActive", new { @class = "" })
+                                    </div>
+                                </div>
+                            </div>*@
+
+                        <div class="form-group">
+                            @Html.Label("Re-Allocate Cases:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                <div class="checkbox">
+                                    @Html.CheckBox("ReAllocateCases", new { @class = "" , @Id="checkbox",onchange="divAssignTo()"})
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="display:none;" id="divAssignTo">
+                            @Html.Label("Alocate To:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.DropDownList("AssignToId", (SelectList)ViewBag.TypeofProperty, "-- Select Type of Property --", htmlAttributes: new { @class = "form-control", @Name = "AssignToId" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Re-Allocate" class="button1" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div>
+    @Html.ActionLink("Back to List", "RoundRobbinHsdActiveWorkQueues", null, new { @class = "button1" })
+</div>
+<script>
+    function divAssignTo() {
+        if (document.getElementById("checkbox").checked == true) {
+            debugger;
+            jQuery('#divAssignTo').css("display", "block")
+        } else {
+            jQuery('#divAssignTo').css("display", "none")
+
+        }
+    }
+    //$('checkbox').change(function () {
+    //    if (document.getElementById("checkbox").checked == true) {
+    //        debugger;
+    //        jQuery("divAssignTo").display("block")
+    //    } else {
+    //        jQuery("divAssignTo").display("none")
+
+    //    }
+    //});
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        var Name = '@ViewBag.Name';
+        var Isactive = '@ViewBag.Isactive';
+
+        $("#Name").val(Name);
+        debugger;
+        if (Isactive == "True") {
+            $("#rrIsActive").prop("checked", true);
+        }
+        else {
+            Isactive.value = false;
+        }
+             var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>
+

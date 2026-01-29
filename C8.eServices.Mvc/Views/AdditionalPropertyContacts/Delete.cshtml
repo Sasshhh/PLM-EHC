@@ -1,0 +1,72 @@
+﻿@model C8.eServices.Mvc.Models.AdditionalPropertyContact
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>AdditionalPropertyContact</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.TitleType.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TitleType.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FullName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Position)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Position)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CellPhoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CellPhoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BusinessPhoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BusinessPhoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EmailAddress)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EmailAddress)
+        </dd>   
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.EncodedActionLink("Back to List", "Index", "AdditionalPropertyContacts", new { incentivePolicyPropertyId = Model.IncentivePolicyPropertyId }, new { @class = "btn btn-primary" })            
+        </div>
+    }
+</div>

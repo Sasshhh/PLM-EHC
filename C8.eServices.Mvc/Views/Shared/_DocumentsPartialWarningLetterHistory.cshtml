@@ -1,0 +1,242 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Web
+
+<style>
+    /* Used only for jquery selections. */
+    .button1 {
+        font-size: 15px;
+    }
+
+    .docUpload {
+    }
+
+    .docDetails {
+    }
+
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        color: #af7b0b;
+        border-color: #af7b0b;
+        background-color: white;
+    }
+
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+    .dtAlign {
+        text-align: left;
+        margin-bottom: 1em;
+        width: auto;
+        padding-right: 1em;
+    }
+
+    .ddAlign {
+        margin-left: 0;
+        margin-bottom: 1em;
+    }
+
+    /*.dl-horizontal dt {
+
+    }
+
+    .dl-horizontal dd {
+
+    }*/
+</style>
+
+<div id="documentResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Progress</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" id="modalText">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-horizontal">
+
+                @foreach (var doc in Model.DocumentsViewModel.DocumentCheckLists)
+                {
+                    var document = Model.DocumentsViewModel.Documents.FirstOrDefault(o => o.DocumentCheckListId == doc.Id);
+                    <div style="width: 100%;margin: 0 auto;">
+                        <br />
+                        <table id="FailureTable123" class="table table-bordered table-hover table-striped panel panel-default display ">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Warning Reason
+                                    </th>
+                                    <th>
+                                        Uploaded Document
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var doc1 in Model.DocumentsViewModel.DocumentCheckLists)
+                                {
+                                    List
+                                    <C8.eServices.Mvc.Models.Document>
+                                        documents = null;
+                                    if (Model.DocumentsViewModel.Documents != null)
+                                    {
+                                        documents = Model.DocumentsViewModel.Documents.Where(o => o.DocumentCheckListId == doc1.Id).ToList();
+                                    }
+
+                                    foreach (var d in documents)
+                                    {
+                                        var reason = Model.WarningLetterReasons.Where(p => p.WarningDocRefId == d.WarningDocRefId).FirstOrDefault();
+                                        if (reason != null)
+                                        {
+                                            <text>
+                                                    <tr>
+                                                        <td>
+                                                            @Html.Label(reason.WarningReason, new { @class = "control-label" })
+                                                        </td>
+                                                        <td>
+                                                            <dd class="ddAlign">
+                                                                <div id="@("docDetails_" + doc1.Id)" class="docDetails">
+                                                                    @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document")
+                                                                    @Html.Raw(doc.DocumentType.Description)
+                                                                </div>
+                                                            </dd>
+                                                        </td>
+                                                    </tr>
+                                            </text>
+                                        }
+                                    }
+                                    <!--<text>
+                                        <tr>
+                                            <td>
+                                                @Html.Label(doc1.DocumentType.Name, new { @class = "control-label" })
+                                            </td>
+                                            <td>
+                                <dd class="ddAlign">
+                                    <div id="@("docDetails_" + doc1.Id)" class="docDetails">-->
+                                        @*@foreach (var d in documents)
+                                        {
+                                            @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document")
+                                            @Html.Raw(doc.DocumentType.Description)
+                                        }*@
+                                    <!--</div>
+                                </dd>
+                                </td>
+                                </tr>
+                                    </text>-->
+                                }
+
+                                </tbody>
+                                </table>
+                            </div>
+                        }
+                    
+
+</div>
+
+<script type="text/javascript">
+    var validFileExtensions = new Array('pdf', 'jpg', 'jpeg', 'png', 'gif');
+
+    function myFunction(a, b) {
+        return a * b;
+    }
+    $(document).ready(function () {
+                 var app2 = @Model.DocumentsViewModel.RcsApplicationId;
+
+        var documentCheckListIds = ''; @*// Used to store the IDs of the document check lists.*@
+    });
+    function initFormData() {
+        var formdata = new FormData();
+
+        @*// Information to associate the documents to.*@
+        formdata.append('CustomerId', '@Html.Raw( Model.DocumentsViewModel.CustomerId )');
+        formdata.append('ReferenceTypeId', '@Html.Raw( Model.DocumentsViewModel.ReferenceTypeId )');
+        formdata.append('ReferenceId', '@Html.Raw( Model.DocumentsViewModel.ReferenceId )');
+        formdata.append('ApplicationId', '@Html.Raw( Model.DocumentsViewModel.ApplicationId )');
+        formdata.append('StatusId', '@Html.Raw( Model.DocumentsViewModel.StatusId )');
+        formdata.append('RcsApplicationId', '@Html.Raw( Model.DocumentsViewModel.RcsApplicationId )');
+
+        return formdata;
+    }
+    @*// Calls function to delete documents.*@
+    function deleteDocument(documentId) {
+        HoldOn.open({
+            message: 'Deleting document...Please Wait',
+            textColor: "white",
+        });
+
+        var formdata = initFormData();
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '@Url.Action( "DeleteDocument", "File" )?q=' + documentId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+                $("#modalText").html("Document Deleted");
+                $("#documentResponseModal").modal('show');
+                displayDocumentDetails11();
+            }
+        }
+
+        return false;
+    }
+    function displayDocumentDetails11() {
+        debugger;
+        var documentCheckLists = JSON.parse('@Html.Raw(Json.Encode(Model.DocumentsViewModel.DocumentCheckLists
+                      .Select(d => new { Id = d.Id, DataList = d.DataList })))');
+
+        $('.docDetails').each(function (i, element) {
+            var elementId = $(element).attr('Id');
+            var documentCheckListId = elementId.substring(elementId.indexOf('_') + 1, elementId.length);
+            var list = $.grep(documentCheckLists, function (e, i) {
+                return e.Id == documentCheckListId
+            });
+            //alert('inside');
+            $.ajax({
+                url: "@Url.Action( "RenderDocumentDetails", "Document" )?q=" + list[0].DataList[0],
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == "Success") {
+                        debugger;
+                        $(element).html($.parseHTML(data.view));
+                    } else {
+                        $(element).html('');
+                    }
+                },
+                error: function () {
+                    $("#modalText").html("Document failed to upload or be deleted... please try again");
+                    $("#documentResponseModal").modal('show');
+                }
+            });
+        });
+    }
+
+</script>

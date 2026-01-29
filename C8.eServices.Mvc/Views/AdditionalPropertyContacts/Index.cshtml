@@ -1,0 +1,112 @@
+﻿@using C8.eServices.Mvc.Models
+@model IEnumerable<C8.eServices.Mvc.Models.AdditionalPropertyContact>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var property = (Property)ViewData["Property"];
+    var incentivePolicyId = (int)ViewBag.IncentivePolicyId;
+    var applicantCustomerId = (int)ViewBag.ApplicantCustomerId;
+    var incentivePolicyPropertyId = (int)ViewBag.IncentivePolicyPropertyId;
+    var referenceTypeId = (int)ViewBag.ReferenceTypeId;
+    var applicationId = (int)ViewBag.ApplicationId;
+}
+
+<div class="page-header">
+    <h3 align="center">Economic Development Incentive Policy Application <br/>Financial Incentives
+    </h3>
+</div>
+<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Application Details</li>
+        <li class="progtrckr-here">Additional Contacts</li>
+        <li class="progtrckr-todo">Supporting Document(s)</li>
+    </ol>
+</div>
+<br />
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                    Property
+                </a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial("_PropertyPartial", property)
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="navigation">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                    Navigation
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNavigation" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            @Html.EncodedActionLink("Back", "Create", "IncentivePolicy", new { incentivePolicyId, customerId = applicantCustomerId }, new { @class = "btn btn-primary" })
+                        </div>
+                        <div class="col-md-6">
+                            <span class="pull-right">
+                                @Html.EncodedActionLink("Add New Contact Person", "Create", "AdditionalPropertyContacts", new { incentivePolicyPropertyId }, new { @class = "btn btn-primary" })
+                                &nbsp;
+                                @Html.EncodedActionLink("Next", "Index", "Document", new { referenceId = incentivePolicyPropertyId, customerId = applicantCustomerId, referenceTypeId, applicationId, incentivePolicyId }, new { @class = "btn btn-primary", title = "Next to supporting document(s)" })
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">Additional Contacts</div>
+    <div class="panel-body">
+        <table class="table table-striped" id="table"
+               data-toggle="table"
+               data-height="500"
+               data-search="true"
+               data-pagination="true"
+               data-page-list="[10,25, 50, 100, ALL]">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Cellphone Number</th>
+                    <th>Business Number</th>
+                    <th>Email Address</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+            {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.TitleType.Name)</td>
+                        <td>@Html.DisplayFor(modelItem => item.FullName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Position)</td>
+                        <td>@Html.DisplayFor(modelItem => item.CellPhoneNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.BusinessPhoneNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.EmailAddress)</td>
+                        <td>
+                            @Html.EncodedActionLink("Edit","Edit", "AdditionalPropertyContacts", new { id = item.Id }, new {@class="btn btn-sm btn-primary"}) |
+                            @Html.EncodedActionLink("Details","Details", "AdditionalPropertyContacts", new { id = item.Id }, new { @class = "btn btn-sm btn-primary" }) |
+                            @Html.EncodedActionLink("Delete","Delete", "AdditionalPropertyContacts", new { id = item.Id }, new { @class = "btn btn-sm btn-primary" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

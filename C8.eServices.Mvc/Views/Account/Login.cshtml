@@ -1,0 +1,360 @@
+﻿@model C8.eServices.Mvc.ViewModels.LoginViewModel
+@using C8.eServices.Mvc.ViewModels
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    //Layout = null;
+    ViewBag.Title = "Log in";
+}
+    <style>
+
+
+        h1 {
+            font-weight: bold;
+            margin: 0;
+            margin-left: 80px;
+        }
+
+        #sign {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: wheat;
+        }
+
+
+        button {
+            border-radius: 20px;
+            border: 1px solid #f6f5f7;
+            background-color: #1e8449;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+        }
+
+        buttonReg {
+            border-radius: 20px;
+            border: 1px solid #f6f5f7;
+            background-color: white;
+            color: #1e8449;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+            cursor:pointer;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        button.ghost {
+            background-color: transparent;
+            border-color: #FFFFFF;
+        }
+            button.ghost:hover {
+                background-color: #ffffff8c;
+                border-color: #1e84498f;
+                color: #1e8449;
+                transition: 0.3s;
+            }
+
+        form {
+            background-color: #ffffff00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 50px;
+            height: 100%;
+            text-align: center;
+        }
+
+        input {
+            background-color: #eee;
+            border: none;
+            padding: 12px 15px;
+            margin: 8px 0;
+            width: 100%;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sign-in-container {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        .container.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+        }
+
+        .sign-up-container {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .container.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+
+
+        .overlay-container {
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .container.right-panel-active .overlay-container {
+            transform: translateX(-100%);
+        }
+        /*  #FF416C*/
+        .overlay {
+            background: #00A65A;
+            background: -webkit-linear-gradient(to right, #51c914, #51c914);
+            background: linear-gradient(to right, #51c914, #51c914);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 0 0;
+            color: #FFFFFF;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .container.right-panel-active .overlay {
+            transform: translateX(50%);
+        }
+
+        .overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-left {
+            transform: translateX(-20%);
+        }
+
+        .container.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .overlay-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .container.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+
+        #signUpHome {
+            margin-left: 90px;
+        }
+
+        @@media only screen and (max-width: 1000px) {
+            .sign-in-container {
+                left: 0;
+                width: 100%;
+                top: 50%;
+                opacity: 1;
+            }
+
+            .sign-up-container {
+                left: 0;
+                width: 100%;
+                opacity: 0;
+                z-index: 1;
+            }
+
+            .overlay-container {
+                position: absolute;
+                left: 0%;
+                width: 100%;
+                height: 75%;
+                overflow: hidden;
+                transition: transform 0.6s ease-in-out;
+                z-index: 100;
+            }
+
+            .container {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+                position: relative;
+                overflow: auto;
+                width: 768px;
+                max-width: 100%;
+                min-height: 550px;
+                /*height: 200%;*/
+                height: initial;
+            }
+
+            .form-container {
+                position: absolute;
+                top: 0;
+                transition: all 0.6s ease-in-out;
+                left: 0;
+                width: 100%;
+                top: 54%;
+                opacity: 1;
+            }
+
+            #signUpHome {
+                position: relative;
+                top: -10%;
+            }
+
+            page-wrap {
+                height: 100%;
+            }
+
+            img {
+                top: 6%;
+            }
+        }
+    </style>
+
+@*<link href="/Content/SignUp.css" rel="stylesheet" />*@
+@if (Request.HttpMethod == "POST")
+{
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Error!</strong> @ViewBag.Error
+    </div>
+}
+<br />
+<br />
+<div class="container" id="container">
+    <div class="form-container sign-in-container">
+        <div>
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", style = "padding:106px 50px;", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <br />
+                <h1 id="sign">Sign in</h1>
+                <br />
+                @*<span>or register your account</span>*@
+                @*<input type="text" placeholder="example@gmail.com" title="Please enter you email" required="" value="" name="Email" id="Email">*@
+                <input class="input-validation-error form-control" data-val="true" data-val-required="The Username field is required." placeholder="username or e-mail" id="UserName" name="UserName" required="True" type="text" value="">
+                <input type="password" title="Please enter your password" placeholder="******" required="" value="" name="Password" id="Password" class="form-control">
+                @*<div class="checkbox">
+                        <input id="RememberMe" name="RememberMe" type="checkbox" value="true" class="i-checks" checked>
+                        Remember login
+                        <p class="help-block small">(if this is a private computer)</p>
+                    </div>*@
+                <a href="@Url.Action("ForgotPassword","Account")">Forgot your password?</a>
+                <button style=" position: relative; top: 23px;" type="submit">Sign In</button>
+
+                @*<div class="col-md-4">
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @required = true })
+
+                    </div>*@
+            }
+        </div>
+    </div>
+    <div class="overlay-container">
+        <div class="overlay">
+            
+            <div class="overlay-panel overlay-right" style="background: #1e8449;width: 60%">
+
+                <img src="~/Content/Images/CoE Logo .png" style=" width: 90px; position: relative; left: 31px; height: 120px;" />
+                <br />
+                <h1>Welcome Back!</h1>
+
+                <p style="font-size: 14px;font-weight: 100;line-height: 20px;letter-spacing: 0.5px;margin: 15px 0 50px;
+                    margin-left: 90px;" class="text-center">
+                    @*To Login into Property Lease Management System
+                    please complete the form with Username and Password*@
+                    To keep connected with us please login with your personal information
+                </p>
+                @*<div class="row">
+                    <buttonReg class="ghost" id="signUpHome" onclick="location.href = '@Url.Action("Register","Account")'"> Register >></buttonReg>
+                    <br />
+                </div>*@
+                <div class="row" style="margin-top:-25px;">
+                    <p>
+                        <button type="button" style="margin-left: 89px; border-radius:20px; padding:9px 35px; " title="Register new account" onclick="location.href='@Url.Action("Register","Account")'"
+                                class="gohome">
+                            Register >>
+                        </button>
+                    </p>
+                    <p>
+                        <button type="button" style="margin-left: 89px; border-radius:20px; padding:9px 35px; " title="Return home" onclick="location.href='../'"
+                                class="gohome">
+                            Go Home >>
+                        </button>
+                    </p>
+                </div>
+                @*<div class="row" style="margin-top:-20px;">
+                    <br />
+
+                    <section id="socialLoginForm">
+                        @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+                    </section>
+                </div>*@
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

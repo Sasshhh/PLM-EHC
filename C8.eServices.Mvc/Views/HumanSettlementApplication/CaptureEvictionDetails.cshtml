@@ -1,0 +1,220 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference Number</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.HumanSettlementApplication.FullName</td>
+                        <td>@Model.HumanSettlementApplication.PurchaserType.Name</td>
+                        <td>@Model.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                        <td>@Model.HumanSettlementApplication.CreatedDateTime</td>
+                        <td>@Model.HumanSettlementApplication.Status.Name</td>
+                        <td>@Html.ActionLink("View", "Details", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br />
+        @if (Model.DocumentsViewModel != null)
+        {
+            <div class="panel-heading">Upload Eviction Document/s</div>
+            @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+            <br />
+        }
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm("CaptureEvictionDetails", "HumanSettlementApplication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.HumanSettlementApplication.Id, new { @Name = "ApplicationId" })
+                <br />
+                if (ViewBag.ApprovalStatus != null)
+                {
+                    <div class="form-group">
+                        @Html.Label("Eviction Reason", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
+                <br />
+                <div id="divComment" style="display:none">
+                    <div class="form-group">
+                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-4">
+                            @Html.TextArea("Comment", new { @class = "form-control" })
+                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Cancel" name="Cancel" onclick="Cancel()" class="button1" />
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script>
+        function ApproveLeaseAgreement() {
+            $.getJSON("../PropertyLeaseApplication/RevenueManagergnLeaseAgreement?id="+@ViewBag.PropertyLeaseAppliactionId ,
+            function (result) {
+                window.location.href = "@Url.Action("pdfDeneratePropertyLeaseAgreement", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ApplicationId=" + Model.HumanSettlementApplication.Id.ToString()) })";
+            });
+    }
+
+    </script>
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable--').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable--').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this application for eviction?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                $.getJSON("../PropertyLeaseApplication/ValidateDocumentUpload",
+                    function (result) {
+
+                        document.getElementById("btnApproval").click();
+
+                        @*debugger;
+                        var val = '@ViewBag.DocumentUploadedCapture';
+                        if (val == "" || val == null) {
+                            swal("Error", "Document/s Required To Submit", "warning");
+                        } else {
+                            document.getElementById("btnApproval").click();
+                        }*@
+                    });
+
+            }
+        });
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+
+            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
+             var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }*@
+
+        });
+</script>
+
+

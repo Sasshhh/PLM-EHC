@@ -1,0 +1,80 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.ApplicationUserRole>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@*<h4>@ViewBag.ApplicationName Users</h4>
+<hr />*@
+
+@*<p>
+        @Html.ActionLink("Add New User", "Create", new { id = @ViewBag.ApplicationId })
+    </p>*@
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                    @ViewBag.ApplicationName Users
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="col-md-8" align="left">
+                    @Html.ActionLink("Add New User", "Create", new { id = @ViewBag.ApplicationId }, new { @class = "btn btn-primary" })
+                </div>
+                <table class="table table-striped" id="table" data-url="/Application/Index">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayName("User Name")
+                            </th>
+                            <th>
+                                @Html.DisplayName("Role Name")
+                            </th>
+                            <th>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.SystemUser.FullName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.IdentityRole.Name)
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.Id, appId = item.ApplicationId }, new { @class = "btn btn-primary" })
+                                    @Html.ActionLink("Delete", "Delete", new { id = item.Id, appId = item.ApplicationId }, new { @class = "btn btn-primary" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "Application", null, new { @class = "btn btn-primary" })
+</div>
+
+
+
+<script>
+    $(function () {
+        $('#table').DataTable();
+    });
+</script>

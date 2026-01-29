@@ -1,0 +1,259 @@
+﻿@*@model IEnumerable<C8.eServices.Mvc.Models.DebitOrder>*@
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Get All Debit Orders";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+@*//<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css">*@
+<link href="~/Content/ResponsiveDataTables.min.css" rel="stylesheet" />
+<h2>Debit Orders</h2>
+<div id="bankAccountPanel" @*style="margin-left: -4%; width: 108%;"*@>
+    <div class="panel panel-default">
+        <div class="panel-heading">Current Once Off Payments & Debit Orders</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="ordersTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Municipal Account
+                        </th>
+                        <th>
+                            Customer Name
+                        </th>
+                        <th>
+                            Customer ID
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+                        <th>
+                            Recurring
+                        </th>
+                        <th>
+                            Batch
+                        </th>
+                        <th>
+                            Active/ Cancelled
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th> Created On</th>
+                        <th>
+                            Email
+                        </th>
+                        <th>
+                            Mobile Number
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@*<div class="row">
+        <table data-toggle="table" data-url="DebitOrders/GADO" data-search="true" data-pagination="true" data-page-size="20" class="table table-bordered table-hover table-striped panel panel-default" id="tblgado">
+            <thead>
+                <tr>
+
+                    <th data-sortable="true" data-field="AccountNumber">
+                        Account Number
+                    </th>
+                    <th data-sortable="true" data-field="AccountHolder">
+                        Account Holder
+                    </th>
+
+                    <th data-sortable="true" data-field="IdentificationNumber">
+                        @Html.DisplayNameFor(model => model.Customer.IdentificationNumber)
+                    </th>
+
+                    <th data-sortable="true" data-field="EmailAddress">
+                        @Html.DisplayNameFor(model => model.Customer.EmailAddress)
+                    </th>
+                    <th data-sortable="true" data-field="CellPhoneNumber">
+                        @Html.DisplayNameFor(model => model.Customer.CellPhoneNumber)
+                    </th>
+
+                    <th data-sortable="true" data-field="Amount">
+                        @Html.DisplayNameFor(model => model.Amount)
+                    </th>
+                    <th data-sortable="true" data-field="Name">
+                        Status
+                    </th>
+                    <th data-sortable="true" data-field="IsRecurring">
+                        @Html.DisplayNameFor(model => model.IsRecurring)
+                    </th>
+                    <th data-sortable="true" data-field="StartDateTime">
+                        @Html.DisplayNameFor(model => model.StartDateTime)
+                    </th>
+
+                </tr>
+            </thead>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Account.AccountNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Account.AccountHolder)
+                    </td>
+
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Customer.IdentificationNumber)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Customer.EmailAddress)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Customer.CellPhoneNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status.Name)
+                    </td>
+
+                    @if (item.IsRecurring == true)
+                    {
+                        <td>
+                            yes
+                        </td>
+                    }
+                    @if (item.IsRecurring == false)
+                    {
+                        <td>
+                            no
+                        </td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StartDateTime)
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>*@
+
+@section Scripts {
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script src="~/Scripts/ResponsiveDataTables.min.js"></script>
+    @*<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js" type="text/javascript"></script>*@
+    <script type="text/javascript">
+        function loadOrders() {
+            debugger;
+            $('#ordersTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "GADOLoad", "DebitOrder")",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "Account.AccountNumber", "autoWidth": true },
+                    { "data": "Customer.FirstName", "autoWidth": true },
+                    { "data": "Customer.IdentificationNumber", "autoWidth": true },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+                    {
+                        "data": "IsRecurring", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            recurred = data;
+                            if (data == '1') {
+                                return 'Yes';
+                            } else {
+                                return 'No';
+                            }
+
+                        }
+                    },
+                    {
+                        "data": "IsBatch", "autoWidth": true,
+                        // `data` refers to the data for the cell (defined by `mData`, which
+                        // defaults to the column being worked with, in this case is the first
+                        // Using `row[0]` is equivalent.
+                        "render": function (data, type, row) {
+                            recurred = data;
+                            if (data == '1') {
+                                return 'Yes';
+                            } else {
+                                return 'No';
+                            }
+
+                        }
+                    },
+                    {
+                        "data": "IsDeleted", "autoWidth": true,
+                        // `data` refers to the data for the cell (defined by `mData`, which
+                        // defaults to the column being worked with, in this case is the first
+                        // Using `row[0]` is equivalent.
+                        "render": function (data, type, row) {
+                            recurred = data;
+                            if (data == '1') {
+                                return 'Cancelled';
+                            } else {
+                                return 'Active';
+                            }
+
+                        }
+                    },
+                    { "data": "Status.Name", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    { "data": "Customer.EmailAddress", "autoWidth": true },
+                    { "data": "Customer.CellPhoneNumber", "autoWidth": true }
+                ],
+                "language": {
+                    "emptyTable": "No debit orders.",
+                },
+                "order": [[9, "desc"]],
+                "responsive":true,
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+
+        $(function () {
+            loadOrders();
+        });
+
+    </script>
+}
+
+

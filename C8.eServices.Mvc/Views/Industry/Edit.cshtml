@@ -1,0 +1,69 @@
+﻿@model C8.eServices.Mvc.Models.Industry
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#">
+                            Edit Industry 
+                        </a>
+                    </h4>
+                </div>
+                <br />
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.IsActive)
+                @Html.HiddenFor(model => model.IsDeleted)
+                @Html.HiddenFor(model => model.IsLocked)
+                @Html.HiddenFor(model => model.CreatedBySystemUserId)
+                @Html.HiddenFor(model => model.CreatedDateTime)
+                @Html.HiddenFor(model => model.ModifiedBySystemUserId)
+                @Html.HiddenFor(model => model.ModifiedDateTime)
+                @Html.HiddenFor(model => model.Key)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubSectorId, "Sub Sector", new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("SubSectorId", null, "--- Select Sub-Sector---", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SubSectorId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.IndustryName, new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.IndustryName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.IndustryName)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.IndustryDescription, new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.IndustryDescription, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.IndustryDescription)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-primary" })
+</div>

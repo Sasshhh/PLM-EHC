@@ -1,0 +1,137 @@
+﻿@using C8.eServices.Mvc.Models
+
+@{
+    ViewBag.Title = "AuditLogsIndex";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var caseHistoryLog = (List<Audit>)ViewData["CaseHistoryLog"];
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        @Html.Label("Audit User", new { @class = "control-label col-md-1 required-field" })
+        <div class="col-md-2">
+
+            @Html.DropDownList("AuditUser", null, "Select Audit User", new { @class = "form-control", @Name = "User" })
+            @Html.ValidationMessage("")
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Table Name", new { @class = "control-label col-md-1 required-field" })
+        <div class="col-md-2">
+            @Html.DropDownList("TableNames", null, "Select Audit Module", new { @class = "form-control", @Name = "Table" })
+            @Html.ValidationMessage("")
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Start Date", new { @class = "control-label col-md-1 required-field" })
+        <div class="col-md-2">
+            @Html.TextBox("startDate", null, new { @name = "startDate", @class = "form-control", @id = "startDate", placeholder = "Select Date" })
+            @Html.ValidationMessage("startDate")
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.Label("End Date", new { @class = "control-label col-md-1 required-field" })
+        <div class="col-md-2">
+            @Html.TextBox("endDate", null, new { @name = "endDate", @class = "form-control", @id = "endDate", placeholder = "Select Date" })
+            @Html.ValidationMessage("endDate")
+        </div>
+    </div>
+    <br />
+
+    <br />
+    <br />
+
+    <button id="btnsubmit" type="submit" class="btn btn-primary">Submit</button>
+    //<input type="submit" value="Search" id="btnSearch" class="btn btn-default" />
+    <button id="btnReset" type="button" class="btn btn-primary">Reset</button>
+
+    <br />
+
+    <br />
+    if (caseHistoryLog != null && ViewBag.ShowAudits == true)
+    {
+        @Html.Partial("~/Views/Shared/_AuditsPartial.cshtml", caseHistoryLog)
+    }
+    <br />
+    <br />
+    <br />
+}
+
+
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Scripts/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.datetimepicker.js"></script>
+<script src="~/Content/RcsStyles/jquery.canvasjs.min.js"></script>
+<link href="~/Content/RcsStyles/fontReports.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+
+        document.getElementById("startDate").value = '';
+        document.getElementById("endDate").value = '';
+
+
+
+        var picker = new Pikaday({
+            field: document.getElementById('startDate'),
+            format: 'YYYY/MM/DD HH:MM',
+
+            maxDate: new Date(),
+
+
+            toString(date, format) {
+
+                var today = new Date()
+                const day = ('0' + (date.getDate())).slice(-2);
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                const year = date.getFullYear();
+                return `${year}-${month}-${day}`;
+            }
+        });
+        var picker2 = new Pikaday({
+            field: document.getElementById('endDate'),
+            format: 'YYYY/MM/DD HH:MM',
+
+            maxDate: new Date(),
+
+
+            toString(date, format) {
+
+                var today = new Date()
+                const day = ('0' + (date.getDate())).slice(-2);
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                const year = date.getFullYear();
+                return `${year}-${month}-${day}`;
+            }
+        });
+
+
+        $('#btnReset').on('click', function () {
+            document.getElementById("startDate").value = '';
+            document.getElementById("endDate").value = '';
+
+            $('#startDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                onSelectDate: function (dt, i) {
+                    $('#endDate').datetimepicker({
+                        format: 'Y/m/d',
+                        minDate: dt,
+                        maxDate: 0,
+                        timepicker: false
+                    });
+                }
+            });
+
+            document.getElementById("AuditUser").value = '';
+        });
+
+    });
+</script>

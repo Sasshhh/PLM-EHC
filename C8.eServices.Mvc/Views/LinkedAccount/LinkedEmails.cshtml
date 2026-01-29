@@ -1,0 +1,107 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.LinkedEmail>
+
+@{
+    ViewBag.Title = "LinkedEmails";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Linked Emails</h4>
+<hr />
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#emailsCollapse">
+                    Linked Emails
+                </a>
+            </h4>
+        </div>
+        <div id="emailsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnReset" class="btn btn-primary">Reset</button>
+                </div>
+                <table id="linkedAccountsTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadLinkedEmails", "LinkedAccount")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="50"
+                       data-height="1400"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="AccountNumber">Account Number</th>
+                            <th data-field="EmailAddress">Email Address</th>
+                            <th data-field="Status">Status</th>
+                            <th data-formatter="linkedEmailAction">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $table = $('#linkedAccountsTable'),
+        $button = $('#btnReset'),
+        $btnSearch = $('#btnSearch');
+
+
+    $(function () {
+        $button.click(function () {
+            resetSearch();
+        });
+
+        $btnSearch.click(function () {
+            customSearch();
+        });
+
+        window.linkedEmailAction = function (value, row) {
+            return "<input type='button' value='Details' onclick='RedirectDetails(\"" + row.LinkedAccountId + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+        }
+
+        window.RedirectDetails = function (Id) {
+            try {
+                window.open(
+                    '@Url.Action("Details", "LinkedAccount")/?q=' + Id,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+    });
+
+    function customSearch() {
+        var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+        $table.bootstrapTable('refresh', {
+            url: '@Url.Action("LoadLinkedEmails", "LinkedAccount")',
+            query: {
+                searchText: searchVal,
+                pageNumber: 1
+            }
+        });
+    }
+
+    function resetSearch() {
+        $('.fixed-table-toolbar').find('.search > :input').val('');
+
+        $table.bootstrapTable('refresh', {
+            url: '@Url.Action("LoadLinkedEmails", "LinkedAccount")',
+            query: {
+                searchText: '',
+                pageNumber: 1
+            }
+        });
+    }
+</script>

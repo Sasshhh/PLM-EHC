@@ -1,0 +1,98 @@
+﻿@model C8.eServices.Mvc.ViewModels.ExternalLoginListViewModel
+@using Microsoft.Owin.Security
+@using C8.eServices.Mvc.Keys
+<style>
+    .form {
+        background-color: #ffffff00;
+    }
+
+    .input[type=submit]:hover {
+        background-color: #f5deb3;
+    }
+
+    button.openIdConnect {
+        background-color: white;
+        border-color: #FFFFFF;
+        color: #1e8449;
+    }
+
+        button.openIdConnect:hover {
+            background-color: #ffffff8c;
+            border-color: #1e84498f;
+        /*    color: #1e8449;*/
+            color: white;
+            transition: 0.3s;
+        }
+
+    button.gohome {
+        background-color: white;
+        border-color: #FFFFFF;
+        color: #1e8449;
+    }
+
+        button.gohome:hover {
+            background-color: #ffffff8c;
+            border-color: #1e84498f;
+            color:white;
+            /*color: #1e8449;*/
+            transition: 0.3s;
+        }
+</style>
+
+@*<h4>Use another service to log in.</h4>*@
+@*<hr />*@
+@{
+
+    var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
+    if (loginProviders.Count() == 0)
+    {
+        <div>
+            <p>
+                There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
+                for details on setting up this ASP.NET application to support logging in via external services.
+            </p>
+        </div>
+    }
+    else
+    {
+        using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = Model.ReturnUrl }))
+        {
+            @Html.AntiForgeryToken()
+            <div id="socialLoginList">
+              
+                <p>
+                    @foreach (AuthenticationDescription p in loginProviders)
+                    {
+                    <button type="submit" style="margin-left: 89px; border-radius:20px; padding:9px 35px; "
+                            class="openIdConnect" id="@p.AuthenticationType" name="provider" value="@p.AuthenticationType" title="Log in using your @p.Caption account">
+
+                        @if (p.AuthenticationType == AuthenticationTypeKeys.OpenIdConnect)
+                        {
+                            @p.AuthenticationType.Replace(AuthenticationTypeKeys.OpenIdConnect, String.Format("{0} >>", AuthenticationTypeKeys.CoESSO));
+                        }
+                        else
+                        {
+                            @p.AuthenticationType
+                        }
+
+
+
+                    </button>
+                    }
+                </p>
+                @if (Session["claims"] != null)
+                {
+                    <p>
+                        <b>CMS Link:</b> <a href="http://10.2.2.46/cms/home/dashboard" target="_blank" class="btn btn-default">CMS</a>
+                        <b>Claims brought back:</b><br />
+                        @foreach (var c in (System.Collections.Generic.List<string>)Session["claims"])
+                        {
+                            @Html.Raw(string.Format("{0}<br/>", c))
+                        }
+                    </p>
+                }
+            </div>
+        }
+    }
+}
+

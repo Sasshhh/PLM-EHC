@@ -1,0 +1,17 @@
+﻿@using C8.eServices.Mvc.Keys
+@model List<C8.eServices.Mvc.Models.Document>
+@foreach (var d in Model)
+{
+    if (d.DocumentCheckList.Application.Key == ApplicationKeys.IncentivePolicy)
+    {
+        @*@Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocumentFromLocation", "File", new { q = d.DocumentLocation }), d.DocumentName) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void(0);' onclick='deleteDocument(\"" + d.Data + "\");'><span class='glyphicon glyphicon-remove'></span></a><br/>") : string.Empty : string.Empty)*@
+        @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", d.DocumentLocation, d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.CreatedDateTime)) : "No Document")@Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void(0);' onclick='deleteDocument(\"" + d.Data + "\");'><span class='fa fa-times'></span></a><br/>") : string.Empty : string.Empty)
+    }
+    else
+    {
+        @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void(0);' onclick='deleteDocument(\"" + d.Data + "\");'><span class='fa fa-times'></span></a><br/>") : string.Empty : string.Empty)
+    }
+    @*// JK.20160723a - Removed uploaded datetime.
+    Html.Raw( d != null ? string.Format( "<a href='{0}'>{1}</a> {2}<br/>", @Url.Action( "GetDocument", "File", new { fileId = d.FileId } ), d.DocumentName, ( d.CreatedDateTime == null ) ? string.Empty : string.Format( "Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.CreatedDateTime ) ) : "No Document<br/>" ) @Html.Raw( Model != null ? string.Format( "<a href='javascript:void(0);' onclick='deleteDocument({0})'><span class='glyphicon glyphicon-remove'></span></a><br/>", d.Id ) : string.Empty )*@
+}
+ 

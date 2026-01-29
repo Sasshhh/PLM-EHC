@@ -1,0 +1,735 @@
+﻿
+@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /*  h4 {
+        font-size: 1.2em;
+    }*/
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+
+
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../plm/Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-bottom: 15px;">
+                            <a href="https://mrisoftware.tpn.co.za" target="_blank" class="btn btn-info btn-lg">
+                                <i class="fa fa-external-link"></i> Perform TPN/ITC Check
+                            </a>
+                        </div>
+                    </div>
+                    1) Enter Official number, tap on Outcome and select Approved, insert comments.
+                    <br />
+                    2) Browse documents and select documents to upload, afterwards click upload button
+                    <br />
+                    3) Enter details of the unit you want to allocate to the tenant if approved outcome is selected
+                    <br />
+                    4) Click on submit button, and then confirm you are sure to proceed.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Application Details
+                </div>
+            </div>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th> Applicant Name </th>
+                        <th> Application Type </th>
+                        <th> Application Reference No. </th>
+                        <th> Application Created Date </th>
+                        <th> Status </th>
+                        <th> Action </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.FullName) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.PurchaserType.Name) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.ApplicationReferenceNumber) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.CreatedDateTime) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.Status.Name) </td>
+                        <td>
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication",
+                            new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + ViewBag.ConductPrpertyId.ToString()), target = "_blank" },
+                            new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <br />
+            <br />
+        </div>
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary();
+                @Html.ValidationMessage("error")
+                <div class="form-horizontal">
+                    <div class="step-app">
+                        <ul class="step-steps">
+
+                            <li style="text-align:center;"><a href="#step3">Risk Assesment Response<span class=""></span></a></li>
+                        </ul>
+
+                    </div>
+                    <div class="panel-group" id="instructions">
+                        <div class="panel panel-default">
+
+                            <div id="collapseInstructions" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    @Html.HiddenFor(model => model.PropertyLeaseApplication.Id, new { htmlAttributes = new { @class = "form-control", @Style = "display:none;" } })
+                                    @Html.HiddenFor(model => model.LeaseDetails.Id, new { htmlAttributes = new { @class = "form-control", @Style = "display:none;" } })
+                                    <div class="form-group">
+
+
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.FirstName, "First Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.FirstName, new { htmlAttributes = new { @class = "form-control", @disabled = "disabled" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.FirstName, "", new { @class = "text-danger" })
+                                        </div>
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.OfficialNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.OfficialNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @required = "required" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.OfficialNumber, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.LastName, "Last Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.LastName, new { htmlAttributes = new { @class = "form-control", @disabled = "disabled" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.LastName, "", new { @class = "text-danger" })
+                                        </div>
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.DateStamp, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.Editor("DateStampConduct", null, new { htmlAttributes = new { @class = " form-control", onchange = "ChangeDate()", @Name = "RiskAssessmentOutcome.DateStamp", @Id = "RiskAssessmentOutcome.DateStamp", @disabled = "disabled" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.DateStamp, "", new { @class = "text-danger" })
+                                            @*</div>*@
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group">
+                                        @Html.Label("Outcome", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                        <div class="col-md-3">
+                                            @Html.DropDownList("ApprovalStatus", null, "-- select option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @onchange = "changestatus()", @Id = "ApprovalStatus", @required = "required" })
+                                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                                        </div>
+                                        <div id="LeetingOfficers" style="display:none;">
+                                            @Html.Label("Letting Officer", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            <div class="col-md-3">
+                                                @Html.DropDownList("LettingOfficer", null, "-- Allocate Officer --", htmlAttributes: new { @class = "form-control", @Name = "LettingOfficer", @Id = "LettingOfficer" })
+                                                @Html.ValidationMessage("LettingOfficer", "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*<div class="form-group">
+            <div id="reject" style="display:none">
+                @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Reason", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                <div class="col-md-8">
+                    @Html.TextAreaFor(model => model.RiskAssessmentOutcome.Reason, new { @class = "form-control", @Id = "RejectComment" })
+                    @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.Reason, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div id="Approve" style="display:block">
+                @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Reason", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-8">
+                    @Html.TextAreaFor(model => model.RiskAssessmentOutcome.Reason, new { @class = "form-control", @Id = "RejectComment" })
+                    @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.Reason, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>*@
+                                    <div class="form-group">
+
+                                        <div id="reject" class="col-md-2" style="display:none; padding-left:0;">
+                                            @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Reason", htmlAttributes: new { @class = "control-label require" })
+                                        </div>
+
+                                        <div id="Approve" class="col-md-2" style="display:block; padding-left:0;">
+                                            @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Reason", htmlAttributes: new { @class = "control-label" })
+                                        </div>
+
+                                        <div class="col-md-8">
+                                            @Html.TextAreaFor(model => model.RiskAssessmentOutcome.Reason, new { @class = "form-control", @Id = "OutcomeReason" })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.Reason, "", new { @class = "text-danger" })
+                                        </div>
+
+                                    </div>
+
+                                    <div id="AllocateSpaceUnitDiv" style="display:block;">
+
+
+
+                                        <br />
+                                        <br />
+                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+
+                                                    <h4 class="panel-title" align="center">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                            Available Unit Details
+                                                        </a>
+                                                    </h4>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <br />
+
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.PropertyLeaseApplication.HumanEHCOptions.Name, "Unit Bed Type", htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-3">
+                                                @Html.EditorFor(model => model.PropertyLeaseApplication.HumanEHCOptions.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.HumanEHCOptions.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.PropertyLeaseApplication.PreferredComplexArea.ComplexName, "1st Complex/Area ", htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-3">
+                                                @Html.EditorFor(model => model.PropertyLeaseApplication.PreferredComplexArea.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.PreferredComplexArea.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                            @Html.LabelFor(model => model.PropertyLeaseApplication.PreferredComplexArea2.ComplexName, "2nd Complex/Area ", htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-3">
+                                                @Html.Editor("PreferredComplexArea2", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.PreferredComplexArea2.Name, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <br />
+
+                                        <br />
+                                        <br />
+
+
+                                    </div>
+                                    <div id="ConfirmTypology" class="panel panel-default">
+                                        <div class="panel-heading"><h4 class="panel-title" align="center">Confirm Typology & Complex</h4></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.PropertyLeaseApplication.PreferredComplexAreaId, "Confirm Complex", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                <div class="col-md-3">
+                                                    @Html.DropDownListFor(model => model.PropertyLeaseApplication.PreferredComplexAreaId, (SelectList)ViewBag.PreferredComplex, "-- select option -- ", new { @class = "form-control", @required = "required" })
+                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.PreferredComplexAreaId, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                @Html.LabelFor(model => model.PropertyLeaseApplication.HumanEHCOptionsId, "Confirm Unit Typology", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                <div class="col-md-3">
+                                                    @Html.DropDownListFor(model => model.PropertyLeaseApplication.HumanEHCOptionsId, (SelectList)ViewBag.humanEHCOptions, "-- select option -- ", new { @class = "form-control", @required = "required" })
+                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.HumanEHCOptionsId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.HiddenFor(model => model.PropertyLeaseApplication.Id)
+                                    </div>
+                                    <div id="documentsDiv" style="display:block;">
+                                        <br />
+                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+
+                                                    <h4 class="panel-title" align="center">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                            Document/s Upload
+                                                        </a>
+                                                    </h4>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        @*<div class="panel-heading">Upload Risk Assessment Document/s</div>*@
+                                        @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+                                    </div>
+                                </div>
+                                <div class="step-footer" align="left">
+                                    @Html.EncodedActionLink("Cancel", "Index", "RCSApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="step-footer" align="center">
+                            <input type="button" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")'" name="btnApprovalStatus" class="button1" />
+
+                            @*<button class="button1" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")'">Cancel</button>*@
+                            <input type="button" value="Submit" name="btnApproval" onclick="checkdocs(@Model.PropertyLeaseApplication.Id)" class="button1" />
+                            <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                            <br />
+                            <br />
+                            <br />
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please wait 20 seconds, then action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function Cancel() {
+        window.location.href = "@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")";
+    }
+    function clickSubmit() {
+        debugger;
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this risk assessment?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                debugger;
+                var statusval = document.getElementById("ApprovalStatus").value;
+                //var reject = document.getElementById("reject");
+                //var accept = document.getElementById("Approve");
+                if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
+                    //alert('rej');
+                    var RejectComment = document.getElementById("RejectComment").value;
+
+                    if ((RejectComment == null || RejectComment == "")) {
+                        swal("error", "Please enter the risk assessment outcome comment!", "warning");
+                    } else {
+                        document.getElementById("btnApproval").click();
+                       /* WaitingListBusy();*/
+                    }
+                    //    document.getElementById("btnApproval").click();
+                } else {
+                 /*   alert('approval');*/
+                    document.getElementById("btnApproval").click();
+                  /*  WaitingListBusy();*/
+                }
+            }
+        });
+    }
+    function checkdocs(id) {
+        debugger;
+        //alert('inside check docs');
+
+
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected_documents") {
+            clickSubmit();
+           
+        } else if (statusval == "Rcs_Approval" || statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc") {
+         
+            $.getJSON("../PropertyLeaseApplication/CaptureDocChecker2?id=" + id,
+                function (result) {
+                    console.log(result);
+                    if (result == "true") {
+                        try {
+                            clickSubmit();
+                        }
+                        catch (cat) {
+                            swal("Error!", "Please upload required documents.", "error");
+                        }
+                    }
+                    else {
+                        swal("Error!", "Please upload required documents.", "error");
+                    }
+                });
+           
+        } else if (statusval == "r_re_allocate_application") {
+
+
+            if (isLettingOfficerSelected()) {
+                clickSubmit();
+            }
+            else {
+                swal("Error!", "Please select letting officer .", "error");
+            }
+         
+        
+          
+         
+        }
+
+
+
+
+    }
+    function isLettingOfficerSelected() {
+        var lettingOfficerDropdown = document.getElementById("LettingOfficer");
+
+        // Check if the dropdown exists
+        if (lettingOfficerDropdown) {
+            // Check if a value is selected and it's not the default value
+            return lettingOfficerDropdown.value !== "" && lettingOfficerDropdown.value !== "-- Allocate Officer --";
+        }
+
+        // Return false if the dropdown does not exist
+        return false;
+    }
+    function makeFieldsNotRequired() {
+        // Array of field names to make not required
+        const fieldsToMakeNotRequired = [
+            'ApplicationAllocatedProperties.SpaceUnitNumber',
+            'ApplicationAllocatedProperties.SpaceUnitSize',
+            'ApplicationAllocatedProperties.SolarReference',
+            'ApplicationAllocatedProperties.MonthlyRentalAmount',
+            'ApplicationAllocatedProperties.NumOfBeds',
+            'ApplicationAllocatedProperties.RequiedDepositAmount',
+            'ApplicationAllocatedProperties.StreetName',
+            'ApplicationAllocatedProperties.Shower',
+            'ApplicationAllocatedProperties.Township',
+            'ApplicationAllocatedProperties.Postal',
+            'ApplicationAllocatedProperties.OfferedComplexId',
+            'ApplicationAllocatedProperties.HumanEHCOptionId',
+            'ApplicationAllocatedProperties.LettingRequirements'
+        ];
+
+        // Loop through each field and set required attribute to false
+        fieldsToMakeNotRequired.forEach(fieldName => {
+            const field = document.querySelector(`[name='${fieldName}']`);
+            if (field) {
+                field.required = false;
+            }
+        });
+    }
+    function makeFieldsRequiredBasedOnStatus() {
+        // Assume 'approved' status makes all fields required again
+      
+        // Array of field names to make required
+        const fieldsToMakeRequired = [
+           
+            'ApplicationAllocatedProperties.OfferedComplexId',
+            'ApplicationAllocatedProperties.HumanEHCOptionId',
+         
+        ];
+
+        // Loop through each field and set required attribute based on status
+        fieldsToMakeRequired.forEach(fieldName => {
+            const field = document.querySelector(`[name='${fieldName}']`);
+            if (field) {
+                field.required = true;
+            }
+        });
+    }
+    function WaitingListBusy() {
+        debugger;
+        $.getJSON("../riskAssessmentOutcomes/ValidateWaitingListSorting",
+            function (result) {
+                debugger;
+                if (result == true) {
+                    jQuery.noConflict();
+                    $("#waitinglist_busy").modal('show');
+                    $('#waitinglist_busy').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
+            });
+    }
+
+    //function ValidateUnit() {
+    //    debugger;
+    //    const SolarReference = document.getElementById('SolarReference').value;
+    //    const SpaceUnitNumber = document.getElementById('SpaceUnitNumber').value;
+    //    if ((SolarReference != null && SolarReference != '') && (SpaceUnitNumber != null && SpaceUnitNumber != '')) {
+    //        $.getJSON("../riskAssessmentOutcomes/ValidateUnit?SpaceUnitNumber=" + SpaceUnitNumber + "&SolarReference=" + SolarReference,
+    //            function (result) {
+    //                debugger;
+    //                if (result.status) {
+    //                    swal("Warning", result.data, "warning");
+    //                    $('#SolarReference').val('');
+    //                    $('#SpaceUnitNumber').val('');
+    //                }
+    //            });
+    //    }
+    //}
+
+    function changestatus() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            jQuery('#reject').css("display", "block")
+            jQuery('#LeetingOfficers').css("display", "none")
+            jQuery('#documentsDiv').css("display", "block")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#ConfirmTypology').css("display", "none")
+            jQuery('#AllocateSpaceUnitDiv').css("display", "none")
+        } else if (statusval == "Rcs_Approval") {
+            jQuery('#reject').css("display", "none")
+            jQuery('#LeetingOfficers').css("display", "none")
+            jQuery('#Approve').css("display", "block")
+            jQuery('#documentsDiv').css("display", "block")
+            jQuery('#AllocateSpaceUnitDiv').css("display", "block")
+            jQuery('#ConfirmTypology').css("display", "block")
+            makeFieldsRequiredBasedOnStatus();
+        } else if (statusval == "r_re_allocate_application") {
+            jQuery('#reject').css("display", "block")
+            jQuery('#LeetingOfficers').css("display", "block")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#documentsDiv').css("display", "none")
+            
+            jQuery('#ConfirmTypology').css("display", "none")
+            jQuery('#AllocateSpaceUnitDiv').css("display", "none")
+            makeFieldsNotRequired();
+        }
+        else if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
+            jQuery('#reject').css("display", "block")
+            jQuery('#LeetingOfficers').css("display", "none")
+            jQuery('#documentsDiv').css("display", "block")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#AllocateSpaceUnitDiv').css("display", "none")
+            makeFieldsNotRequired();
+
+        }
+
+    }
+
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function Submit() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            var RejectComment = document.getElementById("RejectComment").value;
+            if ((RejectComment == null || RejectComment == "")) {
+                swal("error", "Please enter rejection comment!", "warning");
+            } else {
+                document.getElementById("btnApproval").click();
+            }
+
+        }
+    }
+
+</script>

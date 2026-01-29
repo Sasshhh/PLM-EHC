@@ -1,0 +1,188 @@
+﻿
+@{
+    ViewBag.Title = "LinkedAccountStatistics";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Linked Account Statistics</h4>
+<hr/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Search</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <form class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Start Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">End Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox1", "Select Date", new { @class = "input-sm" })
+                                </div>
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox2", "Select Date", new { @class = "input-sm " })
+                                </div>
+                                <div class="col-md-4" style="padding-top:0px">
+                                    <button type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-search"></span>Search</button>
+                                    <button type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#laCollapse">
+                    Linked Account Statistics
+                </a>
+            </h4>
+        </div>
+        <div id="laCollapse" class="panel-collapse collapse in">
+            <table id="LinkedAccountStats" class="table table-bordered table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th id="headings" class="sorting_asc_disabled">Date Linked</th>
+                        <th id="headings">Total Received </th>
+                        <th id="headings">Approved</th>
+                        <th id="headings">Pending Documents</th>
+                        <th id="headings">Pending Approval</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />
+
+@* Load datatable js *@
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script src="@Url.Content("~/scripts/ellipsis.js")"></script>
+    <script src="@Url.Content("~/scripts/moment.js")"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+
+    <script>
+
+
+        $('#txtBox1').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            onSelectDate: function (dt, i) {
+                $('#txtBox2').datetimepicker({
+                    format: 'Y/m/d',
+                    minDate: dt,
+                    timepicker: false
+                });
+            }
+        });
+
+        function convertToDate(data) {
+            @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+            var dtStart = new Date(parseInt(data.substr(6)));
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        function formatDate(data) {
+            @*// Format using moment.js.*@
+            var dtStartWrapper = moment(data);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        //Linked Account Stats
+        $('#LinkedAccountStats').DataTable({
+            "processing": true, @*// for show progress bar*@
+            "serverSide": true, @*// for process server side*@
+            "orderMulti": true, @*// for disable multiple column at once*@
+            "orderable": true,
+            "dom": '<"top"i>rt<"bottom"lp><"clear">',
+            "scrollY": "500px",
+            "info": false,
+            "pageLength": 100,
+            "lengthChange": false,
+            "ajax": {
+                "url": "@Url.Action("LinkedAccountStats", "eBillingDashBoard")",
+                "type": "POST",
+                "datatype": "json"
+            },
+            "columns": [
+                {
+                    "data": "CreatedDateTime",
+                    "name": "CreatedDateTime",
+                    "orderable": false,
+                    "render": function (data) {
+                        return formatDate(data);
+                    }
+                }, {
+                    "data": "RecievedLinkedAccounts",
+                    "orderable": false
+                }, {
+                    "data": "ApprovedLinkedAccounts",
+                    "orderable": false
+                }, {
+                    "data": "PendingDocumentLinkedAccounts",
+                    "orderable": false
+                }, {
+                    "data": "PendingLinkedAccounts",
+                    "orderable": false
+                }
+            ],
+            buttons: [
+                'print'
+            ]
+        });
+        oTable = $('#LinkedAccountStats').DataTable();
+
+        function submitParams() {
+            oTable.columns(3).search($('#txtBox1').val().trim());
+            oTable.columns(4).search($('#txtBox2').val().trim());
+            console.log("in function");
+            oTable.draw();
+        };
+
+        $('#btnSearch').click(function () {
+            submitParams();
+        });
+        $('#btnClear').click(function () {
+            $('#txtBox1').val('Select Date');
+            $('#txtBox2').val('Select Date');
+            submitParams();
+        });
+    </script>
+}
+
+

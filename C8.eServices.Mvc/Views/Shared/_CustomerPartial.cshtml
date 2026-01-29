@@ -1,0 +1,126 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+
+
+    <dl class="dl-horizontal">
+        @if (Model.Customer.Id != 0)
+        {
+
+            if (Model.Entity != null && Model.Entity.Id != 0)
+            {
+
+                <dt>
+                    Firm Name
+                </dt>
+
+                <dd>
+                    <b>@Html.DisplayFor(model => model.Entity.EntityFullName)</b>
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Entity.EntityRegistrationNumber)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Entity.EntityRegistrationNumber)
+                </dd>
+
+            }
+
+            <br />
+          
+
+          
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.FullName)
+            </dt>
+
+            <dd>
+                <b>@Html.DisplayFor(model => model.Customer.FullName)</b>
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.Gender)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.Gender)
+            </dd>
+
+            @*<dt>
+                @Html.DisplayNameFor(model => model.Customer.IsDeceased)
+            </dt>
+
+            <dd>
+                @Html.Raw((bool)Model.Customer.IsDeceased ? "Yes" : "No")
+            </dd>*@
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.Identification)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.Identification)
+            </dd>
+
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.ContactNumbers)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.ContactNumbers)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.SystemUser.EmailAddress)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.EmailAddress)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.PhysicalAddress)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.PhysicalAddress)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.PostalAddress)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.PostalAddress)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Customer.CreatedDateTime)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Customer.CreatedDateTime)
+            </dd>
+
+            @*<dt>Info Captured
+            </dt>
+
+            <dd>
+                @Model.Customer.PercentageComplete().ToString() % complete.
+            </dd>*@
+
+            <dt>&nbsp;</dt>
+            <dd>&nbsp;</dd>
+        }
+
+        @*@if ( Model.ShowUpdateLink )
+        {
+            <dt>&nbsp;</dt>
+            <dd><h3>Click @Html.ActionLink("here", "ManageProfile", "Profile", new { agentId = (Model.Agent != null) ? Model.Agent.Id : 0, customerId = Model.Customer.Id, systemUserId = Model.Customer.SystemUserId, viewId = Model.ViewId }, null) to update this profile.</h3></dd>
+        }*@
+    </dl>
+
+

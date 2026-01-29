@@ -1,0 +1,380 @@
+﻿@model C8.eServices.Mvc.Models.PropertyLeaseApplication
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Materia - Admin Template">
+    <meta name="keywords" content="materia, webapp, admin, dashboard, template, ui">
+    <meta name="author" content="solutionportal">
+    <style>
+        .buttonIcon {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 7px 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .tablecss {
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        th {
+            /* font-size: 12px;
+            font-weight: 600;*/
+            background-color: #1e8449;
+            color: white;
+        }
+
+        .site-head {
+            background-color: #1e8449;
+        }
+
+        .main-container .nav-wrap .nav-head {
+            background: #1e8449;
+        }
+
+        .btn {
+            color: #1e8449;
+            border-color: #1e8449;
+            background-color: white;
+        }
+
+            .btn:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .btn12 {
+            color: #af7b0b;
+            border-color: #af7b0b;
+            background-color: white;
+        }
+
+            .btn12:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+            color: #ffffff;
+            background-color: grey;
+            border-color: #ffffff;
+        }
+
+        .BoToDoHide {
+            display: none;
+        }
+
+        .button1 {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .step-app > .step-steps > li.active a {
+            background-color: darkgrey !important;
+            color: #fff;
+        }
+
+
+        .sk-cube-grid {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 10px;
+            background-color: grey;
+        }
+
+            .sk-cube-grid .sk-cube-child {
+                width: 33%;
+                height: 33%;
+                background-color: white;
+                float: left;
+                -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+                animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out
+            }
+
+            .sk-cube-grid .sk-cube-grid9 {
+                -webkit-animation-delay: .2s;
+                animation-delay: .2s
+            }
+
+
+        .modal-dialog {
+            position: relative;
+            display: table; /* This is important */
+            overflow-y: auto;
+            overflow-x: auto;
+            width: auto;
+            min-width: 300px;
+        }
+
+        .page-content {
+        }
+
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 1cm auto;
+            border: 1px #D3D3D3 solid;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-row {
+            padding-bottom: 190px;
+        }
+        .topBorderOnly {
+            border-top: 1px solid black;
+        }
+
+        .bottomBorderOnly {
+            border-bottom: 1px solid black;
+        }
+        .leftBorderOnly {
+            border-left: 1px solid black;
+            padding-left:4px;
+        }
+        .rightBorderOnly {
+            border-right: 1px solid black;
+        }
+    </style>
+</head>
+<body id="app" class="app off-canvas">
+    <div class="main-container clearfix" id="page">
+        <div class="page-content">
+            <div class="page">
+                <div>
+                    <table class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly" cellspacing="0" cellpadding="0" width="100%">
+                        <tbody>
+                            <tr>
+                                <th border="0" colspan="1"></th>
+                                <th border="0" colspan="4"style="text-align:center; font-size:medium;"><strong>PROPERTY INSPECTION FORM</strong></th>
+                                <th colspan="3" style="background-color: #1e8449;"><img src="~/Content/Images/ekurhuleni_logo.png" style="padding-right:0;" /></th>
+                            </tr>
+                            <tr>
+                                <th colspan="3" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly"><strong>Lease Reference Number (LR NUMBER): </strong></th>
+                                <th colspan="5" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">  e1</th>
+
+                            </tr>
+                            <tr style="text-align:center;">
+                                <th colspan="8" style="text-align:center"><u>PROPERTY INFORMATION</u></th>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    <Strong>
+                                        Property Code: <br />
+                                        Higher Level Property Code: <br />
+                                        &nbsp;Leased Property Erf description: <br /><br />
+                                        Leased Property Use: <br /><br />
+                                        Other Comments: <br />
+                                    </Strong>
+                                </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    e2<br />
+                                    e3<br />
+                                    e4<br /><br />
+                                    e8<br /><br />
+                                    e9<br />
+                                </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    <strong>
+                                        CCA: <br />
+                                        Leased Erf Size: <br />
+                                        Physical address: <br />
+
+                                    </strong>
+                                </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    e5<br />
+                                    e6<br />
+                                    e7<br />
+                                </td>
+                            </tr>
+                            <tr  style="text-align:center;">
+                                <th colspan="8" style="text-align:center"><u>PROPERTY INFORMATION</u></th>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    <strong>
+                                        Inspection Time: <br />
+                                        Approximate Erf Size: <br />
+                                        Property Type: <br />
+                                        Property Use: <br />
+                                        Damage to Property(yes/no): <br />
+                                        Maintenance Required: <br />
+                                        Alterations to Property(yes/no): <br />
+                                        Lettable/non Lettable Condition: <br />
+                                        Other Comments: <br />
+                                    </strong>
+                                </td>
+                                <td colspan="2" class="rightBorderOnly leftBorderOnly">
+                                    e10<br />
+                                    e11<br />
+                                    e12<br />
+                                    e16<br />
+                                    e17<br />
+                                    e18<br />
+                                    e19<br />
+                                    e20<br />
+                                    e21<br />
+                                </td>
+                                <td colspan="2" class="rightBorderOnly leftBorderOnly">
+                                    <strong>
+                                        Occupant Present (yes/no) : <br />
+                                        Building on Property (yes/no): <br />
+                                        Age of Building/year built: <br />
+                                        Building Type (Office/residential ect): <br />
+                                        Building Size: <br />
+                                        Number of Offices/bedrooms: <br />
+                                        Number of Parking/Garages: <br />
+
+                                    </strong>
+                                </td>
+                                <td colspan="2"class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">
+                                    e13<br />
+                                    e14<br />
+                                    e15<br />
+                                    e22<br />
+                                    e23<br />
+                                    e24<br />
+                                    e25<br />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" >APPROVAL</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E26</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e27</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E28</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="rightBorderOnly bottomBorderOnly" ></td>
+                                <td colspan="2" c rightBorderOnly leftBorderOnly">Property Inspector Full Name</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Signature</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Date</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">APPROVAL</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E26</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e27</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E28</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"></td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Property Inspector Full Name</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Signature</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Date</td>
+                            </tr>
+                            <tr style="text-align:center;">
+                                <th colspan="8" style="text-align:center"><u>OCCUPANT INFORMATION</u></th>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Occupant Name in Full (Individual/Company): </td>
+                                <td colspan="5" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e32</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Trading Name: </td>
+                                <td colspan="5" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e33</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Postal Address for Lease Correspondence/Notices: </td>
+                                <td colspan="5" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e34</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"></td>
+                                <td class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Postal Code:</td>
+                                <td class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e37</td>
+                                <td colspan="4"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Physical Residential Street Address of Occupant: </td>
+                                <td colspan="5" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e36</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly"></td>
+                                <td class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Postal Code:</td>
+                                <td class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e35</td>
+                                <td colspan="4" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Identification Number: </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e38 </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Company Registration Number: </td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e39</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">*COPY OF ID IF AVAILABLE</td>
+                                <td colspan="2"></td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">VAT Registration Number:</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E40</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Name and Contact Details of Person Responsible for Rental Payment: </td>
+                                <td colspan="4" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e41</td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Landline: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e42</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Mobile: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e43</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Fax: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e44</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Email:</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E45</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Name and Contact Details of Person Responsible for Lease Renewal: </td>
+                                <td colspan="4" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e46</td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Landline: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e53</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Mobile: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e47</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Fax: </td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e48</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Email:</td>
+                                <td colspan="1" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">E49</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">APPROVAL</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e50</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e51</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">e52</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"></td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Occupant Full Name Signature</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Signature</td>
+                                <td colspan="2" class="topBorderOnly bottomBorderOnly rightBorderOnly leftBorderOnly">Date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

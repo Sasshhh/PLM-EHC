@@ -1,0 +1,449 @@
+﻿@model C8.eServices.Mvc.ViewModels.ManageUserViewModel
+
+@*<p>You're logged in as <strong>@User.Identity.GetUserName()</strong>.</p>*@
+
+@using (Html.BeginForm("Manage", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <h4>Manage Account</h4>
+    <hr />
+
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <p>
+                        <strong>Change Username</strong>
+                        <ul>
+                            <li>
+                                Enter your new username in the 'Username' text box.
+                            </li>
+                            <li>The criteria for the username field is, <strong> 6 to 20 characters long, without any special characters eg. !@@,#,$,%,&,*."</strong></li>
+                            <li>Click the 'Save' button.</li>
+                        </ul>
+                        <strong>Change Email Address</strong>
+                        <ul>
+                            <li>
+                                Enter your new email address in the 'Email Address' text box.
+                            </li>
+                            <li>Click the 'Save' button.</li>
+                        </ul>
+                        <strong>Change Mobile Number</strong>
+                        <ul>
+                            <li>
+                                Enter your new mobile number in the 'Mobile Number' text box.
+                            </li>
+                            <li>Click the 'Save' button.</li>
+                        </ul>
+                        <strong>Change Password</strong>
+                        <ul>
+                            <li>
+                                Enter your current temporary/current password in the 'Current password' text box. If you have requested a password reset via the "Forgot Password" link, <strong> the current password will be the temporary password you receive via email.</strong> If the 'Current password' textbox is already populated, clear it using backspace to ensure that it is empty. <strong>Please do not use the automatically populated password  that your browser fills in, as this will cause an error. Clear the automatically filled password.</strong>
+                            </li>
+                            <li>
+                                Enter a password of your choice in the 'New password' textbox. The password has to be at least 6 characters long and contain at least 1 uppercase character,  1 lowercase character, a numeric character and a special character eg. !,@@,#,$,%,&,*.
+                            </li>
+                            <li>
+                                Enter the password you created in the above step in the 'Confirm new password’ textbox.
+                            </li>
+                            <li>Click the 'Save' button.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#usernameCollapse">
+                        Change Username
+                    </a>
+                </h4>
+            </div>
+            <div id="usernameCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.UserName, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(m => m.UserName, new { @id = "txtUsername", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="button" id="btnSaveUsername" value="Save" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#emailCollapse">
+                        Change Email
+                    </a>
+                </h4>
+            </div>
+            <div id="emailCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="alert alert-info">
+                        <strong>Please note :</strong> Email address will only be updated once email address has been verified.
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.EmailAddress, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(m => m.EmailAddress, new { @id = "txtEmail", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="button" id="btnSaveEmail" value="Save" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#smsCollapse">
+                        Change Mobile Number
+                    </a>
+                </h4>
+            </div>
+            <div id="smsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="alert alert-info" style="display:none">
+                        <strong>Please note :</strong> Mobile Number will only be updated once Mobile Number has been verified.
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.MobileNumber, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(m => m.MobileNumber, new { @id = "txtMobile", @type = "text", @class = "form-control", maxlength = "10", minlength = "10" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="button" id="btnSaveMobile" value="Save" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#passwordDetailsCollapse">
+                        Change Password
+                    </a>
+                </h4>
+            </div>
+            <div id="passwordDetailsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @Html.ValidationSummary()
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.OldPassword, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.PasswordFor(m => m.OldPassword, new { @class = "form-control", @autocomplete = "new-password" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.NewPassword, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control", @autocomplete = "new-password" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-3">
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", @autocomplete = "new-password" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Save" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel-group" @*style="content-visibility: hidden;"*@>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#notificationsCollapse">
+                        Notifications
+                    </a>
+                </h4>
+            </div>
+            <div id="notificationsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.PrefMethodOfCommunication, new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div style="margin-left:0px">
+
+
+
+                                @if (ViewBag.NotiType != null)
+                                {
+                                    foreach (var item in ViewBag.NotiType)
+                                    {
+                                        
+                                        <label>@Html.RadioButtonFor(model => model.PrefMethodOfCommunication, "" + (int)item.Id + "", new { @name = "PrefContMethod", @id = (int)item.Id }) @item.Name</label>
+
+                                    }
+                                }
+                                <br />
+                                @*<label>@Html.RadioButtonFor(model => model.PrefMethodOfCommunication, "2", new { @name = "PrefContMethod", @id = "email" }) Email</label>
+                                    <label>@Html.RadioButtonFor(model => model.PrefMethodOfCommunication, "5", new { @name = "PrefContMethod", @id = "both" }) Both</label>*@
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (ViewBag.Chk != null)
+                    {
+
+                        var incrementer = 0;
+
+                        foreach (var item in ViewBag.Chk)
+                        {
+                            incrementer = 0;
+                            foreach (var nsItem in ViewBag.NotificationSubscriptions)
+                            {
+                                if (nsItem.NotificationId == item.Id)
+                                {
+                                    incrementer++;
+                                    <div class="form-group">
+
+                                        @Html.LabelFor(model => model.PrefMethodOfCommunication, (String)item.Name, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            <input type="checkbox" name="foo" id="@item.Key" checked="checked">
+                                            <span class="checkmark"></span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            if (incrementer == 0)
+                            {
+                                <div class="form-group">
+
+                                    @Html.LabelFor(model => model.PrefMethodOfCommunication, (String)item.Name, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        <input type="checkbox" name="foo" id="@item.Key">
+                                        <span class="checkmark"></span>
+                                    </div>
+                                </div>
+                            }
+
+
+                        }
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="button" id="btnSaveNotification" value="Save" class="button1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width: 650px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "button1" })*@
+                <button type="button" class="button1" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+            $(function () {
+                loadNotificationSubscriptions();
+        $("#btnSaveUsername").click(function (evt) {
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ModifyUserName", "Account")",
+                data: { userName: $("#txtUsername").val()},
+                success: function (response) {
+                    bootbox.alert(response.result, function () {
+                        location.reload();
+                    });
+                },
+                error: function (response) {
+                    console.log(response.result);
+                }
+            });
+        });
+
+        $("#btnSaveEmail").click(function (evt) {
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ModifyEmail", "Account")",
+                data: { email: $("#txtEmail").val() },
+                success: function (response) {
+                    bootbox.alert(response.result, function () {
+                        window.location.href = '@Url.Action("Logout", "Account")';
+                    });
+                },
+                error: function (response) {
+                    console.log(response.result);
+                }
+            });
+        });
+          $("#btnSaveMobile").click(function (evt) {
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ModifyMobile", "Account")",
+                data: { mobile: $("#txtMobile").val() },
+                success: function (response) {
+                    //alert("test");
+                    bootbox.alert(response.result, function () {
+                        //window.location.href = '@Url.Action("Logout", "Account")';
+                    });
+                },
+                error: function (response) {
+                    //alert("test1");
+                    console.log(response.result);
+                }
+            });
+        });
+
+        $("#btnSaveNotification").click(function (evt) {
+            debugger;
+            var NotificationKeyArr = new Array();
+            var CheckedNotificationsArr = new Array();
+            var NotificationType = 7;
+            radiobtn = document.getElementsByName('PrefMethodOfCommunication');
+
+            for (var i = 0, n = radiobtn.length; i < n; i++) {
+                if (radiobtn[i].checked) {
+                    NotificationType = radiobtn[i].id;
+
+                    // alert("Val for MAcc: " + MAcc);
+                }
+                else {
+
+                }
+
+            }
+
+            checkboxes = document.getElementsByName('foo');
+
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                if (checkboxes[i].checked) {
+
+
+
+                    NotificationKeyArr.push(checkboxes[i].id);
+                    CheckedNotificationsArr.push(true);
+                    // alert("Val for MAcc: " + MAcc);
+                }
+                else {
+                    NotificationKeyArr.push(checkboxes[i].id);
+                    CheckedNotificationsArr.push(false);
+                }
+
+            }
+
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("NotificationSubscriptions", "Account")',
+                data: { NotificationKey: NotificationKeyArr, CheckedNotifications: CheckedNotificationsArr, NotificationTypeID: NotificationType }
+            }).success(function (response) {
+                var span = document.createElement("span");
+                span.setAttribute("id", "spanContent");
+                //span.innerHTML = 'Your communication method for Siyakhokha has been successfully updated.';
+                span.innerHTML = 'Your communication method for PLM has been successfully updated.';
+
+                //$("#modalTitleText").html("Notification Subscriptions Update");
+                $("#modalTitleText").html("Communication Method Update");
+                $("#spanContent").remove();
+                $("#modalContentText").append(span);
+                $("#ErrModal").modal("show");
+
+            });
+
+        });
+    });
+
+            function loadNotificationSubscriptions() {
+
+            }
+</script>
+<script>
+    setInputFilter(document.getElementById("MobileNumber"), function (value) {
+        return /^\d*$/.test(value);
+    });
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+
+    function blockSpecialChar(e) {
+        var k;
+        document.all ? k = e.keyCode : k = e.which;
+        return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+    }
+
+
+</script>

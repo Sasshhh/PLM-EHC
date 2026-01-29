@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Back Office Mailer";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div class="panel-group" id="emailControl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseEmailControl">
+                    Back Office Emailer
+                </a>
+            </h4>
+        </div>
+        <div id="collapseEmailControl" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <form id="EmailerForm">
+                    <div class="form-horizontal">
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">MailTo: </label>
+                            <div class="col-md-5">
+                                <input type="email" id="MailTo" placeholder="emailaddress@myemail.com" value="" class="form-control" required="required" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Cc:</label>
+                            <div class="col-md-5">
+                                <input type="text" id="Cc" placeholder="emailaddress@myemail1.com;emailaddress@myemail2.com" value="" class="form-control"  />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Bcc:</label>
+                            <div class="col-md-5">
+                                <input type="text" id="Bcc" value="" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Subject:</label>
+                            <div class="col-md-5">
+                                <input type="text" id="Subject" value="" class="form-control" required style = "margin-left:4%!important;" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Body:</label>
+                            <div class="col-md-5">
+                                <textarea id="body" class="form-control" rows="5" required="" style = "margin-left:4%!important;" ></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-5">
+                                <div id="QuerySuccess" style="display: none;">
+                                    <span class="glyphicon glyphicon-ok" style="color: green;"></span> Message successfully sent.
+                                </div>
+                                <div id="QueryFailed" style="display: none;">
+                                    <span class="glyphicon glyphicon-remove" style="color: red;"></span> Message unsuccessful, please try again later.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-5">
+                                <input id="SendEmail" type="button" value="Send" class="btn btn-primary" />
+                               @* <input id="btnClear" type="button" value="Clear" class="btn btn-primary clear" />*@
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#SendEmail").click(function () {
+
+            var mailTo = $("#MailTo").val();
+            var Cc = $("#Cc").val();
+            var subject = $("#Subject").val();
+            var body = $("#body").val();
+            var Bcc = $("#Bcc").val();
+
+            $.ajax({
+                url: "@Url.Action("SendEmail", "Email")",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ 'mailTo': mailTo, 'Cc': Cc, 'Bcc': Bcc, 'subject': subject, 'body': body }),
+                type: "POST",
+                error: function () {
+                    $("#QueryFailed").css("display", "block");
+                    $("#QuerySuccess").css("display", "none");
+                },
+                success: function (data) {
+                    if (data.status == "success") {
+                        $("#QuerySuccess").css("display", "block");
+                        $("#QueryFailed").css("display", "none");
+                    } else {
+                        $("#QueryFailed").css("display", "block");
+                        $("#QuerySuccess").css("display", "none");
+                    }
+                }
+            });
+        });
+
+        $('#btnClear').click(function () {
+            page.reload();
+        });
+
+    });
+
+    $("#Bcc").multiple_emails();
+    $("#MailTo").multiple_emails();
+    $("#Cc").multiple_emails();
+</script>

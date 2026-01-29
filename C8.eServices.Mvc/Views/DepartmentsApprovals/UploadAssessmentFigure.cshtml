@@ -1,0 +1,159 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+
+@{
+    ViewBag.Title = "UploadAssessmentFigure";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.RcsApplicationId, new { htmlAttributes = new { @id = "returnUrl", @style = "display:none;" } })
+
+    <div class="panel-group" id="documentsUpload">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        Documents Upload
+                    </a>
+                </h4>
+            </div>
+
+            <div>
+                <div class="form-group">
+                    @Html.Label("Billing Discrepancies ", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Billing", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+                    @Html.Label("Credit Control Discrepancies ", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("CreditControl", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+                    @Html.Label("Rates Discrepancies", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Rates", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+                    @Html.Label("Sundries Discrepancies", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Sundries", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+                </div>
+                <br />
+             
+
+               
+            </div>
+
+
+            <br />
+            <br />
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <strong>Error!</strong> @ViewBag.Error
+                        </div>
+                    }
+                    <br />
+
+                    <div id="divNoDiscrepancies" style="display:none">
+                        @Html.Partial("_DocumentsPartialBOAssessment", Model)
+
+
+
+                        <div class="form-group" style="margin: 28px;">
+                            @Html.Label("Amount", htmlAttributes: new { @class = "control-label col-md-1" })
+                            <div class="col-md-3">
+                                @Html.Editor("amount", new { htmlAttributes = new { @class = "form-control", @required = "@required" } })
+                                @Html.ValidationMessage("amount", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-3">
+                                <input type="submit" value="Submit" class="button1" />
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+                </div>
+        </div>
+ 
+    </div>
+}
+
+<script>
+    //Masking amount fields
+    $(document).ready(function ($) {
+        $('#amount').mask('#,##0.00', { reverse: true });
+    });
+
+
+    function switchDivsDiscrepancies() {
+        var Billing = document.getElementById("Billing").value;
+        var CreditControl = document.getElementById("CreditControl").value;
+        var Rates = document.getElementById("Rates").value;
+        var Sundries = document.getElementById("Sundries").value;
+
+
+        if (Billing == "No" && CreditControl == "No" && Rates == "No" && Sundries=="No") {
+            jQuery('#divNoDiscrepancies').css("display", "block")
+            
+        }
+       
+
+        else {
+            jQuery('#divNoDiscrepancies').css("display", "none")
+        
+        }
+    }
+</script>

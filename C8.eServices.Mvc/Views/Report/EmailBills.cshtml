@@ -1,0 +1,295 @@
+﻿@model C8.eServices.Mvc.ViewModels.EmailBillViewModel
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Email Bills";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<style>
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+
+<h4>Email Bills</h4>
+<hr />
+
+@if (Request.HttpMethod == "POST")
+{
+    if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success">
+            <strong>@ViewBag.Message</strong>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <strong>@ViewBag.Warning</strong>
+        </div>
+    }
+}
+
+@using (Html.BeginForm("EmailBills", "Report", null, FormMethod.Post, new { enctype = "multipart/form-data", id = "emailBill-form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group" id="instuctions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 id="instructionsTitle" class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                        Instructions
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>
+                        This facility allows Super Administrator / Administrator to send copy account(s) to the customers. To send copy account, all required fields must be
+                        completed/filled, i.e Account Number, Start Date, End Date, and Email To.
+                    </p>
+                    @if (SecurityHelper.HasSuperiorRights(AccessLevelKeys.AccessLevelOne)) //TODO: Change to level Two, to allow administrators to use this function
+                    {
+                        <p style="display:none">
+                            <b>Note:</b> Super Administrator / Administrators can resend COINS copy of account(s) as bulk for past bill dates. To do so, choose COINS as Account Type then click on "Resend Bulk Coins Copy Accounts". You required to provide bill date / range of bill dates. 
+                        </p>
+                    }
+                    <p>
+                        Once billing account(s) has been sent successfully, you should recieve success message.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row" style="padding-right: 28px">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse1">Bill Information</a>
+                    </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse ">
+
+                    <div class="panel-body">
+                        <div class="col-md-10">
+                            <div class="form-horizontal">
+                                <div class="form-group" style="display:none">
+                                    @Html.Label("Account Type", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.RadioButton("radAccountType", "RMS") @Html.Raw("RMS")
+                                        <br />
+                                        @Html.RadioButton("radAccountType", "Coins") @Html.Raw("Coins")
+                                    </div>
+                                </div>
+                                @{
+                                    //Restricted to authorized users with approved permissions
+                                    if (SecurityHelper.HasSuperiorRights(AccessLevelKeys.AccessLevelOne)) //TODO: Change to level Two, to allow administrators to use this function
+                                    {
+                                        <div id="resendBillsGrp" style="display:none;">
+                                            <div class="form-group">
+                                                @Html.Label("Resend Bulk Coins Copy Accounts", new { @class = "control-label col-md-2" })
+                                                <div class="col-md-10">
+                                                    @Html.CheckBox("isResendCopyAccount")
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+
+                                <div class="form-group" id="accGrp">
+                                    @Html.LabelFor(model => model.AccountNumber, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-4">
+                                        @Html.TextBoxFor(m => m.AccountNumber, new { @class = "form-control", id = "accountNumber", @required = true, @pattern = "^[0-9]+$" })
+                                        @Html.ValidationMessageFor(model => model.AccountNumber)
+                                    </div>
+                                </div>
+
+                                <div id="dateRangeGrp" style="display:none;">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.StartDateTime, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextBoxFor(m => m.StartDateTime, new { @class = "form-control", id = "startDateTime", @required = true })
+                                            @Html.ValidationMessageFor(model => model.StartDateTime)
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EndDateTime, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextBoxFor(m => m.EndDateTime, new { @class = "form-control", id = "endDateTime", @required = true })
+                                            @Html.ValidationMessageFor(model => model.EndDateTime)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="emailGrp">
+                                    @Html.LabelFor(model => model.EmailTo, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextBoxFor(m => m.EmailTo, new { @class = "form-control", @required = true, id = "emailTo", @type = "email" })
+                                        @Html.ValidationMessageFor(model => model.EmailTo)
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="ccGrp">
+                                    @Html.LabelFor(model => model.EmailCc, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextBoxFor(m => m.EmailCc, new { @class = "form-control", id = "CCs", @type = "email" })
+                                        @Html.ValidationMessageFor(model => model.EmailCc)
+                                    </div>
+                                </div>
+
+                                <div id="uploadGrp" class="form-group" style="display:none;">
+                                    @Html.Label("Attachment", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        <label class="btn btn-primary btn-file">
+                                            Browse <input id="fileSelector" name="files" type="file" multiple style="display:none;" />
+                                        </label><br /><br />
+                                        <input type="text" class="form-control" id="upload-file-info" readonly />
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="msgGrp">
+                                    @Html.LabelFor(model => model.Message, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextAreaFor(m => m.Message, new { @class = "form-control", id = "msg" })
+                                        @Html.ValidationMessageFor(model => model.Message)
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="submit" value="Send" id="btnSend" class="btn btn-primary"><span class="glyphicon glyphicon-send"></span>&nbsp;Send</button>
+                                        <button type="button" value="Clear" id="btnClear" class="btn btn-primary"><span class="glyphicon glyphicon-remove"></span>&nbsp;Clear</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                                    }
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+
+@section Scripts{
+
+    <script type="text/javascript" src="@Url.Content("~/Scripts/jquery.datetimepicker.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            @*// Displays a triangle to tell users if the panel is collapsable.*@
+            $('#instructionsTitle').on("click", function () {
+                var span = $('#instructionsTitle').find('span');
+                if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                    span.removeClass('glyphicon-triangle-top');
+                    span.addClass('glyphicon-triangle-bottom');
+                } else {
+                    span.removeClass('glyphicon-triangle-bottom');
+                    span.addClass('glyphicon-triangle-top');
+                }
+            });
+
+            $("#radAccountType").prop('required', true);
+
+            $("#emailBill-form").on('submit', function (evt) {
+                if ($("#upload-file-info").val() == "" && $("input:radio[name='radAccountType']:checked").val() == '@BillingAccountTypeKeys.RMS') {
+                    bootbox.alert("Please attach RMS bill");
+                    evt.preventDefault();
+                }
+            });
+
+            $('#startDateTime').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                onShow: function (ct) {
+                    this.setOptions({
+                        maxDate: jQuery('#endDateTime').val() ? jQuery('#endDateTime').val() : false
+                    });
+                }
+            });
+
+            $('#endDateTime').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                onShow: function (ct) {
+                    this.setOptions({
+                        minDate: jQuery('#startDateTime').val() ? jQuery('#startDateTime').val() : false
+                    });
+                }
+            });
+
+            $("input[name=radAccountType]:radio").change(function () {
+                if ($("input:radio[name='radAccountType']:checked").val() == '@BillingAccountTypeKeys.RMS') {
+                    $("#uploadGrp").show();
+                    $("#dateRangeGrp").hide();
+                    $("#resendBillsGrp").hide();
+                    $("#startDateTime").prop('required', false);
+                    $("#endDateTime").prop('required', false);
+                } else {
+                    $("#uploadGrp").hide();
+                    $("#dateRangeGrp").show();
+                    $("#resendBillsGrp").show();
+                    $("#startDateTime").prop('required', true);
+                    $("#endDateTime").prop('required', true);
+                }
+            });
+
+            $("input[name=isResendCopyAccount]:checkbox").change(function () {
+                var isresend = $("input:radio[name='radAccountType']:checked").val();
+                toggleRequired(isresend);
+            });
+
+            function toggleRequired(isResend) {
+                if (isResend) {
+                    $("#ccGrp").hide();
+                    $("#msgGrp").hide();
+                    $("#emailGrp").hide();
+                    $("#accGrp").hide();
+
+                    $("#accountNumber").prop('required', false);
+                    $("#emailTo").prop('required', false);
+
+                } else {
+                    $("#ccGrp").show();
+                    $("#msgGrp").show();
+                    $("#emailGrp").show();
+                    $("#accGrp").show();
+
+                    $("#accountNumber").prop('required', true);
+                    $("#emailTo").prop('required', true);
+                }
+            }
+
+            $('#fileSelector').on('change', function (event) {
+                var numFiles = this.files.length;
+
+                if (numFiles > 1)
+                    $('#upload-file-info').val(numFiles + " files selected");
+                else
+                    $('#upload-file-info').val($(this).val());
+            });
+
+            @*//Reset form input*@
+            $("#btnClear").on('click', function (evt) {
+                $("#accountNumber").val('');
+                $("#startDateTime").val('');
+                $("#endDateTime").val('');
+                $("#emailTo").val('');
+                $("#CCs").val('');
+                $("#msg").val('');
+                $("input:radio").prop("checked", false);
+                $("#files").val('');
+                $("#upload-file-info").val('');
+
+                evt.PreventDefault();
+            });
+        });
+    </script>
+}

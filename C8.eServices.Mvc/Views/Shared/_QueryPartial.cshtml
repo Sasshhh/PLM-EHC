@@ -1,0 +1,110 @@
+﻿<div class="panel-group" id="QueryPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseQuery">
+                    Customer eServices Help - Need help using this site?
+                </a>
+            </h4>
+        </div>
+        <div id="collapseQuery" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <form id="QueryForm">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <span class="control-label col-md-7" style="color:red;">
+                                <strong>*Please note: All queries related to eServices should be sent to : <a target="_blank" href="http://correspondence.durban.gov.za:200/">Correspondence</a></strong>
+                            </span>
+                        </div>
+                        <br/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(window).load(function () {
+        $("#QuerySuccess").css("display", "none");
+        $("#QueryFailed").css("display", "none");
+
+        @*// Bind the drop down for query types.*@
+        $.ajax({
+            url: "@Url.Action("GetQueryTypes", "Query")",
+            dataType: "json",
+            type: "POST",
+            error: function () {
+            },
+            success: function (data) {
+                var optionhtml1 = '<option value="">' + "Please select an option..." + '</option>';
+                $("#QueryType").append(optionhtml1);
+
+                $.each(data, function (i) {
+                    var optionhtml = '<option value="' + data[i].value + '">' + data[i].text + '</option>';
+                    $("#QueryType").append(optionhtml);
+                });
+            }
+        });
+
+        $("#QuerySend").click(function () {
+
+            var $form = $('#QueryForm');
+
+            if (!$form[0].checkValidity()) {
+
+                @*// If the form is invalid, submit it. The form won't actually submit;*@
+                @*// this will just cause the browser to display the native HTML5 error messages.*@
+                $form.find(':submit').click();
+            } else {
+
+                HoldOn.open({
+                    message: 'Sending Query..Please Wait',
+                    textColor: "white",
+                });
+
+                @*// Send data...*@
+                $.ajax({
+                    url: "@Url.Action( "ProcessQuery", "Query" )",
+                    dataType: "json",
+                    data: {
+                        queryTypeId: $("#QueryType").val(), fullName: $("#QueryFullName").val(),
+                        email: $("#QueryEmail").val(), comment: $("#QueryComment").val(),
+                        referenceNumber: $("#QueryReferenceNumber").val(), contactNumber: $("#QueryContactNumber").val(),
+                        captchaResponse: $("#g-recaptcha-response").val()
+                        },
+                    type: "POST",
+                    error: function (ex) {
+                        $("#QueryFailed").css("display", "block");
+                        $("#QuerySuccess").css("display", "none");
+
+                        console.log(ex);
+                    },
+                    success: function (data) {
+                        if (data.status == "success") {
+                            $("#QuerySuccess").css("display", "block");
+                            $("#QueryFailed").css("display", "none");
+                            $("#QueryComment").val("");
+                            $("#QueryReferenceNumber").val("");
+                        } else {
+                            $("#QueryFailed").css("display", "block");
+                            $("#QuerySuccess").css("display", "none");
+
+                           
+                        }
+                        HoldOn.close();
+                    }                 
+                });
+            }
+        });
+    });
+
+    function validateCaptcha(response) {
+        if (response.length == 0)
+            $("#QuerySend").prop('disabled', true);
+        else
+            $("#QuerySend").prop('disabled', false);
+    }
+
+</script>

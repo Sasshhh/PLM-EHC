@@ -1,0 +1,7 @@
+{
+  "package_id": "{0}",
+  "language": "en-US",
+  "user_email": "{1}",
+  "callback_url": "https://web.signinghub.co.za/",
+  "collapse_panels": "true"
+}

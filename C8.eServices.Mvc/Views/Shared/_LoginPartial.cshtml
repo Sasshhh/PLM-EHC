@@ -1,0 +1,53 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer
+@using Microsoft.AspNet.Identity
+
+@{
+    eServicesDbContext _context = new eServicesDbContext();
+    var identityManager = new IdentityManager(_context);
+}
+<link rel="stylesheet" href="~/Content/font-awesome.min.css">
+<ul class="nav navbar-nav navbar-left" style="margin-top:4%">
+    <li class="dropdown">
+        <a data-toggle="dropdown" class="dropdown-toggle" href="#">About<b class="caret"></b></a>
+        <ul role="menu" class="dropdown-menu" style="width: auto">
+            <li>@Html.ActionLink("Introduction", "Introduction", "Home")</li>
+            <li>@Html.ActionLink("Privacy Policy", "InfoandPrivacy", "Home")</li>
+            <li>@Html.ActionLink("Rights and Usage", "RightsandUsage", "Home")</li>
+            <li>@Html.ActionLink("Unavailability Policy", "Unavailability", "Home")</li>
+            <li>@Html.ActionLink("Security", "UsernamePassword", "Home")</li>
+
+        </ul>
+    </li>
+    <li>@Html.ActionLink("FAQ", "FAQ", "Home", routeValues: null, htmlAttributes: null)</li>
+</ul>
+
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <ul class="nav navbar-nav navbar-right" style="margin-top:21%">
+            @{Html.RenderAction("RequestNotifications", "Requests");}
+            <li>
+                <a class="navbar-brand" title="Requests To Access Municipal Account" href="@Url.Action("AccountRequests", "Profile")">
+                    <i class="far fa-bell fa-1x"></i> <span class="badge alert-warning" id="fullbatchCount">@Session["ReqCount"]</span>
+                </a>
+            </li>
+            <li>
+                @Html.ActionLink("Logged in as " + identityManager.CurrentUser(User).UserName, "Manage", "Account", routeValues: null, htmlAttributes: new { title = "Manage" })
+            </li>
+            <li><a id="logout" href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+        </ul>
+    }
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right" style="margin-top:4%">
+        <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>
+        <li>@Html.ActionLink("Log In", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
+    </ul>
+}
+
+
+

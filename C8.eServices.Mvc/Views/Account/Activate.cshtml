@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "Activate";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div>
+    @if (TempData["Success"] != null)
+    {
+        if (TempData["Success"].Equals(true))
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Success!</strong> @ViewBag.CompletedAction
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Error - </strong> @ViewBag.CompletedAction
+            </div>
+        }
+    }
+</div>
+
+<h4>Resend Activation Email</h4>
+<hr />
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    <ul>
+                        <li>
+                            Enter the email address you used to register with in the 'Email' text box.
+                        </li>
+                        <li>
+                            Complete the reCaptcha by clicking the 'I am not a robot' check box. If you are presented with a puzzle, follow the intructions to complete it.  If you are unsure of how to use the reCaptcha go to this link <a href="https://support.google.com/recaptcha/?hl=en#6081912_" style="font-size: 14px;">https://support.google.com/recaptcha/?hl=en#6081912_</a> and read the instructions under the heading 'Using reCAPTCHA V2'.
+                        </li>
+                        <li>
+                            After successfully completing the reCapture click the 'Resend' button.
+                        </li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("Activate", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    @*<h4>Enter your email.</h4>*@
+    @*<div class="form-horizontal">*@
+    
+
+    <div class="form-group">
+        @Html.Label("Email", new { @class = "control-label col-md-2" })
+        <div class="col-md-3">
+            @Html.TextBox("Email", null, new { @class = "form-control", @required = true })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <div class="g-recaptcha" data-sitekey="6Ld0PAgUAAAAAGB3JFTS8PFWgo1AqLOrMyroBJP3" data-callback="validateCaptcha"></div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input id="btnSubmit" type="submit" disabled class="btn btn-primary" value="Resend" />
+        </div>
+    </div>
+}
+
+<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+
+<script type="text/javascript">
+    function validateCaptcha(response) {
+        if (response.length == 0)
+            $("#btnSubmit").prop('disabled', true);
+        else
+            $("#btnSubmit").prop('disabled', false);
+    }
+</script>
+
+
+
+

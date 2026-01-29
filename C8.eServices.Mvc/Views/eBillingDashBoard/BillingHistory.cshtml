@@ -1,0 +1,347 @@
+﻿@{
+    ViewBag.Title = "Billing History";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<style>
+    td.details-control {
+        background: url('../Content/DataTables/images/details_open.png') no-repeat center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('../Content/DataTables/images/details_close.png') no-repeat center center;
+    }
+
+    .sorting_disabled {
+        background-image: none !important;
+    }
+
+    
+
+    .wrap {
+        white-space: pre-wrap; /* css-3 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+    }
+
+    #headings {
+        text-align: left;
+        padding-left: 10px;
+        font-size: 10px;
+    }
+</style>
+
+<h4>Billing History</h4>
+<hr/>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Search</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <form class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Account Number </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top:0px;">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtAccountNumber" />
+                                </div>
+                                <div class="col-md-8" style="padding-top:0px;">
+                                    <button type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-search"></span>Search</button>
+                                    <button type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                    <span id="btnPdf"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" id="exportButton">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#billsCollapse">
+                    Customer Billing History
+                </a>
+            </h4>
+        </div>
+        <div id="billsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table id="myTable" class="table  table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th id="headings" style="background-image:none !important" class="sorting_asc_disabled"></th>
+                            <th id="headings">Bill Date</th>
+                            <th id="headings">Account Number</th>
+                            <th id="headings">Details</th>
+                            <th id="headings">Balance Brought Forward</th>
+                            <th id="headings">Payments</th>
+                            <th id="headings">Electricity</th>
+                            <th id="headings">Water</th>
+                            <th id="headings">Sewage</th>
+                            <th id="headings">Rates</th>
+                            <th id="headings">Vat</th>
+                            <th id="headings">Other</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />
+<link rel="stylesheet" type="text/css" href="~/content/DataTables/css/buttons.bootstrap.min.css"/>
+
+@* Load datatable js *@
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script src="@Url.Content("~/scripts/ellipsis.js")"></script>
+    <script src="@Url.Content("~/scripts/moment.js")"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/buttons.html5.min.js")"></script>
+
+
+    <script>
+
+
+    $('#txtBox1').datetimepicker({
+        format: 'Y/m/d',
+        timepicker: false,
+        onSelectDate: function (dt, i) {
+            $('#txtBox2').datetimepicker({
+                format: 'Y/m/d',
+                minDate: dt,
+                timepicker: false
+            });
+        }
+    });
+
+    function convertToDate(data) {
+        @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+        var dtStart = new Date(parseInt(data.substr(6)));
+        @*// Format using moment.js.*@
+        var dtStartWrapper = moment(dtStart);
+        return dtStartWrapper.format("YYYY/MM/DD");
+    }
+
+    function convertToDate2(data) {
+        @*// The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.*@
+        var dtStart = new Date(parseInt(data.substr(6)));
+        @*// Format using moment.js.*@
+        var dtStartWrapper = moment(dtStart);
+        return dtStartWrapper.format("YYYY-MM-DD");
+    }
+
+
+    var oTable = $('#myTable').DataTable({
+        "processing": true, @*// for show progress bar*@
+        "serverSide": false, @*// for process server side*@
+        "dom": '<"top"i>rt<"bottom"lp><"clear">',
+        "scrollY": "500px",
+        "buttons": [
+            { "extend": 'pdf', "text": 'Export', "className": 'btn btn-default btn-xs' }
+        ],
+        "info": false,
+        "sortable": false,
+        "lengthChange": false,
+        "ajax": {
+            "url": "@Url.Action("loadBillingHistory", "eBillingDashBoard")",
+            "type": "POST",
+            "datatype": "json"
+        },
+
+        "columns": [
+            {
+                "data": "Id",
+                "defaultContent": "",
+                "className": "details-control",
+                "orderable": false,
+                "width": "5px"
+            },
+            {
+                "data": "BillDate",
+                "name": "Bill Date",
+                "orderable": false,
+                "render": function (data) {
+                    return convertToDate(data);
+                },
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "AccountNumber",
+                "name": "Account Number",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": null,
+                "defaultContent": "",
+                "name": "Details",
+                "className": "cells",
+                "orderable": false
+            },
+            {
+                "data": "BalanceBroughtForward",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Payments",
+                "orderable": false,
+                "width": "70px",
+                "className": "cells"
+            },
+            {
+                "data": "Electricity",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Water",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Sewage",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Rates",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Vat",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            },
+            {
+                "data": "Other",
+                "orderable": false,
+                "className": "cells",
+                "width": "70px"
+            }
+        ],
+        "initComplete": function () {
+            oTable.buttons().container()
+                .appendTo($('#btnPdf'));
+        }
+
+    });
+
+
+    $('#btnSearch').click(function () {
+        var id = $('#txtAccountNumber').val();
+        oTable.ajax.url("@Url.Action("loadBillingHistory", "eBillingDashBoard")/" + id).load();
+
+    });
+
+    $('#btnClear').click(function () {
+        $('#txtAccountNumber').val('');
+        submitParams();
+    });
+
+    $('#myTable').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = oTable.row(tr);
+        if (row.child.isShown()) {
+            @*// This row is already open - close it*@
+            row.child.hide();
+            tr.removeClass('shown');
+        } else {
+            console.log(oTable.row(tr).data());
+            @*// Open this row*@
+            format(row.child, oTable.row(tr).data());
+            tr.addClass('shown');
+        }
+    });
+
+
+    function format(callback, data) {
+        var date = convertToDate2(data.BillDate);
+        var accountNumber = data.AccountNumber;
+        console.log(date);
+        console.log(accountNumber);
+        $.ajax({
+            url: "@Url.Action("loadBillingHistoryDetail", "eBillingDashBoard")/" + date + '?accountno=' + accountNumber,
+            dataType: "json",
+            complete: function (response) {
+                var data = JSON.parse(response.responseText);
+                var thead = '', tbody = '';
+                for (var key in data[0]) {
+                    @*//thead += '<th>' + key + '</th>';*@
+                }
+
+                $.each(data, function (i, d) {
+                    for (var x = 0; x < d.length; x++) {
+                        tbody += '<tr >'
+                            + '<td style="width:30px; "></td>'
+                            + '<td style="width:100px; "></td>'
+                            + '<td style="width:100px;"></td>'
+                            + '<td style="width:260px; max-width:260px;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;">' + d[x].Description + '</td>'
+                            + '<td style="width:90px ;">' + d[x].BalanceBroughtForward + '</td>'
+                            + '<td  style="width:90px; ">' + d[x].Payments + '</td>'
+                            + '<td style="width:100px; ">' + d[x].Electricity + '</td>'
+                            + '<td style="width:100px; ">' + d[x].Water + '</td>'
+                            + '<td style="width:100px; ">' + d[x].Sewage + '</td>'
+                            + '<td style="width:90px; ">' + d[x].Rates + '</td>'
+                            + '<td style="width:90px; ">' + d[x].Vat + '</td>'
+                            + '<td style="width:90px; ">' + d[x].Other + '</td>' +
+                            '</tr>';
+
+                    }
+                });
+                callback($('<table style="table-layout: fixed;">' + thead + tbody + '</table>')).show();
+            },
+            error: function () {
+                $('#output').html('There was an error!');
+            }
+        });
+    }
+</script>
+}

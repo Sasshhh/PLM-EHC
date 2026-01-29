@@ -1,0 +1,9 @@
+[
+  {
+    "user_email": "{0}",
+    "user_name": "{1}",
+    "role": "{2}",
+    "email_notification": false,
+    "signing_order": 1
+  }
+]

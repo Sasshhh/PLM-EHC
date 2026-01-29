@@ -1,0 +1,130 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RatesRebate>
+@using C8.eServices.Mvc.Keys;
+
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>My Rates Rebate Cases</h4>
+<hr />
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Expand/Collapse panels by clicking on their titles. 
+                    The functions of this page are as follows :
+                    <ol>
+                        <li><strong>Clerk Rates Rebate Applications </strong>  - Contains all rates rebate applications assigned to the clerk.
+                                     The action column contains a button based on the status of the rates rebate application: <br/>
+                              <strong>1. Processed/Acknowledged rates rebate application - Start</strong>  <br/>
+                              <strong>2. Query on rate rebate application - Continue</strong> <br/>
+                             Once the button is clicked you will be redirected to the process rates rebate application page.
+                        </li>
+                    </ol>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#applicationsCollapse">
+                    Clerk Rates Rebate Cases
+                </a>
+            </h4>
+        </div>
+        <div id="applicationsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table class="table table-striped" id="applicationsTable"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadClerkRateRebateApplications", "RatesRebateBackOffice")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="10"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="FirstName">First Name</th>
+                            <th data-field="LastName">Last Name</th>
+                            <th data-field="EmailAddress">Email Address</th>
+                            <th data-field="ApplicationNumber">Application Number</th>
+                            <th data-field="ApplicationType">Application Type</th>
+                            <th data-field="IsConflict">Is Conflict</th>
+                            <th data-field="Status">Status</th>
+                            <th data-formatter="clerkActions">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var $table = $('#applicationsTable'),
+        $button = $('#btnRefresh'),
+        $btnSearch = $('#btnSearch');
+
+        $button.click(function () {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadClerkRateRebateApplications", "RatesRebateBackOffice")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        });
+
+        $btnSearch.click(function () {
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadClerkRateRebateApplications", "RatesRebateBackOffice")',
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        });
+
+        window.clerkActions = function (value, row, index) {
+            if (row.CaseText != "" && (row.StatusKey != '@StatusKeys.RatesRebateApplicationApproved' && row.StatusKey != '@StatusKeys.RatesRebateApplicationDeclined')) {
+                return "<input type='button' value=" + row.CaseText + " onclick='RedirectCase(\"" + row.RatesRebateId + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+                @*return "<input type='button' value="+row.CaseText+" onclick='location.href='@Url.Action("ProcessRatesRebateApplication", "RatesRebateBackOffice")/'" + row.RatesRebateId + "style = 'font-size:12px;' class = 'btn btn-primary'>";*@
+            }
+        }
+
+        window.RedirectCase = function (Id) {
+            @*//location.href = '@Url.Action("ProcessRatesRebateApplication", "RatesRebateBackOffice")/' + Id;*@
+            location.href = '@Url.Action("ProcessRatesRebateApplication", "RatesRebateBackOffice")/?q=' + Id;
+        }
+    });
+</script>
+
+
+

@@ -1,0 +1,111 @@
+﻿@model C8.eServices.Mvc.ViewModels.LoginViewModel
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Log in";
+}
+@*@Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")*@
+@if (Request.HttpMethod == "POST")
+{
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Error!</strong> @ViewBag.Error
+    </div>
+}
+
+<h4>RCS Log In</h4>
+<hr />
+<br />
+<div id="warningGroup" style="display: block;">
+
+    <div class="alert alert-warning">
+        <h5 style="color: black;">Please Note: The SMS Activation Code is not a Password</h5>
+        <h5 style="color: black;">You need to login with your username and password that you created during registration.</h5>
+        <h5 style="color: black;">Then to activate your account using the SMS Activation Code sent to your phone, Please choose that option after login.</h5>
+    </div>
+</div>
+<br />
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Welcome to the RCS login page.<br />
+                    Please complete the login form to access your RCS profile:
+                    <ul>
+                        <li>
+                            Username- enter your username that you registered with.
+                        </li>
+                        <li>
+                            Password - enter your password that you registered with.
+                        </li>
+                    </ul>
+                </p>
+                <p>
+                    If you did not register, please click on the "Register" link.
+                </p>
+                <p>
+                    If you have forgotten your password, please click the "Forgot Password" link below.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <section id="loginForm">
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @*<h4>Use a local account to log in.</h4>*@
+
+                @*@Html.ValidationSummary(true)*@
+                <div class="form-group">
+                    @Html.Label("Username", new { @class = "col-md-2 control-label" })
+                    <div class="col-md-4">
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @required = true })
+                        @*@Html.ValidationMessageFor(m => m.UserName)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+                    <div class="col-md-4">
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", @required = true, @autocomplete = "new-password" })
+                        @*@Html.ValidationMessageFor(m => m.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox">
+                            @Html.CheckBoxFor(m => m.RememberMe)
+                            @Html.LabelFor(m => m.RememberMe)
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Log in" class="button1" />
+                    </div>
+                </div>
+
+
+                <p>
+                    @Html.ActionLink("Register", "Register") if you don't have a local account.
+                </p>
+                <p>
+                    @Html.ActionLink("Forgot Username & Password?", "ForgotPassword")
+                </p>
+            }
+        </section>
+    </div>
+</div>

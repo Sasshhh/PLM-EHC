@@ -1,0 +1,203 @@
+﻿@model C8.eServices.Mvc.Models.Property
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#isVerified").change(function () {
+            var isChecked = $(this).is(':checked');
+            if (isChecked) {
+                $("#PhysicalAddress1").attr("readonly", false);
+                $("#PhysicalAddress2").attr("readonly", false);
+                $("#PhysicalAddress3").attr("readonly", false);
+                $("#PhysicalAddress4").attr("readonly", false);
+                $("#PhysicalAddress5").attr("readonly", false);
+                $("#PhysicalAddressCode").attr("readonly", false);
+                $("#PropertyDescription").attr("readonly", false);
+                $("#ddlStatus").attr("disabled", false);
+            }
+            else {
+                $("#RatesNumber").attr("readonly", false);
+                $("#PhysicalAddress1").attr("readonly", true);
+                $("#PhysicalAddress2").attr("readonly", true);
+                $("#PhysicalAddress3").attr("readonly", true);
+                $("#PhysicalAddress4").attr("readonly", true);
+                $("#PhysicalAddress5").attr("readonly", true);
+                $("#PhysicalAddressCode").attr("readonly", true);
+                $("#PropertyDescription").attr("readonly", true);
+            }
+        });
+
+        $("#GetProperty").click(function () {
+            var ratesNumber = $("#RatesNumber").val();
+            var customerId = parseInt(@ViewBag.CustomerId);
+            var ratesRebateId = parseInt(@ViewBag.RatesRebateId);
+
+            $.ajax({
+                type: 'GET',
+                url: '/Property/GetProperty',
+                data: { ratesNumber: ratesNumber, customerId: customerId, ratesRebateId: ratesRebateId },
+                cache: false,
+                success: function (result) {
+                    if (result.isExists) {
+                        alert("Property with same rate number exists.");
+
+                        $("#PhysicalAddress1").val('');
+                        $("#PhysicalAddress2").val('');
+                        $("#PhysicalAddress3").val('');
+                        $("#PhysicalAddress4").val('');
+                        $("#PhysicalAddress5").val('');
+                        $("#PropertyDescription").val('');
+                        $("#ddlStatus").val('');
+
+                        $("#isVerified").attr("disabled", true);
+                        $("#RatesNumber").attr("readonly", false);
+                    } else {
+                        $("#PhysicalAddress1").val(result.PhysicalAddress1);
+                        $("#PhysicalAddress2").val(result.PhysicalAddress2);
+                        $("#PhysicalAddress3").val(result.PhysicalAddress3);
+                        $("#PhysicalAddress4").val(result.PhysicalAddress4);
+                        $("#PhysicalAddress5").val(result.PhysicalAddress5);
+                        $("#PhysicalAddressCode").val(result.PhysicalAddressCode);
+                        $("#PropertyDescription").val(result.PropertyDescription);
+                        $("#ddlStatus").val(result.StatusId);
+
+                        $("#isVerified").attr("disabled", false);
+                        $("#RatesNumber").attr("readonly", true);
+                    } 
+                },
+                error: function (result) {
+                    alert("Rates number not found, please correct your input.");
+                }
+
+            });
+        });
+    });
+
+</script>
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+    var ratesRebateId = ViewBag.RatesRebateId;
+}
+
+<h2>Home Owner's Rates Rebate Application for Residential Property</h2>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+
+        @{
+    if (Request.HttpMethod == "POST")
+    {
+        if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert">×</a>
+                <strong>@TempData["Error"].ToString()</strong>
+            </div>
+        }
+    }
+
+        }
+
+        <p>
+            Please click here @Html.CheckBox("isVerified", new { id = "isVerified", @disabled = true }) to correct or fill in missing information.
+        </p>
+        <br />
+        <div class="form-group">
+            @Html.LabelFor(model => model.RatesNumber, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.RatesNumber, new { @class = "form-control", id = "RatesNumber" })
+                @Html.ValidationMessageFor(model => model.RatesNumber)
+
+            </div>
+            <div>
+                <input id="GetProperty" type="button" value="Get Property" class="btn btn-primary" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddress1, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.PhysicalAddress1, new { @class = "form-control", id = "PhysicalAddress1", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddress1)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddress2, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.PhysicalAddress2, new { @class = "form-control", id = "PhysicalAddress2", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddress2)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddress3, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.PhysicalAddress3, new { @class = "form-control", id = "PhysicalAddress3", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddress3)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddress4, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.PhysicalAddress4, new { @class = "form-control", id = "PhysicalAddress4", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddress4)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddress5, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.PhysicalAddress5, new { @class = "form-control", id = "PhysicalAddress5", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddress5)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhysicalAddressCode, new { @class = "control-label col-md-2" })
+            <div class="col-md-1">
+                @Html.TextBoxFor(model => model.PhysicalAddressCode, new { @class = "form-control", id = "PhysicalAddressCode", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PhysicalAddressCode)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PropertyDescription, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextAreaFor(model => model.PropertyDescription, new { @class = "form-control", id = "PropertyDescription", @readonly = true })
+                @Html.ValidationMessageFor(model => model.PropertyDescription)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StatusId, "Status", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.DropDownListFor(model => model.StatusId, (SelectList)ViewBag.StatusId, "---Select Status---", new { @class = "form-control", id = "ddlStatus", @disabled = true })
+                @Html.HiddenFor(model => model.StatusId, null)
+                @Html.ValidationMessageFor(model => model.StatusId)
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                @Html.ActionLink("Back", "Index", "Property", new { customerId, ratesRebateId }, new { @class = "btn btn-primary" })
+            </div>
+        </div>
+    </div>
+}
+
+@*<div>
+    @Html.ActionLink("Back to List Of Properties", "Index", new { customerId, ratesRebateId })
+</div>*@

@@ -1,0 +1,342 @@
+﻿@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.SupportViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<h4>Lodged Queries, Complaints and Compliments</h4>
+<hr />
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>Previous Queries, Complaints and Compliments</p>
+                <p>1.	In the Tab <strong>“Previous Queries/ Complaints/ Compliments” </strong> all your previously logged queries will be displayed here.</p>
+                <p>2.	Use the <strong>“Search”</strong> bar to search between your different queries.</p>
+                @*<p>3.	Under <strong>“Linked Account”</strong>, you may edit or remove a bank account.</p>*@
+                <br />
+                <p>Report an issue</p>
+                <p>In the Tab <strong>"Log New Query, Complaint or Compliment"</strong></p>
+                <p>1.	Select the checkbox if you do not have a Municipal Account linked to your profile</p>
+                <p>2.	If you do have a Municipal Account linked to your profile select the Municipal Account you want to query on.</p>
+                <p>3.	Select the Query Type.</p>
+                <p>4.	Enter the Description for your query.</p>
+                <p>5.	Click <strong>“Submit”</strong> when all fields have been filled in.</p>
+                <p>6.	Click <strong>“Reset”</strong> to clear all fields.</p>
+                <br />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="queryPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount1">
+                    <span>Previous Queries, Complaints and Compliments</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNewLinkedAccount1" class="panel-collapse collapse in" style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="queryTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                <thead>
+                    <tr>
+                        <th>
+                            Municipal Account No
+                        </th>
+                        <th>
+                            Reference No
+                        </th>
+                        <th>
+                            Query Type
+                        </th>
+                        <th>
+                            Comment
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Created On
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("Index", "Support", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Query.Id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @*if (Request.HttpMethod == "POST")
+    {
+        <div class="alert alert-danger">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>Error!</strong> @ViewBag.Error
+        </div>
+    }*@
+    <div class="panel-group" id="newLinkedAccount">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewLinkedAccount">
+                        <span>Log New Query, Complaint or Compliment</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewLinkedAccount" class="panel-collapse collapse in">
+                @if (TempData["Success"] != null)
+                {
+                    if (TempData["Success"].Equals(true))
+                    {
+                        <div class="alert alert-success">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <strong>Success!</strong> @ViewBag.QueryMessage
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <strong>Error! </strong> @ViewBag.QueryMessage
+                        </div>
+                    }
+                }
+                <div class="panel-body">
+                    <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                        @ViewBag.QueryMessage
+                    </div>
+                    <div class="form-horizontal">
+                        <div class="form-group" id="boxDiv">
+                            @Html.Label("I do not have an account", htmlAttributes: new { @class = "control-label col-md-3" })
+                            <div class="col-md-5">
+                                <input id="box" onclick="IsMunicipalAccHolder()" type="checkbox" checked="" style="display: inline-block;width: 30px;height: 19px;margin-top: 1%;">
+                            </div>
+                        </div>
+                        <div class="form-group" id="AccDiv">
+                            @Html.Label("Municipal Account No", new { @class = "control-label col-md-3" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.Query.AccountId, (SelectList)ViewBag.Accounts, "Select type ...", htmlAttributes: new { @class = "form-control", id = "AccountDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.Query.AccountId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label("Query Type", new { @class = "control-label col-md-3" })
+                            <div class="col-md-5">
+                                @Html.DropDownListFor(model => model.Query.QueryTypeId, (SelectList)ViewBag.QueryTypes, "Select type ...", htmlAttributes: new { @class = "form-control", id = "QueryTypeDdl", @required = true, @onchange = "DeactivateAccount();" })
+                                @Html.ValidationMessageFor(model => model.Query.QueryTypeId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Query.Description, htmlAttributes: new { @class = "control-label col-md-3" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.Query.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Query.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="submitBtn" type="submit" value="Submit" class="btn btn-primary" />
+                                <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        $('#box').prop('checked', false);
+        //enable: $("#mySelect option['value=test']").removeAttr("disabled");
+
+        //disable: $("#mySelect option['value=test']").attr("disabled", "disabled");
+        function IsMunicipalAccHolder() {
+            var cbox = $('#box');
+            if (cbox.is(':checked')) {
+                //debugger;
+                $('#AccDiv').hide();
+                $("#Query_AccountId").val(1);
+                //$("#AccountDdl").val(1);
+                $("#AccountDdl").removeAttr('required');
+                $("#QueryTypeDdl option[value='2']").attr("disabled", "disabled");
+            }
+            else {
+                $('#AccDiv').show();
+                $("#QueryTypeDdl option[value='2']").removeAttr("disabled");
+                $("#QueryTypeDdl").attr("required","required");
+
+          }
+        }
+        //$('#BankDdl').on('change', function () {
+        //    var savedIndex = $('#BankDdl').prop('selectedIndex');
+        //    //  $('#BankBranchCode').prop('selectedIndex', savedIndex);
+        //    $('#BankBranchCodedl').prop('selectedIndex', savedIndex);
+        //    $('#BankBranchCode').val($('#BankBranchCodedl').val());
+
+        //    //$('#hiddenRadioValue51').val(this.value);
+        //});	
+
+        function loadQueries() {
+
+            $('#queryTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadQueries", "Support", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "Account.Description", "autoWidth": true },
+                    { "data": "CaseNumber", "autoWidth": true },
+                    { "data": "QueryType.Name", "autoWidth": true },
+                    { "data": "Description", "autoWidth": true },
+                    { "data": "Status.Description", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No Support Queries available.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+
+            resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function getDebitOrder(data) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("LoadOrder", "DebitOrder")?q=" + data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response != null) {
+                        $("#Query_Id").val(response.data.Id);
+                        $("#AccountDdl").val(response.data.AccountId);
+                        $("#QueryTypeDdl").val(response.data.QueryTypeId);
+                        $("#Query_Description").val(response.data.Description);
+                    } else {
+                        alert("Unfortunately there is no such query in the system.");
+                    }
+                },
+                failure: function (response) {
+                    alert('f: ' + response.responseText);
+                },
+                error: function (response) {
+                    alert('e: ' + response.responseText);
+                }
+            });
+        }
+
+        function deleteItem(data) {
+            if (confirm("Are you sure?")) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("DeleteOrder", "DebitOrder")?q=" + data,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+            }
+
+            loadOrders();
+            return false;
+        }
+
+        function resetControls() {
+            $("#Query_Id").val("");
+            $("#AccountDdl option:eq(0)").prop("selected", true);
+            $("#QueryTypeDdl option:eq(0)").prop("selected", true);
+            $("#Query_Description").val("");
+            $('#box').prop('checked', false);
+        }
+
+        $(function () {
+            loadQueries();
+
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        });
+
+
+        function DeactivateAccount() {
+            var option = document.getElementById("QueryTypeDdl").value;
+            if (option == '9') {
+                $('#AccDiv').hide();
+                $('#box').prop('checked', true);
+               // $('#boxDiv').hide();
+
+
+            }
+            else if (option != '9') {
+                $('#AccDiv').show();
+                $('#boxDiv').show();
+
+                //$('#box').prop('checked', false);
+
+
+            }
+            var cbox = $('#box');
+            if (cbox.is(':checked')) {
+                //debugger;
+                $('#AccDiv').hide();
+                $("#Query_AccountId").val(1);
+                //$("#AccountDdl").val(1);
+                $("#AccountDdl").removeAttr('required');
+                $("#QueryTypeDdl option[value='2']").attr("disabled", "disabled");
+            }
+            else {
+                $('#AccDiv').show();
+                $("#QueryTypeDdl option[value='2']").removeAttr("disabled");
+                $("#QueryTypeDdl").attr("required", "required");
+
+            }
+        }
+    </script>
+
+}

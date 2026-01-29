@@ -1,0 +1,362 @@
+﻿@using C8.eServices.Mvc.Keys
+@model IEnumerable<C8.eServices.Mvc.Models.IncentivePolicyProperty>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div class="page-header">
+    <h3 align="center">
+        Economic Development Incentive Policy Application <br />Financial Incentives
+    </h3>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Contact Us
+                </a>
+            </h4>
+        </div>
+        <div class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    For any queries or information regarding your Incentive Policy application, please contact Dr Nuthan Maharaj on 0313114252 or send an email to <a href="mailto:Nuthan.Maharaj@durban.gov.za">Nuthan.Maharaj@durban.gov.za</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="navigation">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                    Navigation
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNavigation" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            <p>Please read this @Html.ActionLink("document", "ReturnIncentivePolicyTsAndCs", "AppSetting", null, new { target = "_blank" }) before applying for the incentive policy</p>
+                            @Html.EncodedActionLink("Apply", "Create", "IncentivePolicy", new {incentivePolicyId = 0, customerId = 0}, new {@class = "btn btn-primary"})
+                            &nbsp;&nbsp;(Create a new application)
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">Incentive Policy Applications</div>
+    <div class="panel-body">
+        <hr />
+        <div class="fixed-table-toolbar">
+            <div class="pull-left">
+                <input type="text" id="startDate" class="form-control" />
+            </div>
+            <div class="pull-left">
+                <input type="text" id="endDate" class="form-control" />
+            </div>
+            <div class="pull-left">
+                &nbsp;
+                <div class="col-lg-11">
+                    @Html.DropDownList("ApplicationStatuses", null, "Select Status", new { id = "ddlStatusId", @class = "form-control", @style = "width: 160px;" })
+                </div>
+            </div>
+            <div class="pull-left">
+                &nbsp;
+                <button id="btnFilter" class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+        <div id="toolbar1">
+            &nbsp;
+            <button id="btnSearch" class="btn btn-primary">Search</button>
+            <button id="btnRefresh" class="btn btn-primary">Reset</button>
+        </div>
+        <table class="table table-striped" id="applicationsTable"
+               data-toggle="table"
+               data-pagination="true"
+               data-toolbar="#toolbar1"
+               data-url="@Url.Action("LoadApplications", "IncentivePolicy")"
+               data-query-params-type="Else"
+               data-side-pagination="server"
+               data-page-list="[10, 100, 250]"
+               data-height="500"
+               data-search="true">
+            <thead>
+                <tr>
+                    <th data-field="ApplicationNumber" data-formatter="editApplication">Application Number</th>
+                    <th data-field="IncentiveCategory">Incentive Category</th>
+                    <th data-field="Applicant">Applicant</th>
+                    <th data-field="RatesNumber">Rates Number</th>
+                    <th data-field="PropertyAddress">Property Address</th>
+                    <th data-field="Status">Status</th>
+                    <th data-field="ApplicationDate">Submission Date</th>
+                    <th data-formatter="Action">Action</th>
+                </tr>
+            </thead>
+        </table>
+        @*<table class="table table-striped" id="table"
+                   data-toggle="table"
+                   data-height="500"
+                   data-search="true"
+                   data-pagination="true"
+                   data-page-list="[10,25, 50, 100, ALL]">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.IncentivePolicy.ApplicationNumber)</th>
+                        <th>Incentive Category</th>
+                        <th>Applicant</th>
+                        <th>Rates Number</th>
+                        <th>Property Address</th>
+                        <th>Status</th>
+                        <th>Application Date</th>
+                        <th>Action Application</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                {
+                        <tr>
+                            <td>
+                                @if (item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationPending || item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationInQuery)
+                                {
+                                    @Html.EncodedActionLink(item.IncentivePolicy.ApplicationNumber, "Create", "IncentivePolicy", new { incentivePolicyId = item.IncentivePolicyId, customerId = item.IncentivePolicy.CustomerId }, null)
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.IncentivePolicy.ApplicationNumber)
+                                }
+
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.CategoryType.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.Customer.FullName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Property.RatesNumber)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Property.PropertyFullAddress)</td>
+                            <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.Status.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.IncentivePolicy.CreatedDateTime)</td>
+                            @if (item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationSubmitted || item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationApproved
+                     || item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationReSubmitted)
+                            {
+                                <td style="text-align: center">@Html.EncodedActionLink("View in PDF", "AsPdf", "BackOfficeIncentivePolicy", new { referenceId = item.IncentivePolicy.Id }, new { @class = "btn btn-sm btn-primary", title = "Print Application" }) </td>
+                            }
+                            else if (item.IncentivePolicy.Status.Key == StatusKeys.IncentivePolicyApplicationInQuery)
+                            {
+                                <td>
+                                    <input type="button" value="Re-Submit" class="btn btn-sm btn-primary" onclick="signDeclaration('@item.IncentivePolicy.Data');" /> |
+                                    @Html.EncodedActionLink("View in PDF", "AsPdf", "BackOfficeIncentivePolicy", new { referenceId = item.IncentivePolicy.Id }, new { @class = "btn btn-sm btn-primary", title = "Print Application" })
+                                </td>
+                            }
+                            else
+                            {
+                                <td style="display: inline">
+                                    <input type="button" value="Submit" class="btn btn-sm btn-primary" onclick="signDeclaration('@item.IncentivePolicy.Data');" /> |
+                                    @Html.EncodedActionLink("View in PDF", "AsPdf", "BackOfficeIncentivePolicy", new { referenceId = item.IncentivePolicy.Id }, new { @class = "btn btn-sm btn-primary", title = "Print Application" })
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>*@
+    </div>
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog alert-success" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>*@
+                <h4 class="modal-title">Success</h4>
+            </div>
+            <div class="modal-body" id="successMsg">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript" src="@Url.Content("~/Scripts/jquery.datetimepicker.js")"></script>
+    <script type="text/javascript">
+
+        var $table = $('#applicationsTable'),
+            $button = $('#btnRefresh'),
+            $buttonSearch = $("#btnSearch"),
+            $btnFilter = $('#btnFilter');
+
+        var today = new Date();
+        var day = ("0" + today.getDate()).slice(-2);
+        var month = ("0" + (today.getMonth() + 1)).slice(-2);
+        var year = today.getFullYear();
+
+        $(document).ready(function () {
+            var success = '@TempData["Success"]';
+            if (success != '' && success != null) {
+                $('#successMsg').html(success);
+                $('#successModal').modal('show');
+            }
+        });
+
+        $(function () {
+
+            $button.click(function () {
+                resetSearch();
+            });
+
+            $buttonSearch.click(function () {
+                customSearch();
+            });
+
+            $btnFilter.click(function () {
+                customSearch();
+            });
+
+            $('#startDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: '2016/09/07',
+                onShow: function (ct) {
+                    this.setOptions({
+                        maxDate: jQuery('#endDate').val() ? jQuery('#endDate').val() : false
+                    });
+                }
+            });
+
+            $('#endDate').datetimepicker({
+                format: 'Y/m/d',
+                timepicker: false,
+                scrollInput: false,
+                value: year + "/" + month + "/" + day,
+                onShow: function (ct) {
+                    this.setOptions({
+                        minDate: jQuery('#startDate').val() ? jQuery('#startDate').val() : false
+                    });
+                }
+            });
+
+        });
+
+        window.Action = function (value, row, index) {
+            var myUrl = '@Url.Action("AsPdf", "BackOfficeIncentivePolicy")/' + '?q=' + row.ReferenceId;
+            return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+            @*if (row.ApplicationStatus === '@StatusKeys.IncentivePolicyApplicationPending') {
+                return '<button class=\"btn btn-primary btn-sm\" onclick=\"signDeclaration(\'' + row.Data + '\');\">Submit</button>|' +
+                    '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+            } else if (row.ApplicationStatus === '@StatusKeys.IncentivePolicyApplicationInQuery') {
+                return '<button class=\"btn btn-primary btn-sm\" onclick=\"signDeclaration(\'' + row.Data + '\');\">Re-Submit</button>|' +
+                    '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+            } else {
+                return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">View in PDF</a>';
+
+            }*@
+        }
+
+        window.editApplication = function (value, row, index) {
+            var myUrl = '@Url.Action("Create", "IncentivePolicy")/' + '?q=' + row.ApplicationReference;
+
+            if (row.ApplicationStatus === '@StatusKeys.IncentivePolicyApplicationPending' || row.ApplicationStatus === '@StatusKeys.IncentivePolicyApplicationInQuery') {
+                return '<a href=\"' + myUrl + '\">' + row.ApplicationNumber + '</a>';
+            } else {
+                return row.ApplicationNumber;
+            }
+        }
+        @*window.editApplication = function(appId) {
+            try {
+                window.open(
+                    '@Url.Action("ProcessIncentivePolicyApplication", "BackOfficeIncentivePolicy")/?q=' + appId,
+                    '_blank'
+                );
+            } catch (ex) {
+                console.log(ex);
+            }
+        }*@
+
+        function customSearch() {
+
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var statusId = $('#ddlStatusId').val();
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            console.log(statusId);
+            console.log(endDate);
+            console.log(startDate);
+            console.log(searchVal);
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadApplications", "IncentivePolicy")/?startDate=' + startDate + '&endDate=' + endDate +
+                    '&applicationStatus=' + statusId,
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            resetFilters();
+            var appStatus = $('#ddlStatusId').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadApplications", "IncentivePolicy")/?applicationStatus' + appStatus,
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetFilters() {
+            $('#startDate').val('2016/09/07');
+            $('#endDate').val(year + "/" + month + "/" + day);
+            $('#ddlStatusId').prop('selectedIndex', 0);
+        }
+
+        function signDeclaration(data) {
+            bootbox.confirm({
+                title: "Declaration",
+                message: '<p>' + 'I do hereby declare that the information supplied is to the best of my knowledge, true and correct.' +
+                    'I acknowledge that the Municipality reserves the right to prosecute anyone who willfully provides false information with the intention to benefit unlawfully from the rebates awarded.' + '</p>',
+                buttons: {
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> No'
+                    },
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Yes'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        // Submit application
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("SubmitApplication", "IncentivePolicy")/' + '?q=' + data,
+                            success: function (data) {
+                                $('#successMsg').html(data.result);
+                                $('#successModal').modal('show');
+                                // Reload application dashboard
+                                //window.location = '@Url.Action("Index", "IncentivePolicy")';
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+}

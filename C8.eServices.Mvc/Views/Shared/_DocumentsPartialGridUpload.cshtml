@@ -1,0 +1,563 @@
+﻿@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+@using System.Web
+
+<style>
+    /* Used only for jquery selections. */
+    .button1 {
+        font-size: 15px;
+    }
+
+    .docUpload {
+    }
+
+    .docDetails {
+    }
+
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        color: #af7b0b;
+        border-color: #af7b0b;
+        background-color: white;
+    }
+
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+    .dtAlign {
+        text-align: left;
+        margin-bottom: 1em;
+        width: auto;
+        padding-right: 1em;
+    }
+
+    .ddAlign {
+        margin-left: 0;
+        margin-bottom: 1em;
+    }
+
+    /*.dl-horizontal dt {
+
+    }
+
+    .dl-horizontal dd {
+
+    }*/
+</style>
+
+<div id="documentResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Progress</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" id="modalText">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-horizontal">
+
+    @if (Model.IsUploadView)
+    {
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Document Type
+                        </th>
+                        <th>
+                            Browse
+                        </th>
+                        <th>
+                            Document
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var doc in Model.DocumentCheckLists)
+                    {
+                        List
+                        <C8.eServices.Mvc.Models.Document>
+                            documents = null;
+                        if (Model.Documents != null)
+                        {
+                            documents = Model.Documents.Where(o => o.DocumentCheckListId == doc.Id).ToList();
+                        }
+
+                        <text>
+
+
+
+
+
+                            <tr>
+                                <td>
+                                    @Html.Label(doc.DocumentType.Name, new { @class = "control-label" })
+                                </td>
+                                <td>
+                                    <dt class="dtAlign">
+                                        <span class="btn btn-default btn-file">
+                                            Browse
+                                            <input type="file" id="@Html.Raw( string.Format( "docUpload_{0}", doc.Id ) )" name="@Html.Raw( string.Format( "_{0}", doc.Id ) )" class="docUpload" multiple>
+                                        </span>
+                                    </dt>
+                                </td>
+                                <td>
+                                    <dd class="ddAlign">
+                                        <div id="@("docDetails_" + doc.Id)" class="docDetails">
+                                            @foreach (var d in documents)
+                                            {
+                                                @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName) : "No Document<br/>") 
+                                                @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='fa fa-times' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)
+                                            }
+                                        </div>
+                                        @Html.Raw(string.Format("<small>{0}</small>", doc.DocumentType.Description))
+                                    </dd>
+                                    @*@item.FilePath*@
+                                </td>
+
+                            </tr>
+
+
+                            @*<div class="col-md-9">
+                                    <dl class="dl-horizontal">
+
+
+                                    </dl>
+                                </div>*@
+
+
+                        </text>
+
+                    }
+
+
+
+
+                </tbody>
+            </table>
+
+
+        </div>
+
+
+
+
+        <text>
+
+            <br />
+            <br />
+            <div class="form-group">
+                <div class="col-md-offset-1 col-md-2">
+                    <input type="button" value="Upload" class="button1" id="uploadFiles" />
+
+                </div>
+                <div class="col-md-2">
+                    @* <input type="button" id="btnSiyakhokha" disabled="disabled" value="Pay Now" onclick="location.href= '@Html.Raw(Model.ReturnUrl )'"  name="btnApprovalStatus" class="button1" />*@
+
+                    @*<a class="button1" disabled="disabled" readonly="readonly" href="@Html.Raw(Model.ReturnUrl )">Pay with siyakhokha payment portal</a>*@
+                </div>
+                <div class="col-md-3">
+
+                    @*<input type="button" id="btnExternal" class="button1" value="Next" onclick="location.href='@Url.Action("Index2", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("RcsApplicationId=" + Model.RcsApplicationId.ToString()) })'" />*@
+                    @*@Html.ActionLink(
+                        "Pay at cashier (receipt upload)",
+                        "Index2",                         // controller action
+                        "RCSApplication",        // controller
+                        new { Model.RcsApplicationId },         // action parameters aka route values
+                        new { @class = "button1", @disabled = "disabled" })*@
+                </div>
+
+
+            </div>
+
+        </text>
+
+    }
+    else
+    {
+        foreach (var doc in Model.DocumentCheckLists)
+        {
+            var document = Model.Documents.FirstOrDefault(o => o.DocumentCheckListId == doc.Id);
+
+            <text>
+
+                <div class="form-group">
+                    @Html.Label(doc.DocumentType.Name, new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.Raw(document != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", @Url.Action("GetDocument", "File", new { q = document.File.Data }), document.DocumentName, (document.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", document.File.CreatedDateTime)) : "No Document")
+                        @Html.Raw(doc.DocumentType.Description)
+                    </div>
+                </div>
+
+            </text>
+
+        }
+    }
+
+</div>
+
+<script type="text/javascript">
+    var validFileExtensions = new Array('pdf', 'jpg', 'jpeg', 'png', 'gif');
+
+    function myFunction(a, b) {
+        return a * b;
+    }
+       function checkdocs(id) {
+            debugger;
+            alert('inside');
+            alert('id = ' + id);
+            //return true;
+            @*$.getJSON(" @Url.Action("CaptureDocChecker2", "DepartmentApprovals", new { id = 4532 })",*@
+           $.getJSON("../DepartmentsApprovals/CaptureDocChecker2?id=4532"
+              ,
+               function (result) {
+                   console.log(result);
+                   return result;
+                    if (result != "Error") {
+                        try {
+
+
+                            alert('success');
+
+
+
+                        }
+                        catch (cat) { }
+                    }
+                    else {
+                        //alert("Unsuccessfully captured!");
+                        swal("Error!", "Unsuccessfully captured.", "error");
+                    }
+                });
+
+            //$.getJSON("../DepartmentApprovals/CaptureDocChecker?id=4532",
+
+            //    function (result) {
+            //        alert('inside res');
+            //        return true;
+            //        alert('begin return' + result);
+            //        return true;
+            //        if (result != "Error") {
+            //            try {
+            //                if (result == "false") {
+            //                    return true;
+            //                }
+            //                else return false;
+            //            }
+            //            catch (cat) { }
+            //        }
+            //        else {
+            //            //alert("Unsuccessfully captured!");
+            //            swal("Error!", "Unsuccessfully captured.", "error");
+            //        }
+            //    });
+        }
+    $(document).ready(function () {
+                 var app2 = @Model.RcsApplicationId;
+
+                            //$.getJSON("../DepartmentsApprovals/CaptureDocChecker2?id=" + app2,
+                            //    function (result) {
+
+
+                            //        if (result == "false") {
+                            //            try {
+
+                            //            document.getElementById("btnExternal").disabled = false;
+
+
+
+                            //            }
+                            //            catch (cat) { }
+                            //        }
+                            //        else {
+
+                            //              document.getElementById("btnExternal").disabled = true;
+
+
+                            //        }
+                            //    });
+
+
+
+        var documentCheckListIds = ''; @*// Used to store the IDs of the document check lists.*@
+
+            $('.docUpload').each(function (i, fileInput) {
+                debugger;
+            $(fileInput).on('change', fileInput, function () {
+                debugger;
+                var name = $(fileInput).attr('Id');
+                var id = '#docDetails_' + name.substring(name.indexOf('_') + 1, name.length);
+
+                @*// Gets multiple files and shows them.*@
+                var files = $(fileInput).prop("files");
+                var names = $.map(files, function (val) { return val });
+                var fileExtensions = [];
+                var fileSize = 0;
+
+                names.forEach(function (value, index, array) {
+                    var extension = value.name.split('.').pop().toLowerCase();
+                    var isValidFile = $.inArray(extension, validFileExtensions);
+
+                    fileExtensions.push(isValidFile);
+                    fileSize += value.size;
+                    $(id).append(value.name + "</br>");  /*remove if any problem occur when uploading using this partial*/
+                    debugger;
+
+                });
+
+
+                if ($.inArray(-1, fileExtensions) !== -1) {
+                    bootbox.alert("Please select a valid file of type pdf/jpg/png/gif.");
+                    $(fileInput).val('');
+                    $(id).html('');
+                }
+                else {
+                    if (fileSize > (1024 * 1024 * 5)) {
+                        bootbox.alert("File(s) size should not exceed 5MB.");
+                        $(fileInput).val('');
+                        $(id).html('');
+                    }
+                }
+            });
+        });
+
+        $('#uploadFiles').click(function () {
+            var numOfFiles = 0;
+            var formdata = initFormData();
+
+            HoldOn.open({
+                message: 'Uploading document/s...Please Wait',
+                textColor: "white",
+            });
+
+            $('.docUpload').each(function (i, fileInput) {
+                debugger;
+                numOfFiles = numOfFiles + fileInput.files.length;
+
+                for (i = 0; i < fileInput.files.length; i++) {
+                    formdata.append(fileInput.files[i].name, fileInput.files[i]);
+                    documentCheckListIds += $(this).attr("name"); @*// append all IDs together, the actual name has a underscore in it.*@
+                }
+            });
+
+            formdata.append('DocumentCheckListIds', documentCheckListIds);
+
+            if (numOfFiles > 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '@Url.Action("AddDocumentHuman", "File", new { folder = Model.ApplicationReferenceNumber, rcsappid = Model.RcsApplicationId } )');
+
+                xhr.send(formdata);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        documentCheckListIds = '';
+
+                        if (xhr.status == 200) {
+                            HoldOn.close();
+                            $("#modalText").html("Document(s) Uploaded");
+                            $("#documentResponseModal").modal('show');
+                            displayDocumentDetails();
+
+
+                            var app = @Model.RcsApplicationId;
+
+                            //$.getJSON("../DepartmentsApprovals/CaptureDocChecker2?id=" + app,
+                            //    function (result) {
+
+
+                            //        if (result == "false") {
+                            //            try {
+
+                            //            document.getElementById("btnExternal").disabled = false;
+
+
+
+                            //            }
+                            //            catch (cat) { }
+                            //        }
+                            //        else {
+
+                            //              document.getElementById("btnExternal").disabled = true;
+
+
+                            //        }
+                            //    });
+
+
+
+                            //var y = checkdocs(4532);
+
+
+
+                          //  var res = checkdocs('4532');
+                         //   alert(res);
+                         //   if (res == true) {
+                                //document.getElementById("btnSiyakhokha").disabled = false;
+                           //     document.getElementById("btnExternal").disabled = false;
+                          //  }
+
+
+                            $('.docUpload').each(function (i, fileInput) {
+                                debugger;
+                                var input = $(fileInput);
+                                input.val('');
+                            });
+                        }
+                        else {
+                            HoldOn.close();
+                            $("#modalText").html("An error occurred. Please try again");
+                            $("#documentResponseModal").modal('show');
+                        }
+                    }
+                }
+
+                return false;
+            }
+            else {
+                HoldOn.close();
+                $("#modalText").html("Please select file(s) to be uploaded");
+                $("#documentResponseModal").modal('show');
+            }
+        });
+
+
+    });
+
+    //output formdata elements
+    //var outputLog = {}, iterator = formdata.entries(), end = false;
+    //while (end == false) {
+    //    var item = iterator.next();
+    //    if (item.value != undefined) {
+    //        outputLog[item.value[0]] = item.value[1];
+    //    } else if (item.done == true) {
+    //        end = true;
+    //    }
+    //}
+    //console.log(outputLog);
+
+    function initFormData() {
+        var formdata = new FormData();
+
+        @*// Information to associate the documents to.*@
+        formdata.append('CustomerId', '@Html.Raw( Model.CustomerId )');
+        formdata.append('ReferenceTypeId', '@Html.Raw( Model.ReferenceTypeId )');
+        formdata.append('ReferenceId', '@Html.Raw( Model.ReferenceId )');
+        formdata.append('ApplicationId', '@Html.Raw( Model.ApplicationId )');
+        formdata.append('StatusId', '@Html.Raw( Model.StatusId )');
+        formdata.append('RcsApplicationId', '@Html.Raw( Model.RcsApplicationId )');
+
+        return formdata;
+    }
+
+
+    @*// Calls function to delete documents.*@
+    function deleteDocument(documentId) {
+        HoldOn.open({
+            message: 'Deleting document...Please Wait',
+            textColor: "white",
+        });
+
+        var formdata = initFormData();
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '@Url.Action( "DeleteDocument", "File" )?q=' + documentId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+                $("#modalText").html("Document Deleted");
+                $("#documentResponseModal").modal('show');
+                displayDocumentDetails();
+            }
+        }
+
+        return false;
+    }
+
+    @*function getDocument(fileId) {
+        HoldOn.open({
+            message: 'Loading document...Please Wait',
+            textColor: "white",
+        });
+
+        var formdata = new FormData();
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '@Url.Action( "GetDocument", "File" )?fileId=' + fileId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+            }
+        }
+
+        return false;
+    }*@
+
+    function displayDocumentDetails() {
+        var documentCheckLists = JSON.parse('@Html.Raw(Json.Encode(Model.DocumentCheckLists
+                      .Select(d => new { Id = d.Id, DataList = d.DataList })))');
+
+        $('.docDetails').each(function (i, element) {
+            var elementId = $(element).attr('Id');
+            var documentCheckListId = elementId.substring(elementId.indexOf('_') + 1, elementId.length);
+            @*documentCheckListId = documentCheckListId.substring(documentCheckListId.indexOf('_') + 1, documentCheckListId.length);
+            // JK.20160504 - The missing javascript line terminators are included in the razor C# code.
+            var referenceTypeId = @Html.Raw( string.Format( "{0};", Model.ReferenceTypeId ) )
+            var referenceId = @Html.Raw( string.Format( "{0};", Model.ReferenceId ) )
+            var applicationId = @Html.Raw( string.Format( "{0};", Model.ApplicationId ) )
+            var customerId = @Html.Raw( string.Format( "{0};", Model.CustomerId ) )*@
+
+            var list = $.grep(documentCheckLists, function (e, i) {
+                return e.Id == documentCheckListId
+            });
+            //alert('inside');
+            $.ajax({
+                url: "@Url.Action("HumanRenderDocumentDetails", "Document" )?q=" + list[0].DataList[0],
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == "Success") {
+                        debugger;
+                        $(element).html($.parseHTML(data.view));
+                    } else {
+                        $(element).html('');
+                    }
+                },
+                error: function () {
+                    $("#modalText").html("Document failed to upload or be deleted... please try again");
+                    $("#documentResponseModal").modal('show');
+                }
+            });
+        });
+    }
+
+</script>

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configurationSnapshot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:schemas-microsoft-com:xml-wcfconfigurationsnapshot">
+  <behaviors />
+  <bindings>
+    <binding digest="System.ServiceModel.Configuration.BasicHttpBindingElement, System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089:&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data name=&quot;PortTypeEndpoint0Binding&quot; /&gt;" bindingType="basicHttpBinding" name="PortTypeEndpoint0Binding" />
+  </bindings>
+  <endpoints>
+    <endpoint normalizedDigest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://10.10.7.100:9040/Services/WSDL-service0.serviceagent/PortTypeEndpoint0&quot; binding=&quot;basicHttpBinding&quot; bindingConfiguration=&quot;PortTypeEndpoint0Binding&quot; contract=&quot;CorrespondanceSoapService.PortType&quot; name=&quot;PortTypeEndpoint0&quot; /&gt;" digest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://10.10.7.100:9040/Services/WSDL-service0.serviceagent/PortTypeEndpoint0&quot; binding=&quot;basicHttpBinding&quot; bindingConfiguration=&quot;PortTypeEndpoint0Binding&quot; contract=&quot;CorrespondanceSoapService.PortType&quot; name=&quot;PortTypeEndpoint0&quot; /&gt;" contractName="CorrespondanceSoapService.PortType" name="PortTypeEndpoint0" />
+  </endpoints>
+</configurationSnapshot>

@@ -1,0 +1,455 @@
+﻿@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.Property
+
+@{
+    ViewBag.Title = "Add Property";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+    var ratesRebateId = ViewBag.RatesRebateId;
+    var vaProperty = (Property)null;
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+}
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-here">Properties</li>
+        <li class="progtrckr-todo">Accounts</li>
+        <li class="progtrckr-todo">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+        <li class="progtrckr-todo">Submit</li>
+    </ol>
+</div>*@
+<br />
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 2:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li><strong>Properties - Update information about the properties owned by the principle owner.</strong></li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    Please add your property information under the "Add Property" panel. You will need to have a rate number to add a property.
+                    Enter the rate number in the text box and click on the "Get Property" button to get your property information. If your
+                    property information is incorrect, you may edit it by clicking the check box in the "Add Property" panel.
+                </p>
+                <p>
+                    If you wish to go back to the @ViewBag.ReturnText page, you may click the "Back" button in the "Navigation" panel.
+                </p>
+                <p>
+                    You may save your property information by clicking the "Next" button in the "Navigation" panel. This will also take you
+                    to the accounts step for this property, which is step 3.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("vaProperty")
+    
+    <div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                        Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            @*<div class="col-md-6">@Html.ActionLink( "Back", "Index", "Property", new { customerId, ratesRebateId }, new { @class = "btn btn-primary" } )</div>*@
+                            <div class="col-md-6">
+                                @Html.EncodedActionLink("Back", (ViewBag.IsPropertyList) ? "Index" : "Create", (ViewBag.IsPropertyList) ? "Property" : "RatesRebate",
+                                new { customerId, ratesRebateId, isFromDocument = false },
+                                new { @class = "btn btn-primary" })
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    <input type="submit" value="Next" class="btn btn-primary" id="save" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.StatusId, new { id = "statusId" })
+        @Html.HiddenFor(model => model.Id, new { id = "propertyId" })
+
+        <div class="panel-group" id="property">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseProperty">
+                            Add Property
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseProperty" class="panel-collapse collapse in">
+                    <div class="panel-body">
+
+                        @{
+    if (Request.HttpMethod == "POST")
+    {
+        if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert">×</a>
+                <strong>@TempData["Error"].ToString()</strong>
+            </div>
+        }
+    }
+                        }
+                        <div id="errorMsg" class="alert alert-danger" hidden="hidden"></div>
+
+                        <p>
+                            Please click here @Html.CheckBox("isConflict", new { id = "isConflict", @disabled = true }) to correct or fill in missing information.
+                        </p>
+                        <br />
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RatesNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.RatesNumber, new { @class = "form-control", id = "RatesNumber", @required = true, @maxlength = "8" })
+                                @Html.ValidationMessageFor(model => model.RatesNumber)
+
+                            </div>
+                            <div>
+                                <input id="GetProperty" type="button" value="Get Property" class="btn btn-primary" />
+                                <input id="ResetQuery" hidden type="button" value="Reset" class="btn btn-primary" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress1, new { @class = "form-control", id = "PhysicalAddress1", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress1)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress2, new { @class = "form-control", id = "PhysicalAddress2", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress3, new { @class = "form-control", id = "PhysicalAddress3", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress4, new { @class = "form-control", id = "PhysicalAddress4", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress5, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress5, new { @class = "form-control", id = "PhysicalAddress5", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress5)
+                            </div>
+                        </div>
+
+                        @*<div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddressCode, new { @class = "control-label col-md-2" })
+                            <div class="col-md-1">
+                                @Html.TextBoxFor(model => model.PhysicalAddressCode, new { @class = "form-control", @required = true, @readonly = true, pattern = @"\d{4}", @title = "Postal address code. should contain numbers only with a length of 4. e.g. 4000" })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddressCode)
+                            </div>
+                        </div>*@
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PropertyDescription, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextAreaFor(model => model.PropertyDescription, new { @class = "form-control", id = "PropertyDescription", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PropertyDescription)
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog" role="dialog">
+        <div class="panel panel-default">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Information</h4>
+                </div>
+                <div class="modal-body" id="errorList">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+  <!-- Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content panel-info">
+            <div class="modal-header panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Information</h4>
+            </div>
+            <div class="modal-body" id="errorList">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#ResetQuery").hide();
+    });
+
+    $(function () {
+
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+
+        function disableControls() {
+            $("#RatesNumber").attr("readonly", false);
+            $("#PhysicalAddress1").attr("readonly", true);
+            $("#PhysicalAddress2").attr("readonly", true);
+            $("#PhysicalAddress3").attr("readonly", true);
+            $("#PhysicalAddress4").attr("readonly", true);
+            $("#PhysicalAddress5").attr("readonly", true);
+            //$("#PhysicalAddressCode").attr("readonly", true);
+            $("#PropertyDescription").attr("readonly", true);
+
+            $("#isConflict").attr("disabled", true);
+
+        }
+
+        function resetControls() {
+
+            disableControls();
+
+            $("#RatesNumber").val('');
+            $("#PhysicalAddress1").val('');
+            $("#PhysicalAddress2").val('');
+            $("#PhysicalAddress3").val('');
+            $("#PhysicalAddress4").val('');
+            $("#PhysicalAddress5").val('');
+            //$("#PhysicalAddressCode").val('');
+            $("#PropertyDescription").val('');
+
+            $("#isConflict").attr('checked', false);
+
+        }
+        $("#ResetQuery").click(function () {
+            resetControls();
+
+            $("#GetProperty").show();
+            $("#ResetQuery").hide();
+            $('#errorMsg').hide();
+
+            $('input[type="submit"]').prop('disabled', true);
+        });
+
+        $("#isConflict").change(function () {
+            var isChecked = $(this).is(':checked');
+
+           
+            if (isChecked) {
+                $("#PhysicalAddress1").attr("readonly", false);
+                $("#PhysicalAddress2").attr("readonly", false);
+                $("#PhysicalAddress3").attr("readonly", false);
+                $("#PhysicalAddress4").attr("readonly", false);
+                $("#PhysicalAddress5").attr("readonly", false);
+                //$("#PhysicalAddressCode").attr("readonly", false);
+                $("#PropertyDescription").attr("readonly", true);
+                $("#ddlStatus").attr("disabled", false);
+                $('.isConflict').prop('checked', true);
+
+                $("#GetProperty").hide();
+                $("#ResetQuery").show();
+
+                $("#isConflict").removeAttr("disabled").on("click", function (e) {
+                    //e.preventDefault();
+                    //$(this).unbind(e);
+                    return true;
+                });
+            }
+            else {
+                disableControls();
+                $("#isConflict").attr("disabled", false);
+            }
+        });
+
+        $('input[type="submit"]').prop('disabled', true);
+
+        $("#GetProperty").click(function () {
+            var ratesNumber = $("#RatesNumber").val();
+
+            var customerId = parseInt(@ViewBag.CustomerId);
+            var ratesRebateId = parseInt(@ViewBag.RatesRebateId);
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action( "GetProperty", "Property" )",
+                data: { ratesNumber: ratesNumber, customerId: customerId, ratesRebateId: ratesRebateId, isConflict: false },
+                cache: false,
+                success: function (result) {
+                    
+                    if (result.errorMsg != null && result.errorMsg != '') {
+                        var msg = result.errorMsg;
+                        var errors = msg.replace(/\n/g, "<br />");
+
+                        if (errors !== null && errors.length > 0) {
+                            $('#errorMsg').html(errors);
+                            $('#errorMsg').show();
+
+                            $("#GetProperty").hide();
+                            $("#ResetQuery").show();
+
+                            errors = "";
+                        } else {
+                            $('#errorMsg').hide();
+
+                            $("#GetProperty").show();
+                            $("#ResetQuery").hide();
+                        }
+                    } else {
+                        if (result.existsInApplication) {
+                            var errormsg = "";
+
+                            errormsg = "Property with rate number: <b>[" + ratesNumber + "]</b> has already been included. Please use another rate number.";
+
+                            bootbox.alert({
+                                title: "Warning",
+                                message: errormsg
+                            });
+
+                            $("#RatesNumber").val('');
+
+                       @*//$("#PhysicalAddress1").val('');
+                            //$("#PhysicalAddress2").val('');
+                            //$("#PhysicalAddress3").val('');
+                            //$("#PhysicalAddress4").val('');
+                            //$("#PhysicalAddress5").val('');
+                            //$("#PhysicalAddressCode").val('');
+                            //$("#PropertyDescription").val('');
+                            //$("#ddlStatus").val('');
+
+                            //$("#isConflict").attr("disabled", true);
+                            //$("#RatesNumber").attr("readonly", false);
+
+                            //$('input[type="submit"]').prop('disabled', true);*@
+                       } else {
+
+                            if (result.property != null) {
+
+                                $("#RatesNumber").val(result.property.RatesNumber);
+
+                                $("#PhysicalAddress1").val(result.property.PhysicalAddress1);
+                                $("#PhysicalAddress2").val(result.property.PhysicalAddress2);
+                                $("#PhysicalAddress3").val(result.property.PhysicalAddress3);
+                                $("#PhysicalAddress4").val(result.property.PhysicalAddress4);
+                                $("#PhysicalAddress5").val(result.property.PhysicalAddress5);
+                                //$("#PhysicalAddressCode").val(result.property.PhysicalAddressCode);
+                                $("#PropertyDescription").val(result.property.PropertyDescription);
+
+                                $("#isConflict").attr("disabled", false);
+                                $("#RatesNumber").attr("readonly", true);
+
+                                $('input[type="submit"]').prop('disabled', false);
+
+                                $("#propertyId").val(result.property.Id);
+                                $("#statusId").val(result.property.StatusId);
+
+                                $("#GetProperty").hide();
+                                $("#ResetQuery").show();
+
+                            } else {
+
+                                $("#PhysicalAddress1").val('');
+                                $("#PhysicalAddress2").val('');
+                                $("#PhysicalAddress3").val('');
+                                $("#PhysicalAddress4").val('');
+                                $("#PhysicalAddress5").val('');
+                                //$("#PhysicalAddressCode").val('');
+                                $("#PropertyDescription").val('');
+                                $("#ddlStatus").val('');
+
+                                $("#isConflict").attr("disabled", true);
+                                $("#RatesNumber").attr("readonly", false);
+
+                                $('input[type="submit"]').prop('disabled', true);
+
+                                bootbox.alert({
+                                    title: "Error",
+                                    message:  "Property with rate number: <b>[" + ratesNumber + "]</b> not found!"
+                                });
+                            }
+                        }
+                    } 
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        });
+    });
+
+</script>
+

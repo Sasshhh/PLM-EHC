@@ -1,0 +1,525 @@
+﻿@model C8.eServices.Mvc.Models.InstantEFT
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<style>
+    .isRecurring {
+        display: block;
+    }
+
+    .checkbox-round {
+        /*content: "✔";*/
+        margin-top: -11px;
+        margin-left: -4px;
+        text-align: center;
+        text-shadow: rgb(176, 190, 217) 1px 1px, rgb(176, 190, 217) -1px -1px, rgb(176, 190, 217) 1px -1px, rgb(176, 190, 217) -1px 1px;
+    }
+
+        .checkbox-round:checked {
+            content: "✔";
+        }
+</style>
+@*<div>*@
+    <h4>Instant EFT Details</h4>
+    <hr />
+    @*<dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsBatch)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsBatch)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Amount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Amount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedDateTime)
+        </dd>
+    </dl>
+</div>*@
+
+<div class="panel-group" id="BatchPayment">
+
+    @*Main Batch Panel Body*@
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewBatchPayment">
+                    <span>EFT Summary Details</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNewBatchPayment" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @* New Batch Payment Body*@
+                <div id="NewBatchDiv">
+                    <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                        @ViewBag.AccountsMessage
+                    </div>
+
+
+
+                    <table id="NewBatchPaymentTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Reference No
+                                </th>
+                                <th>
+                                    Municipal Account
+                                </th>
+                                <th>
+                                   Amount Paid
+                                </th>
+                                <th>
+                                    Date Created
+                                </th>
+                                @*<th>
+                                    <label class="ckbox"><input type="checkbox" value="default" id="selectAll" checked onClick="toggle(this)"><span> All</span></label>
+                                </th>*@
+
+                            </tr>
+
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot align="right">
+                            <tr>
+                                <th>
+                                    &nbsp;
+                                </th>
+                                <th id="subTotal">Total Amount Paid (R)</th>
+                                <th >&nbsp;</th>
+                                <th >&nbsp;</th>
+
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+                @*<div class="alert alert-danger col-md-10" id="AMTPAlert" style="display:none;margin-left: 15px;">
+                        <p><strong>Please note:</strong>The Debit order amount needs to be a minimum of R50,00 and a maximum of R1M (1 Million Rand)</p>
+                    </div>*@
+
+            </div>
+        </div>
+    </div>@* New batch Payment panel*@
+
+</div>
+@*<p>*@
+    <a class="btn btn-primary" href="@Url.Action("IndexBatchEFTPayment","InstantEFT")">Back</a>@*@Html.ActionLink("Back to List", "IndexBatchEFTPayment")
+</p>*@
+
+<div id="ErrorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleTextE"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentTextE"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" id="closeBtn" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="RequestModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="RQSmodalTitleText">Request Municipal Account Access</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="RQSTmodalContentText">
+                        <div class="form-horizontal">
+                            @*<div class="form-group">
+                                    @Html.Label("Municipal Account", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.Editor("MunicipalAccount", new { htmlAttributes = new { @class = "form-control", @id = "MunicipalAccount", @readonly = true } })
+                                    </div>
+                                </div>*@
+                            <div class="form-group">
+                                <div class="col-md-2">
+                                    <span></span>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                    @Html.Label("Reason for Request", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextArea("Comment", new { @class = "form-control", @id = "Comment" })
+                                    </div>
+                                </div>*@
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RequestAccount">Send Request</button>
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+        function convertToDate(data) {
+            // The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.
+            var dtStart = new Date(parseInt(data.substr(6)));
+            // Format using moment.js.
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        function formatDate(data) {
+            // Format using moment.js.
+            var dtStartWrapper = moment(data);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+    </script>
+    <script type="text/javascript">
+                var BatchAccNum = 0;
+        var amt2d = 0;
+        //var count = 0;
+        var amt2due = 0;
+        var amt2dueTotal = 0;
+       
+        function loadBatchAccounts() {
+            $('#NewBatchPaymentTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("LoadEFTDetails", "InstantEFT", new { @Id = Model.Id } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    {
+                        "data": "InstantEFT.ReferenceNumber", "autoWidth": true,
+                        "render": function (data, type, row) {
+                           // BatchAccNum = data;
+                            //var AccountNo = '<label id=\"MA' + data+'_ID'+'\">' + data + '</label>';
+
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "Account.AccountNumber", "autoWidth": true,
+                        "render": function (data, type, row) {
+                           // BatchAccNum = data;
+                            var AccountNo = '<label id=\"MA' + data + '_ID' + '\">' + data + '</label>';
+
+                            return AccountNo;
+                        }
+                    },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            amt2d = parseFloat(data).toFixed(2);
+                            //var AmtForm="R{0}".format(amt2d);
+                            return parseFloat(data).toFixed(2);
+                        }
+
+                    },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    }
+
+                ],
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    // Total over all pages
+                    total1 = api
+                        .column(2)
+                        .data()
+                        .reduce(function (a, b) {
+                            var amt3due = 0;
+                            var sumT = 0;
+                            if (intVal(b) < 0) {
+                                sumT = intVal(a) + 0;
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                            else {
+                                sumT = intVal(a) + intVal(b);
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                        }, 0);
+
+                    // Total over this page
+                    pageTotal1 = api
+                        .column(2, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            var amt3due = 0;
+                            var sumT = 0;
+                            if (intVal(b) < 0) {
+                                sumT = intVal(a) + 0;
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                            else {
+                                sumT = intVal(a) + intVal(b);
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                        }, 0);
+                    $(api.column(2).footer()).html(
+                     pageTotal1
+                    );
+                },
+                "language": {
+                    "emptyTable": "No debit orders.",
+                },
+                "Initcomplete": "",
+                "paging": false,
+                "destroy": true
+            });
+
+           // resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function toggle(source) {
+            checkboxes = document.getElementsByName('foo');
+            inputs = document.getElementsByClassName('PayAmtVal');
+                //ctrl values
+                debugger;
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                checkboxes[i].checked = source.checked;
+                if (source.checked) {
+                    document.getElementById(inputs[i].id).disabled = false;
+                    loadBatchAccounts();
+                    document.getElementById('Amount').value = amt2due;
+                }
+                else {
+                    document.getElementById(inputs[i].id).disabled = true;
+                    document.getElementById('Amount').value = 0;
+                }
+            }
+
+
+        }
+
+        function toggleValue(source, rowAcc) {
+            var paymentSub = document.getElementById('subTotal');
+            var subVal = 0;
+                subVal = parseFloat(paymentSub.innerHTML).toFixed(2);
+            var newSub = 0;
+            //ctrl values + '_' + rowCount
+            var amtInputCtrl = 'MA'+rowAcc  + '_amt';
+            var sourceVal = parseFloat(document.getElementById(amtInputCtrl).value).toFixed(2);
+            debugger;
+            if (source.checked) {
+                if (isNaN(parseFloat(sourceVal))) {
+                    sourceVal = 0;
+                }
+                newSub = parseFloat(+subVal + +sourceVal).toFixed(2);
+                document.getElementById(amtInputCtrl).disabled = false;
+                paymentSub.innerHTML = newSub;
+                document.getElementById('Amount').value = newSub;
+            }
+            else {
+                if (isNaN(parseFloat(sourceVal))) {
+                    sourceVal = 0;
+                }
+                newSub = parseFloat(subVal - sourceVal).toFixed(2);
+                document.getElementById(amtInputCtrl).disabled = true;
+                paymentSub.innerHTML = newSub;
+                document.getElementById('Amount').value = newSub;
+            }
+
+
+            toggleInputValue();
+        }
+        function toggleInputValue() {
+            var paymentSub = document.getElementById('subTotal');
+            var subVal = 0;
+            var isValid = true;
+            var newSub = 0;
+            var sourceVal = 0;
+            inputs = document.getElementsByClassName('PayAmtVal');
+            checkboxes = document.getElementsByName('foo');
+            var DAmit = 0;
+            //ctrl values
+            for (var i = 0, n = inputs.length; i < n; i++) {
+                if (checkboxes[i].checked) {
+                    if (isNaN(parseFloat(inputs[i].value))) {
+                        sourceVal = 0;
+                    }
+
+
+                    else {
+                        if (inputs[i].value > 1000000) {
+                            isValid = false;
+
+                            //$("#spanContent").remove();
+
+
+
+                            //var span = document.createElement("span");
+                            //span.setAttribute("id", "spanContent");
+                            //span.innerHTML = '<h5>Once-Off Batch Payment Summary</h5>';
+
+                            //span.innerHTML += '<br><h5>Total Payment Amount R' + '</h5>';
+                            //span.innerHTML += '<b>Are you sure you want to continue with this Batch Payment?<br><br>';
+
+
+                            //$("#modalContentTextVal").html("Batch Payment Successful");
+
+                            //$("#modalTitleTextVal").html("You have successfully made your once-off batch payment .");
+                            //$("#ValModal").modal("show");
+
+                        }
+                        else if (inputs[i].value < 50) {
+                            isValid = false;
+
+                        }
+                        else {
+
+                        }
+
+
+
+                        sourceVal = parseFloat(inputs[i].value).toFixed(2);
+                    }
+
+                    //DAmit = sourceVal.replace(",", ".");
+                   // validateAmtInput(inputs[i].id, sourceVal);
+                }
+               else {
+                    sourceVal = parseFloat(0).toFixed(2);
+               }
+                newSub = parseFloat(+newSub + +sourceVal).toFixed(2);
+            }
+            subVal = parseFloat(newSub).toFixed(2);
+            paymentSub.innerHTML = subVal;
+            document.getElementById('Amount').value = subVal;
+
+            if (isValid == false) {
+                document.getElementById('submitBtn').disabled = true;
+                $("#AMYAlert").show();
+
+            }
+            else {
+                document.getElementById('submitBtn').disabled = false;
+                $("#AMYAlert").hide();
+            }
+
+        }
+        $('#closeBtn').click(function () {
+            location.reload();
+        })
+        function resetControls() {
+            loadBatchAccounts();
+        }
+        $(function () {
+            loadBatchAccounts();
+            //loadFilters();
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        });
+
+    </script>
+    <script>
+        function setInputFilter(textbox, inputFilter) {
+            ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+                textbox.addEventListener(event, function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    }
+                });
+            });
+        }
+
+        function blockSpecialChar(e) {
+            var k;
+            document.all ? k = e.keyCode : k = e.which;
+            return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+        }
+        function isNumberKey(evt, obj) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            var value = obj.value;
+            var dotcontains = value.indexOf(".") != -1;
+            if (dotcontains)
+                if (charCode == 46) return false;
+            if (charCode == 46) return true;
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+    </script>
+}
+
+

@@ -1,0 +1,243 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    //ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: rgba(0, 0, 0, 0);
+            opacity: 1;
+            display: block;
+            background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+            background-size: 20px 20px;
+            width: 20px;
+            height: 20px;
+            border-width: thin;
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.HumanSettlementApplication.FullName</td>
+                        <td>@Model.HumanSettlementApplication.PurchaserType.Name</td>
+                        <td>@Model.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                        <td>@Model.HumanSettlementApplication.Status.Name</td>
+                        <td>@Model.HumanSettlementApplication.CreatedDateTime</td>
+                        <td>
+                            @Html.ActionLink("View", "Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <br />
+                @Html.HiddenFor(model => model.PropertyLeaseApplication.Id, htmlAttributes: new {@Name= "ApplicationId", @class = "form-control", @Style = "display:none;" })
+                <div class="form-horizontal">
+                    @if (ViewBag.ApprovalStatus != null)
+                    {
+                        <div class="form-group">
+                            @Html.Label("Keep me in waiting list?", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                                @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    }
+                </div>
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button"  class="button1" value="Submit" onclick="clickSubmit()" />
+
+                    @*<input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />*@
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please wait 20 seconds, then action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit the following document approval?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                
+                $.getJSON("../MatchedUnits/ValidateWaitingListSorting",
+                    function (result) {
+                        debugger;
+                        if (result == true) {
+                            //jQuery.noConflict();
+                            $("#waitinglist_busy").modal('show');
+                            $('#waitinglist_busy').modal({
+                                backdrop: 'static',
+                                keyboard: false,
+                                show: true
+                            });
+                        } else {
+                           document.getElementById("btnApproval").click();
+                        }
+                    });
+
+            }
+        });
+    }
+
+    function WaitingListBusy() {
+        $.getJSON("../riskAssessmentOutcomes/ValidateWaitingListSorting",
+            function (result) {
+                debugger;
+                if (result == true) {
+                    jQuery.noConflict();
+                    var ttt = result;
+                    alert("uyuyu");
+                    $('#waitinglist_busy').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
+            });
+    }
+
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }});
+</script>
+
+

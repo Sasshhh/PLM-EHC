@@ -1,0 +1,95 @@
+.ev-page .page-content {
+  background-color: #fcfcfc;
+}
+
+.invoice-content {
+  padding: 20px;
+  padding-bottom: 40px;
+}
+
+.invoice-header {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+body:not(.dark-skin) .invoice-header {
+  background-color: #f6f6f6;
+}
+
+.invoice-logo {
+  position: absolute;
+}
+
+.invoice-logo img {
+  height: 96px;
+}
+
+.invoice-details {
+  margin-bottom: 100px;
+}
+
+.invoice-title {
+  white-space: nowrap;
+}
+
+.invoice-client {
+  padding-left: 6px;
+  border-left: 6px solid #dedede;
+}
+
+table.invoice-products td:nth-child(4), table.invoice-products td:nth-child(5), table.invoice-products td:nth-child(6) {
+  white-space: nowrap;
+}
+
+.invoiceRow {
+  position: relative;
+  -webkit-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  transform: scale(0);
+  -webkit-transition: all 0.3s linear;
+  -o-transition: all 0.3s linear;
+  transition: all 0.3s linear;
+  opacity: 0;
+}
+
+.invoiceRow.open {
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+  opacity: 1;
+}
+
+table.invoice-products th {
+  white-space: nowrap;
+}
+
+table.invoice-products th:nth-child(3), table.invoice-products th:nth-child(4), table.invoice-products th:nth-child(5), table.invoice-products th:nth-child(6),
+table.invoice-products td:nth-child(3), table.invoice-products td:nth-child(4), table.invoice-products td:nth-child(5), table.invoice-products td:nth-child(6) {
+  text-align: right;
+}
+
+table.invoice-products th:nth-child(3) input, table.invoice-products th:nth-child(4) input, table.invoice-products th:nth-child(5) input, table.invoice-products th:nth-child(6) input,
+table.invoice-products td:nth-child(3) input, table.invoice-products td:nth-child(4) input, table.invoice-products td:nth-child(5) input, table.invoice-products td:nth-child(6) input {
+  text-align: right;
+}
+
+.delete-invoice-row {
+  padding: 0;
+  padding-top: 4px;
+}
+
+.invoice-totals {
+  margin-top: 40px;
+}
+
+.invoice-totals tr > td:first-child {
+  text-align: right;
+}
+
+@media print {
+  table.invoice-totals td:last-child {
+    width: 20%;
+  }
+}

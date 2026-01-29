@@ -1,0 +1,129 @@
+﻿@model C8.eServices.Mvc.Models.Units
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Units</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedBySystemUser.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ModifiedBySystemUser.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UnitTypeId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UnitTypeId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HumanEHC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HumanEHC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PropertyType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PropertyType)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Complex_Area)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Complex_Area)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PropertyPrice)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PropertyPrice)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PropertyDeposit)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PropertyDeposit)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsActive)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsDeleted)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsDeleted)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsLocked)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsLocked)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreatedDateTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ModifiedDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ModifiedDateTime)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

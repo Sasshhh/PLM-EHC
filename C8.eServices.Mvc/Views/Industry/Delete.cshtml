@@ -1,0 +1,64 @@
+﻿@model C8.eServices.Mvc.Models.Industry
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+@*<h2>Delete</h2>*@
+
+<hr />
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                    Are you sure you want to delete industry type for - @Model.IndustryName 
+                </a>
+            </h4>
+        </div>
+        <div id="userRoleCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.SubSector.SubSectorName)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.SubSector.SubSectorName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IndustryName)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IndustryName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IndustryDescription)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IndustryDescription)
+                    </dd>
+
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <input type="submit" value="Delete" class="btn btn-primary" />
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-primary" })
+</p>

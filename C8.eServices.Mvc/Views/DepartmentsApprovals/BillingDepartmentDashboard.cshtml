@@ -1,0 +1,243 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.DepartmentsApproval>
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    .rowCrit {
+        color: red !important;
+    }
+</style>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+@*<h4>Rates Clearance Figures</h4>*@
+<div id="bankAccountPanel">
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        Billing Discrepancy
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+
+                <div style="width: 90%; margin: 0 auto;">
+                    <br />
+                    <table id="DepartmentsTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Reference Number
+                                </th>
+                                <th>
+                                    Discrepancy
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+                                <th>
+                                    Created Date
+                                </th>
+                                @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                                {
+                                    <th>Clerk</th>
+                                }
+                                <th>
+
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+                            @if (Model == null)
+                            {
+                            <tr>
+                                <td>
+                                    No Results Found
+                                </td>
+                                <td>
+                                    No Results Found
+                                </td>
+                                <td>
+                                    No Results Found
+                                </td>
+                                <td>
+                                    No Results Found
+                                </td>
+
+                                <td>
+                                </td>
+
+                                @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin") || User.IsInRole("Back Office System Administrator")))
+                                {
+                                    <td>
+                                    </td>
+                                }
+                                <td>
+                                    No Results Found
+                                </td>
+                            </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model)
+                                {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RCSApplicationStatus.ApplicationReferenceNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FailureReason)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Status.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CreatedDateTime.Value)
+                            </td>
+                            @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                            {
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Data)
+                                </td>
+                            }
+                            <td style="background-color:@item.ColorCode">
+                            </td>
+                            <td>
+                                @if (Request.IsAuthenticated && (User.IsInRole("Billing")))
+                                {
+                                    @Html.ActionLink("View", "BillingFlag", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.RCSApplicationStatusId.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+
+
+                                }
+
+                                @Html.ActionLink("Application Details", "Details", "Capture", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.RCSApplicationStatusId.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+
+
+                                @*@if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+            {
+                @Html.ActionLink("Re-Allocate", "BillingReAllocate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" });
+            }*@
+                                @if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Sectional Head") || User.IsInRole("Support Admin")|| User.IsInRole("Back Office System Administrator")))
+                                {
+                                    @Html.ActionLink("Re-Allocate", "ManualReAllocateDepartments", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString() + "&rrqID=" + item.RoundRobinQueueId + "&ResponsibilityType=" + ResponsibilityTypeKeys.Billing + "&ViewName=BillingDepartmentDashboard" + "&TitleName=BillingRedistributionTitle&BodyName=BillingRedistribution") }, new { @class = "btn btn-primary" });
+                                }
+
+                                @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.RCSApplicationStatusId.ToString() + "&" + "CommunicationType=" + CommunicationTypeKeys.AttorneyToBo) }, new { @class = "btn btn-primary" })
+
+
+                            </td>
+                        </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            debugger;
+            $('#DepartmentsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "ApprovalsLoad", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "RCSApplicationStatus.ApplicationReferenceNumber", "autoWidth": true },
+                    { "data": "RCSDepartment.Name", "autoWidth": true },
+                    { "data": "FailureReason", "autoWidth": true },
+                    { "data": "Status.Name", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true },
+                    {
+                        "data": "Id",
+                        "autoWidth": true,
+                        "render": function (data) {
+                            var myUrl = '@Url.Action( "Details", "DepartmentsApprovals" )/' + data;
+                            return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; ';
+                        }
+                    }],
+                "language": {
+                    "emptyTable": "No payment history.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        //$(function () {
+        //    loadAccounts();
+
+        //});
+
+    </script>
+
+}
+
+
+
+
+<script>
+    $(function () {
+        $('#DepartmentsTable').DataTable();
+            var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>

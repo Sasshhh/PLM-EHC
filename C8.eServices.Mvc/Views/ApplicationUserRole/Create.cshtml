@@ -1,0 +1,224 @@
+﻿@*@model IEnumerable<C8.eServices.Mvc.Models.ApplicationUserRole>*@
+@model C8.eServices.Mvc.ViewModels.UserAdminViewModel
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error: </span>
+        @TempData["Error"].ToString()
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("input[name=userType]:radio").change(function () {
+            if ($("input:radio[name='userType']:checked").val() == "New User") {
+                $("#currentSysUserGrp").hide();
+                $("#newSysUserGrp").show();
+
+                $("#firstName").prop('required', true);
+                $("#lastName").prop('required', true);
+                $("#userName").prop('required', true);
+                $("#email").prop('required', true);
+
+                $("#ddlUserId").prop('required', false);
+            }
+            else {
+                $("#currentSysUserGrp").show();
+                $("#newSysUserGrp").hide();
+
+                $("#firstName").prop('required', false);
+                $("#lastName").prop('required', false);
+                $("#userName").prop('required', false);
+                $("#email").prop('required', false);
+
+                $("#ddlUserId").prop('required', true);
+            }
+
+            $("#submitGrp").show();
+        });
+    });
+</script>
+
+<h4>New Application User</h4>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("applicationId", (int)@ViewBag.ApplicationId)
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+
+        <div class="panel-group" id="newApplicationUser">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewApplicationUser">
+                            <span>Add User</span>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseNewApplicationUser" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                <label>@Html.RadioButton("userType", "New User") &nbsp; New User</label><br />
+                                <label>@Html.RadioButton("userType", "Existing User") &nbsp; Existing User</label>
+                            </div>
+                        </div>
+                        <hr />
+                        <div id="currentSysUserGrp" style="display:none;">
+                            <div class="form-group">
+                                @Html.Label("UserName:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.DropDownList("UserId", null, "--Select User--", new { @class = "form-control", @id = "ddlUserId" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="newSysUserGrp" style="display:none;">
+                            <div class="form-group">
+                                @Html.Label("First Name:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("firstName", null, new { @class = "form-control", @pattern = "[A-Za-z\\s]*" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("Last Name:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("lastName", null, new { @class = "form-control", @pattern = "[A-Za-z\\s]*" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("UserName:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("userName", null, new { @class = "form-control" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("Email Address:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    <input id="email" name="emailAddress" class="form-control" type="email" required placeholder="example@gmail.com" pattern="^[a-zA-Z0-9._+-]+&#64;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="submitGrp" style="display:none;">
+                            @*<div class="form-group">
+                                @Html.Label("Role Name:", new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.DropDownList("RoleId", null, "--Select Role--", new { @class = "form-control", @required = true })
+                                </div>
+                            </div>*@
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">
+                                    Select User Role
+                                </label>
+                                <div>
+
+                                    @*<div class="multiselect">
+                @Html.ListBoxFor(x => x.SelectedFeatures, Model.Features, new { @class = "multiselect-on", @type = "checkbox" })
+
+            </div>*@
+
+                                </div>
+                                @*@Html.CheckBoxFor(model => model.Features, new MultiSelectList(Model.Features, "Text", "Text"), htmlAttributes: new { @class = "form-control multiselect-on", id = "ddlTypeOfIncident", @multiple = "true", @required = "required", @title = "Identify the types of issues (hold the control key to select multiple classifications)" })*@
+
+                                @*@Html.ListBoxFor(model => model.SelectedFeatures, new MultiSelectList(Model.Features, "Text", "Text"), htmlAttributes: new { @class = "form-control multiselect-on", id = "ddlTypeOfIncident", @multiple = "true", @required = "required", @title = "Identify the types of issues (hold the control key to select multiple classifications)" })*@
+                                @foreach (var item in Model.Features)
+                                {
+                                    <input type="checkbox" name="SelectedRoles" value="@item.Value" class="checkbox-inline" />
+                                    @Html.Label(item.Text, new { @class = "control-label" })
+                                }
+
+
+
+
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" value="Create" class="button1" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group" id="unassignedUsers">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseUnassignedUsers">
+                        <span>Unassigned Users</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseUnassignedUsers" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table table-striped" id="table"
+                           data-toggle="table"
+                           data-height="500"
+                           data-search="true"
+                           data-pagination="true"
+                           data-page-list="[10,25, 50, 100, ALL]">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.Label("Username")
+                                </th>
+                                <th>
+                                    @Html.Label("First Name")
+                                </th>
+                                <th>
+                                    @Html.Label("Last Name")
+                                </th>
+                                <th>
+                                    @Html.Label("Email Address")
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.UserRole)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SystemUser.UserName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SystemUser.FirstName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SystemUser.LastName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SystemUser.EmailAddress)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", new { id = @ViewBag.ApplicationId }, new { @class = "button1" })
+</div>
+

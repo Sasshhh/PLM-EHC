@@ -1,0 +1,150 @@
+﻿@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.ViewModels
+@model C8.eServices.Mvc.ViewModels.RatesRebatePropertyViewModel
+
+<style>
+    .propText {
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    dd {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    dt {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<div class="row propText">
+
+    @if (Model.Property != null)
+    {
+        <hr style="width: 90%" />
+    }
+    <div class="col-md-6">
+        <dl class="dl-horizontal ">
+            @if (Model.Property != null)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => model.Property.RatesNumber)
+                </dt>
+
+                <dd>
+                    <b>@Html.DisplayFor(model => model.Property.RatesNumber)</b>
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Property.BlockComplex)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Property.BlockComplex)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Property.StreetSuburb)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Property.StreetSuburb)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Property.PhysicalAddressCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Property.PhysicalAddressCode)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Property.PropertyDescription)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Property.PropertyDescription)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.RatesRebateProperty.Status)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.RatesRebateProperty.Status.Name)
+                </dd>
+            }
+        </dl>
+    </div>
+    <div class="col-md-6">
+        @if (Model.AdditionalOwners != null && Model.AdditionalOwners.Count >= 1)
+        {
+            <dl class="dl-horizontal ">
+
+                @for (var c = 0; c < Model.AdditionalOwners.Count; c++)
+                {
+                    <dt style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap ">
+                        Additional Owner @(c + 1)
+                    </dt>
+                    <dd>
+                        @Model.AdditionalOwners[c].OwnerName
+                    </dd>
+                    <dt style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                        Status
+                    </dt>
+                    <dd>
+                        @Model.AdditionalOwners[c].Status.Name
+                    </dd>
+                }
+            </dl>
+        }
+    </div>
+
+</div>
+<div style="margin-left: 20px">
+    @if (Model.PropertyAccounts != null && Model.PropertyAccounts.Any())
+    {
+        <span style="margin-left: 35px; text-decoration: underline"> <strong>Property Accounts</strong></span>
+         <br/>
+    <table class="table-condensed table-bordered" style="margin-left: 50px; margin-top :10px; margin-bottom: 10px" width="60%">
+        <thead>
+            <th>Account Number</th>
+            <th>Account Type</th>
+            <th>Status</th>
+            <th>Details</th>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.PropertyAccounts)
+            {
+                <tr>
+                    <td>
+                        @item.AccountNumber
+                    </td>
+                    <td>
+                        @item.AccountType.Description
+                    </td>
+                    <td>
+                        @item.Status.Name
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "AccountDetails", new { id = item.Id }, new { target = "_blank" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    }
+</div>
+<div style="margin-left: 30px">
+    @if (Model.DocumentVm != null)
+    {
+        <span style="margin-left: 14px; text-decoration: underline"> <strong>Property Documents</strong></span>
+        
+        { Html.RenderPartial("_DocumentsPartial", (Model.DocumentVm ?? new DocumentsViewModel())); }
+    }
+</div>
+

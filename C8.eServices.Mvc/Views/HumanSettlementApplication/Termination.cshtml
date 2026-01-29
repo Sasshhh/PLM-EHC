@@ -1,0 +1,568 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var Deposit = string.Empty;
+    var Outstanding = string.Empty;
+    var enddate = string.Empty;
+    try
+    {
+        if (Model.HumanSettlementLeaseMaster != null)
+        {
+            enddate = Model.HumanSettlementLeaseMaster.EndDate.ToString() ?? null;
+        }
+        if (Model.HumanSettlementLeaseDetails != null && string.IsNullOrEmpty(enddate))
+        {
+            enddate = Model.HumanSettlementLeaseDetails.EndDate.ToString();
+        }
+    }
+    catch (Exception)
+    {
+
+        //throw;
+    }
+
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+
+
+        @@media only screen and (max-width: 1000px) {
+
+            .buttonIcon {
+                font-size: 2.5rem !important;
+            }
+
+            .chkboxmargin {
+                margin-left: 30px;
+            }
+
+            .cards tbody tr {
+                float: left;
+                /*width: 20rem;*/
+                width: 90%;
+                margin: 0.5rem;
+                border: 0.0625rem solid rgba(0,0,0,.125);
+                border-radius: .25rem;
+                box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+            }
+
+            .cards thead tr {
+                float: left;
+                /*width: 25rem;*/
+                width: 90%;
+                margin: 0.5rem;
+                border: 0.0625rem solid rgba(0,0,0,.125);
+                border-radius: .25rem;
+                box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+            }
+
+
+            .cards tbody td {
+                display: block;
+                word-wrap: break-word;
+            }
+
+            .cards thead th {
+                display: none;
+            }
+
+            .table tbody label {
+                display: block;
+            }
+
+            .cards tbody label {
+                display: inline;
+                position: relative;
+                font-size: 85%;
+                top: -0.5rem;
+                color: #808080;
+                min-width: 4rem;
+                margin-left: 0;
+                margin-right: 1rem;
+                text-align: left;
+            }
+
+            tr.selected label {
+                color: #404040;
+            }
+
+            .table .fa {
+                font-size: 2.5rem;
+                text-align: center;
+            }
+
+            .cards .fa {
+                font-size: 7.5rem;
+            }
+        }
+
+        @@media only screen and (max-width: 1000px) {
+            .step-app > .step-steps {
+                display: inline-block;
+                padding: 1px;
+                color: white;
+                background-color: #848484;
+                text-decoration: none;
+                border-right: 1px solid #fff;
+                word-wrap: break-word;
+                width: 100%;
+            }
+        }
+
+        .button1 {
+            font-size: 13px;
+        }
+
+        .required:before {
+            content: '*';
+            color: red;
+        }
+
+        input[type='date'] {
+            position: relative;
+        }
+
+        ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+            position: absolute;
+        }
+
+        ::-webkit-clear-button {
+            right: 2.5em;
+        }
+
+        ::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        ::-webkit-calendar-picker-indicator {
+            right: 0;
+            padding: .539em .34em;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: rgba(0, 0, 0, 0);
+            opacity: 1;
+            display: block;
+            background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+            background-size: 20px 20px;
+            width: 20px;
+            height: 20px;
+            border-width: thin;
+            margin-left: 50px;
+        }
+
+
+        input[type='date'] {
+            position: relative;
+        }
+
+        ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+            position: absolute;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: rgba(0, 0, 0, 0);
+            opacity: 1;
+            display: block;
+            background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+            background-size: 20px 20px;
+            width: 20px;
+            height: 20px;
+            border-width: thin;
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        @if (Model.Search)
+        {
+            <div class="panel-heading">Agreement Of Lease Termination</div>
+            <br />
+            <div style="width: 90%;margin: 0 auto;">
+                @using (Html.BeginForm("Termination", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Search=" + false + "&Render=" + true + "&Id=0") }@*, FormMethod.Get*@))
+{
+@Html.AntiForgeryToken()
+
+<br />
+<div class="form-group">
+    @Html.Label("Application Reference Number", htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-3">
+        @Html.TextAreaFor(model => model.Message, new { @class = "form-control", @Name = "ReferenceNumber", @required = "required" })
+        @Html.ValidationMessage("ReferenceNumber", "", new { @class = "text-danger" })
+    </div>
+</div>
+<br />
+<div id="divComment" style="display:none">
+    <div class="form-group">
+        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-4">
+            @Html.TextArea("Comment", new { @class = "form-control" })
+            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <br />
+    <br />
+    <br />
+</div>
+<br />
+<br />
+
+<div id="divbtn" style="display:block" class="col-md-offset-2">
+    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+    <br />
+    <br />
+    <br />
+</div>
+}
+            </div>
+        }
+        else if (Model.Render || Model.Review)
+        {
+            <div class="panel-heading">Evaluating Application</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Application Type</th>
+                            <th>Application Reference Number</th>
+                            <th>Agreement Created Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Model.HumanSettlementApplication.ApplicantFullName</td>
+                            <td>@Model.HumanSettlementApplication.PurchaserType.Name</td>
+                            <td>@Model.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                            @if (Model.HumanSettlementApplication.IsMaster)
+                            {
+                                Deposit = Model.HumanSettlementLeaseMaster.DepositeAmount.ToString("c");
+                                Outstanding = Model.HumanSettlementLeaseMaster.DepositeAmount.ToString("c");
+                                <td>@Model.HumanSettlementLeaseMaster.CreatedDateTime.Value</td>
+                                <td>@Model.HumanSettlementLeaseMaster.Status.Name</td>
+                            }
+                            else
+                            {
+                                Deposit = Model.HumanSettlementLeaseDetails.DepositeAmount.ToString("c");
+                                Outstanding = Model.HumanSettlementLeaseDetails.DepositeAmount.ToString("c");
+                                <td>@Model.HumanSettlementLeaseDetails.CreatedDateTime.Value</td>
+                                <td>@Model.HumanSettlementLeaseDetails.Status.Name</td>
+                            }
+                            <td>
+                                @Html.ActionLink("View", "Details", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ApplicationId=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br />
+            </div>
+            if (Model.Review)
+            {
+                @*<div class="panel-heading">Evaluating Application</div>*@
+                <br />
+                <div class="panel-heading">Tenant Account Balance</div>
+                <br />
+                <div style="width: 90%;margin: 0 auto;">
+
+                    <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Deposit Amount Paid
+                                </th>
+                                <th>
+                                    Amount Due
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @Deposit
+                                </td>
+                                <td>
+                                    @Outstanding
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br />
+                </div>
+                <br />
+                <div class="panel-heading">Upload Financial Documents</div>
+                @Html.Partial("_DocumentsPartialPrePostInspectionHSD", Model.DocumentsViewModel)
+            }
+            using (Html.BeginForm("HumanAgreementTermination", "HumanSettlementApplication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <br />
+                @Html.HiddenFor(model => model.HumanSettlementApplication.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;", @Name = "ApplicatoinId" })
+                @Html.HiddenFor(model => model.HumanSettlementApplication.ColorCode, htmlAttributes: new { @class = "form-control", @Style = "display:none;", @Id = "EndDateId" })
+                if (Model.Render)
+                {
+                    <div class="form-horizontal">
+                        @if (!string.IsNullOrEmpty(Model.HumanSettlementApplication.ServeNoticeDate.ToString()))
+                        {
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.LeaseTermination.TerminationDate, "Notice Date", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-2">
+                                    @Html.EditorFor(model => model.HumanSettlementApplication.ColorCode, new { htmlAttributes = new { @class = " form-control", onchange = "ChangeDate()", @required = "required", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.LeaseTermination.TerminationDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        <div class="form-group">
+                            <span>@Html.LabelFor(model => model.LeaseTermination.TerminationDate, "Termination Date", htmlAttributes: new { @class = "control-label col-md-2" }) <b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-2">
+                                @Html.EditorFor(model => model.LeaseTermination.TerminationDate, "Date", new { htmlAttributes = new { @class = " form-control", onchange = "ChangeDate()", @required = "required", @Name = "ServeNoticeDate", @Id = "ServeNoticeDate" } })
+                                @Html.ValidationMessageFor(model => model.LeaseTermination.TerminationDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span> @Html.Label("Termination Reason", htmlAttributes: new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-2">
+                                @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @onchange = "ChangeStatus()", @Id = "ApprovalStatusId", @Name = "ApprovalStatusddl", @required = "required" })
+                                @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.Review)
+                {
+                    <div class="form-group">
+                        <span>@Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1 col-md-offset-1" }) <b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Id = "ApprovalStatus", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                }
+                <br />
+                <div id="divbtn" style="display:block" class="col-md-offset-2">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+<div id="otp_success" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p id="_successId"><strong>Success!</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal" @*onclick="location.href='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = Model._Data })'"*@>OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+
+
+    <script>
+    $(function () {
+        $('#RCSTable').DataTable();
+        $('#RCSTable2').DataTable();
+        var display = "@ViewBag.DisplaySwal";
+        var message = "@ViewBag.MessageBodySwal";
+        if (display != null && display != "") {
+            var message = "@ViewBag.MessageBodySwal";
+            swal("Error!", message, "warning");
+        }
+        var success = "@ViewBag.success";
+        if (success != null && success != "") {
+            //$('#_successId').text('Successfully actioned, communication sent.')
+            $('#otp_success').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        }
+    });
+
+    function OpenChatModal() {
+
+        $('#MessageModal').modal('show');
+    };
+
+
+    </script>
+
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function ChangeDate() {
+        debugger;
+        var Startdate = document.getElementById("ServeNoticeDate").value;
+        var ApplicationEndDate = new Date('@enddate');
+        var today = new Date();
+        var thisDate = new Date(Startdate);
+        var day_difference = (thisDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+        var days = parseInt(day_difference + 1);
+        var month = thisDate.getMonth() + 1;
+        var year = thisDate.getFullYear();
+        var dateSelected = thisDate.getUTCDate();
+        var firstDay = 1;
+        var LastDate = new Date(year, month, 0, 2, 0, 0);
+        var LastDay = LastDate.getDate();
+        var TodayMonth = today.getMonth();
+        var date = true;
+        var fullcalender = LastDay;
+        if (thisDate > ApplicationEndDate) {
+            swal("Error!", "The lease terminates before date selected!", "warning");
+            $('#ServeNoticeDate').val('');
+        }
+        if (days < fullcalender) {
+            var tt = days;
+            swal("Error!", "Please select full calender month!", "warning");
+            $('#ServeNoticeDate').val('');
+        }
+        if (month >= TodayMonth && dateSelected < LastDay && days >= fullcalender) {
+            var tt3 = days;
+            swal("Error!", "Please select last day of the month!", "warning");
+            $('#ServeNoticeDate').val('');
+            //$('#lease_stattdate').val('');
+            //$('#ServeNoticeDate').val('');
+            //$('#end_date').val('');
+            //$('#termination_notice').val('');
+        }
+        if (month >= TodayMonth && dateSelected == LastDate) {
+            var tempday = 15;
+            var nextdate = new Date(year, month + 23, tempday);
+            var NXmonth = nextdate.getMonth();
+            var NXyear = nextdate.getFullYear();
+            var terminateday = new Date(NXyear, NXmonth + 1, 0).getDate();
+            var exitdate = new Date(NXyear, NXmonth, terminateday).toLocaleDateString('en-ZA');
+            var renewalNotice = new Date(NXyear, month + 20, 1).toLocaleDateString('en-ZA');
+            var terminationNotice = new Date(NXyear, month + 23, 1).toLocaleDateString('en-ZA');
+
+            //$('#renewal_notice').val(renewalNotice);
+            //$('#end_date').val(exitdate);
+            //$('#termination_notice').val(terminationNotice);
+        }
+    }
+
+
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to send notice for this application?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+
+                document.getElementById("btnApproval").click();
+            }
+        });
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }});
+</script>
+
+

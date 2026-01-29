@@ -1,0 +1,1130 @@
+@using C8.eServices.Mvc.DataAccessLayer;
+@model C8.eServices.Mvc.ViewModels.InstantEFTViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<style>
+    .isRecurring {
+        display: block;
+    }
+
+    .checkbox-round {
+        /*content: "✔";*/
+        margin-top: -11px;
+        margin-left: -4px;
+        text-align: center;
+        text-shadow: rgb(176, 190, 217) 1px 1px, rgb(176, 190, 217) -1px -1px, rgb(176, 190, 217) 1px -1px, rgb(176, 190, 217) -1px 1px;
+    }
+
+        .checkbox-round:checked {
+            content: "✔";
+        }
+</style>
+
+<h4>Instant EFT Payments</h4>
+
+<div class="alert alert-warning" id="associatedAlert" style="display:none">
+    @ViewBag.InstantEFTWarning
+</div>
+
+@*<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>Current Once Off Payments & Debit Orders</p>
+                <p>1.	In the Tab <strong>“Current Once Off Payments & Debit Orders”</strong> all your Debit Order Instructions created will be displayed here.</p>
+                <p>2.	Use the <strong>“Search”</strong> bar to search between your different Debit Order Instructions created.</p>
+                @*<p>3.	Under <strong>“Linked Account”</strong>, you may edit or remove a bank account.</p>*@
+@*<br />
+    <p>Create a Once Off Payment or Recurring Debit Order</p>
+    <p>1.	Select the dropdown <strong>“Bank Account”</strong>, and select your preferred account type you would like to make payment with.</p>
+    <p>2.	Select the dropdown <strong>“Municipal Account No”</strong>,and select the account you would like the debit order to go through.</p>
+    <p>3.	Enter the Amount. (Minimum Amount is R50.00)</p>
+    <p>4.	Click the Radio button <strong>“YES”</strong> for a recurring Debit Order Payment to go off every month, and <strong>"NO"</strong> if you would like to make a Once-Off Payment.</p>
+    <p>5.	Enter the Debit Order Day. (Enter days between the 1st – 31st)</p>
+    <p>6.	Select the Start Date.</p>
+    <p>7.	Click Pay when done to create the Once Off Payment or Debit Order Instruction.</p>
+    <p>8.	Click Reset to clear all fields.</p>
+    <br />*@
+@*<p>
+        <h2><strong>Please Note:</strong></h2>  Your bank account will be <b>Debited</b> according to your <b>Monthly Consumption</b> which will be populated automatically in the <b>Debit Amount</b> field.
+        You may change this amount at any time and set up a recurring or once off payment.
+    </p>*@
+@*</div>
+            </div>
+        </div>
+    </div>*@
+
+<div id="CurrentBulkInstantEFT">
+    <div class="panel-group" id="CurrentBulkInstantEFTGrp">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Current Instant EFT Payments
+            </div>
+
+            <div style="width: 90%; margin: 0 auto;">
+                <br />
+                <table id="currentBatchesTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                    <thead>
+                        <tr>
+                            <th>
+                                Reference No
+                            </th>
+                            <th>
+                                Amount
+                            </th>
+                            <th>
+                                Bulk Payment
+                            </th>
+                            <th>
+                               Dated Created
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>View</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@*@using (Html.BeginForm("IndexBatchEFTPayment", "InstantEFT", FormMethod.Post, new { onkeydown = "return event.keyCode!=13" }))
+{
+    @Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.InstantEFT.Id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })*@
+    <div class="panel-group" id="BatchPayment">
+
+        @*Main Batch Panel Body*@
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNewBatchPayment">
+                        <span>New EFT Payment - Create a single Instant EFT Payment for a municipal account or Bulk Instant EFT Payment for multiple Municipal Accounts</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNewBatchPayment" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @* New Batch Payment Body*@
+                    <div id="NewBatchDiv">
+                        <div class="alert alert-warning" id="associatedAlert" style="display:none">
+                            @ViewBag.AccountsMessage
+                        </div>
+
+
+
+                        <table id="NewBatchPaymentTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Account Number
+                                    </th>
+                                    <th>
+                                        Amount Due (R)
+                                    </th>
+                                    <th>
+                                        Due Date
+                                    </th>
+                                    <th>
+                                        Payment Amount(R)
+                                    </th>
+                                    <th>
+                                        <label class="ckbox"><input type="checkbox" value="default" id="selectAll" checked onClick="toggle(this)"><span> All</span></label>
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot align="right">
+                                <tr>
+                                    <th>
+                                        Total Amount Due (R)
+                                    </th>
+                                    <th>&nbsp;</th>
+                                    <th>
+                                        Payment Total (R)
+                                    </th>
+                                    <th id="subTotal">&nbsp;</th>
+
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </tfoot>
+
+                        </table>
+                    </div>
+                    @*<div class="alert alert-danger col-md-10" id="AMTPAlert" style="display:none;margin-left: 15px;">
+                            <p><strong>Please note:</strong>The Debit order amount needs to be a minimum of R50,00 and a maximum of R1M (1 Million Rand)</p>
+                        </div>*@
+                    <div class="panel-group" id="MakePayment">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseMakePayment">
+                                        <span>Make Payment</span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapseMakePayemnt" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    <form action="https://www.goeft.co.za/eft/gateway/index" method="post" enctype="multipart/form-data">
+                                        <div class="form-horizontal">
+                                            <div class="col-md-6">
+                                                <input type="hidden" name="MerchantId" value="fc85c334-beee-429c-bf73-a9f07e63d193">
+                                                @*<input type="hidden" name="Reference" value="test"><br>*@
+                                                <input type="hidden" id="ReturnUrl" name="ReturnUrl" value="">
+                                                <div class="form-group">
+                                                    @Html.Label("Reference No", new { @class = "control-label col-md-4" })
+                                                    <div class="col-md-6">
+														@*<--! JK.20191011a - Converted to HTML and included name. -->*@
+														<input type="text" id="Reference1" name="Reference1" class="form-control" readonly="readonly">
+                                                        @*Html.Editor("Reference No", new { htmlAttributes = new { @class = "form-control", @id = "Reference1", @name= "Reference1", @readonly = "readonly" } })*@
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" style="display:none">
+                                                    @Html.Label("Reference No2", new { @class = "control-label col-md-4" })
+                                                    <div class="col-md-6">
+														@*<--! JK.20191011a - Converted to HTML and included name. -->*@
+														<input type="text" id="Reference2" name="Reference2" class="form-control" readonly="readonly">
+                                                        @*Html.Editor("Reference No2", new { htmlAttributes = new { @class = "form-control", @id = "Reference2", @name = "Reference2", @readonly = "readonly"} })*@
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.Label("EFT Amount", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                    <div class="col-md-6">
+														@*<--! JK.20191011a - Converted to HTML and included name. -->*@
+														<input type="text" id="Amount" name="Amount" class="form-control" readonly="readonly">
+                                                        @*Html.Editor("EFT Amount", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @id = "Amount", @name="Amount" } })*@
+                                                        @*@Html.ValidationMessageFor(model => model.DebitOrder.Amount, "", new { @class = "text-danger" })*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                    </div>
+                                                    <div class="alert alert-danger col-md-10" id="AMTPAlert" style="display:none;margin-left: 15px; margin-top:-15px">
+                                                        <p><strong></strong>Please select a bank Account</p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                    </div>
+                                                    <div class="alert alert-danger col-md-10" id="AMYAlert" style="display:none;margin-left: 15px;">
+                                                        <p><strong>Please note:</strong>The EFT amount needs to be a minimum of R50,00 @*and a maximum of R1M (1 Million Rand)*@</p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                    </div>
+                                                    <div class="alert alert-warning col-md-10" id="associatedAlert" style="display:block;margin-left: 15px;">
+                                                        <p><strong>Please note:</strong>The EFT Amount is the <b>Total Amount of the Payment.</b> This amount will be <b>Deducted</b> from your Bank Account as a single transaction.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @*<div class="form-group">
+                <div class="col-md-2">
+                </div>
+                <div class="alert alert-warning col-md-5" id="associatedAlert" style="display:block;margin-left: 15px;">
+                    <p><strong>Please note:</strong> If you select recurring above, your account will be debited every month on the selected <b>Debit Order Day</b> from the the selected <b>Start Date</b> below.</p>
+                </div>
+            </div>*@
+
+                                            <div class="form-group">
+                                                <div class="col-md-offset-2 col-md-10">
+                                                    <input id="submitBtn" type="button" value="Pay" onclick="submitpopup()" class="btn btn-primary" />
+                                                    <input id="submitBtnFinal" value="Pay" style="display: none;" class="btn btn-primary" />
+                                                    <input type="submit" value="Submit" id="EFTSubmit" style="display: none;" class="btn btn-primary" />
+                                                    @*<input id="submitBtn" type="submit" value="Pay" onclick="return confirm('Are you sure you would like to continue with this Debit Order Instruction?')" class="btn btn-primary" />*@
+                                                    <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>@* New batch Payment panel*@
+
+    </div>
+@*}*@
+@*//Submitbtn*@
+<div id="SubmitModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Confirm" class="btn btn-primary" />
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="ErrorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleTextE"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentTextE"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" id="closeBtn" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="RequestModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="RQSmodalTitleText">Request Municipal Account Access</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="RQSTmodalContentText">
+                        <div class="form-horizontal">
+                            @*<div class="form-group">
+                                    @Html.Label("Municipal Account", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.Editor("MunicipalAccount", new { htmlAttributes = new { @class = "form-control", @id = "MunicipalAccount", @readonly = true } })
+                                    </div>
+                                </div>*@
+                            <div class="form-group">
+                                <div class="col-md-2">
+                                    <span></span>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                    @Html.Label("Reason for Request", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextArea("Comment", new { @class = "form-control", @id = "Comment" })
+                                    </div>
+                                </div>*@
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RequestAccount">Send Request</button>
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@{Html.RenderAction("BatchDailySequence", "InstantEFT");}
+@section Scripts{
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+
+        function submitpopup() {
+            var subVal = 0;
+            var newSub = 0;
+            var sourceVal = 0;
+            inputs = document.getElementsByClassName('PayAmtVal');
+            checkboxes = document.getElementsByName('foo');
+            var MAcc = 0;
+            var totalPM = $("#Amount").val();
+            //alert($("#BankAccountDdl").val());
+            debugger;
+            if (totalPM < 50) {
+                $("#AMYAlert").show();
+            }
+            else {
+                $("#AMTPAlert").hide();
+                $("#AMYAlert").hide();
+                var span = document.createElement("span");
+                span.setAttribute("id", "spanContent");
+                span.innerHTML = '<h4>Instant EFT Payment Summary</h4>';
+                span.innerHTML += '<h6 style="color:red">Are you sure you want to continue with this Instant EFT Payment?</h6>';
+                var municpalAccNo = 0;
+                for (var i = 0, n = inputs.length; i < n; i++) {
+                    if (checkboxes[i].checked) {
+                        sourceVal = parseFloat(inputs[i].value).toFixed(2);
+                        //SumDebitAmount.push(sourceVal);
+                        //alert("Val for sourceVal: " + sourceVal);
+                        MAcc = inputs[i].id;
+                        MAcc = MAcc.substring(2, 12);
+                        span.innerHTML += 'Municipal Account <b>' + MAcc + '</b> - Payment Amount <b>R' + sourceVal + '</b><br>';
+                        municpalAccNo++;
+                        console.log(municpalAccNo);
+                    }
+                    else {
+                    }
+                }
+                @*if (municpalAccNo.length > 1) {
+                    BatchBool = "1";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar+ BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }
+                else {
+                    BatchBool = "0";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar+ BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }*@
+                span.innerHTML += '<br><h5>Total Payment Amount R' + totalPM + '</h5>';
+                
+                $("#modalTitleText").html("Confirm Instant EFT Payment");
+                $("#spanContent").remove();
+                $("#modalContentText").append(span);
+                $("#SubmitModal").modal("show");
+            }
+        }
+
+        function ArtificialSubmit() {
+            document.getElementById("submitBtnFinal").click();
+        }
+        function validateAmt(ValAmt) {
+            var DAmit = ValAmt.replace(",", ".");
+            $("#submitBtn").prop('disabled', false);//$("#btnSubmit").prop('disabled', false);
+            $("#AMYAlert").hide();
+            $("#submitBtn").prop('disabled', false);//$("#btnSubmit").prop('disabled', false);
+            //$("#AMYAlert").hide();
+            DAmit = $("#Amount").val();
+            DAmit = DAmit.replace(".", ",");
+            $("#Amount").val(DAmit);
+
+        }
+
+        function validateAmtInput(InputB, ValAmt) {
+            //debugger;
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            if (intVal(ValAmt) < 50) {
+                //  AMYAlert
+                $("#AMYAlert").show();
+            }
+
+            else {
+                //$("#submitBtn").prop('disabled', false);//$("#btnSubmit").prop('disabled', false);
+                $("#AMYAlert").hide();
+                //var DAmit = ValAmt.replace(".", ",");
+                document.getElementById(InputB).value = parseFloat(ValAmt).toFixed(2);
+                //  alert($("#Amount").val());
+            }
+
+        }
+
+        function convertToDate(data) {
+            // The 6th+ positions contain the number of milliseconds in Universal Coordinated Time between the specified date and midnight January 1, 1970.
+            var dtStart = new Date(parseInt(data.substr(6)));
+            // Format using moment.js.
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        function formatDate(data) {
+            // Format using moment.js.
+            var dtStartWrapper = moment(data);
+            return dtStartWrapper.format("YYYY/MM/DD");
+        }
+
+        $(document).ready(function () {
+            $(".PayAmtVal").focusin(function () {
+
+            });
+            $(".PayAmtVal").focusout(function () {
+                var DAmit = $("#Amount").val();
+                DAmit = DAmit.replace(",", ".");
+                $("#Amount").val(DAmit);
+                //alert($("#Amount").val());
+                validateAmt($("#Amount").val());
+            });
+
+        });
+    </script>
+    <script type="text/javascript">
+                var BatchAccNum = 0;
+        var amt2d = 0;
+        //var count = 0;
+        var amt2due = 0;
+        var amt2dueTotal = 0;
+
+            var BatchstrikeDate =@DateTime.Now.Day;
+        var BatchYear =@DateTime.Now.ToString("yy");
+       // var BatchYear = BatchYear1.substring(2, 3);
+        console.log(BatchYear);
+            var BatchMonth =@DateTime.Now.Month.ToString();
+            if (BatchMonth < 10) {
+                BatchMonth = "0" + BatchMonth;
+                    }
+        var BatchDay =@DateTime.Now.Day.ToString();
+        if (BatchDay < 10) {
+            BatchDay = "0" + BatchDay;
+        }
+            var BatchHour =@DateTime.Now.Hour.ToString();
+            var BatchMinute =@DateTime.Now.Minute.ToString();
+            var BatchSec =@DateTime.Now.Second.ToString();
+            var BatchSSec =@DateTime.Now.Millisecond.ToString();
+            
+        var startDateFormat = BatchYear + "/" + BatchMonth + "/" + BatchDay;
+        var SequenceChar = '@Session["EFTBatchCount"]';
+        //var BatchSequence1 = @ViewBag.BatSeq;
+        console.log(SequenceChar);
+        //var SequenceChar = "000";
+        //if (BatchSequence.length == 1) {
+        //    SequenceChar = "000";
+        //}
+        //else if (BatchSequence.length == 2) {
+        //    SequenceChar = "00";
+        //}
+        //else if (BatchSequence.length == 3) {
+        //    SequenceChar = "0";
+        //}
+        //else if (BatchSequence.length == 4) {
+        //    SequenceChar = "";
+        //}
+       // console.log(BatchSequence1);
+        console.log(SequenceChar);
+
+        var batchChar = "."
+        var BatchBool = "1";
+        //Batch Format- YYYYMMDD-SEQ(3)-BatchID(1)-StrikeDay(2) -20190101-001-1
+        var BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar + BatchBool;
+        //var BatchDateFormat = "." + BatchYear + BatchMonth + BatchDay + BatchHour + BatchMinute + BatchSec + BatchSSec + BatchBool + BatchstrikeDate;
+        document.getElementById('Reference1').value = BatchDateFormat;
+        document.getElementById('Reference2').value = "Bulk Instant EFT";
+        function loadBatchOrders() {
+            $('#currentBatchesTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadBatchOrders", "InstantEFT", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "ReferenceNumber", "autoWidth": true },
+                    {
+                        "data": "Amount", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            var amt2d = parseFloat(data).toFixed(2);
+                            //var AmtForm="R{0}".format(amt2d);
+                            return parseFloat(data).toFixed(2);
+                        }
+
+                    },
+                     {
+                        "data": "IsBatch", "autoWidth": true,
+                        // `data` refers to the data for the cell (defined by `mData`, which
+                        // defaults to the column being worked with, in this case is the first
+                        // Using `row[0]` is equivalent.
+                        "render": function (data, type, row) {
+                            if (data == '1') {
+                                return 'Yes';
+                            } else {
+                                return 'No';
+                            }
+
+                        }
+                    },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    { "data": "Status.Name", "autoWidth": true }
+                    ,
+                      {
+                    "data": "Data",
+                    "title": "View",
+                    "render": function (data, type, row) {
+                        var myUrl = '@Url.Action( "EFTDetails", "InstantEFT" )/' + '?q=' + data;
+                        var detailsUrl = '@Url.Action( "DisplayLinkedAccount", "CustomerLinkedAccount" )/' + '?q=' + data;
+                        var delinkUrl = '@Url.Action("DelinkAccount", "Profile" )/' + '?q=' + data;
+                        return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; '; //<a href=\"' + delinkUrl + '\" class=\"btn btn-primary btn-sm\">Delink</a>
+                    }
+
+                }
+                ],
+
+                "language": {
+                    "emptyTable": "No EFT payments.",
+                },
+                "Initcomplete": "",
+
+                "destroy": true
+            });
+
+            resetControls();
+
+
+        }
+
+
+        function loadBatchAccounts() {
+            $('#NewBatchPaymentTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadAccountBatch", "InstantEFT", new { q = Model.Customer.Data } )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    {
+                        "data": "NEW_ACCOUNT", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            BatchAccNum = data;
+                            var AccountNo = '<label id=\"MA' + data+'_ID'+'\">' + data + '</label>';
+
+                            return AccountNo;
+                        }
+                    },
+                    {
+                        "data": "PAYABLE", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            amt2d = parseFloat(data).toFixed(2);
+                            //var AmtForm="R{0}".format(amt2d);
+                            return parseFloat(data).toFixed(2);
+                        }
+
+                    },
+                    {
+                        "data": "DUE_DATE", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "data": "PAYABLE", "autoWidth": true,
+                        "render": function (data, type, row) {
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            if (intVal(data) < 0) {
+                                amt2d = parseFloat(0).toFixed(2);
+                            }
+                            else {
+                                amt2d = parseFloat(data).toFixed(2);
+                                //var AmtForm="R{0}".format(amt2d);
+
+                            }
+                            //onfocus=\"setInputFilter(document.getElementById(' + BatchAccNum + '_' + count + '_amt' +'), function(value) {return /^\d*[,.]?\d{0,2}$/.test(value); });\"  + '_' + count
+                            //onkeypress=\"return isNumberKey(event,this)\"
+                            var AmtIn = '<input onkeypress=\"return isNumberKey(event,this)\"   class=\"form-control text-box single-line PayAmtVal\" style=\"height:25px!important\" onblur=\"toggleInputValue()\"  id=\"MA' + BatchAccNum + '_amt' + '\" value =\"' + amt2d + '\" type=\"text\">';
+                            return AmtIn;
+                        }
+
+                    },
+                    {
+                        "data": "Data",
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            var selectRow = "";
+                            if (amt2d == 0) {
+                                selectRow = '<label class=\"ckbox\"><input class=\"checkbox-round \" id=\"MA' + BatchAccNum + '_foo' + '\" value=\"' + data + '\" name=\"foo\" onClick=\"toggleValue(this,' + BatchAccNum + ')\" type=\"checkbox\"><span></span></label>';
+
+                            }
+                            else {
+                                selectRow = '<label class=\"ckbox\"><input class=\"checkbox-round \" id=\"MA' + BatchAccNum + '_foo' + '\" value=\"' + data + '\" name=\"foo\" onClick=\"toggleValue(this,' + BatchAccNum + ')\" checked type=\"checkbox\"><span></span></label>';
+
+                            }
+                           
+                            return selectRow;
+
+                        }
+
+                    }
+
+                ],
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                   // count = 0;
+                    //loadFilters();
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    //document.getElementById('DebitOrder_StrikeDay').value = BatchstrikeDate;
+                    toggleInputValue();
+                   // document.getElementById('startD').value = startDateFormat;
+                    // Total over all pages
+                    total1 = api
+                        .column(1)
+                        .data()
+                        .reduce(function (a, b) {
+                            var amt3due = 0;
+                            var sumT = 0;
+                            if (intVal(b) < 0) {
+                                sumT = intVal(a) + 0;
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                            else {
+                                sumT = intVal(a) + intVal(b);
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                        }, 0);
+
+                    // Total over this page
+                    pageTotal1 = api
+                        .column(1, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            var amt3due = 0;
+                            var sumT = 0;
+                            if (intVal(b) < 0) {
+                                sumT = intVal(a) + 0;
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                            else {
+                                sumT = intVal(a) + intVal(b);
+                                amt3due = parseFloat(sumT).toFixed(2);
+                                return amt3due;
+                            }
+                        }, 0);
+
+                    // Total over all pages Amount Due
+                    total3 = api
+                        .column(3)
+                        .data()
+                        .reduce(function (a, b) {
+                            var sumT = 0;
+                            if (intVal(b) < 0) {
+                                sumT = intVal(a) + 0;
+                                amt2dueTotal = parseFloat(sumT).toFixed(2);
+                                return amt2dueTotal;
+                            }
+                            else {
+                                sumT = intVal(a) + intVal(b);
+                                amt2dueTotal = parseFloat(sumT).toFixed(2);
+                                return amt2dueTotal;
+                            }
+                        }, 0);
+
+                    // Total over this page Amount Due
+                    pageTotal3 = api
+                        .column(3, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            var selectAll = document.getElementById('selectAll');
+                            var sumT = 0;
+                            if (selectAll.checked) {
+                           if (intVal(b) < 0) {
+                               sumT = intVal(a) + 0;
+                               amt2due = parseFloat(sumT).toFixed(2);
+                               return amt2due;
+                           }
+                           else {
+                               sumT = intVal(a) + intVal(b);
+                               amt2due = parseFloat(sumT).toFixed(2);
+                               document.getElementById('Amount').value = amt2due;
+                               return amt2due;
+                           }
+                        }
+                       else {
+                           amt2due = 0;
+                           return amt2due;
+                     }
+                        }, 0);
+
+                    // Update footer
+                    $(api.column(3).footer()).html(
+                       pageTotal3
+                    );
+                    $(api.column(1).footer()).html(
+                     pageTotal1
+                    );
+                },
+                "language": {
+                    "emptyTable": "No debit orders.",
+                },
+                "Initcomplete": "",
+                "paging": false,
+                "destroy": true
+            });
+
+           // resetControls();
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6, 13)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        function toggle(source) {
+            checkboxes = document.getElementsByName('foo');
+            inputs = document.getElementsByClassName('PayAmtVal');
+                //ctrl values
+                debugger;
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                checkboxes[i].checked = source.checked;
+                if (source.checked) {
+                    document.getElementById(inputs[i].id).disabled = false;
+                    loadBatchAccounts();
+                    document.getElementById('Amount').value = amt2due;
+                    BatchBool = "1";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar+ BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }
+                else {
+                    document.getElementById(inputs[i].id).disabled = true;
+                    document.getElementById('Amount').value = 0;
+                    BatchBool = "0";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar + BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }
+            }
+          
+
+        }
+
+        function toggleValue(source, rowAcc) {
+            var paymentSub = document.getElementById('subTotal');
+            var subVal = 0;
+                subVal = parseFloat(paymentSub.innerHTML).toFixed(2);
+            var newSub = 0;
+            //ctrl values + '_' + rowCount
+            var amtInputCtrl = 'MA'+rowAcc  + '_amt';
+            var sourceVal = parseFloat(document.getElementById(amtInputCtrl).value).toFixed(2);
+            debugger;
+            if (source.checked) {
+                if (isNaN(parseFloat(sourceVal))) {
+                    sourceVal = 0;
+                }
+                newSub = parseFloat(+subVal + +sourceVal).toFixed(2);
+                document.getElementById(amtInputCtrl).disabled = false;
+                paymentSub.innerHTML = newSub;
+                document.getElementById('Amount').value = newSub;
+            }
+            else {
+                if (isNaN(parseFloat(sourceVal))) {
+                    sourceVal = 0;
+                }
+                newSub = parseFloat(subVal - sourceVal).toFixed(2);
+                document.getElementById(amtInputCtrl).disabled = true;
+                paymentSub.innerHTML = newSub;
+                document.getElementById('Amount').value = newSub;
+            }
+
+
+            toggleInputValue();
+        }
+        function toggleInputValue() {
+            var paymentSub = document.getElementById('subTotal');
+            var subVal = 0;
+            var isValid = true;
+            var newSub = 0;
+            var sourceVal = 0;
+            inputs = document.getElementsByClassName('PayAmtVal');
+            checkboxes = document.getElementsByName('foo');
+            var DAmit = 0;
+            //ctrl values
+            var cCon = 0;
+            for (var i = 0, n = inputs.length; i < n; i++) {
+                if (checkboxes[i].checked) {
+                    cCon++;
+                    if (isNaN(parseFloat(inputs[i].value))) {
+                        sourceVal = 0;
+                    }
+
+
+                    else {
+                        if (inputs[i].value > 1000000) {
+                            isValid = false;
+
+                        }
+                        else if (inputs[i].value < 50) {
+                            isValid = false;
+
+                        }
+                        else {
+
+                        }
+
+
+
+                        sourceVal = parseFloat(inputs[i].value).toFixed(2);
+                    }
+                    if (cCon> 1) {
+                        BatchBool = "1";
+                        BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar + BatchBool;
+                        document.getElementById('Reference1').value = BatchDateFormat;
+                    }
+                    else {
+                        BatchBool = "0";
+                        BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar + BatchBool;
+                        document.getElementById('Reference1').value = BatchDateFormat;
+                    }
+                    //DAmit = sourceVal.replace(",", ".");
+                   // validateAmtInput(inputs[i].id, sourceVal);
+                }
+               else {
+                    sourceVal = parseFloat(0).toFixed(2);
+
+               }
+                newSub = parseFloat(+newSub + +sourceVal).toFixed(2);
+            }
+            subVal = parseFloat(newSub).toFixed(2);
+            paymentSub.innerHTML = subVal;
+            document.getElementById('Amount').value = subVal;
+
+            if (isValid == false) {
+                document.getElementById('submitBtn').disabled = true;
+                $("#AMYAlert").show();
+
+            }
+            else {
+                document.getElementById('submitBtn').disabled = false;
+                $("#AMYAlert").hide();
+            }
+
+        }
+        function loadFilters() {
+            var body = document.getElementsByTagName('body')[0];
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.onload = function () {
+                callFunctionFromScript();
+            }
+
+
+            inputs = document.getElementsByClassName('PayAmtVal');
+            //ctrl values
+            for (var i = 0, n = inputs.length; i < n; i++) {
+                //var dd = /^\d*[,.]?\d{0,2}$/.test(value);
+                script.text += 'setInputFilter(document.getElementById("' + inputs[i].id +'"), function (value) {return /^\\d*[,.]?\\d{0,2}$/.test(value);});';
+            }
+            //alert(script.text);
+           // body.removeChild(script);
+            body.appendChild(script);
+
+        }
+        $('#closeBtn').click(function () {
+            location.reload();
+        })
+        function resetControls() {
+           // $("#BankAccountDdl option:eq(0)").prop("selected", true);
+           // $("#AccountDdl option:eq(0)").prop("selected", true);
+            //$("#DebitOrder_Id").val("");
+            $("#Amount").val("");
+            //$("#DebitOrder_StrikeDay").val("");
+           // $("#startD").val("");
+            loadBatchAccounts();
+        }
+        $(function () {
+            var CurrUrl = window.location.href;
+            var ReturnUrl = CurrUrl.replace("IndexBatchEFTPayment", "ReturnLink");
+            document.getElementById('ReturnUrl').value = ReturnUrl;
+            loadBatchOrders();
+            // var dd = /^\d*[,.]?\d{0,2}$/.test(value);
+            //alert(dd);
+            var ddd = "/^\\d*[,.]?\\d{0,2}$/.test(value);";
+           // alert(ddd);
+
+            loadBatchAccounts();
+            //loadFilters();
+            $('#btnReset').on('click', function () {
+                resetControls();
+            });
+        var DebitAmount = new Array();
+        var MunicipalAccNum = new Array();
+            //Payment Button
+            $('#submitBtnFinal').on('click', function () {
+            var custf = "@Model.Customer.Id";
+           // alert(custf);
+            var cust = 5;
+            var paymentSub = document.getElementById('subTotal');
+            var subVal = 0;
+            var newSub = 0;
+            var sourceVal = 0;
+            inputs = document.getElementsByClassName('PayAmtVal');
+                checkboxes = document.getElementsByName('foo');
+                var MAcc = 0;
+              
+
+
+            for (var i = 0, n = inputs.length; i < n; i++) {
+                if (checkboxes[i].checked) {
+                    sourceVal = parseFloat(inputs[i].value).toFixed(2);
+                    DebitAmount.push(sourceVal);
+                    //alert("Val for sourceVal: " + sourceVal);
+                    MAcc = inputs[i].id;
+                    MAcc = MAcc.substring(2,12);
+                    MunicipalAccNum.push(MAcc);
+                   // alert("Val for MAcc: " + MAcc);
+                }
+                else {
+
+                }
+
+                }
+                if (MunicipalAccNum.length > 1) {
+                    BatchBool = "1";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar+ BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }
+                else {
+                    BatchBool = "0";
+                    BatchDateFormat = "" + BatchYear + BatchMonth + BatchDay + SequenceChar + BatchBool;
+                    document.getElementById('Reference1').value = BatchDateFormat;
+                }
+                debugger;
+               // accountNo: $('#MunicipalAccount').val(), Comment: $('#BankAccountDdl').val()$("#BankAccountDdl option:eq(0)")
+
+                if (DebitAmount.length > 0) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("BulkPayment", "InstantEFT")',
+                        data: { ControllerDebitAmount: DebitAmount, CusId: "@Model.Customer.Id", MAccounts: MunicipalAccNum, bat: BatchDateFormat, refer: $("#Reference2").val() , eftTotal: $("#Amount").val()}
+                    }).success(function (data) {
+
+                       // $('#Comment').val("");
+                        if (data.isValid) {
+							// JK.20191011a - Need to convert this to a comma so that it is accepted as a decimal by controller.
+							$("#Amount").val($("#Amount").val().replace(".", ","));
+                            document.getElementById("EFTSubmit").click();
+                             $("#SubmitModal").hide();
+                            $("#spanContent").remove();
+                            $("#modalTitleTextE").html("EFT Payment Processing");
+
+                            $("#modalContentTextE").html("Please wait...");
+                            $("#ErrorModal").modal("show");
+                            $("#closeBtn").hide();
+                        }
+                        else if (data.isRequested) {
+
+                            //$("#modalTitleText").html("Request Already Exists");
+                            //$("#spanContent").remove();
+                            //$("#modalContentText").html("You already have an active request pending on this account.");
+                            //$("#ErrorModal").modal("show");
+                            //$("#statusFalse").show();
+                            //$("#statusTrue").hide();
+
+                            //$("#submitBtn").prop('disabled', true);
+
+                        }
+                        else {
+
+                            $("#modalTitleTextE").html("Error");
+
+                            $("#modalContentTextE").html("Instant EFT Payment failed! Please try again later. ");
+
+                            $("#ErrorModal").modal("show");
+
+                            $("#closeBtn").show();
+
+                        }
+
+
+                    });
+                }
+        });
+        });
+
+    </script>
+    <script>
+        setInputFilter(document.getElementById("Amount"), function (value) {
+            return /^\d*[,.]?\d{0,2}$/.test(value);
+        });
+
+        //setInputFilter(document.getElementsByClassName("PayAmtVal"), function (value) {
+        //    return /^\d*[,.]?\d{0,2}$/.test(value);
+        //});
+        //setInputFilter(document.getElementById("BankAccNo"), function (value) {
+        //return /^\d*$/.test(value);
+        //});
+        //setInputFilter(document.getElementById("BankAccHold"), function (value) {
+        //return /^([a-zA-Z _-]*)$/.test(value);
+        //});
+        function setInputFilter(textbox, inputFilter) {
+            ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+                textbox.addEventListener(event, function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    }
+                });
+            });
+        }
+
+        function blockSpecialChar(e) {
+            var k;
+            document.all ? k = e.keyCode : k = e.which;
+            return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+        }
+        function isNumberKey(evt, obj) {
+
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            var value = obj.value;
+            var dotcontains = value.indexOf(".") != -1;
+            if (dotcontains)
+                if (charCode == 46) return false;
+            if (charCode == 46) return true;
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+    </script>
+}
+

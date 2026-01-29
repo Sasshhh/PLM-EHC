@@ -1,0 +1,327 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var propertyId = ViewBag.PropertyId;
+    var customerId = ViewBag.CustomerId;
+    var status = ViewBag.RatesRebateStatus;
+    var referenceId = ViewBag.ReferenceId;
+    var appID = ViewBag.RcsAppId;
+    var applicationId = ViewBag.ApplicationId;
+    var referenceTypeId = ViewBag.ReferenceTypeId;
+    var incentivePolicyId = ViewBag.IncentivePolicyId;
+    var data = ViewBag.Data;
+    var CustomerType = ViewBag.CustomerType;
+    //var navList1 = "Null";
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+    //var CustomerModel = new CustomerProfileViewModel();
+}
+
+
+@if (ViewBag.Application == ApplicationKeys.RatesRebate)
+{
+    <h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+    <hr />
+    @Html.Partial("_NavigationPartial", navList)
+
+    @*<div style="display: block;">
+            <ol class="progtrckr" data-progtrckr-steps="1">
+                <li class="progtrckr-done">Principle Owner</li>
+                <li class="progtrckr-done">Properties</li>
+                <li class="progtrckr-done">Accounts</li>
+                <li class="progtrckr-done">Additional Owners</li>
+                <li class="progtrckr-here">Documents</li>
+                <li class="progtrckr-todo">Submit</li>
+            </ol>
+        </div>*@
+    <br />
+}
+else if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
+{
+    <div class="page-header">
+        <h3 align="center">
+            Economic Development Incentive Policy Application <br />Financial Incentives
+        </h3>
+    </div>
+
+    <div style="display: block;">
+        <ol class="progtrckr" data-progtrckr-steps="3">
+            <li class="progtrckr-done">Application Details</li>
+            <li class="progtrckr-done">Additional Contacts</li>
+            <li class="progtrckr-here">Supporting Document(s)</li>
+        </ol>
+    </div>
+    <br />
+}
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading"  data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+        
+                    @*<span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>*@
+                    Instructions
+      
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                @if (ViewBag.Application == ApplicationKeys.RatesRebate)
+                {
+                    <p>
+                        You are currently at step 5:
+                    </p>
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li><strong>Documents - Upload documents to support and verify your application per property.</strong></li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+
+                    <p>
+                        If you would like to go back to the additional owners listing page, you may click the "Back" button on the "Navigation" panel.
+                    </p>
+                    <p>
+                        Click the "Browse" Button, select the document on your personal workspace and then click the "Upload" button. Once the document has
+                        been uploaded/modified you will get a notification. You can then click "Back to previous page" to return to the previous page.
+                    </p>
+                    <p style="color:red">
+                        Allowed file extentions e.g. 'pdf', 'jpg', 'jpeg', 'png', 'gif'
+                    </p>
+                    <p>
+                        You may click the "Next" button in the "Navigation" panel to go to the submit and property listing page, where you may add another property
+                        or submit the application.
+                    </p>
+                }
+                else
+                {
+                    <p>
+                        Click the "Browse" Button, select the document on your personal workspace and then click the "Upload" button. Once the document has
+                        been uploaded/modified you will get a notification. You can then click "Next" to end the process.
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                        Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">
+                                @if (ViewBag.Application == ApplicationKeys.RatesRebate)
+                                {
+                                   @Html.EncodedActionLink("Back", "Index", "AddItionalPropertyOwner", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary" })
+                                }
+                                else if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
+                                {
+                                    @Html.EncodedActionLink("Back", "Index", "AdditionalPropertyContacts", new { incentivePolicyPropertyId = referenceId }, new { @class = "btn btn-primary" })
+                                }
+                                else
+                                {
+                                    <a class="btn btn-primary" href="javascript:goBack();">Back</a>
+
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+
+                                    @if (ViewBag.Application == ApplicationKeys.RatesRebate)
+                                    {
+                                        <a class="btn btn-primary" href="@Html.Raw( Model.ReturnUrl.Contains( "?" ) ? Model.ReturnUrl.Split('?')[0] + "?q=" + HttpUtility.UrlEncode(SecureActionLinkExtension.Encrypt(Model.ReturnUrl.Split('?')[1]))   :  Model.ReturnUrl )">Next</a>
+                                    }
+                                    else if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
+                                    {
+                                        @Html.ActionLink("Save", "Index", "IncentivePolicy", null, new { @class = "btn btn-primary" })
+                                        <span>&nbsp;</span>
+                                       @Html.EncodedActionLink("Submit Application", "SubmitApplication", "IncentivePolicy", new { incentivePolicyId }, new { @class = "btn btn-primary disablelink", id = "btnSubmit", title = "You must agree with terms and conditions before submitting your application." })
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-primary" href="@Html.Raw(Model.ReturnUrl )">Next</a>
+                                    }
+
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+<div class="panel-group" id="documentsUpload">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+           
+                    Documents Upload
+            
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @if (ViewBag.CustomerType == 7)
+                {
+                    @*<h4>Please Note: Document Uploads is Optional</h4>*@
+                }
+                <br />
+                @if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
+                {
+                    @Html.Partial("_LargeDocumentsPartial", Model)
+
+                }
+                else
+                {
+                    @Html.Partial("_DocumentsPartialPOP", Model)
+                }
+
+            </div>
+        </div>
+    </div>
+    @if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 id="instructionsTitle" class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseDeclaration">
+                        <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                        Declaration
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseDeclaration" class="panel-collapse collapse in">
+                <div class="panel-body">
+
+                    <p>
+                        <label style="color:red">*</label> <input type="checkbox" id="chkAgree" name="agreeTcCs" value="true" /> &nbsp; I, the applicant <input id="declareName" type="text" placeholder="Full Name" style="width:250px" /> do hereby declare that the information supplied is to the best of my knowledge, true and correct.
+                        I acknowledge that the Municipality reserves the right to prosecute anyone who willfully provides false information with the intention to benefit unlawfully from the rebates awarded.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                        Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">
+
+                                @Html.EncodedActionLink("Back", "Index", "AdditionalPropertyContacts", new { incentivePolicyPropertyId = referenceId }, new { @class = "btn btn-primary" })
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    @Html.ActionLink("Save", "Index", "IncentivePolicy", null, new { @class = "btn btn-primary" })
+                                    <span>&nbsp;</span>
+                                    @Html.EncodedActionLink("Submit Application", "SubmitApplication", "IncentivePolicy", new { incentivePolicyId }, new { @class = "btn btn-primary disablelink", id = "btnbtnSubmit", title = "You must agree with terms and conditions before submitting your application." })
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@*modal for missing documents*@
+
+
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>*@
+                <h4 class="modal-title">Errors</h4>
+            </div>
+            <div class="modal-body text-danger" id="errorList">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script type="text/javascript">
+        var jsvar = '@ViewBag.DocumentErrorList';
+        var errors = jsvar.replace(/\n/g, "<br />");
+        console.log(errors);
+        $(document).ready(function () {
+            // Displays a triangle to tell users if the panel is collapsable.
+            $('#instructionsTitle').on("click", function () {
+                var span = $('#instructionsTitle').find('span');
+                if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                    span.removeClass('glyphicon-triangle-top');
+                    span.addClass('glyphicon-triangle-bottom');
+                } else {
+                    span.removeClass('glyphicon-triangle-bottom');
+                    span.addClass('glyphicon-triangle-top');
+                }
+
+            });
+            if (errors !== null && errors.length > 0) {
+                $('#errorList').html(errors);
+                $('#errorModal').modal('show');
+                errors = "";
+            }
+        });
+
+        function signDeclaration(data) {
+            bootbox.confirm({
+                title: "Declaration",
+                message: '<p>' + 'I do hereby declare that the information supplied is to the best of my knowledge, true and correct.' +
+                    'I acknowledge that the Municipality reserves the right to prosecute anyone who willfully provides false information with the intention to benefit unlawfully from the rebates awarded.' + '</p>',
+                buttons: {
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> No'
+                    },
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Yes'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        // Submit application
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("SubmitApplication", "IncentivePolicy")/' + '?q=' + data,
+                            success: function (data) {
+                                $('#successMsg').html(data.result);
+                                $('#successModal').modal('show');
+                                // Reload application dashboard
+                                window.location = '@Url.Action("Index", "IncentivePolicy")';
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+
+}

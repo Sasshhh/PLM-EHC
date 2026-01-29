@@ -1,0 +1,238 @@
+.main-wrapper.side-menu .email-menu {
+  display: none;
+}
+
+.main-wrapper.side-menu .messages-wrapper {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.email-menu .list-group a.list-group-item {
+  color: #dedede;
+}
+
+.email-menu .account-storage-indicator {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.messages-wrapper {
+  overflow: hidden;
+}
+
+.messages-wrapper .input-field {
+  display: inline-block;
+}
+
+body:not(.dark-skin) .messages-wrapper .toolbar:not(.text-white) .icon {
+  color: #757575 !important;
+}
+
+.checkbox-active-tools.check-all {
+  margin-left: 1px;
+}
+
+.msg-row {
+  line-height: 20px;
+}
+
+.msg-row .msg-wrapper {
+  padding: 8px 0;
+}
+
+.msg-row p {
+  margin: 0;
+}
+
+.msg-row .msg-ck {
+  float: left;
+  margin-top: 8px;
+  margin-left: 8px;
+  width: 0px;
+}
+
+.msg-row .msg-ck .checkbox {
+  display: inline-block;
+  margin: 0;
+  left: -87px;
+}
+
+.msg-row .msg-ck label {
+  -webkit-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  transform: scale(0);
+}
+
+.msg-row .msg-star + label {
+  float: left;
+  font-size: 22px;
+  color: #999;
+  padding-right: 10px;
+  cursor: pointer;
+}
+
+.msg-row .msg-star + label:before {
+  content: "\f4d2";
+  font-family: MaterialDesignIcons;
+}
+
+.msg-row .msg-star + label:after {
+  display: none;
+}
+
+.msg-row .msg-star + label:hover {
+  color: #ffab00;
+}
+
+.msg-row [type="checkbox"]:checked.msg-star + label:before {
+  content: "\f4ce";
+  color: #ffab00;
+}
+
+.msg-row .msg-from {
+  display: inline-block;
+  width: 140px;
+  max-width: 300px;
+  font-size: 15px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+.msg-row .msg-sub {
+  display: block;
+  font-size: 14px;
+  color: #757575;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+.msg-row .msg-time-stamp {
+  display: inline-block;
+  width: 70px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.msg-row.unread .msg-sub {
+  font-weight: 600;
+}
+
+.msg-row.check-active .msg-wrapper {
+  padding-left: 20px !important;
+}
+
+.msg-row.check-active .msg-wrapper .msg-ck label {
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+}
+
+.msg-row.check-active .msg-wrapper .avatar, .msg-row.check-active .msg-wrapper .icon {
+  left: 45px !important;
+}
+
+.msg-row.check-active .msg-sub {
+  left: 98px;
+}
+
+.msg-row .msg-content {
+  line-height: 20px;
+  padding: 20px;
+}
+
+.msg-row .btn-close {
+  display: none;
+}
+
+.light-skin .email-menu {
+  background-color: #262733 !important;
+}
+
+.light-skin .msg-row.selected {
+  background-color: #FFFFD2 !important;
+}
+
+.light-skin .msg-row:hover {
+  background-color: rgba(50, 50, 50, 0.05) !important;
+}
+
+.light-skin .msg-row .msg-from {
+  color: #212121;
+}
+
+.light-skin .msg-sub, .light-skin .msg-time-stamp {
+  color: #757575;
+}
+
+.dark-skin .email-menu {
+  background-color: #3B3D51 !important;
+}
+
+.dark-skin .msg-row.selected {
+  background-color: rgba(250, 250, 250, 0.1) !important;
+}
+
+.dark-skin .msg-row:hover {
+  background-color: rgba(250, 250, 250, 0.2) !important;
+}
+
+.dark-skin .msg-row .msg-from {
+  color: #dedede;
+}
+
+.dark-skin .msg-sub, .dark-skin .msg-time-stamp {
+  color: #A9B1B3;
+}
+
+.email-wrapper .list-group-item.active .msg-wrapper {
+  padding-right: 60px;
+}
+
+.email-header-toolbar {
+  padding-left: 5%;
+}
+
+.checkbox-active-tools {
+  display: none;
+  float: left;
+  padding-left: 12px;
+  margin-bottom: 0;
+}
+
+.checkbox-active-tools.checkbox {
+  margin-top: 0;
+}
+
+.checkbox-active-tools.active {
+  display: inline-block;
+}
+
+@media only screen and (max-width: 480px) {
+  .email-wrapper {
+    width: calc(100% + 30px);
+    margin-left: -15px !important;
+    margin-right: -15px;
+  }
+  .email-wrapper .toolbar {
+    -webkit-transform: scaleX(1) translate3d(0, 0, 0);
+    -moz-transform: scaleX(1) translate3d(0, 0, 0);
+    -ms-transform: scaleX(1) translate3d(0, 0, 0);
+    -o-transform: scaleX(1) translate3d(0, 0, 0);
+    transform: scaleX(1) translate3d(0, 0, 0);
+  }
+  .email-header-toolbar {
+    padding-left: 10px;
+  }
+  .inbox.toolbar {
+    padding: 0;
+  }
+}

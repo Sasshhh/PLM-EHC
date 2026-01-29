@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "eServices Maintenance";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+@*<h2>_Offline</h2>*@
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            @*<h2>Our site is not currently available.</h2>*@
+            
+            @if (@C8.eServices.Mvc.Helpers.OfflineData.HasMessage)
+            {
+                <h3>@C8.eServices.Mvc.Helpers.OfflineData.Message</h3>    
+            }
+        </div>
+    </div>
+</div>
+<br/><br/>
+

@@ -1,0 +1,266 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.DepartmentsApproval>
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    .rowCrit {
+        color: red !important;
+    }
+</style>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<h4>@ViewBag.DepartmentName Department</h4>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Failed Applications</div>
+        <div style="width: 90%; margin: 0 auto;">
+            <br />
+            <table id="DepartmentsTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Reference Number
+                        </th>
+                        <th>
+                            Department
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Created Date
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                @if (User.IsInRole("Clerks"))
+                {
+                    <tbody>
+                        @{
+                            var list2 = new List<string>();
+                            var allApps2 = Model.Where(x => x.RCSApplicationStatus.ApplicationReferenceNumber != null).GroupBy(x => x.RCSApplicationStatus.ApplicationReferenceNumber).ToList();
+                        }
+                        @foreach (var item5 in allApps2)
+                        {
+                            var list = new List<string>();
+                            foreach (var item2 in allApps2)
+                            {
+                                foreach (var item in item2)
+                                {
+                                    list.Add(item.RCSDepartment.Name);
+                                }
+                            }
+                            <tr>
+                                <td>
+                                    @item5.Key
+                                </td>
+                                <td>
+                                    @{
+                                        var classificationString = list.Distinct().ToArray();
+                                        StringBuilder sb = new StringBuilder();
+
+
+                                        for (int i = 0; i < classificationString.Length; i++)
+                                        {
+                                            if (i == classificationString.Length - 1)
+                                            {
+                                                sb.Append(classificationString[i]);
+                                            }
+
+                                            else
+                                            {
+                                                sb.Append(classificationString[i] + " , ");
+                                            }
+                                        }
+                                    }
+                                    @sb
+                                </td>
+                                <td>
+                                    @if (item5.FirstOrDefault().Status.Key == StatusKeys.BackOffice)
+                                    {
+                                        <a class="rowCrit">@Html.DisplayFor(modelItem => item5.FirstOrDefault().Status.Name)</a>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item5.FirstOrDefault().Status.Name)
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item5.FirstOrDefault().CreatedDateTime)
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Application Details", "Details","Capture", new { refNo = item5.FirstOrDefault().RCSApplicationStatusId, id = item5.FirstOrDefault().Id }, new { @class = "btn btn-primary" })
+                                    @Html.ActionLink("View", "Details", new { refNo = item5.FirstOrDefault().RCSApplicationStatusId, id = item5.FirstOrDefault().Id }, new { @class = "btn btn-primary" })
+                                    @*@Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item5.FirstOrDefault().RCSApplicationStatusId }, new { @class = "btn btn-primary" })*@
+                                    @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item5.FirstOrDefault().RCSApplicationStatusId, CommunicationType = CommunicationTypeKeys.AttorneyToBo }, new { @class = "btn btn-primary" })
+                                    @if (item5.FirstOrDefault().Status.Key == StatusKeys.PendingDocumentsApproval)
+                                    {
+                                        @Html.ActionLink("Action", "BOEval", new { id = item5.FirstOrDefault().RCSApplicationStatusId }, new { @class = "btn btn-primary" })
+                                    }
+                                </td>
+                            </tr>
+                                        }
+                    </tbody>
+                }
+                else
+                {
+            <tbody>
+                @if (Model == null)
+                {
+                <tr>
+                    <td>
+                        No Results Found
+                    </td>
+                    <td>
+                        No Results Found
+                    </td>
+                    <td>
+                        No Results Found
+                    </td>
+                    <td>
+                        No Results Found
+                    </td>
+                    <td>
+                        No Results Found
+                    </td>
+                </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RCSApplicationStatus.ApplicationReferenceNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RCSDepartment.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Status.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                            </td>
+
+                            <td>
+                                @Html.ActionLink("View", "Details", new { refNo = item.RCSApplicationStatusId, id = item.Id }, new { @class = "btn btn-primary" })
+
+                                @if (User.IsInRole("Water"))
+                                {
+                                    
+                                 @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item.RCSApplicationStatusId, CommunicationType = CommunicationTypeKeys.AttorneyToWater }, new { @class = "btn btn-primary" })
+               
+                                }
+
+                                else if (User.IsInRole("Electricity"))
+                                {
+                                 @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToElectricity }, new { @class = "btn btn-primary" })
+               
+                                }
+
+                                else if (User.IsInRole("SIE"))
+                                {
+                                 @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToSIE }, new { @class = "btn btn-primary" })
+               
+                                }
+
+                                else if (User.IsInRole("Real Estate"))
+                                {
+                                 @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToRealEstate }, new { @class = "btn btn-primary" })
+               
+                                }
+
+                                else if (User.IsInRole("Accounts Management"))
+                                {
+                                 @Html.ActionLink("Message", "CreateMessage", "RCSApplication", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToAccountsManagement }, new { @class = "btn btn-primary" })
+               
+                                }
+
+                             
+                          </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+                }
+                </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            debugger;
+            $('#DepartmentsTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "ApprovalsLoad", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+                    { "data": "RCSApplicationStatus.ApplicationReferenceNumber", "autoWidth": true },
+                    { "data": "RCSDepartment.Name", "autoWidth": true },
+                    { "data": "FailureReason", "autoWidth": true },
+                    { "data": "Status.Name", "autoWidth": true },
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true },
+                    {
+                        "data": "Id",
+                        "autoWidth": true,
+                        "render": function (data) {
+                            var myUrl = '@Url.Action( "Details", "DepartmentsApprovals" )/' + data;
+                            return '<a href=\"' + myUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; ';
+                        }
+                    }],
+                "language": {
+                    "emptyTable": "No payment history.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        //$(function () {
+        //    loadAccounts();
+
+        //});
+
+    </script>
+
+}
+
+
+<script>
+    $(function () {
+        $('#DepartmentsTable').DataTable();
+    });
+</script>

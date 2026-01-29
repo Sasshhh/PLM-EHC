@@ -1,0 +1,286 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.BillingHistory>
+@{
+    /**/
+
+    ViewBag.Title = "BillsOnline";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Customer Bills</h4>
+<hr />
+
+<div class="alert alert-info" style="font-size:20px">
+    <strong>Please note :</strong> Bills will be loaded 24-48 hours after municipal account has been linked and the status is active.
+</div>
+
+<div class="panel-group" id="billsOnline">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    View/Pay Municipal Bills
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @*<div class="form-group">
+                        <div style="float:left" class="col-md-6">
+                            Number of Months per account: @Html.DropDownList("monthsPerAccount", Enumerable.Range(1, 12).Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString() }), "Select")
+                        </div>
+                        <div id="toolbar" class="col-md-12">
+                            &nbsp;
+                            <button id="btnSearch" class="btn btn-primary">Search</button>
+                            <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                        </div>
+                    </div>*@
+
+                <table class="table table-striped" id="onlineBillsTable"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadOnlineBills", "Report")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="10"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="AccountNumber">Municipal Account No</th>
+                            @if (ViewBag.IsAgent != null && ViewBag.IsAgent)
+                            {
+                                <th data-field="IdentificationNumber">Identification</th>
+                            }
+                            @*<th data-field="BillDate">Bill Date</th>*@
+                            <th data-formatter="BillDate">Bill Date</th>
+                            <th data-formatter="BillAmount">Amount</th>
+                            <th data-formatter="viewBill">View Municipal Bill</th>
+                            <th data-formatter="payBill">Pay Municipal Bill</th>
+                        </tr>
+                        @* <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.AccountNumber)
+                            </th>
+                            @if (ViewBag.IsAgent)
+                            {
+                                <th data-sortable="true">
+                                    @Html.DisplayNameFor(model => model.IdentificationNumber)
+                                </th>
+                            }
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.BillDate)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayName("Balance Brought Forward")
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Payments)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Electricity)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Water)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Sewage)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Vat)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Other)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.DownloadLink)
+                            </th>*@
+
+                    </thead>
+                    @*<tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.AccountNumber)</td>
+                                        @if (ViewBag.IsAgent)
+                                        {
+                                            <td>@Html.DisplayFor(modelItem => item.IdentificationNumber)</td>
+                                        }
+                                        <td>@Html.DisplayFor(modelItem => item.BillDate)</td>
+                                        <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.BalanceBroughtForward)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Payments)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Electricity)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Water)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Sewage)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Vat)
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="right">
+                                                    @Html.DisplayFor(modelItem => item.Other)
+                                                </div>
+                                            </td>
+                                        @if (item.AccountType == "COINS")
+                                            {
+                                                <td style="text-align: center;">
+                                                    <div style="display:block; text-align:center">
+                                                        @Html.EncodedActionLink(null, "GenerateBill", "Report", new { accountNumber = item.AccountNumber, _billDate = item.BillDate }, new { @class = "download", @title="Download bill" })
+                                                    </div>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                        <td style="text-align: center;">
+                                            <div style="display:block; text-align:center">
+                                                @Html.EncodedActionLink(null, "RenderRmsGeneratedBill", "Report", new { accountNumber = item.AccountNumber, _billDate = item.BillDate, generatedBillLocation = item.DownloadLink }, new { @class = "download", @title = "Download bill" })
+                                            </div>
+                                        </td>
+
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>*@
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var $table = $('#onlineBillsTable'),
+           $button = $('#btnRefresh'),
+           $btnSearch = $('#btnSearch'),
+            numMonths = $("#monthsPerAccount").val();
+    $(document).ready(function () {
+        $("#monthsPerAccount").change(function () {
+            var numMonths = this.value,
+                $table = $('#onlineBillsTable'),
+                searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadOnlineBills", "Report")',
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1,
+                    numberOfMonths: numMonths
+                }
+            });
+        });
+    });
+
+    $(function () {
+        $(function () {
+            $button.click(function () {
+                $('.fixed-table-toolbar').find('.search > :input').val('');
+                $table.bootstrapTable('refresh', {
+                    url: '@Url.Action("LoadOnlineBills", "Report")',
+                    query: {
+                        searchText: '',
+                        pageNumber: 1,
+                        numberOfMonths: numMonths
+                    }
+                });
+            });
+
+            $btnSearch.click(function () {
+                var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+                numMonths = $("#monthsPerAccount").val();
+                console.log(numMonths);
+                $table.bootstrapTable('refresh', {
+                    url: '@Url.Action("LoadOnlineBills", "Report")',
+                    query: {
+                        searchText: searchVal,
+                        pageNumber: 1,
+                        numberOfMonths: numMonths
+                    }
+                });
+            });
+        });
+        var BDate = "";
+        window.BillDate = function (value, row, index) {
+            BDate = row.BillDate;
+            console.log(BDate);
+            return row.BillDate;
+        }
+        window.BillAmount = function (value, row, index) {
+            return parseFloat(row.BillAmount).toFixed(2);
+        }
+        window.viewBill = function (value, row, index) {
+            var obj = row.DownloadLink;
+            var url = '@Url.Action("GenerateBill", "Report")' + '?q=' + obj;
+            return '<div style="display:block; text-align:center"><a href=\"' + url + '\" class=\"download\" target=\"_blank\"></a></div>';
+        }
+
+        @*window.payBill = function (value, row, index) {
+            var obj = row.DownloadLink;
+            var url = '@Url.Action("CardPayment", "Payment")';
+            return '<div style="display:block; text-align:center"><a href=\"' + url + '\" class=\"pay\"></a></div>';
+        }*@
+
+        window.payBill = function (value, row, index) {
+            var obj = row.DownloadLink;
+            var url = '@Url.Action("CardPayment", "Payment")';
+            var url2 = '@Url.Action("Details", "Payment")' + '?q=' + obj;
+            var subBDate = BDate.substring(5, 7);
+            var BatchMonth =@DateTime.Now.Month.ToString();
+            BatchMonth = BatchMonth - 1;
+            if (BatchMonth < 10) {
+                BatchMonth = "0" + BatchMonth;
+            }
+            //return pay button only if month is previous month or current month
+            if (subBDate >= BatchMonth) {
+                return '<div style="display:block; text-align:center"><a href=\"' + url2 + '\" class=\"qrcode\"></a></div>';
+            }
+            else {
+                return '&nbsp;';
+            }
+            //return '<div style="display:block; text-align:center"><a href=\"' + url + '\" class=\"pay\"></a></div>&nbsp;<div style="display:block; text-align:center"><a href=\"' + url2 + '\" class=\"qrcode\"></a></div>';
+        }
+    });
+
+</script>

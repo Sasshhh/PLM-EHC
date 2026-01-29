@@ -1,0 +1,419 @@
+﻿@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var Id = Model.HumanSettlementApplication.Id;
+}
+
+<style>
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+
+      
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../plm/Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.FullName)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.PurchaserType.Name)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.CreatedDateTime.Value)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.Status.Name)</td>
+                        <td>@Html.ActionLink("View", "Details", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+        </div>
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm(FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-horizontal">
+                    @Html.HiddenFor(model => model.HumanSettlementApplication.Id, new { htmlAttributes = new { @class = "form-control", @Name = "HumanSettlementApplication.Id" } })
+                    @Html.HiddenFor(model => model.HumanSettlementApplication.Data, new { htmlAttributes = new { @class = "form-control", @Name = "data" } })
+                    <div class="form-group col-md-offset-3"  id="waringMessage">
+                        <div class="alert alert-warning col-md-6" style="align-content:center;">
+                            <p style="text-align:center; font-family:monospace;">Please prioritize applicants requirements when selecting.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <!--Complex Selection-->
+                        <div id="ComplexAreaSel" style="display:block">
+                            <span> @Html.Label("Available Complex/Area", htmlAttributes: new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.DropDownList("PreferredArea", (SelectList)ViewBag.PreferredArea, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "PreferredArea", @onchange = "changeComplexSelection(this.value)", @Id = "PreferredAreadll", @required = "reuired" })
+                                @Html.ValidationMessage("PreferredArea", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <!--Unit Selection-->
+                        <div id="PreferredUnitSel" style="display:none">
+                            <span>@Html.Label("Matching available Unit", htmlAttributes: new { @class = "control-label col-md-2" }) <b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.DropDownList("PreferredUnitID", (SelectList)ViewBag.PreferredUnit, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "PreferredUnitID", @onchange = "changeUnitSelection()", @Id = "preferreUnitdll", @required = "reuired" })
+                                @Html.ValidationMessage("PreferredUnitID", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.HiddenFor(model => model.HumanSettlementApplication.PreferredComplexArea.Id)
+                        @Html.HiddenFor(m => m.spaceUnitID, new { id = "spaceUnitID" })
+                        <input type="hidden" name="selUnitVal" id="selUnitVal" value="">
+                    </div>
+
+                    <div class="step-footer" align="left">
+                        @Html.EncodedActionLink("Cancel", "Index", "HumanSettlementApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })
+                        @*@Html.EncodedActionLink("Cancel", "Index", "RCSApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })*@
+                    </div>
+
+                    <div class="step-footer col-md-offset-2" >
+                        <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                        <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                        <br />
+                        <br />
+                        <br />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<div>
+    <br />
+    <input type="button" value="Back To List" onclick="location.href='@Url.Action("WaitingListQueue", "HumanSettlementApplication", new { q = Model.HumanSettlementApplication.Data })'" name="btnApprovalStatus" class="button1" />
+
+</div>
+
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please wait 20 seconds, then action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function Cancel() {
+        window.location.href = "@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")";
+    }
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this risk assessment?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                document.getElementById("btnApproval").click();
+            }
+        });
+    }
+
+
+    function WaitingListBusy() {
+        debugger;
+        $.getJSON("../riskAssessmentOutcomes/ValidateWaitingListSorting",
+            function (result) {
+                debugger;
+                if (result == true) {
+                    jQuery.noConflict();
+                    $("#waitinglist_busy").modal('show');
+                    $('#waitinglist_busy').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
+            });
+    }
+
+    function changestatus() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            jQuery('#reject').css("display", "block")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#ComplexAreaSel').css("display", "none")
+        } else {
+            jQuery('#reject').css("display", "none")
+            jQuery('#Approve').css("display", "block")
+            jQuery('#ComplexAreaSel').css("display", "block")
+
+        }
+    }
+
+
+    function changeUnitSelection() {
+        var unitval1 = document.getElementById("preferreUnitdll").value;
+        document.getElementById("spaceUnitID").value = unitval1;
+    }
+    function changeComplexSelection(val) {
+        debugger;
+      /*  var unitval = document.getElementById("PreferredAreadll").value;*/
+
+        if (val != "" && val != null) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetUnitbyPreferredAreaId")',
+                dataType: 'json',
+                // data: { id: $("#PreferredUnitdll").val() },
+                data: { id: val, ApplicationId: @Model.HumanSettlementApplication.Id },
+                success: function (mems) {
+                    console.log("success --- TestEnd");
+                    // states contains the JSON formatted list
+                    // of states passed from the controller
+                    jQuery('#PreferredUnitSel').css("display", "block")
+                    var ddlOptions = $("#preferreUnitdll");
+                    $("#preferreUnitdll").empty();
+                    ddlOptions.append(
+                        $('<option></option>').val('').text("-- Select Option --")
+                    );
+                    debugger;
+                    $.each(mems, function (i, member) {
+                        debugger;
+                        var rr = member.ColorCode;
+                        var rrId = member.Id;
+                        ddlOptions.append(
+                            $('<option></option>').val(member.Id).text(member.ColorCode)
+                        );
+                        /*  $("#preferreUnitdll").append('<option value="' + member.Id + '" text="' + member.ColorCode + '" >'+'</option>');*/
+                    });
+                },
+                error: function (ex) {
+                    swal("warning", "Please select applicants complex preference", "warning");
+                    /*  alert('Failed to retrieve units.' + ex);*/
+                }
+            });
+        }
+    }
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function Submit() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            var RejectComment = document.getElementById("RejectComment").value;
+            if ((RejectComment == null || RejectComment == "")) {
+                swal("error", "Please enter rejection comment!", "warning");
+            } else {
+                document.getElementById("btnApproval").click();
+            }
+
+        }
+    }
+
+</script>

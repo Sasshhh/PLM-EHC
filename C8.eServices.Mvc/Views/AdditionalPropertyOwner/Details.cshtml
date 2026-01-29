@@ -1,0 +1,44 @@
+﻿@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.AdditionalPropertyOwner
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var propertyId = ViewBag._PropertyId;
+}
+
+<h2>Home Owner's Rates Rebate Application for Residential Property</h2>
+
+<div>
+    <h4>AdditionalPropertyOwner</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(model => model.Property.RatesNumber)</dt>
+        <dd>@Html.DisplayFor(model => model.Property.RatesNumber)</dd>
+        <dt>Status</dt>
+        <dd>@Html.DisplayFor(model => model.Status.Name)</dd>
+        <dt>@Html.DisplayNameFor(model => model.ExecutorContactNumber)</dt>
+        <dd>@Html.DisplayFor(model => model.ExecutorContactNumber)</dd>
+        <dt>@Html.DisplayNameFor(model => model.ExecutorName)</dt>
+        <dd>@Html.DisplayFor(model => model.ExecutorName)</dd>
+        <dt>@Html.DisplayNameFor(model => model.IsDeceased)</dt>
+        <dd>@Html.DisplayFor(model => model.IsDeceased)</dd>
+        <dt>@Html.DisplayNameFor(model => model.IsRegisteredOwner)</dt>
+        <dd>@Html.DisplayFor(model => model.IsRegisteredOwner)</dd>
+        <dt>@Html.DisplayNameFor(model => model.OwnerIdentificationNumber)</dt>
+        <dd>@Html.DisplayFor(model => model.OwnerIdentificationNumber)</dd>
+        <dt>@Html.DisplayNameFor(model => model.OwnerName)</dt>
+        <dd>@Html.DisplayFor(model => model.OwnerName)</dd>
+        <dt>@Html.DisplayNameFor(model => model.IsActive)</dt>
+        <dd>@Html.DisplayFor(model => model.IsActive)</dd>
+        <dt>@Html.DisplayNameFor(model => model.IsDeleted)</dt>
+        <dd>@Html.DisplayFor(model => model.IsDeleted)</dd>
+        <dt>@Html.DisplayNameFor(model => model.IsLocked)</dt>
+        <dd>@Html.DisplayFor(model => model.IsLocked)</dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id, propertyId = Model.PropertyId }) |
+    @Html.ActionLink("Back to List Of Property Owners", "Index", new { propertyId = Model.PropertyId })
+</p>

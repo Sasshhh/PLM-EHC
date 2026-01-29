@@ -1,0 +1,26 @@
+{
+  "name": "sid-instant-eft-popup",
+  "description": "A script to add the SID Instant EFT payment popup",
+  "main": [
+  "sidPopup.js",
+  "sidPopupStyle.css"
+],
+  "authors": [
+    "SID <support@sidpayment.com>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "bower_components"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1"
+  },
+  "keywords": [
+    "SID",
+    "EFT",
+    "Secure",
+	"Instant",
+	"popup"
+  ]
+}

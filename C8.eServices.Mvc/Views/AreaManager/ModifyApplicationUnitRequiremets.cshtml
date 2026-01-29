@@ -1,0 +1,273 @@
+﻿@model C8.eServices.Mvc.Models.TemporaryDisplayModel
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>Edit Application Requirements</h4>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.WaitingListQueueId)
+    @Html.HiddenFor(m => m.PropertyLeaseApplicationId)
+    @Html.HiddenFor(m => m.ItemPosition, new { @class = "form-control", @Id = "ItemPosition" })
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                            Applicant Information
+                        </a>
+                    </h4>
+                </div>
+
+                <div id="userRoleCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            @Html.Label("Applicant Name:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(m => m.ApplicantFullName, null, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Application Ref No:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                <div class="checkbox">
+                                    @Html.TextBoxFor(m => m.ApplicationReferenceNo, null, new { @class = "form-control", @readonly = true })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Bedroom Type:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(m => m.BedRooms, null, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Complex/Area(s):", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(m => m.ComplexAreas, null, new { @class = "form-control", @readonly = true, @Id = "Queue" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span>@Html.Label("Uniit Size:", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.DropDownList("HumanEHCOptionsId", (SelectList)ViewBag.HumanEHCOptions, "-- Select Unit Size --", htmlAttributes: new { @class = "form-control", @Name = "HumanEHCOptionsId", @required = "reuired" })
+                                @Html.ValidationMessage("HumanEHCOptionsId", "", new { @class = "text-danger" })
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Change To:", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span>@Html.Label("Option 1:", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.DropDownList("ComplexOptionOneId", (SelectList)ViewBag.ComplexOptionOne, "-- Select Complex/Area --", htmlAttributes: new { @class = "form-control", @Name = "ComplexOptionOneId", @required = "reuired" })
+                                @Html.ValidationMessage("ComplexOptionOneId", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span> @Html.Label("Option 2:", new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-3">
+                                @Html.DropDownList("ComplexOptionTwoId", (SelectList)ViewBag.ComplexOptionTwo, "-- Select Complex/Area --", htmlAttributes: new { @class = "form-control", @Name = "ComplexOptionTwoId", @required = "reuired" })
+                                @Html.ValidationMessage("ComplexOptionTwoId", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="button" value="Modify" onclick="clickSubmit()" class="button1" />
+                                <input type="submit" value="Re-Allocate" style="display:none;" id="btnApproval" class="button1" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div>
+    @Html.ActionLink("Back to List", "WaitingListQueueManagement", null, new { @class = "button1" })
+</div>
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-danger col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please enter position within queue length.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="equalposition" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-danger col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Queue item in position entered.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="waitinglist_busy2" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please wait 20 seconds, then action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to modify this application?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                WaitingListBusy();
+
+                //if (entered == ItemPosition) {
+                //    //jQuery.noConflict();
+                //    //$("#waitinglist_busy").modal('show');
+                //    $('#equalposition').modal({
+                //        backdrop: 'static',
+                //        keyboard: false,
+                //        show: true
+                //    });
+                //    $("#MoveToPosition").val('');
+                //} else {
+                //}
+            }
+        });
+    }
+    function WaitingListBusy() {
+        debugger;
+        $.getJSON("../AreaManager/ValidateWaitingListSorting",
+            function (result) {
+                debugger;
+                if (result == true) {
+                    //jQuery.noConflict();
+                    //$("#waitinglist_busy").modal('show');
+                    $('#waitinglist_busy2').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
+            });
+    }
+
+    function divAssignTo() {
+        if (document.getElementById("checkbox").checked == true) {
+            debugger;
+            jQuery('#divAssignTo').css("display", "block")
+        } else {
+            jQuery('#divAssignTo').css("display", "none")
+
+        }
+    }
+    //$('checkbox').change(function () {
+    //    if (document.getElementById("checkbox").checked == true) {
+    //        debugger;
+    //        jQuery("divAssignTo").display("block")
+    //    } else {
+    //        jQuery("divAssignTo").display("none")
+
+    //    }
+    //});
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+    function ValidateQueueLen(val) {
+        debugger;
+        var entered = parseFloat(document.getElementById("MoveToPosition").value);
+        var Queue = parseFloat(document.getElementById("Queue").value);
+        var ItemPosition = parseFloat(document.getElementById("ItemPosition").value);
+        if (Queue != 0 && entered > Queue) {
+            //jQuery.noConflict();
+            //$("#waitinglist_busy").modal('show');
+            $('#waitinglist_busy').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+            $("#MoveToPosition").val('');
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        var Name = '@ViewBag.Name';
+        var Isactive = '@ViewBag.Isactive';
+
+        $("#Name").val(Name);
+        $("#MoveToPosition").val('');
+        debugger;
+        if (Isactive == "True") {
+            $("#rrIsActive").prop("checked", true);
+        }
+        else {
+            Isactive.value = false;
+        }
+             var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>
+

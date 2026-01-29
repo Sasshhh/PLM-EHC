@@ -1,0 +1,312 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RatesRebateProperty>
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using Newtonsoft.Json
+@{
+
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr/>
+
+<div class="alert alert-info">
+    <strong>Please note :</strong> If the market value of your property is below R5000000, 
+     you will be automatically granted a rebate.
+</div>
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p><strong>Welcome to the eThekwini Home Owner's Rates Rebate Application for Residential Property...</strong></p>
+                <p>
+                    This service allows you to apply for a rebate, the application involves the following steps:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    In this page you are able to create a new application for a rebate by clicking on the "Apply" button below. If you have applied for a
+                    rebate previously, you should see your applications listed below in the "Rates Rebate Applications" panel. If the application was not
+                    submitted, you may click the "Submit" button next to each application. If your application is not submitted, you may edit the information
+                    in the application by clicking on the application number.
+                </p>
+                <p>
+                    Through out this application process you can navigate between the screens with the buttons in the "Navigation" panels. Each page/ step
+                    also has an "Instructions" panel which you may click on to view the instructions on how to complete the respective step. All "Instructions"
+                    panels will be minimised or collapsed, to expand them you will need to click on the "Instructions" title on the panel header.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="navigation">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                    Navigation
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNavigation" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            @Html.EncodedActionLink("Apply", "Create", "RatesRebate", new { customerId = 0, ratesRebateId = 0 }, new { @class = "btn btn-primary" })
+                            &nbsp;&nbsp;(Create a new application)
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="ratesReabates">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    Rates Rebate Applications
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table class="table table-striped" id="table"
+                       data-toggle="table"
+                       data-height="500"
+                       data-search="true"
+                       data-pagination="true"
+                       data-page-list="[10,25, 50, 100, ALL]">
+                    <thead>
+                        <tr>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.RatesRebate.ApplicationNumber)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.RatesRebate.ApplicantCustomerId)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.RatesRebate.OwnerCustomerId)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Property.RatesNumber)
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Property.PropertyDescription)
+                            </th>
+                            <th data-sortable="true">
+                                Date
+                            </th>
+                            <th data-sortable="true">
+                                @Html.DisplayNameFor(model => model.RatesRebate.Status)
+                            </th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td data-id="applicationNumber" style="text-align: center;">
+                                        @if (item.RatesRebate.Status.Key == StatusKeys.RatesRebateApplicationPending || item.RatesRebate.Status.Key == StatusKeys.RatesRebateApplicationQuery)
+                                        {
+                                            @Html.EncodedActionLink(item.RatesRebate.ApplicationNumber, "Create", "RatesRebate", new { ratesRebateId = item.RatesRebateId }, null)
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.RatesRebate.ApplicationNumber)
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RatesRebate.ApplicantCustomer.FullName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RatesRebate.OwnerCustomer.FullName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Property.RatesNumber)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Property.PropertyDescription)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RatesRebate.CreatedDateTime)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RatesRebate.Status.Name)
+                                    </td>
+                                    <td>
+                                        @if (item.RatesRebate.Status.Key == StatusKeys.RatesRebateApplicationPending && !ApplicationHelper.CanApprove())
+                                        {
+                                            @Html.EncodedActionLink("Submit", "SubmitApplication", "RatesRebate", new { id = item.RatesRebateId }, new { @class = "btn btn-primary" })
+                                        }
+                                        else if (item.RatesRebate.Status.Key == StatusKeys.RatesRebateApplicationQuery)
+                                        {
+                                            @Html.EncodedActionLink("Resubmit", "SubmitApplication", "RatesRebate", new { id = item.RatesRebateId }, new { @class = "btn btn-primary" })
+                                        }
+                                        else if (item.RatesRebate.Status.Key == StatusKeys.RatesRebateApplicationPending && ApplicationHelper.CanApprove())
+                                        {
+                                            @Html.EncodedActionLink("Approve", "SubmitApplication", "RatesRebate", new { id = item.RatesRebateId }, new { @class = "btn btn-primary" })
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                @*<button id="testBtn">Close</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+@*modal for missing documents*@
+
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>*@
+                <h4 class="modal-title">Errors</h4>
+            </div>
+            <div class="modal-body text-danger" id="errorList">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog alert-success" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>*@
+                <h4 class="modal-title">Success</h4>
+            </div>
+            <div class="modal-body" id="successMsg">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Finish</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        var jsvar = '@ViewBag.Errors';
+        var success = '@ViewBag.Success';
+        var errors = jsvar.replace(/\n/g, "<br />");
+
+        $(document).ready(function () {
+            mergCells();
+
+            if (success != '') {
+                $('#successMsg').html(success);
+                $('#successModal').modal('show');
+            }
+
+            if (errors !== null && errors.length > 0) {
+                $('#errorList').html(errors);
+                $('#errorModal').modal('show');
+                errors = "";
+            }
+
+            @*// Merge cells based on the application Number*@
+            $('#table').on('page-change.bs.table.bs.table search.bs.table sort.bs.table', function () {
+                mergCells();
+            });
+
+            @*// Displays a triangle to tell users if the panel is collapsable.*@
+            $('#instructionsTitle').on("click", function () {
+                var span = $('#instructionsTitle').find('span');
+                if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                    span.removeClass('glyphicon-triangle-top');
+                    span.addClass('glyphicon-triangle-bottom');
+                } else {
+                    span.removeClass('glyphicon-triangle-bottom');
+                    span.addClass('glyphicon-triangle-top');
+                }
+            });
+        });
+
+        function mergCells() {
+            $('#table').each(function () {
+                var columnNumberToMerge = 1,
+                    columnNumberToMerge2 = 7,
+                    columNumberToMerge3 = 8;
+                @*// Previous_td holds the first instance of same td. Initially first td=null.**@
+                var previousTd = null,
+                    previousTd2 = null,
+                    previousTd3 = null;
+
+                var i = 1;
+                $("tbody", this).find('tr').each(function () {
+                    @*// find the correct td of the correct column*@
+                    @*// we are considering the table column 1, You can apply on any table column*@
+                    var currentTd = $(this).find('td:nth-child(' + columnNumberToMerge + ')');
+                    var currentTd2 = $(this).find('td:nth-child(' + columnNumberToMerge2 + ')');
+                    var currentTd3 = $(this).find('td:nth-child(' + columNumberToMerge3 + ')');
+
+                    if (previousTd == null) {
+                        @*// for first row*@
+                        previousTd = currentTd;
+                        previousTd2 = currentTd2;
+                        previousTd3 = currentTd3;
+                        i = 1;
+                    } else if (currentTd.text() == previousTd.text()) {
+                        @*// the current td is identical to the previous row td*@
+                        @*// remove the current td*@
+                        currentTd.remove();
+                        currentTd2.remove();
+                        currentTd3.remove();
+
+                        @*// increment the rowspan attribute of the first row td instance*@
+                        previousTd.attr('rowspan', i + 1);
+                        previousTd2.attr('rowspan', i + 1);
+                        currentTd3.attr('rowspan', i + 1);
+                        i = i + 1;
+                    } else {
+                        @*// means new value found in current td. So initialize counter variable i*@
+                        previousTd = currentTd;
+                        previousTd2 = currentTd2;
+                        previousTd3 = currentTd3;
+                        i = 1;
+                    }
+                });
+            });
+
+        }
+
+
+    </script>
+}

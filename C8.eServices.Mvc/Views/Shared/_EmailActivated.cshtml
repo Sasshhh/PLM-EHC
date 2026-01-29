@@ -1,0 +1,59 @@
+﻿@{
+    ViewBag.Title = "_EmailActivated";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div id="successGroup" style="display:none;">
+    <div class="alert alert-success">
+        <strong>Success!</strong> Account activated.
+    </div>
+</div>
+
+<div id="warningGroup" style="display: none;">
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> User Account not activated.<br /><br />
+        <h6>
+            Click @Html.EncodedActionLink(" HERE", "ResendUserActivationEmail", "Account", new { Id = ViewBag.EncodedSystemUserId}, new { @style = "font-size:large" })
+            to resend activation email
+            </h6>
+            <br />
+            OR
+            <br />
+            <h6>
+                Click @Html.ActionLink(" HERE", "ActivateMobile", "Account", new { Id = ViewBag.EncodedUserId}, new { @style = "font-size:large" })
+                to activate using activation code from SMS
+            </h6>
+    </div>
+</div>
+
+<div id="errorGroup" style="display:none;">
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> Email confirmation link expired.<br /><br />
+        <h6>
+            Click @Html.EncodedActionLink(" HERE", "ResendUserActivationEmail", "Account", new { Id = ViewBag.EncodedSystemUserId}, new { @style = "font-size:large" })
+    to resend activation email
+</h6>
+        <br />
+        OR
+        <br />
+       <h6> Click @Html.ActionLink(" HERE", "ActivateMobile", "Account", new { Id = ViewBag.EncodedUserId }, new {@style = "font-size:large" }) to activate using activation code from SMS</h6>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(function () {
+        var status = '@ViewBag.status';
+
+        if (status === "Activated") {
+            $("#successGroup").show();
+        } else if (status === "Warning") {
+            $("#warningGroup").show();
+        } else {
+            $("#errorGroup").show();
+        }
+    });
+
+</script>
+

@@ -1,0 +1,313 @@
+﻿@{
+    /**/
+
+    ViewBag.Title = "DocView";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<style>
+    .ui-datetimepicker-calendar {
+        display: none;
+    }
+
+    .ui-datepicker-month {
+        display: none;
+    }
+
+    .ui-datepicker-prev {
+        display: none;
+    }
+
+    .ui-datepicker-next {
+        display: none;
+    }
+</style>
+<script type="text/javascript"
+        id="botcopy-embedder-d7lcfheammjct"
+        class="botcopy-embedder-d7lcfheammjct"
+        data-botId="5dc08fa433815dbba4ec1d75">
+    var s = document.createElement('script');
+    s.type = 'text/javascript'; s.async = true;
+    s.src = 'https://widget.botcopy.com/js/injection.js';
+    document.getElementById('botcopy-embedder-d7lcfheammjct').appendChild(s);
+</script>
+<h4>Siyakhokha Statement Doc View</h4>
+<hr />
+
+@*<div class="alert alert-info" style="font-size:20px">
+        <strong>Please note :</strong> Bills will be loaded 24-48 hours after municipal account has been linked and the status is active.
+    </div>*@
+
+<div class="panel-group" id="billsOnline">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    Generate PDF Statement
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="form-horizontal">
+
+                    <div class="form-group">
+                        @Html.Label("Municipal Account", new { @class = "control-label col-md-2" })
+                        <div class="col-md-5">
+                            @Html.Editor("MunicipalAcc", new { htmlAttributes = new { @class = "form-control", @id = "MunicipalAcc", maxlength = 10, @required = true } })
+
+                            @*@Html.DropDownListFor(model => model.DebitOrder.BankAccountId, (SelectList)ViewBag.BankAccounts, "Select type ...", htmlAttributes: new { @class = "form-control", id = "BankAccountDdl", @required = true })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.BankAccountId)*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="alert alert-danger col-md-5" id="AccAlert" style="display:none;margin-left: 15px;">
+                            <p><strong>Please Enter a Valid Municipal Account Number</strong></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Statement Year", new { @class = "control-label col-md-2" })
+                        <div class="col-md-5">
+                            @Html.Editor("StatemYear", new { htmlAttributes = new { @class = "form-control", @id = "StatemYear", @placeholder = "Select Date", @required = true } })
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="alert alert-danger col-md-5" id="YearAlert" style="display:none;margin-left: 15px;">
+                            <p><strong>Please Select a Year that is current or past. No future Dates.</strong></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Statement Month", new { @class = "control-label col-md-2" })
+                        <div class="col-md-5">
+                            @*@Html.Editor("StatemMon", new { htmlAttributes = new { @class = "form-control", @id = "StatemMon", maxlength = 10 } })*@
+                            @Html.DropDownList("StatemMon",
+              new List<SelectListItem> {
+                   new SelectListItem { Value = "0" , Text = "Select Statement Month" },
+                   new SelectListItem { Value = "00" , Text = "Select All Months" },
+                   new SelectListItem { Value = "01" , Text = "January" },
+                   new SelectListItem { Value = "02" , Text = "February" },
+                   new SelectListItem { Value = "03" , Text = "March" },
+                   new SelectListItem { Value = "04" , Text = "April" },
+                   new SelectListItem { Value = "05" , Text = "May" },
+                   new SelectListItem { Value = "06" , Text = "June" },
+                   new SelectListItem { Value = "07" , Text = "July" },
+                   new SelectListItem { Value = "08" , Text = "August" },
+                   new SelectListItem { Value = "09" , Text = "September" },
+                   new SelectListItem { Value = "10" , Text = "October" },
+                   new SelectListItem { Value = "11" , Text = "November" },
+                   new SelectListItem { Value = "12" , Text = "December" }
+                       },
+              new { @class = "form-control", @id = "StatemMon" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="alert alert-danger col-md-5" id="MonAlert" style="display:none;margin-left: 15px;">
+                            <p><strong>Please Select a Month</strong></p>
+                        </div>
+                    </div>
+                    @*<div class="form-group isRecurring">
+                            @Html.LabelFor(model => model.DebitOrder.StrikeDay, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.DebitOrder.StrikeDay, new { htmlAttributes = new { @class = "form-control", @required = true, @min = "1", @max = "31" } })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.StrikeDay, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group isRecurring">
+                            @Html.LabelFor(model => model.DebitOrder.StartDateTime, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.DebitOrder.StartDateTime, new { htmlAttributes = new { @class = "form-control", @id = "startD", @placeholder = "Select Date", @required = true } })
+                                @Html.ValidationMessageFor(model => model.DebitOrder.StartDateTime, "", new { @class = "text-danger" })
+                            </div>
+                        </div>*@
+
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input id="submitBtn" type="button" value="Search for Statement(s)" @*onclick="submitpopup()" )"*@ class="btn btn-primary" />
+                            <input id="submitBtnFinal" type="submit" value="Pay" style="display: none;" class="btn btn-primary" />
+
+                            @*<input id="submitBtn" type="submit" value="Pay" onclick="return confirm('Are you sure you would like to continue with this Debit Order Instruction?')" class="btn btn-primary" />*@
+                            <input type="button" value="Reset" id="btnReset" class="btn btn-primary" />
+                            @*<div id="PDFLinkMain" style="display:block; text-align:center">*@
+                            <div id="PDFLink" style="display:none; text-align:center">
+                            </div>
+
+                            @*</div>*@
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <table data-toggle="table" data-pagination="true" data-page-size="20" class="table table-bordered table-hover table-striped panel panel-default" id="MultiplePDFLinks">
+                        <thead>
+                            <tr>
+
+                                <th data-field="AccountNumber">
+                                    Account Number
+                                </th>
+                                <th data-field="AccountHolder">
+                                    Statement Month
+                                </th>
+
+                                <th data-field="IdentificationNumber">
+                                    Statement Year
+                                </th>
+
+                                <th data-field="EmailAddress">
+                                    PDF Download Link
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="MultipleLinksTBL"></tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+<script type="text/javascript">
+     var currentYear =@DateTime.Now.Year;
+    $("#StatemYear").datetimepicker({
+        format: "Y",
+        changeYear: true,
+        changeMonth: false,
+        scrollYear: false,
+        maxDate: 0,
+        timepicker: false
+    });
+    function submitpopup() {
+        debugger;
+        if ($("#DebitOrder_Amount").val() < 50 || $("#DebitOrder_Amount").val() > 1000000) {
+            validateAmt($("#DebitOrder_Amount").val());
+        }
+    }
+    $('#submitBtn').on('click', function () {
+        var Acc = $('#MunicipalAcc').val();
+        var Year = $('#StatemYear').val();
+        var Month = $('#StatemMon').val();
+        if (Acc == "" || Acc == null) {
+            $("#AccAlert").show();
+            $("#YearAlert").hide();
+            $("#MonAlert").hide();
+        }
+        else if (Year == "" || Year == null || Year > currentYear) {
+            $("#AccAlert").hide();
+            $("#YearAlert").show();
+            $("#MonAlert").hide();
+        }
+        else if (Month == "0" || Month == null)
+        {
+            $("#MonAlert").show();
+            $("#AccAlert").hide();
+            $("#YearAlert").hide();
+        }
+        else {
+            $("#AccAlert").hide();
+            $("#YearAlert").hide();
+            $("#MonAlert").hide();
+            var ur = "";
+        var Item = "";
+
+        var old_tbody = document.getElementById('MultipleLinksTBL');
+        var new_tBody = document.createElement('tbody');
+        new_tBody.setAttribute("id", "MultipleLinksTBL");
+        var currMonth =@DateTime.Now.Month;
+        var currYear=@DateTime.Now.Year;
+        if (Month == "00") {
+            for (var j = 1; j < 13; j++)
+    {
+                if (j < 10) {
+                    Month = "0" + j;
+                    //alert(Month);
+                }
+                else {
+                    Month = j;
+                }
+                if (Month < currMonth && Year <= currYear) {
+                     url = '@Url.Action("GeneratePDF", "Report")?cusAcc=' + Acc + '&StateYear=' + Year + '&stateMonth=' + Month;
+                Item = '<tr><td>' + Acc + '</td><td>' + Month + '</td><td>' + Year + '</td><td><a href=\"' + url + '\" class=\"download\"></a></td></tr>';
+                new_tBody.innerHTML += Item;
+                }
+
+            }
+            old_tbody.parentNode.replaceChild(new_tBody, old_tbody);
+        }
+        else {
+           url = '@Url.Action("GeneratePDF", "Report")?cusAcc=' + Acc + '&StateYear=' + Year + '&stateMonth=' + Month;
+           Item = '<tr><td>' + Acc + '</td><td>' + Month + '</td><td>' + Year + '</td><td><a href=\"' + url + '\" class=\"download\"></a></td></tr>';
+            new_tBody.innerHTML += Item;
+            old_tbody.parentNode.replaceChild(new_tBody, old_tbody);
+      // window.open(url, target = "_blank"); target=\"_blank\"
+        }
+
+
+        }
+    });
+    function resetControls() {
+        $('#MunicipalAcc').val("");
+        $('#StatemYear').val("");
+        $("#MultipleLinksTBL").html("");
+        $("#StatemMon").val("0");
+     //   var old_tbody = document.getElementById('MultipleLinksTBL');
+        //var new_tBody = document.createElement('tbody');
+        //new_tBody.setAttribute("id", "MultipleLinksTBL");
+    }
+    $(function () {
+
+        $('#btnReset').on('click', function () {
+            resetControls();
+        });
+    });
+</script>
+<script>
+    setInputFilter(document.getElementById("MunicipalAcc"), function (value) {
+        return /^\d*$/.test(value);
+    });
+
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+</script>
+

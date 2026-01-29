@@ -1,0 +1,344 @@
+﻿@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.PropertyAccount
+
+@{
+    ViewBag.Title = "Create an account for your property";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var propertyId = ViewBag.PropertyId;
+    var customerId = ViewBag.CustomerId;
+    var property = (Property)ViewData["Property"];
+    var ratesRebateId = ViewBag.RatesRebateId;
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="1">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-done">Properties</li>
+        <li class="progtrckr-here">Accounts</li>
+        <li class="progtrckr-todo">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+        <li class="progtrckr-todo">Submit</li>
+    </ol>
+</div>*@
+<br />
+
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Property
+                </a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial("_PropertyPartial", property)
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 3:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li><strong>Accounts - Update information about the accounts associated with a property.</strong></li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    In this step you can add accounts to the property you previously selected, which is displayed in the above "Property" panel.
+                </p>
+                <p>
+                    If you would like to go back to the accounts listing page, you may click the "Back" button on the "Navigation" panel.
+                </p>
+                <p>
+                    You may add an account to this property by entering an account number in the respective field and clicking the "Verify" button. Once verfiied, you may
+                    edit the fields (if they are incorrect) by clicking the checkbox above the "Rate No" label in the "Property Account" panel. This will make the
+                    fields editable and you may correct the respective fields.
+                </p>
+                <p>
+                    You may click the "Save" button in the "Navigation" panel to save your information, which will take you back to the accounts listing page.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                        Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">
+                                @*<a href="@Url.Action( "Index", "Property", new { customerId, ratesRebateId = ViewBag.RatesRebateId } )" class="btn btn-primary">Properties</a>
+                                    &nbsp;*@
+                                @Html.EncodedActionLink("Back", "Index", "PropertyAccount", new { propertyId = Model.PropertyId, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary" })
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    <input type="submit" value="Save" class="btn btn-primary" id="save" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="form-horizontal">
+
+        @{
+    if (Request.HttpMethod == "POST")
+    {
+        if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <a class="close" data-dismiss="alert">×</a>
+                <strong>@TempData["Error"].ToString()</strong>
+            </div>
+        }
+    }
+        }
+
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.PropertyId)
+        @Html.Hidden("ratesRebateId", new { ratesRebateId = (int)ratesRebateId })
+
+        <div class="panel-group" id="propertyAccount">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapsePropertyAccount">
+                            Create Property Account
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapsePropertyAccount" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <p>
+                            Please click here @Html.CheckBox("isConflict", new { id = "isConflict" }) to correct or fill in missing information.
+                        </p>
+                        <br />
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PropertyId, "Rate No", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.Property.RatesNumber, new { @class = "form-control", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PropertyId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.AccountTypeId, "Account Type", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.DropDownListFor(model => model.AccountTypeId, (SelectList)ViewBag.AccountTypeId, "---Select Account Type---", new { @class = "form-control", id = "accountType" })
+                                @Html.ValidationMessageFor(model => model.AccountTypeId)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.AccountNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.AccountNumber, new { @class = "form-control", id = "AccountNumber" })
+                                @Html.ValidationMessageFor(model => model.AccountNumber)
+                            </div>
+                            <div>
+                                <input id="GetPropertyAccount" type="button" value="Verify" class="btn btn-primary" />
+                                <input id="ResetQuery" type="button" hidden value="Reset" class="btn btn-primary" />
+                                <div id="isverified" class="col-md-1">
+                                    <span class="glyphicon glyphicon-ok" style="color: green"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BilledFirstName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.BilledFirstName, new { @class = "form-control", id = "billedFirstName" })
+                                @Html.ValidationMessageFor(model => model.BilledFirstName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BilledLastName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.BilledLastName, new { @class = "form-control", id = "billedLastName" })
+                                @Html.ValidationMessageFor(model => model.BilledLastName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BilledIdentificationNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.BilledIdentificationNumber, new { @class = "form-control", id = "billedIdentificationNo" })
+                                @Html.ValidationMessageFor(model => model.BilledIdentificationNumber)
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+    $("#isverified").hide();
+    $('input[type="submit"]').prop('disabled', true);
+    $("#isConflict").attr("disabled", true);
+    $("#ResetQuery").hide();
+
+    $(function () {
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+
+        $("#ResetQuery").click(function () {
+            $("#isverified").hide();
+            $("#ResetQuery").hide();
+            $("#GetPropertyAccount").show();
+
+            $("#isConflict").attr('checked', false);
+
+            $('input[type="submit"]').prop('disabled', true);
+            $("#isConflict").attr("disabled", true);
+
+            $("#AccountNumber").val('');
+            $("#billedFirstName").val('');
+            $("#billedLastName").val('');
+            $("#billedIdentificationNo").val('');
+            $("#accountType").selectedIndex = 0;
+
+            $("#AccountNumber").attr("readonly", false);
+            $("#billedFirstName").attr("readonly", true);
+            $("#billedIdentificationNo").attr("readonly", true);
+            $("#billedLastName").attr("readonly", true);
+
+        });
+
+        $("#GetPropertyAccount").click(function () {
+            var accountNumber = $("#AccountNumber").val();
+            $.ajax({
+                type: 'GET',
+                url: "@Url.Action( "GetPropertyAccount", "PropertyAccount" )",
+                data: { accNo: accountNumber },
+                cache: false,
+                success: function (result) {
+
+                    if (result.isValid) {
+
+                        $("#billedFirstName").val(result.propertyAccount.BilledFirstName);
+                        $("#billedLastName").val(result.propertyAccount.BilledLastName);
+                        $("#billedIdentificationNo").val(result.propertyAccount.BilledIdentificationNumber);
+
+                        if (result.propertyAccount.AccountTypeId != 0)
+                            $("#accountType").val(result.propertyAccount.AccountTypeId);
+
+                        $("#isverified").show();
+                        $("#GetPropertyAccount").hide();
+
+                        $("#AccountNumber").attr("readonly", true);
+                        $("#billedFirstName").attr("readonly", true);
+                        $("#billedIdentificationNo").attr("readonly", true);
+                        $("#billedLastName").attr("readonly", true);
+
+                        $('input[type="submit"]').prop('disabled', false);
+                        $("#isConflict").attr("disabled", false);
+                        $("#ResetQuery").show();
+
+                        $(this).click(function () {
+                            return true;
+                        });
+
+                    } else {
+                        $("#isverified").hide();
+                        $("#ResetQuery").hide();
+                        $("#GetPropertyAccount").show();
+
+                        $('input[type="submit"]').prop('disabled', true);
+                        $("#isConflict").attr("disabled", true);
+
+                        bootbox.alert({ title: "Error", message: "Account number not found, please correct your input." });
+                    }
+                },
+                error: function (result) {
+                    bootbox.alert({ title: "Error", message: "Account number not found, please correct your input." });
+                }
+
+            });
+        });
+    });
+
+    $(function () {
+
+        $("#isConflict").change(function () {
+
+            var isChecked = $(this).is(':checked');
+            if (isChecked) {
+                $("#billedFirstName").attr("readonly", false);
+                $("#billedFirstName").attr("required", true);
+                $("#billedFirstName").prop("pattern", "^[a-zA-Z ]+$");
+                $("#billedFirstName").prop('title', 'Billed First Name. should contain characters only without any leading or trailing spaces e.g. John Mark');
+
+                $("#billedIdentificationNo").attr("readonly", false);
+
+                $("#billedLastName").attr("readonly", false);
+                $("#billedLastName").attr("required", true);
+                $("#billedLastName").prop("pattern", "^[a-zA-Z ]+$");
+                $("#billedLastName").prop('title', 'Billed Last Name. should contain characters only without any leading or trailing spaces e.g. John Mark');
+
+            } else {
+                $("#billedFirstName").attr("readonly", true);
+                $("#billedIdentificationNo").attr("readonly", true);
+                $("#billedLastName").attr("readonly", true);
+            }
+        });
+    });
+
+</script>

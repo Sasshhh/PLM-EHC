@@ -1,0 +1,309 @@
+﻿@model C8.eServices.Mvc.ViewModels.CustomerLinkedAccountViewModel
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Keys
+
+@{
+    ViewBag.Title = "DisplayLinkedAccount";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    //var documentsList = (IEnumerable<Document>)ViewData["UploadList"];
+    var db = new eServicesDbContext();
+    var documentsVm = ViewData["DocumentsVm"];
+}
+
+<h4>Linked Account Details</h4>
+
+<div id="emailResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Activation Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Customer Account Details
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayName("Customer ID/Passport No:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Customer.IdentificationNumber)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Municipal Account No:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.AccountNumber)
+                    </dd>
+
+                    <br />
+
+                    <dt>
+                        @Html.DisplayName("Full Name:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Customer.FullName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Primary Email:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Customer.EmailAddress)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Contact Number:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Customer.CellPhoneNumber)
+                    </dd>
+
+                    <br />
+
+                    <dt>
+                        @Html.DisplayName("Notification Type:")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.LinkedAccount.RecipientType.Name)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.LinkedAccount.LinkedAccountType.Key == LinkedAccountTypeKeys.Unassociated)
+{
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                        Customer Documents
+                    </a>
+                </h4>
+            </div>
+            <div id="documentsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div>
+                        <div class="form-group">
+                            @Html.Partial("~/Views/Shared/_DocumentsPartial.cshtml", documentsVm)
+                        </div>
+                    </div>
+                    @if (!ViewBag.DocumentsVerified)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-offset-3 col-md-10">
+                                @Html.EncodedActionLink("Edit", "Index", "Document", new
+                                                   {
+                                                       referenceId = @ViewBag.LinkedAccountId,
+                                                       customerId = Model.CustomerId,
+                                                       referenceTypeId = @ViewBag.ReferenceTypeId,
+                                                       applicationId = @ViewBag.ApplicationId,
+                                                       returnUrl = @ViewBag.ReturnUrl
+                                                   }, new { @class = "btn btn-primary" })
+                            </div>
+                        </div>
+                    }
+                    @*<div class="form-group">
+                            <div class="col-md-offset-3 col-md-10">
+                                @Html.ActionLink("Edit", "Index", "Document", new
+                                  {
+                                     referenceId = Model.Customer.Id,
+                                     referenceTypeId = @ViewBag.ReferenceTypeId,
+                                     applicationId = @ViewBag.ApplicationId,
+                                     returnUrl = Url.Action("Index", "Profile", new { customerId = Model.Customer.Id, agentId = 0 })
+                                  }, new { @class = "btn btn-default" })
+                            </div>
+                        </div>*@
+
+                        @*@if (documentsList.Count() > 0)
+                            {
+                                <table class="table table-striped" id="tableDocs"
+                                       data-toggle="table"
+                                       data-height="350"
+                                       data-search="true"
+                                       data-pagination="true"
+                                       data-page-list="[10,25, 50, 100, ALL]">
+                                    <thead>
+                                        <tr>
+                                            <th data-sortable="true">
+                                                Document Name
+                                            </th>
+                                            <th data-sortable="true">
+                                                Upload Date
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in documentsList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a href="@Url.Action("GetDocument", "File", new { fileId = @item.FileId})">@item.DocumentName</a>
+                                                </td>
+                                                <td>
+                                                    @item.CreatedDateTime
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }*@
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+
+@if (Model.LinkedAccount.RecipientType.Key != RecepientTypeKeys.ToPrimaryEmail
+    && Model.LinkedAccount.RecipientType.Key != RecepientTypeKeys.ViewOnly)
+{
+    var linkedEmails = db.LinkedEmails.Include("Status")
+                       .Where(le => le.LinkedAccountId == Model.Id && le.IsActive && !le.IsDeleted)
+                       .ToList();
+
+    if (linkedEmails.Any(le => le.Status.Key == StatusKeys.PendingEmailVerification))
+    {
+        <div class="alert alert-warning">
+            <strong>Please note :</strong> Bills will only be sent to verified email addresses.
+        </div>
+    }
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#emailsCollapse">
+                        Linked Emails
+                    </a>
+                </h4>
+            </div>
+            <div id="emailsCollapse" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table table-striped" id="tableEmails"
+                           data-toggle="table"
+                           data-height="350"
+                           data-search="true"
+                           data-pagination="true"
+                           data-page-list="[10,25, 50, 100, ALL]">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">
+                                    Email Address
+                                </th>
+                                <th data-sortable="true">
+                                    Date Created
+                                </th>
+                                <th data-sortable="true">
+                                    Status
+                                </th>
+                                @*<th>
+                                        Email Verification
+                                    </th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in linkedEmails)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.EmailAddress)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Status.Name)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (Model.Notes.Any())
+{
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#">
+                        Linked Account Notes
+                    </a>
+                </h4>
+            </div>
+            <div id="notesCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <table class="table table-striped" id="tableEmails"
+                           data-toggle="table"
+                           data-height="300"
+                           data-search="true"
+                           data-pagination="true"
+                           data-page-list="[10,25, 50, 100, ALL]">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">
+                                    Date Created
+                                </th>
+                                <th data-sortable="true">
+                                    Note
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Notes)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NoteEntry)
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+

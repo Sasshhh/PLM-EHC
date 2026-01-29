@@ -1,0 +1,353 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.EmailQueueProcessed>
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Models
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+
+<h4>Email Notifications</h4>
+<hr />
+
+@*<div class="panel-group" id="instuctions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 id="instructionsTitle" class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                        Instructions
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>
+                        This view shows details of users currently registered on Siyakhokha with missing customer profiles. Please see steps below explaining each action.
+                    </p>
+                    <p>
+                        <b>Search</b> - Allows to search the database. Search can be done on any field currently listed on the table.<br />
+                        <b>Reset</b> - Refreshes the search results.<br />
+                        <b>Modify</b> - Allows Super Administrator/ Administrator to change customer's email address.<br />
+                        <b>Delete</b> - Allows to delete user from Siyakhokha.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Email Notifications
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="fixed-table-toolbar">
+                    <div class="pull-left">
+                        <input type="text" id="startDate" class="form-control " />
+                    </div>
+                    <div class="pull-left">
+                        <input type="text" id="endDate" class="form-control " />
+                    </div>
+                    <div class="pull-left">
+                        &nbsp;
+                        <button id="btnFilter" class="btn btn-primary ">Filter</button>
+                    </div>
+                </div>
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table id="systemUserTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadEmailNotifications", "EmailQueueProcesseds")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="50"
+                       data-height="1400"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="queueDate">Queue Date</th>
+                            <th data-field="toList">Sent To</th>
+                            <th data-field="subjectEmail">Subject</th>
+                            <th data-field="processedDate">Processed Date</th>
+                            <th data-field="status">Status</th>
+                            <th data-formatter="action">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="activationEmailModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Activation Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalResponseText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="ErrorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleTextE"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentTextE"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" id="closeBtn" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="@Url.Content( "~/Scripts/jquery.datetimepicker.js" )"></script>
+<script type="text/javascript">
+
+    $(function () {
+        var $table = $('#systemUserTable'),
+            $button = $('#btnRefresh'),
+            $btnSearch = $('#btnSearch'),
+            $btnFilter = $('#btnFilter');
+
+        var today = new Date();
+        var day = ("0" + today.getDate()).slice(-2);
+        var month = ("0" + (today.getMonth() + 1)).slice(-2);
+        var year = today.getFullYear();
+
+        $('#startDate').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            scrollInput: false,
+            value: '2019/07/01',
+            onShow: function (ct) {
+                this.setOptions({
+                    maxDate: jQuery('#endDate').val() ? jQuery('#endDate').val() : false
+                });
+            }
+        });
+
+        $('#endDate').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            scrollInput: false,
+            value: year + "/" + month + "/" + day,
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('#startDate').val() ? jQuery('#startDate').val() : false
+                });
+            }
+        });
+
+        $(function () {
+            //System User Buttons
+            $button.click(function () {
+                resetSearch();
+            });
+
+            $btnSearch.click(function () {
+                customSearch();
+            });
+
+            $btnFilter.click(function() {
+                customSearch();
+            });
+        });
+
+        window.delete = function (value, row, index) {
+            return "<input type='button' value='Delete' onclick='RedirectDelete(\"" + row.Id + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+        }
+
+        window.RedirectDelete = function (Id) {
+            var result = "Are you sure you want to delete this user?";
+            bootbox.confirm({
+                message: result,
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Yes',
+                        className: 'btn-primary'
+                    },
+                    cancel: {
+                        className: 'btn-primary'
+                    }
+                },
+                closeButton: false,
+                callback: function (confirmed) {
+
+                    if (confirmed) {
+                        try {
+                            $.ajax({
+                                type: 'POST',
+                                url: "@Url.Action("DeleteSystemUser", "Customer")",
+                                data: { id: Id },
+                                success: function (response) {
+                                    console.log(response);
+                                    if (response.result == "success") {
+                                        bootbox.alert("System user has been successfully deleted!", function () {
+                                            //Refresh the list
+                                            refreshSystemUser();
+                                        });
+                                    } else {
+                                        bootbox.alert("Error occured while trying to delete, please try again later or contact system administrator", function () {
+                                            location.reload();
+                                        });
+                                    }
+                                },
+                                error: function (response) {
+                                    console.log(response.result);
+                                }
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                }
+            });
+
+        }
+
+        window.sendActivationEmail = function (value, row, index) {
+            if (row.AccountStatus == "Pending") {
+                return "<input type='button' value='Send Activation Email' onclick='SendEmail(" + row.Id + ");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+            }
+            else {
+                return "<span>Activated</span>";
+            }
+        }
+
+        window.action = function (value, row, index) {
+            return "<input type='button' value='Resend Notification' onclick='RedirectEdit(" + row.emQID +");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+        }
+        window.RedirectEdit = function (Id) {
+            $("#modalTitleTextE").html("Resending...");
+
+            $("#modalContentTextE").html("Please wait... Page will reload once completed.");
+            $("#ErrorModal").modal("show");
+            $("#closeBtn").hide();
+            try {
+                window.open(
+                    '@Url.Action("Resend", "EmailQueueProcesseds")/?id=' + Id,
+                    '_parent'
+                );
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+        function customSearch() {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();;
+
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadEmailNotifications", "EmailQueueProcesseds")?startDate=' + startDate + '&endDate=' + endDate,
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetSearch() {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            resetFilters();
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadEmailNotifications", "EmailQueueProcesseds")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        }
+
+        function resetFilters() {
+            $('#startDate').val('2019/07/01');
+            $('#endDate').val(year + "/" + month + "/" + day);
+        }
+
+        function refreshSystemUser() {
+            $(function () {
+                $table.bootstrapTable('refresh', {
+                    url: '@Url.Action("LoadEmailNotifications", "EmailQueueProcesseds")',
+                    query: {
+                        pageNumber: 1,
+                        searchText: ''
+                    }
+                });
+            });
+        }
+
+        window.SendEmail = function (systemUserId) {
+            try {
+                $.ajax({
+                    type: 'POST',
+                    url: "@Url.Action("SendActivationEmail", "Customer")",
+                    data: { systemUserId: systemUserId },
+                    cache: false,
+                    success: function (response) {
+                        switch (response.result) {
+                            case "Success":
+                                $("#modalResponseText").html("Success! Activation email sent to customer.");
+                                break;
+                            default:
+                                $("#modalResponseText").html("Error! An Unexpected error has occurred. Please try again later.");
+                                break;
+                        }
+
+                        $("#activationEmailModal").modal('show');
+                    },
+                    error: function (response) {
+                        console.log(response.result);
+                    }
+                });
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+    });
+
+    @*// Displays a triangle to tell users if the panel is collapsable.*@
+    $('#instructionsTitle').on("click", function () {
+        var span = $('#instructionsTitle').find('span');
+        if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+            span.removeClass('glyphicon-triangle-top');
+            span.addClass('glyphicon-triangle-bottom');
+        } else {
+            span.removeClass('glyphicon-triangle-bottom');
+            span.addClass('glyphicon-triangle-top');
+        }
+    });
+</script>

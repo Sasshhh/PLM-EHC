@@ -1,0 +1,476 @@
+﻿@model C8.eServices.Mvc.ViewModels.ManualReAllocationViewModel
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Register";
+}
+
+@*<h4>Re-Allocate</h4>*@
+@*@Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")*@
+@if (Request.HttpMethod == "POST")
+{
+    <script type="text/javascript">
+        $(function () {
+            if ('@ViewBag.Response' === "Success") {
+                $("#confirmEmailModal").modal('show');
+            }
+        });
+    </script>
+}
+
+<style type="text/css">
+    .validation-summary-errors {
+        color: red;
+        font-style: italic;
+    }
+</style>
+
+<div id="confirmEmailModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">RCS Confirmation Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @if (ViewBag.EmailAddress != null)
+                    {
+                        if (ViewBag.EmailAddress.Contains("@"))
+                        {
+                            @*@Html.Raw(HttpUtility.HtmlDecode(string.Format("Confirmation email sent to Area Manager {0}<br/>", ViewBag.EmailAddress)));*@
+                            @Html.Raw(HttpUtility.HtmlDecode(string.Format("Confirmation email sent to Area Manager <br/>")));
+                            @Html.Raw(HttpUtility.HtmlDecode("Please await profile approval by Area Manager."));
+                        }
+                        else
+                        {
+                            @Html.Raw(HttpUtility.HtmlDecode(string.Format("Confirmation code SMS sent to {0}<br/>", ViewBag.EmailAddress)));
+                            @Html.Raw(HttpUtility.HtmlDecode("Please enter your confirmation code to complete your registration."));
+                        }
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="location.href='@Url.Action( "Login","Account")';">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "registerForm" }))
+{
+    @Html.AntiForgeryToken()
+    @*<h4>Create a new account.</h4>*@
+    <hr />
+
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @*<p>
+                            Welcome to the RCS registration page.<br />
+                            Please complete the registration form to register on RCS as per the instructions below:
+                            <ul>
+                                <li>
+                                    First Name - your name/s used before your surname.
+                                </li>
+                                <li>
+                                    Last Name - your family name after your name/s.
+
+                                </li>
+                                <li>
+                                    RSA ID Number - your valid RSA ID number.
+                                </li>
+                                <li>
+                                    Username - a unique name that you can use to log in to RCS.
+                                </li>
+                                <li>
+                                    Password/ Confirm Password - a password to secure your RCS account. Please repeat the same password for both
+                                    fields to avoid typographical errors. The password has to be at least 6 characters long and contain at least 1 uppercase character,  1 lowercase character, a numeric character and a special character eg. !,@@,#,$,%,&,*.
+                                </li>
+                                <li>
+                                    Mobile Number / Confirm Mobile Number - this is your principle Mobile Number that you regularly check. Please repeat the same Mobile Number for both field to avoid typographical errors.
+                                </li>
+
+                                <li>
+                                    Email Address/ Confirm Email Address - this is your principle email that you regularly check. Please repeat the same email
+                                    address for both field to avoid typographical errors.
+                                </li>
+                                <li>
+                                    Use Email Address  <b>OR</b> Mobile Number
+                                </li>
+                                <li>
+                                    Please note required fields are marked with a <b>Red Asterisks <b style="color:red; font-size:x-large;">*</b></b>
+                                </li>
+                            </ul>
+                        </p>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.ValidationSummary()
+    <br />
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#accountInfoCollapse">
+                        Re-Allocate
+                    </a>
+                </h4>
+            </div>
+            <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+
+                    <div class="form-group">
+                        <span> @Html.LabelFor(m => m.CurrentAssignedUserName, "Assigned Username", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(m => m.CurrentAssignedUserName, new { @class = "form-control", @required = true })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <span>@Html.LabelFor(m => m.CurrentFullName, "Full Name", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(m => m.CurrentFullName, new { @class = "form-control", @required = true })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.HiddenFor(m => m.ResponsibilityType, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.ViewName, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.RCSApplicationId, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.RoundRobinQueueId, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.PropertyLeaseApplicationId, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.TitleName, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.BodyName, new { @class = "form-control" })
+                            @Html.HiddenFor(m => m.DepartmentId, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                            <span>  @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.PasswordFor(m => m.Password, new { @class = "form-control", @required = true, @autocomplete = "new-password" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span>  @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                            <div class="col-md-4">
+                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", @required = true, @autocomplete = "new-password" })
+                            </div>
+                        </div>*@
+                    <br />
+                    <br />
+
+
+
+
+                    <div class="form-group">
+                        <span> @Html.LabelFor(m => m.NewBackOfficeUser, "Re-Allocate To", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+
+
+                        <div class="col-md-4">
+                            @Html.DropDownListFor(model => model.NewBackOfficeUser, (SelectList)ViewBag.BOUsers, "-- Select Option --", htmlAttributes: new { @class = "form-control", @id = "ddlCCC", @required = "required", @Name= "UserId" })
+
+                        </div>
+
+                    </div>
+
+                    @*<div class="form-group">
+                            <span> @Html.Label("Active Directory", new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+
+                            <div class="col-md-4">
+                                @Html.CheckBoxFor(m => m.AdUser, new { @class = "form-control", @id = "ADUser" })
+
+
+                            </div>
+                        </div>*@
+
+
+
+
+                    <br />
+
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            @*<input id="btnTandC" type="button" disabled class="button1" value="Register" />*@
+                            <input id="btnSubmit" type="button" class="button1" value="Re-Allocate" />
+                        </div>
+                    </div>
+                    <br />
+                    <div class="validation-summary-valid" id="jValidationSummary">
+                        <ul>
+                            <li style="display:none"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div class="modal fade" id="TCModalLong" tabindex="-1" role="dialog" aria-labelledby="TCModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TCModalLongTitle">Terms & Conditions</h5>
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>*@
+            </div>
+            <div class="modal-body">
+                <div>
+                    <textarea name="" id="terms" cols="75" rows="25" readonly>To be confirmed by business
+Introduction
+These conditions will govern the relationship between the Municipality and the registered account holder as rendered by the City of Ekurhuleni via the RCS Service
+
+The account holder understands that by submitting their registration to subscribe to the service that they have familiarized themselves with the contents in the Terms and Conditions, and that the account holder intends to be bound by the contents.
+
+This Agreement will commence when the City of Ekurhuleni accepts the account holders request to subscribe to Service, which acceptance will manifest at that point in time when the City of Ekurhuleni sends the account holders an activation confirmation (the "commencement date").
+
+Definitions
+-"Agent" means a person who acts on behalf of a User or a Registered Account Holder;
+-"City of Ekurhuleni" means a municipality established in terms of section 12 of Local Government Act, 1998 (Act no: 117 of 1998)
+-"RCS site" means the website through which the City of Ekurhuleni provides the Service.
+-"Registered Account Holder" means the registered holder of an account, whether it be in a personal or business capacity, held with the City of Ekurhuleni for services rendered by or on behalf of the City.
+-"Service" means the electronic statement presentation, enquiry and payment solution as well as any other services provided on the RCS site.
+-"Registration" means the action whereby the User indicates to the City of Ekurhuleni that they want to utilize the service.
+-"User" means all persons who access, view, download from, or use the RCS site whether on the Internet, mobile device or kiosk. "Users" includes "Registered Account Holders".
+-"Writing" means the act or process of producing and recording words in a form that can be read and understood and shall include e-mails, facscimile, e-registered or registered post;
+
+An expression which denotes:
+-any gender includes the other genders;
+-a natural person includes a juristic person and vice versa;
+-the singular includes the plural and vice versa.
+
+Application
+These Terms and Conditions shall apply to all Users and becomes binding between the City of Ekurhuleni and a user immediately upon the user accessing, viewing or using the Service or its contents.
+
+Electronic Communications
+When a user visits the RCS website or sends an e-mail to the City of Ekurhuleni, that user consents to receiving communications from the City of Ekurhuleni electronically and agrees that all agreements, statements. Bills, notices, disclosures and other communications sent by the City of Ekurhuleni satisfies any legal requirements, including but not limited, to the requirement that such communications are considered to be "in writing" with the same legal stature as a written document.
+
+The User accepts and acknowledges that, once the account is registered on RCS, the City of Ekurhuleni will cease to send the account holder statements via manual postal delivery.
+
+INTELLECTUAL PROPERTY RIGHTS AND DOMAIN NAME USE
+All intellectual property rights in all materials and software made available through the RCS Service or site are owned by the City of Ekurhuleni or a third party, or alternatively the City of Ekurhuleni is the lawful user thereof, and are protected by both South African and international intellectual property right laws. The User agrees not to do anything that may infringe the City of Ekurhuleni's' intellectual property rights in this regard, including but not limited to unauthorised copying, reproduction, retransmission, distribution, dissemination, sale, publication, or other circulation or exploitation of such material and shall comply with all laws applicable to any intellectual property rights (including without limitation trade secrets, copyright, trademarks, registered designs, and patents) in respect of any data, files and/or information accessed, retrieved or stored by the User through the User's use of the RCS Service.
+
+The User warrants that it will not use the RCS Service in any way that will infringe any person's intellectual property rights, and that it recognises and uses any service in accordance with the City of Ekurhuleni's intellectual property rights. The User is prohibited from using the trademarks, logos, brand names, domain names or other marks of the City of Ekurhuleni or RCS.
+
+City of Ekurhuleni Agent
+Where the User registers on behalf of a Registered Account Holder and uses the service on behalf of such Registered Account Holder, or acts as an agent of such Registered Account Holder, then the User warrants that they have obtained a written mandate from such Registered Account Holder, which mandate will contain at least the following conditions:
+
+The User acts as a duly authorised agent on behalf of the Registered Account Holder;
+
+The Registered Account Holder and the User are jointly and severally liable towards the City of Ekurhuleni for all claims that the City of Ekurhuleni might have in terms of this agreement against the Registered Account Holder and/or the User, and;
+
+The User has disclosed the contents of this agreement to the Registered Account Holder.
+
+Where a User registers, invites or authorises access to another person or third party, then such User warrants that they are jointly and severally liable towards the City of Ekurhuleni for all claims that the City of Ekurhuleni might have in terms of this agreement against the Registered Account Holder and/or the User for all actions performed by such other person or third-party.
+
+User Name and Password
+During registration by the User on the RCS site, the User will create a unique username in such format as the City of Ekurhuleni may determine from time to time.
+
+Unless otherwise specified, the User must change the initial password to a unique password of choice when requested to do so and/or when the RCS Service is accessed for the first time.
+
+The User undertakes to ensure that the username and password are neither easily accessible nor disclosed to any unauthorized person. Storing the username and/or password on a computer or network will be regarded as prima facie negligence.
+
+The account holder undertakes to report any actual or attempted unauthorised access to the City of Ekurhuleni, without delay, via the RCS call centre and provide the City of Ekurhuleni with written confirmation thereof within 24 (twenty-four) hours of such notification. On receipt of notification, the City of Ekurhuleni reserves the right to deactivate the user name and/or password without further notice.
+
+The City of Ekurhuleni may at its sole discretion and for whatever reason, require a User to change their username and/or password from time to time and the User undertakes to unconditionally comply with such a requirement.
+
+The City of Ekurhuleni may temporarily or permanently suspend a User's access to the RCS Service in the event that the User abuses, commits or attempts to commit any form of fraud or undesirable activity, or the City of Ekurhuleni detects any potential threat by the User on the RCS site.
+
+Payment and Relation to the City of Ekurhuleni
+As part of its service offering, the City of Ekurhuleni will co-operate with various banks (the "bank") to enable the Registered Account Holder or User to make payments due to the City of Ekurhuleni and to reconcile such payments with the account holder's records.
+
+The Registered Account Holder and the User understands that they enter into a direct agreement with the bank and that the City of Ekurhuleni is not a party to this agreement.
+
+Duties of the City of Ekurhuleni
+
+The RCS Service will provide access to monthly account statements and inform Users when a new statement or bill is made available on the RCS site.
+
+The Registered Account Holder remains liable for payment of services rendered and the failure to provide a notification or statement to the Registered Account Holder or User does not negate this liability.
+
+The RCS Service will provide facilities to register linked accounts, submit information and provide an on-line enquiry facility.
+
+Where the User elects to make payment to the City of Ekurhuleni through one of the payment services, the Service will maintain an online record of all payments for a period of 24 months, provided that the User complies with the prescribed procedures for such payments.
+
+Disputes
+The User will refer any dispute that may arise out of this Agreement to the RCS call centre, who will attempt to resolve the dispute through settlement, negotiation or mediation.
+
+If the dispute has not been resolved within 10 (ten) business days after it was referred to the RCS call centre, the User may refer the dispute to the City of Ekurhuleni's legal department, or if payment related to the Chief Financial Officer of the City of Ekurhuleni.
+
+Refund Policy
+Payments for municipal services are non refundable. In the event that a user makes an erroneous payment or in the event that a user wishes to dispute any payment already processed then the registered account holder must log a dispute with the Ekurhuleni Metropolitan Municipality Finance department.
+
+No refunds will be processed via the RCS service.
+
+Information and Privacy
+The City of Ekurhuleni understands that the information provided by the User or Registered Account Holder to the City of Ekurhuleni (the "information"), includes private and sensitive information. The City of Ekurhuleni will, save for the circumstances as set out in this clause 11, not share any such information with any third party without the prior consent of the User or Registered Account Holder.
+
+The City of Ekurhuleni will only disclose the information to a third party:
+-to perform the Service;
+-if the City of Ekurhuleni is required by law or court order to disclose the information; and/or
+-if legislation or a government Act provides for such disclosure.
+
+The City of Ekurhuleni will store information on its system for a period of 12 (twelve) months after the termination of this agreement, or for a period of 2 (two) years after submission of information if this agreement remains in force for longer than 2 (two), whichever might be the case.
+
+Although the City of Ekurhuleni will take all reasonable measures to ensure that the information will not be compromised, the User and Registered Account Holder acknowledges that they need to keep copies of the information under their own control in order to mitigate potential damages that might result from a loss or corruption of information.
+
+Use of User Information by the City of Ekurhuleni
+The City of Ekurhuleni may in the widest sense possible distribute, loan, sell or otherwise share with other persons or entities information constituting or descriptive of demographic information, habits, usage patterns, preferences, survey data or other descriptive or related data which does not permit recipients to individually identify any particular User of the service.
+
+The City of Ekurhuleni will be entitled in its sole discretion, and without notice, to provide user information and records to the courts, law enforcement agencies, others involved in prosecuting claims or investigations for conduct or conditions alleged or believed to be illegal or the violation or threatening of rights of any person or entity, and to maintain and use such information and records internally.
+
+The City of Ekurhuleni may provide online, mobile communication methods, and e-mail communications to the user on matters pertaining to the service, its features, its sponsors, or its use without compensation to the user, but shall do so reasonably and in good faith.
+
+The user acknowledges:
+-that communications within the RCS Service may be monitored or reviewed for quality control and other reasonable business and/or legal purposes;
+-The use of User information and the disposal or dissemination thereof shall not constitute invasion of privacy by the City of Ekurhuleni.
+
+Use of RCS and Software
+It is the responsibility of the User to acquire and maintain, at his/her own expense, the computer hardware, system and information security, software, telecommunications lines and access to the Internet and the RCS website and/or download content from RCS.
+
+Software, if any, made available for download on or via the website is governed by the license conditions establishing a legal relationship between the User and the licensor of such software. The user indemnifies the City of Ekurhuleni against any breach of such license conditions.
+
+The City of Ekurhuleni gives no warranty and makes no representation, whether express or implied, as to the quality or compatibility of such software.
+
+The City of Ekurhuleni hereby grants the User the right to view, download and print the content of the RCS site for the purposes of accessing and using the RCS services, provided that such content is only used by the User for personal, educational or non-commercial purposes. No further reproduction or any form of distribution of the content on the RCS site is permitted.
+
+Users may only access and use the RCS Service for the purpose of interacting with the City and paying for services.
+
+The City of Ekurhuleni and its agents shall not be liable, in any manner whatsoever, for any damage, loss or liability that results from the use of the e=Ekurhuleni Service or information contained within the RCS site.
+
+Unavailability of the City of Ekurhuleni Services
+The City of Ekurhuleni shall at all times and for whatever reason, have the sole and exclusive right to suspend or terminate the Service with prior written notification and provide reason for such termination or suspension. However, without prejudice to the foregoing, the City of Ekurhuleni will not exercise its rights in terms of this clause without just cause.
+
+The user acknowledges and accepts that the City of Ekurhuleni service may become unavailable from time-to-time due to various circumstances, including:
+-technical failure or problems with the RCS service ;
+-infrastructure or technical problems with third party information technology systems;
+-unavailability of telecommunication or electricity services;
+-or other circumstances beyond the control of the City of Ekurhuleni.
+-Without derogating from the provisions of this clause, the user undertakes to limit their potential debt caused by any unavailability of the Municipal Service by making use of alternative account statement enquiry and payment methods available to consumers.
+
+Changes and Amendments
+The City of Ekurhuleni expressly reserves the right, in its sole and absolute discretion, to do any of the following, at any time without prior notice to the User:
+-change these Terms and Conditions;
+-change the content and/or services available from RCS;
+-discontinue any aspect of the RCS service; and/or
+-change the software and hardware required to access and use RCS.
+-Any new version of the Terms and Conditions will be displayed on RCS. It is the Users obligation to visit RCS on a regular basis in order to determine whether any amendments have been made to the Terms and Conditions. By accessing RCS, the User will be bound by the latest version of the Terms and Conditions, as published on RCS.
+
+No Warranties or Representations
+The Terms and Conditions evidences the sole terms and conditions governing the Services.
+
+Users acknowledge and agree that any warranties, statements or representations of whatever nature and in whatever form, including promotional materials, granted or made by the City of Ekurhuleni, its employees, agents or advisors which are not stated in the Conditions of Use shall not be valid and enforceable and Users shall not hold the City of Ekurhuleni liable to any such warranty or representation, whether made prior to, during or after concluding the Conditions of Use.
+
+To the extent permitted by law, the City of Ekurhuleni (including its employees, suppliers, Internet service providers, partners, affiliates and agents) shall not be liable for any damage, loss or liability of any nature incurred by person and resulting from;
+-access to RCS;
+-access to websites linked to RCS;
+-inability to access RCS;
+-inability to access websites linked to RCS;
+-content available on RCS;
+-services available from RCS; and/or
+-downloads and use of content from RCS.
+
+The City of Ekurhuleni site and Service are provided "as is" and the City of Ekurhuleni makes no express or implied representations or warranties with regard thereto. Without limiting the generality of the a foregoing:-
+-the City of Ekurhuleni does not warrant that the website, its contents, any third party content and services, payment or the Municipal Services will be error free or will meet any particular criteria of accuracy, completeness or reliability of information, performance or quality. The City of Ekurhuleni expressly disclaims all implied warranties, including, without limitation, warranties of merchantability, title, fitness for a particular purpose, non-infringement, compatibility, security and accuracy; and
+-whilst the City of Ekurhuleni has taken reasonable measures to ensure the integrity of the Services, no warranty, whether express or implied is given that any files, downloads or applications available via the website are free of viruses or any other data or code which has the ability to corrupt or affect the operation of a user's system.
+
+Governing Law and Jurisdiction
+These conditions are governed by the laws of the Republic of South Africa.</textarea>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <p id="box1">By checking this box you are agreeing to our Terms and Conditions.<span>&nbsp;</span> <input id="box" onclick="HideTCM()" type="checkbox" checked="" data-dismiss="modal" style="display: inline-block;width: 30px;height: 19px;margin-top: 0%;"></p>
+
+
+                @*<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>*@
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    //function setCookie(cname, cvalue, exdays) {
+    //    var d = new Date();
+    //    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    //    var expires = "expires=" + d.toGMTString();
+    //    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    //}
+
+    $(function () {
+        $("form").submit(function (e) {
+            var success = true;
+
+            return success;
+        });
+    });
+
+
+
+
+
+
+
+    $(document).ready(function () {
+
+
+
+
+        $("#btnSubmit").click(function () {
+            $("form").submit(function (e) {
+                var success = true;
+
+                return success;
+            });
+            document.getElementById("registerForm").submit();
+
+
+
+
+        });
+
+
+
+
+    });
+
+
+
+
+</script>
+
+<script>
+
+
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+</script>

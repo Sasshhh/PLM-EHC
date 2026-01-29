@@ -1,0 +1,44 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+
+@{
+    ViewBag.Title = "View RCC Certificate";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div id="documentsUpload">
+    <div class="panel-group">
+        <div class="panel panel-default">
+
+
+
+
+            <div class="panel-group" style="margin-bottom: -1px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading" align="center">
+                        View RCC Certificate
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+                <br />
+
+                @Html.Partial("_DocumentsPartialRCCCertificateCustomer", Model)
+
+
+                <br />
+            </div>
+
+
+        </div>
+    </div>
+ 
+</div>
+

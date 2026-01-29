@@ -1,0 +1,334 @@
+﻿@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+@using System.Web
+
+<style>
+    .button1 {
+        font-size: 15px;
+    }
+
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        color: #af7b0b;
+        border-color: #af7b0b;
+        background-color: white;
+    }
+
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+    .dtAlign {
+        text-align: left;
+        margin-bottom: 1em;
+        width: auto;
+        padding-right: 1em;
+    }
+
+    .ddAlign {
+        margin-left: 0;
+        margin-bottom: 1em;
+    }
+</style>
+
+<div id="documentResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Progress</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" id="modalText"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-horizontal">
+
+    @if (Model.IsUploadView)
+    {
+        // ---------------------------------------------------------
+        //  UPLOAD VIEW (Existing Logic)
+        // ---------------------------------------------------------
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>Document Type</th>
+                        <th>Browse</th>
+                        <th>Document</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in Model.DocumentCheckLists)
+                    {
+                        List<C8.eServices.Mvc.Models.Document> documents = null;
+                        if (Model.Documents != null)
+                        {
+                            documents = Model.Documents.Where(o => o.DocumentCheckListId == doc.Id).ToList();
+                        }
+                        <tr>
+                            <td>
+                                @Html.Label(doc.DocumentType.Name, new { @class = "control-label" })
+                            </td>
+                            <td>
+                <dt class="dtAlign">
+                    <span class="btn btn-default btn-file">
+                        Browse
+                        <input type="file" id="@Html.Raw( string.Format( "docUpload_{0}", doc.Id ) )" name="@Html.Raw( string.Format( "_{0}", doc.Id ) )" class="docUpload" multiple>
+                    </span>
+                </dt>
+                </td>
+                <td>
+                <dd class="ddAlign">
+                    <div id="@("docDetails_" + doc.Id)" class="docDetails">
+                        @if (documents != null)
+                        {
+                            foreach (var d in documents)
+                            {
+                                @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName) : "No Document<br/>")
+                                @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='fa fa-times' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)
+                            }
+                        }
+                    </div>
+                    @Html.Raw(string.Format("<small>{0}</small>", doc.DocumentType.Description))
+                </dd>
+                </td>
+                </tr>
+            }
+                    </tbody>
+                    </table>
+                </div>
+
+                <text>
+                    <br /><br />
+                    <div class="form-group">
+                        <div class="col-md-offset-1 col-md-2">
+                            <input type="button" value="Upload" class="button1" id="uploadFiles" />
+                        </div>
+                    </div>
+                </text>
+            }
+            else
+            {
+                // ---------------------------------------------------------
+                //  READ ONLY VIEW (Refactored to match Table Style)
+                // ---------------------------------------------------------
+                <div style="width: 90%;margin: 0 auto;">
+                    <br />
+                    <table class="table table-bordered table-hover table-striped panel panel-default display">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Document Type</th>
+                                <th>Attached Documents</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model.DocumentCheckLists)
+                            {
+                                // Logic to get all documents for this type (not just FirstOrDefault)
+                                var documents = Model.Documents != null
+                                              ? Model.Documents.Where(o => o.DocumentCheckListId == doc.Id).ToList()
+                                              : new List<C8.eServices.Mvc.Models.Document>();
+
+                                <tr>
+                                    <td>
+                                        @Html.Label(doc.DocumentType.Name, new { @class = "control-label" })
+                                        <br />
+                                        <small class="text-muted">@Html.Raw(doc.DocumentType.Description)</small>
+                                    </td>
+                                    <td>
+                                        <div class="docDetails">
+                                            @if (documents != null && documents.Any())
+                                            {
+                                                foreach (var d in documents)
+                                                {
+                                                    <div>
+                                                        @* Display Link Only (No Delete Button) *@
+                                                        <i class="fa fa-file-text-o"></i>
+                                                        <a href='@Url.Action("GetDocument", "File", new { q = d.File.Data })' target="_blank">
+                                                            @d.DocumentName
+                                                        </a>
+                                                        @if (d.CreatedDateTime.HasValue)
+                                                        {
+                                                            <small class="text-muted" style="margin-left:10px;">
+                                                                (@d.CreatedDateTime.Value.ToString("yyyy-MM-dd"))
+                                                            </small>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-danger">No Document Attached</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+</div>
+
+<script type="text/javascript">
+    var validFileExtensions = new Array('pdf', 'jpg', 'jpeg', 'png', 'gif');
+
+    $(document).ready(function () {
+        var documentCheckListIds = '';
+
+        $('.docUpload').each(function (i, fileInput) {
+            $(fileInput).on('change', fileInput, function () {
+                var name = $(fileInput).attr('Id');
+                var id = '#docDetails_' + name.substring(name.indexOf('_') + 1, name.length);
+                var files = $(fileInput).prop("files");
+                var names = $.map(files, function (val) { return val });
+                var fileExtensions = [];
+                var fileSize = 0;
+
+                names.forEach(function (value, index, array) {
+                    var extension = value.name.split('.').pop().toLowerCase();
+                    var isValidFile = $.inArray(extension, validFileExtensions);
+                    fileExtensions.push(isValidFile);
+                    fileSize += value.size;
+                    $(id).append(value.name + "</br>");
+                });
+
+                if ($.inArray(-1, fileExtensions) !== -1) {
+                    bootbox.alert("Please select a valid file of type pdf/jpg/png/gif.");
+                    $(fileInput).val('');
+                    $(id).html('');
+                }
+                else {
+                    if (fileSize > (1024 * 1024 * 5)) {
+                        bootbox.alert("File(s) size should not exceed 5MB.");
+                        $(fileInput).val('');
+                        $(id).html('');
+                    }
+                }
+            });
+        });
+
+        $('#uploadFiles').click(function () {
+            var numOfFiles = 0;
+            var formdata = initFormData();
+
+            HoldOn.open({ message: 'Uploading document/s...Please Wait', textColor: "white" });
+
+            $('.docUpload').each(function (i, fileInput) {
+                numOfFiles = numOfFiles + fileInput.files.length;
+                for (i = 0; i < fileInput.files.length; i++) {
+                    formdata.append(fileInput.files[i].name, fileInput.files[i]);
+                    documentCheckListIds += $(this).attr("name");
+                }
+            });
+
+            formdata.append('DocumentCheckListIds', documentCheckListIds);
+
+            if (numOfFiles > 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '@Url.Action( "AddDocument", "File", new { folder = Model.ApplicationReferenceNumber, rcsappid = Model.RcsApplicationId } )');
+                xhr.send(formdata);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        documentCheckListIds = '';
+                        if (xhr.status == 200) {
+                            HoldOn.close();
+                            $("#modalText").html("Document(s) Uploaded");
+                            $("#documentResponseModal").modal('show');
+                            displayDocumentDetails();
+                            $('.docUpload').each(function (i, fileInput) { $(fileInput).val(''); });
+                        }
+                        else {
+                            HoldOn.close();
+                            $("#modalText").html("An error occurred. Please try again");
+                            $("#documentResponseModal").modal('show');
+                        }
+                    }
+                }
+                return false;
+            }
+            else {
+                HoldOn.close();
+                $("#modalText").html("Please select file(s) to be uploaded");
+                $("#documentResponseModal").modal('show');
+            }
+        });
+    });
+
+    function initFormData() {
+        var formdata = new FormData();
+        formdata.append('CustomerId', '@Html.Raw( Model.CustomerId )');
+        formdata.append('ReferenceTypeId', '@Html.Raw( Model.ReferenceTypeId )');
+        formdata.append('ReferenceId', '@Html.Raw( Model.ReferenceId )');
+        formdata.append('ApplicationId', '@Html.Raw( Model.ApplicationId )');
+        formdata.append('StatusId', '@Html.Raw( Model.StatusId )');
+        formdata.append('RcsApplicationId', '@Html.Raw( Model.RcsApplicationId )');
+        return formdata;
+    }
+
+    function deleteDocument(documentId) {
+        HoldOn.open({ message: 'Deleting document...Please Wait', textColor: "white" });
+        var formdata = initFormData();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '@Url.Action( "DeleteDocument", "File" )?q=' + documentId);
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                HoldOn.close();
+                $("#modalText").html("Document Deleted");
+                $("#documentResponseModal").modal('show');
+                displayDocumentDetails();
+            }
+        }
+        return false;
+    }
+
+    function displayDocumentDetails() {
+        var documentCheckLists = JSON.parse('@Html.Raw(Json.Encode(Model.DocumentCheckLists.Select(d => new { Id = d.Id, DataList = d.DataList })))');
+        $('.docDetails').each(function (i, element) {
+            var elementId = $(element).attr('Id');
+            var documentCheckListId = elementId.substring(elementId.indexOf('_') + 1, elementId.length);
+            var list = $.grep(documentCheckLists, function (e, i) { return e.Id == documentCheckListId });
+
+            $.ajax({
+                url: "@Url.Action( "RenderDocumentDetails", "Document" )?q=" + list[0].DataList[0],
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == "Success") {
+                        $(element).html($.parseHTML(data.view));
+                    } else {
+                        $(element).html('');
+                    }
+                },
+                error: function () {
+                    $("#modalText").html("Document failed to upload or be deleted... please try again");
+                    $("#documentResponseModal").modal('show');
+                }
+            });
+        });
+    }
+</script>

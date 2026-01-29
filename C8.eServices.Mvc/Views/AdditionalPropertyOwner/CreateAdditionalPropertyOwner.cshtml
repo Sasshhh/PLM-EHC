@@ -1,0 +1,130 @@
+﻿@model C8.eServices.Mvc.Models.AdditionalPropertyOwner
+
+@{
+    ViewBag.Title = "CreateAdditionalPropertyOwner";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var propertyId = ViewBag.PropertyId;
+}
+
+<h2>Home Owner's Rates Rebate Application for Residential Property</h2>
+<hr />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Additional Property Owner</h4>
+        <hr />
+        @Html.ValidationSummary(true)
+
+        <p>
+            Please click here @Html.CheckBox("isConflict", new { id = "isConflict", @disabled = true }) to correct or fill in missing information.
+        </p>
+        <div class="form-group">
+            @Html.LabelFor(model => model.PropertyId, "Rates Number", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBox("RatesNumber", "", new { @class = "form-control", id = "ratesNumber" })
+            </div>
+            <div>
+                <input id="GetPropertyOwner" type="button" value="Get Property Owner" class="btn btn-primary" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.ExecutorContactNumber, "Executor Contact Number", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.ExecutorContactNumber, new { @class = "form-control", id = "executorContactNumber", @pattern = @"^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$", @title = "Contact number. should contain numbers only with a length of 10 e.g. 0812345690", @placeholder = "0810000000", maxlength = 10 })
+                @Html.ValidationMessageFor(model => model.ExecutorContactNumber)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ExecutorName, "Executor Name", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.ExecutorName, new { @class = "form-control", id = "executorName" })
+                @Html.ValidationMessageFor(model => model.ExecutorName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsDeceased, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsDeceased, new { id = "isDeceased" })
+                @Html.ValidationMessageFor(model => model.IsDeceased)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsRegisteredOwner, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsRegisteredOwner, new { id = "isRegisteredOwner" })
+                @Html.ValidationMessageFor(model => model.IsRegisteredOwner)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.OwnerIdentificationNumber, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.OwnerIdentificationNumber, new { @class = "form-control", id = "owneridentificationNumber" })
+                @Html.ValidationMessageFor(model => model.OwnerIdentificationNumber)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.OwnerName, new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.OwnerName, new { @class = "form-control", id = "ownerName" })
+                @Html.ValidationMessageFor(model => model.OwnerName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StatusId, "StatusId", new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.DropDownListFor(model => model.StatusId, (SelectList)ViewBag.StatusId, "---Select Status---", new { @class = "form-control", id = "statusId" })
+                @Html.ValidationMessageFor(model => model.StatusId)
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List of Property Owners", "Index", new { propertyId })
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#GetPropertyOwner").click(function () {
+            var ratesNumber = $("#ratesNumber").val();
+            var customerId = parseInt(@ViewBag.CustomerId);
+            var ratesRebateId = parseInt(@ViewBag.RatesRebateId);
+
+            $.ajax({
+                type: 'GET',
+                url: "@Url.Action("GetPropertyOwner", "AdditionalPropertyOwner")",
+                data: { ratesNumber: ratesNumber, customerId: customerId, ratesRebateId: ratesRebateId },
+                cache: false,
+                success: function (result) {
+
+
+                    $("#ratesNumber").val(result.RatesNumber);
+                    $("#executorContactNumber").val(result.ExecutorContactNumber);
+                    $("#executorName").val(result.ExecutorName);
+                    $("#isDeceased").val(result.IsDeceased);
+                    $("#ownerIdentificationNumber").val(result.OwnerIdentificationNumber);
+                    $("#ownerName").val(result.OwnerName);
+                    $("#statusId").val(result.StatusId);
+                },
+                error: function (result) {
+                    alert("Rates number not found, please correct your input.");
+                }
+
+            });
+        });
+    });
+</script>

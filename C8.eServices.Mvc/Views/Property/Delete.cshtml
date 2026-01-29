@@ -1,0 +1,197 @@
+﻿@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.Property
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-here">Properties</li>
+        <li class="progtrckr-todo">Accounts</li>
+        <li class="progtrckr-todo">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+        <li class="progtrckr-todo">Submit</li>
+    </ol>
+</div>*@
+<br />
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 2:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li><strong>Properties - Update information about the properties owned by the principle owner.</strong></li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</li>
+                    </ol>
+                </p>
+                <p>
+                    You are about to delete a property from your rates rebate application. Please confirm by clicking "Delete" in the "Navigation"
+                    panel or click "Cancel" to go back to the property listing page.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Hidden( "customerId", ( int ) customerId )
+
+@using ( Html.BeginForm() )
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">
+                                @Html.EncodedActionLink( "Cancel", "Index","Property", new { customerId, ratesRebateId = ViewBag.RatesRebateId }, new { @class = "btn btn-primary" } )
+                            </div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    <input type="submit" value="Delete" class="btn btn-primary" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseProperty">Are you sure you want to delete this property?
+                </a>
+            </h4>
+        </div>
+        <div id="collapseProperty" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div>
+                    <dl class="dl-horizontal">
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.RatesNumber )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.RatesNumber )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddress1 )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddress1 )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddress2 )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddress2 )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddress3 )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddress3 )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddress4 )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddress4 )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddress5 )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddress5 )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PhysicalAddressCode )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PhysicalAddressCode )
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor( model => model.PropertyDescription )
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor( model => model.PropertyDescription )
+                        </dd>
+
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+    });
+
+    </script>
+
+}

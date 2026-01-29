@@ -1,0 +1,104 @@
+﻿@model C8.eServices.Mvc.Models.AdditionalPropertyContact
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var incentivePolicyPropertyId = (int)ViewBag.IncentivePolicyPropertyId;
+    var customerId = (int) ViewBag.ApplicantCustomerId;
+    var referenceTypeId = (int) ViewBag.ReferenceTypeId;
+    var applicationId = (int) ViewBag.ApplicationId;
+    var incentivePolicyId =  ViewBag.IncentivePolicyId;
+}
+
+<div class="page-header">
+    <h3 align="center">
+        Economic Development Incentive Policy Application <br />Financial Incentives
+    </h3>
+</div>
+
+<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Application Details</li>
+        <li class="progtrckr-here">Additional Contacts</li>
+        <li class="progtrckr-todo">Supporting Document(s)</li>
+    </ol>
+</div>
+<br />
+<div class="panel panel-default">
+    <div class="panel-heading">Additional Contact Details</div>
+    <div class="panel-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.IncentivePolicyPropertyId)
+
+            <div class="form-horizontal">
+                <p style="color: red">NB: Please provide the details of the person who can be contacted for any further information.</p>
+                <hr/>
+                @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.TitleTypeId, "Title Type", htmlAttributes: new {@class = "control-label col-md-2 required" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("TitleTypeId", null, htmlAttributes: new {@class = "form-control" , required="required"})
+                        @Html.ValidationMessageFor(model => model.TitleTypeId, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.FullName, htmlAttributes: new {@class = "control-label col-md-2 required" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.FullName, new {htmlAttributes = new {@class = "form-control", required="required"}})
+                        @Html.ValidationMessageFor(model => model.FullName, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Position, htmlAttributes: new {@class = "control-label col-md-2 required"})
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Position, new {htmlAttributes = new {@class = "form-control", required="required"}})
+                        @Html.ValidationMessageFor(model => model.Position, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CellPhoneNumber, htmlAttributes: new {@class = "control-label col-md-2 required" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.CellPhoneNumber, new {htmlAttributes = new {@class = "form-control", required="required"}})
+                        @Html.ValidationMessageFor(model => model.CellPhoneNumber, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.BusinessPhoneNumber, htmlAttributes: new {@class = "control-label col-md-2 required" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.BusinessPhoneNumber, new {htmlAttributes = new {@class = "form-control", reuired ="required"}})
+                        @Html.ValidationMessageFor(model => model.BusinessPhoneNumber, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EmailAddress, htmlAttributes: new {@class = "control-label col-md-2 required" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.EmailAddress, new {htmlAttributes = new {@class = "form-control", required="required"}})
+                        @Html.ValidationMessageFor(model => model.EmailAddress, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            @Html.EncodedActionLink("Back to List", "Index", "AdditionalPropertyContacts", new {incentivePolicyPropertyId = Model.IncentivePolicyPropertyId}, new {@class = "btn btn-primary"})
+                        </div>
+                        <div class="col-md-6">
+                            <span class="pull-right">
+                                <input type="submit" value="Save" class="btn btn-primary" />
+                                &nbsp;
+                                @Html.EncodedActionLink("Next", "Index", "Document", new {referenceId = incentivePolicyPropertyId, customerId, referenceTypeId, applicationId, incentivePolicyId}, new {@class = "btn btn-primary", title = "Next to supporting document(s)"})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

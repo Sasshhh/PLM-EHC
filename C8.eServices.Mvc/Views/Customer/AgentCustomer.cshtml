@@ -1,0 +1,123 @@
+﻿
+@{
+    ViewBag.Title = "AgentCustomer";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Agent Customers</h4>
+<hr/>
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    This view shows details of registered agent customers on Siyakhokha. Please see steps below explaining each action.
+                </p>
+                <p>
+                    <b>Search</b> - Allows to search the database. Search can be done on any field currently listed on the table.<br />
+                    <b>Reset</b> - Refreshes the search results.<br />
+                    <b>Details</b> - View more details of the agent customer.<br />
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Registered Agent Customers
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table id="customerTable"
+                       class="table table-striped"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadAgentCustomers", "Customer")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="50"
+                       data-height="1400"
+                       data-search="true">
+                    <thead>
+                    <tr>
+                        <th data-field="AgentFullName">Agent</th>
+                        <th data-field="CustomerIdNumber">Customer ID Number</th>
+                        @*<th data-field="CustomerIdNumber">Customer ID Number</th>*@
+                        <th data-field="CustomerFullName">Customer FullName</th>
+                        <th data-field="CustomerEmailAddress">Customer Email Address</th>
+                        <th data-field="ProfileStatus">Profile Status</th>
+                        <th data-field="DateCreated">Date Created</th>
+                        <th data-formatter="details">Details</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        var $table = $('#customerTable'),
+        $button = $('#btnRefresh'),
+        $btnSearch = $('#btnSearch');
+
+        $button.click(function () {
+            $('.fixed-table-toolbar').find('.search > :input').val('');
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadAgentCustomers", "Customer")',
+                query: {
+                    searchText: '',
+                    pageNumber: 1
+                }
+            });
+        });
+
+        $btnSearch.click(function () {
+            var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+            $table.bootstrapTable('refresh', {
+                url: '@Url.Action("LoadAgentCustomers", "Customer")',
+                query: {
+                    searchText: searchVal,
+                    pageNumber: 1
+                }
+            });
+        });
+    });
+
+    window.details = function (value, row, index) {
+        return "<input type='button' value='Details' onclick='RedirectDetails(\"" + row.Id + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+    }
+
+    window.RedirectDetails = function (Id) {
+        try {
+            window.open(
+                '@Url.Action("Details", "Customer")/?q=' + Id,
+                '_parent'
+            );
+
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+    }
+</script>

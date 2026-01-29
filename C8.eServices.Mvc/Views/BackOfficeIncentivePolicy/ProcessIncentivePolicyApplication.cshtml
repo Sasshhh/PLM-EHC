@@ -1,0 +1,996 @@
+﻿@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.ViewModels
+@using Microsoft.Ajax.Utilities
+@model C8.eServices.Mvc.ViewModels.IncentivePolicyApplicationViewModel
+@{
+    ViewBag.Title = "ProcessIncentivePolicyApplication";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<style>
+    .table {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+    body .modal-dialog {
+        width: 800px;
+    }
+
+    #ah1 {
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    #ahb1 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    #ah2 {
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    #ahb2 {
+        font-weight: bold;
+        font-size: 12px;
+    }
+</style>
+
+<div class="page-header">
+    <h3 align="center"> Economic Development Incentive Policy Application <br />Financial Incentives</h3>
+</div>
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Expand/Collapse panels by clicking on their titles. The functions of each panel are as follows :
+                    <ol>
+                        <li>Application Details - View applicant information here</li>
+                        <li>
+                            Property Details
+                        </li>
+                        <li>Notes - Add notes, pertaining to the application here by clicking the 'Add Note' button. </li>
+
+                    </ol>
+                    Set the application status by choosing an option from the 'Application Status' dropdown list and then clicking the 'Save' button.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="property">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Property
+                </a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial("_PropertyPartial", Model.Property)
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default ">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <a data-toggle="collapse" href="#applicationdetails">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Application Details
+                </a>
+            </div>
+        </div>
+        <div id="applicationdetails" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal ">
+                    <dt id="ah1">
+                        Application Number
+                    </dt>
+                    <dd id="ahb1">
+                        @Html.DisplayFor(model => model.IncentivePolicy.ApplicationNumber)
+                    </dd>
+                    <dt id="ah1">
+                        Applicant Details
+                    </dt>
+                    <dd id="ahb1">
+                        &nbsp;
+                    </dd>
+                    <dt>Title</dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.IncentivePolicy.Customer.TitleType.Name)
+                    </dd>
+                    <dt>Name</dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.IncentivePolicy.Customer.FullName)
+                    </dd>
+                    <dt>
+                        &nbsp;
+                    </dt>
+                    <dd>
+                        &nbsp;
+                    </dd>
+
+                    @if (Model.IncentivePolicy.Customer.PostalAddress3 != null)
+            {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.PhysicalAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.PhysicalAddress)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.PostalAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.PostalAddress)
+                        </dd>
+                    }
+
+                    <dt>
+                        &nbsp;
+                    </dt>
+                    <dd>
+                        &nbsp;
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.Identification)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IncentivePolicy.Customer.Identification)
+                    </dd>
+
+                    @if (Model.IncentivePolicy.Customer.HomePhoneNumber != null)
+            {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.HomePhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.HomePhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.IncentivePolicy.Customer.WorkPhoneNumber != null)
+            {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.WorkPhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.WorkPhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.IncentivePolicy.Customer.CellPhoneNumber != null)
+            {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.CellPhoneNumber)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.CellPhoneNumber)
+                        </dd>
+                    }
+
+                    @if (Model.IncentivePolicy.Customer.EmailAddress != null)
+            {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IncentivePolicy.Customer.EmailAddress)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.IncentivePolicy.Customer.EmailAddress)
+                        </dd>
+                    }
+                </dl>
+
+                <dl class="dl-horizontal">
+                    <dt id="ah1">
+                        Entity Details
+                    </dt>
+                    <dd id="ahb1">
+                        &nbsp;
+                    </dd>
+                    @if (Model.Customer.Entity.EntityFullName != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityFullName)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityFullName)
+                        </dd>
+                    }
+                    @if (Model.Customer.Entity.EntityRegistrationNumber != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityRegistrationNumber)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityRegistrationNumber)
+                        </dd>
+                    }
+
+                    @if (Model.Customer.Entity.EntityType != null)
+                    {
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Customer.Entity.EntityType.Name)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.Entity.EntityType.Name)
+                        </dd>
+                    }
+                </dl>
+                @if (Model.AdditionalPropertyContacts.Any())
+                {
+                    <dl class="dl-horizontal">
+                        <dt id="ah1">
+                            Additional Contacts
+                        </dt>
+                        <dd id="ahb1">
+                            &nbsp;
+                        </dd>
+                        @foreach (var c in Model.AdditionalPropertyContacts)
+                        {
+                            <dt>
+                                Name
+                            </dt>
+                            <dd>
+                                @c.ContactFullName
+                            </dd>
+                            <dt>
+                                Position
+                            </dt>
+                            <dd>
+                                @c.Position
+                            </dd>
+                            <dt>
+                                Contacts
+                            </dt>
+                            <dd>
+                                @c.ContactNumbers
+                            </dd>
+                            <dd> &nbsp; </dd>
+                        }
+
+                    </dl>
+                }
+                <div class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                            Nature Of Investment
+                        </div>
+                        <div class="panel-body">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyRatesNumber, "Municipal Property Rates No.", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(model => model.PropertyRatesNumber, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.IncentivePolicy.CategoryType.Name, "Category of Incentive", new {@class = "control-label col-md-2"})
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(model => model.IncentivePolicy.CategoryType.Name, new {@class = "form-control"})
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.Label("Industry Sector", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                       @Model.IndustrySector
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.VatNumber, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.VatNumber, new {@class = "form-control"})
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.VatNumber)
+                                    </div>
+                                    @Html.LabelFor(model => model.PropertyInvestment.TaxNumber, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.TaxNumber, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.TaxNumber)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.InvestmentDescription, new { @class = "form-control textarea" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.InvestmentDescription)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, "Please provide full description of the type of manufacturing or industrial product or services", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.TypeOfServices, new { @class = "form-control textarea" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.InvestmentDescription)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.BbbeeStatus, "BBBEE Status", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.BbbeeStatus, new { @class = "form-control" })
+                                        <h4 class="small">(points as per DTI BBBEE scorecard)</h4>
+                                    </div>
+                                    @Html.LabelFor(model => model.PropertyInvestment.SupplierNumber, "eThekwini Municipality supplier No.", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.SupplierNumber, new { @class = "form-control" })
+                                        <h4 class="small">(where applicable)</h4>
+                                    </div>
+                                    @Html.LabelFor(model => model.PropertyInvestment.SicCode, "Standard Industrial Classification", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.SicCode, new { @class = "form-control" })
+                                        <h4 class="small">SIC code (where applicable)</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                            Investment Details
+                        </div>
+                        <div class="panel-body">
+                            <div class="panel-body">
+                                <h6 style="color:red">NB: Rates will move back to normal rates if the development has not been completed within the specified timeframe.</h6>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.DevelopmentPeriod, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.DevelopmentPeriod, new { @class = "form-control", placeholder = "e.g 2 years 8 months" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.DevelopmentPeriod)
+                                    </div>
+                                    @Html.LabelFor(model => model.PropertyInvestment.ProjectedStartDateTime, "Projected Start Date", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.ProjectedStartDateTime, new { @class = "form-control datePicker", id = "ProjectedStartDateTime" })
+                                    </div>
+                                    @Html.LabelFor(model => model.PropertyInvestment.ProjectedEndDateTime, "Projected End Date", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.PropertyInvestment.ProjectedEndDateTime, new { @class = "form-control datePicker", id = "ProjectedEndDateTime" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.LandSize, "Land Size", new { @class = "control-label col-md-2" }) (@Model.LandSizeUnitofMeasureDisplay)
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.LandSize, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.LandSize)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.BuildingSize, "Building Size", new { @class = "control-label col-md-2" }) (@Model.BuildingSizeUnitofMeasureDisplay)
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.BuildingSize, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.BuildingSize)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <h6 class="col-md-offset-1 col-md-10" style="font-weight: bold;text-decoration: underline;">Percentage of operational expenditure (of Rand value) procured from:</h6>
+                                    @Html.LabelFor(model => model.BuildingSize, "Outside RSA (%)", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.OperationalExpanditureForeign, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.OperationalExpanditureForeign)
+                                    </div>
+                                    @Html.LabelFor(model => model.BuildingSize, "Inside RSA: outside eThekwini (%)", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.OperationalExpanditureOutBound, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.OperationalExpanditureOutBound)
+                                    </div>
+                                    @Html.LabelFor(model => model.BuildingSize, "Inside RSA: within eThekwini (%)", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(model => model.OperationalExpanditureInBound, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.OperationalExpanditureInBound)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-horizontal">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                            Value Of Investment
+                        </div>
+                        <div class="panel-body">
+                            <div class="panel-body">
+                                <table class="table table-bordered">
+                                    <colgroup span="2"></colgroup>
+                                    <colgroup span="2"></colgroup>
+                                    <tr>
+                                        <td rowspan="2"></td>
+                                        <th rowspan="2">Capital expenditure <br/> (Rand value)</th>
+                                        <th colspan="2" scope="colgroup" style="text-align: center">Number of jobs to be created</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col">Permanent</th>
+                                        <th scope="col">Temporary</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 1</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear1, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear1, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear1, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear1, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 2</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear2, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear2, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear2, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear2, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 3</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear3, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear3, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear3, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear3, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 4</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear4, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear4, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear4, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear4, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Year 5</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureYear5, new {@class = "form-control appendToCapitalSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsYear5, new {@class = "form-control appendToPJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsYear5, new {@class = "form-control appendToTJobsSum", @style = "width:200px"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsYear5, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Total</th>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CapitalExpenditureTotal, new {@class = "form-control", @style = "width:200px", id = "capitalTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.CapitalExpenditureTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PermanentJobsTotal, new {@class = "form-control", @style = "width:200px", id = "perTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.PermanentJobsTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.TempJobsTotal, new {@class = "form-control", @style = "width:200px", id = "tempTotal", @readonly = "readonly"})
+                                            @Html.ValidationMessageFor(model => model.TempJobsTotal, "", new {@class = "text-danger"})
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="form-group form-inline">
+                                    @Html.Label("Has the applicant previously benefitted, or currently benefitting, from other investment incentive programmes within eThekwini Municipality", new {@class = "control-label col-md-6"})
+                                    <div class="col-md-4 button-group">
+                                        <input type="radio" name="option" id="radio1" value="yes"> Yes
+                                        <input type="radio" name="option" id="radio2" value="no"> No
+                                        <h6>If Yes, please specify</h6>
+                                    </div>
+                                </div>
+                                <div id="benefitsGrp" style="display: none;">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            @Html.TextAreaFor(model => model.PropertyInvestment.IncentiveProgrammeCurrentBenefits, new { @class = "form-control textarea", @id="radBenefits", rows = 5 })
+                                            @Html.ValidationMessageFor(model => model.PropertyInvestment.IncentiveProgrammeCurrentBenefits)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, "What positive impacts wil the investment have on skills development and training", new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.ImpactOnSkillDevelopment, new { @class = "form-control textarea" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.ImpactOnSkillDevelopment)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.PropertyInvestment.InvestmentDescription, "Please list any support services you may require from eThekwini Municipality E.g. Revenue Clearance Certificates", new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.TextAreaFor(model => model.PropertyInvestment.SupportServices, new { @class = "form-control textarea" })
+                                        @Html.ValidationMessageFor(model => model.PropertyInvestment.SupportServices)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Supporting Documents
+                </a>
+            </h4>
+        </div>
+        <div id="documentsCollapse" class="panel-collapse">
+            <div class="panel-body">
+                <div>
+                    @Html.Partial("~/Views/Shared/_LargeDocumentsPartial.cshtml", Model.DocumentsViewModel)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default ">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <a data-toggle="collapse" href="#notes">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Notes
+                </a>
+            </div>
+        </div>
+        <div id="notes" class="panel-collapse collapse">
+            <div class="dl-horizontal panel-body">
+                <div>
+                    <div style="padding-bottom: 10px">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#notesModal" data-id="" id="test">
+                            Add Note
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modalEmail" data-target="#emailModal" data-id="" id="email">
+                            Send Mail
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modalHistory" data-target="#historyModal" data-id="" id="history">
+                            Application History
+                        </button>
+                    </div>
+                    <div>
+                        <table id="NotesGrid" class="table table-bordered " width="100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Date Created
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                    <th>
+                                        Note
+                                    </th>
+                                    <th> Note Type</th>
+                                    <th> Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(model => model.ApplicantCustomerId)
+    @Html.HiddenFor(model => model.IncentivePolicyId)
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+
+        <div class="form-group" style="margin-left: 10px">
+            @Html.LabelFor(model => model.IncentivePolicy.StatusId, "Application Status", new { @class = "control-label col-md-2", style = "text-align:right; margin-left: 10px" })
+            <div class="col-md-4">
+                @Html.DropDownListFor(model => model.IncentivePolicy.StatusId, (SelectList)ViewBag.Statuses, "Select status ...", new { @class = "form-control", id = "status", required = true })
+                @Html.ValidationMessageFor(model => model.IncentivePolicy.StatusId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-primary" style="margin-left: 30px" />
+                @*<input type="button" value="Download Application" class="btn btn-primary" id="downloadApplication"/>*@
+                @Html.EncodedActionLink("Download Application", "AsPdf", "BackOfficeIncentivePolicy", new { referenceId = Model.IncentivePolicyId }, new { @class = "btn btn-primary", title = "Print Application", id = "downloadApplication" })
+            </div>
+        </div>
+    </div>
+}
+
+
+@* Modal form for creating note*@
+
+<div class="modal fade" id="NotesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("AddNote", "BackOfficeIncentivePolicy", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "note-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCustomerId)
+        @Html.HiddenFor(model => model.IncentivePolicy.Id)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Add Note</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Notes, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(m => m.Notes, new { htmlattributes = new { @class = "form-control", rows = 10, colulmns = 250, id = "noteEditor" } })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveNote">Save Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@* Modal form for creating email*@
+
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("SendEmail", "BackOfficeIncentivePolicy", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "email-form" }))
+    {
+        @Html.HiddenFor(model => model.ApplicantCustomerId)
+        @Html.HiddenFor(model => model.IncentivePolicy.Id)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create Email</h4>
+                </div>
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.Label("Email Address", new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Model.IncentivePolicy.Customer.EmailAddress
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Notes, new { @class = "col-md-2 control-label" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(m => m.Notes, new { htmlattributes = new { @class = "form-control", rows = 10, colulmns = 250, id = "emailEditor" } })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="sendEmail">Send Email</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+@* Modal form for yes/no note*@
+
+<div class="modal fade" id="NotesOkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+        @using (Ajax.BeginForm("DeleteNote", "BackOfficeIncentivePolicy", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "noteOk-form" }))
+        {
+            @Html.HiddenFor(model => model.IncentivePolicy.Id)
+            @Html.HiddenFor(model => model.IncentivePolicy)
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Delete Note</h4>
+                    </div>
+                    <div class="modal-body" id="noteToDelete">
+                        Are you sure you want to delete this note ?
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="delNote">Delete Note</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+@* Modal form for history *@
+
+<div class="modal fade" id="HistoryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("ViewHistory", "BackOfficeIncentivePolicy", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "History-form" }))
+    {
+        @Html.HiddenFor(model => model.IncentivePolicy.Id)
+        @Html.HiddenFor(model => model.IncentivePolicy)
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Application History</h4>
+                </div>
+                <div class="modal-body" id="historyText">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+
+
+    <script type="text/javascript">
+        $('#test').on('click', function () {
+            $("#noteEditor").val('');
+            $('#NotesModal').modal('show');
+        });
+
+
+        $('#email').on('click', function () {
+            $("#emailEditor").val('');
+            $('#emailModal').modal('show');
+        });
+
+
+        var oTable;
+        $(document).ready(function () {
+
+            oTable = $('#NotesGrid').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("LoadNotes", "BackOfficeIncentivePolicy", new {id = Model.IncentivePolicy.Id})",
+                    "type": "GET",
+                    "datatype": "json",
+                    "scrollY": "200px",
+                },
+                "columns": [
+                    {
+                        "data": "CreatedDate",
+                        "width": "15%"
+                    },
+                    { "data": "SystemUser", "width": "15%" },
+                    {
+                        "data": "Note",
+                        "width": "25%",
+                        "render": function (data, type, row) {
+                            if (data != null) {
+                                return '<div class="test" style="text-overflow:ellipsis;">' + data + '</div>';
+                            } else {
+                                return '';
+                            };
+                        }
+                    },
+                    { "data": "NoteType", "width": "15%" },
+                    {
+                        "data": "Id",
+                        "title": "Delete",
+                        "render": function (data, type, row) {
+                            if (row.NoteType != "Email") {
+                                return "<button type=\"button\" class=\"btn btn-primary btn-sm\" data-id=\"" + data + "\" id=\"delete" + data + "\">Delete Note</button>";
+                            } else
+                                return "";
+                        },
+                        "autoWidth": true
+
+                    }
+                ],
+                "drawCallback": function (settings) {
+                    $('#NotesGrid tbody td:nth-child(3)').each(function () {
+                        var $td = $(this);
+                        $td.attr('title', $td.text());
+                    });
+                    $('#NotesGrid tbody td[title]').tooltip({
+                        "container": 'body',
+                        'placement': 'top'
+                    });
+                }
+
+            });
+
+            var benefits = $("#radBenefits").val();
+            if (benefits === null || benefits === '') {
+                $("#radio1").prop("checked", false);
+                $("#radio2").prop("checked", true);
+                $("#benefitsGrp").show();
+            } else {
+                $("#radio2").prop("checked", false);
+                $("#radio1").prop("checked", true);
+                $("#benefitsGrp").show();
+            }
+
+            //Ensures the context of text area fits
+            $(".textarea").each(function () {
+                do_resize(this);
+            });
+        });
+
+        $(document).on('click', '[id^=delete]', function () {
+            var nId = $(this).attr('data-id');
+            $('#NotesOkModal').modal('show');
+            $('#delNote').on('click', function () {
+                $.ajax({
+                    type: "POST",
+                    dataType: 'html',
+                    url: '@Url.Action("DeleteNote", "BackOfficeIncentivePolicy")',
+                    data: { id: nId }
+                }).success(function (data) {
+                    oTable.ajax.reload();
+                    nId = "";
+                    $('#NotesOkModal').modal('hide');
+                });
+            });
+        });
+
+        $('#saveNote').on('click', function () {
+            var form = $('#note-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddNote", "BackOfficeIncentivePolicy")',
+                data: form.serialize()
+            }).success(function (data) {
+                $("#noteEditor").val('');
+                $('#NotesModal').modal('hide');
+                oTable.ajax.reload();
+            });
+        });
+
+
+        $('#sendEmail').on('click', function () {
+            var form = $('#email-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SendEmail", "BackOfficeIncentivePolicy")',
+                data: form.serialize()
+            }).success(function (data) {
+                $("#emailEditor").val('');
+                $('#emailModal').modal('hide');
+                oTable.ajax.reload();
+            });
+        });
+
+        $('#history').on('click', function () {
+            var form = $('#history-form');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ViewHistory", "BackOfficeIncentivePolicy", new {id = Model.IncentivePolicy.Id})',
+                data: form.serialize()
+            }).success(function (data) {
+
+                $('#HistoryModal').modal('show');
+                $("#historyText").html(data);
+            });
+
+        });
+
+        // Download the application
+        $('#downloadApplication').on('click', function () {
+            var obj = '@Model.IncentivePolicy.Data';
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AsPdf", "BackOfficeIncentivePolicy")' + '?q=' + obj
+            }).success(function (data) {
+            });
+        });
+
+        $(function () {
+            $('input, select, textarea').attr('readonly', 'readonly');
+            $("#status, #noteEditor, #emailEditor").removeAttr('readonly');
+            $("#oTable").find('.search > :input').removeAttr('readonly');
+        });
+
+        function do_resize(textarea) {
+
+            var maxrows = 5;
+            var txt = textarea.value;
+            var cols = textarea.cols;
+
+            var arraytxt = txt.split('\n');
+            var rows = arraytxt.length;
+
+            for (var i = 0; i < arraytxt.length; i++)
+                rows += parseInt(arraytxt[i].length / cols);
+
+            if (rows > maxrows) textarea.rows = maxrows;
+            else textarea.rows = rows;
+        }
+        @*$(function () {
+            $('.SaveAsPDF').click(function () {
+                var $form = $("#ShellF");
+                var mat = myFunctions.getFormData($form);
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AsPdf", "Back")',
+                    data: '{smd: ' + JSON.stringify(shellVM) + ', mat: ' + JSON.stringify(mat) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    //dataType: "json",
+                    dataType: "html",
+                    success: function (response) {
+                        alert("The result is saved as pdf");
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            });
+        });*@
+    </script>
+}

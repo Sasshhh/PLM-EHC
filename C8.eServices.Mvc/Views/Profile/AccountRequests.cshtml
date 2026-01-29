@@ -1,0 +1,433 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var token = Html.AntiForgeryToken();
+}
+
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<style>
+    .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -6px;
+        margin-left: -1px;
+        -webkit-border-radius: 0 6px 6px 6px;
+        -moz-border-radius: 0 6px 6px;
+        border-radius: 0 6px 6px 6px;
+        background-color: #d2930b !important;
+        border-color: #d2930b !important;
+    }
+</style>
+
+<h4>Request Access to Municipal Account</h4>
+<hr />
+@*<div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>Welcome to Siyakhokha</p>
+                    <p>
+                        The Profiles Dashboard shows a summary of your details along with your current linked accounts. Please see points below explaining each action:
+                        <ol>
+                            <li>"Customer Information" - Shows a summary of your details, it will be blank if no information has been entered (New registration). The "Click here to update profile" link redirects to the Manage Profile page where your profile can be captured or edited.</li>
+                            <li>"Link Municipal Account" - Allows you to add a new Municipal Account. Please note that your profile details must be captured first before you add any Municipal Accounts. Once the "Link Municipal Account" link is clicked it will redirect you to the create link.</li>
+                            <li>"Edit (Linked Accounts)" - Allows you to edit an existing linked Municipal Account.</li>
+                            <li>"Details (Linked Accounts)" - Allows you to view an existing linked Municipal Account.</li>
+                        </ol>
+                    </p>
+                    <p>
+                        As a Customer, you will be able to:
+                        <ul>
+                            <li>"Link Account (Personal Accounts)" - Link your personal municipal accounts to your principle profile.</li>
+                            <li>"Edit/ Details (Personal Accounts)" - Edit or view your personal linked Municipal Accounts.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+@{Html.RenderAction("RequestNotifications", "Requests");}
+@if (Model.Customer.Id != 0 && Model.Customer.Status.Key == StatusKeys.CustomerActive)
+{
+
+    <div id="linkedAccReq">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Requests Sent for Municipal Account Access</div>
+            <div style="width: 90%; margin: 0 auto;">
+                <br />
+                <table id="accountsReqTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                    <thead>
+                        <tr>
+                            <th>Municipal Account Number</th>
+                            @*<th>Comment</th>*@
+                            <th>Status</th>
+                            <th>Date Created</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div id="linkedAccReqRec">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Requests Received for Municipal Account Access  <span class="badge alert-warning" id="fullbatchCount2">@Session["ReqCount"]</span></div>
+            <div style="width: 90%; margin: 0 auto;">
+                <br />
+                <table id="accountsReqRecTable" class="table table-bordered table-hover table-striped panel panel-default ">
+                    <thead>
+                        <tr>
+                            <th>Municipal Account Number</th>
+                            <th>Requested By</th>
+                            @*<th>Comment</th>*@
+                            <th>Status</th>
+                            <th>Date Created</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @*</div>
+                </div>
+            </div>
+        </div>*@
+
+
+}
+
+<div id="ErrModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width: 650px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="RejectRequestModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="RejectRQSmodalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="RejectRQSTmodalContentText">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @*@Html.Label("Municipal Account", htmlAttributes: new { @class = "control-label col-md-2" })*@
+                                <div class="col-md-3">
+                                    @Html.Hidden("Requestid", new { htmlAttributes = new { @class = "form-control", @id = "Requestid", @readonly = true } })
+                                </div>
+                            </div>
+                            <div class="form-group" id="WarningDiv">
+                                <div class="col-md-6">
+                                    <span><b>Please note:</b> If you approve the request to access the municipal account, this will grant the requesting user full access to your Municipal Account including the ability to: <br /> View statements <br /> Make payments towards the account<br /> View Payment History <br />Lodge queries for the account</span>
+                                </div>
+                            </div>
+                            <div class="form-group" id="CommentDiv">
+                                @Html.Label("Reason for Rejection", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextArea("Comment", new { @class = "form-control", @id = "Comment" })
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<input id="submitBtn" type="button" onclick="ArtificialSubmit()" value="Okay" class="btn btn-primary" />*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="AcceptRequestAccount">Approve Request</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="RejectRequestAccount">Decline Request</button>
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+<script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            $("#submitLoadCustomer").click(function () {
+
+                var identityOrAccountNo = $('#identityOrAccountNo').val();
+                if (identityOrAccountNo == null || identityOrAccountNo == '') {
+                    $("#modalTitleText").html("No Customer Information Found");
+                    $("#modalContentText").html("No customer ID number found please update your profile above to access Siyakhokha services ");
+                    $("#ErrModal").modal("show");
+                }
+                var token = $('#__RequestVerificationToken').val();
+                var data = "{ 'identityOrAccountNo': '" + identityOrAccountNo + "' }";
+                if (identityOrAccountNo != null) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("LoadCustomer", "Profile")",
+                        data: data,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status == 'OK') {
+                                window.location.href = data.Url
+                                //alert("The status cannot be updated at this time");
+                            }
+                            else if (data == 'Failed')
+                            {
+                                $("#modalTitleText").html("No Customer Information Found");
+                                $("#modalContentText").html("No customer information found please update your profile above to access Siyakhokha services");
+                                $("#ErrModal").modal("show");
+                                //alert("fail");
+                            }
+                            else {
+                                alert("The status cannot be updated at this time");
+                            }
+                        }
+                    });
+                }
+                else {
+                    alert("The account could not be found. Please update your profile to access Siyakhokha Services. ");
+                }
+            });
+        });
+    </script>
+}
+
+<script>
+
+    $(document).ready(function () {
+        //loadAccounts();
+        loadAccountsReq();
+        loadAccountsReqRec();
+    });
+        function loadAccountsReq() {
+            $('#accountsReqTable').DataTable({
+            "ajax": {
+                "url": "@Url.Action( "LoadAccountReqs", "Profile", new { q = Model.Customer.Data } )",
+                "type": "GET",
+                "datatype": "json",
+                "timeout": 60000
+            },
+             "columns": [
+                 { "data": "ReferenceAlpha", "autoWidth": true },
+                { "data": "Status.Name", "autoWidth": true },
+                {
+                    "data": "CreatedDateTime", "autoWidth": true,
+                    "render": function (data) {
+                        return convertDate(data);
+                    }
+                },
+                {
+                    "data": "Data",
+                    "title": "View Request",
+                    "render": function (data, type, row) {
+                        var myUrl = '@Url.Action( "LinkedAccountsDetails", "Profile" )/' + '?q=' + data;
+                        var detailsUrl = '@Url.Action( "Details", "Requests" )/' + '?q=' + data;
+                        var CancelUrl = '@Url.Action("Delete", "Requests")/' + '?q=' + data;
+                        return '<a href=\"' + CancelUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp; '; //<a href=\"' + delinkUrl + '\" class=\"btn btn-primary btn-sm\">Delink</a><a href=\"' + detailsUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp;
+                    }
+
+                }
+            ],
+            "language": {
+                "emptyTable": "No account requests",
+            },
+            "Initcomplete": "",
+            "destroy": true
+            });
+    }
+
+    function loadAccountsReqRec() {
+            $('#accountsReqRecTable').DataTable({
+            "ajax": {
+                "url": "@Url.Action( "LoadAccountReqRecs", "Profile", new { q = Model.Customer.Data } )",
+                "type": "GET",
+                "datatype": "json",
+                "timeout": 60000
+            },
+             "columns": [
+                 { "data": "ReferenceAlpha", "autoWidth": true },
+                 { "data": "Customer.FullName", "autoWidth": true },
+                //{ "data": "Comment.Comments", "autoWidth": true },
+                { "data": "Status.Name", "autoWidth": true },
+                {
+                    "data": "CreatedDateTime", "autoWidth": true,
+                    "render": function (data) {
+                        return convertDate(data);
+                    }
+                },
+                {
+                    "data": "Data",
+                    "title": "View Request",
+                    "render": function (data, type, row) {
+                        var AcceptUrl = '@Url.Action( "AcceptRequests", "Requests" )/' + '?q=' + data;
+                        var detailsUrl = '@Url.Action( "Details", "Requests" )/' + '?q=' + data;
+                        var RejectUrl = '@Url.Action("RejectRequests", "Requests")/' + '?q=' + data;
+                        return '<a href=\"' + detailsUrl + '\" class=\"btn btn-primary btn-sm\">Details</a>&nbsp;'; //<a href=\"' + delinkUrl + '\" class=\"btn btn-primary btn-sm\">Delink</a>
+                    }
+
+
+                 },
+                     {
+                    "data": "Id",
+                    "title": "Action",
+                    "render": function (data, type, row) {
+                        var AcceptUrl = '@Url.Action( "AcceptRequests", "Requests" )/' + '?q=' + data;
+                        var detailsUrl = '@Url.Action( "Details", "Requests" )/' + '?q=' + data;
+                        var RejectUrl = '@Url.Action("RejectRequests", "Requests")/' + '?q=' + data;
+                        return '<button id=\"SendAcceptRequest\" onclick=\"sendRQSTAccept(' + data + ')\"  class=\"btn btn-primary btn-sm\">Approve</button>&nbsp; <button id=\"SendRejRequest\" onclick=\"sendRQSTRej(' +data+ ')\"  class=\"btn btn-primary btn-sm\">Decline</button>&nbsp; '; //<a href=\"' + delinkUrl + '\" class=\"btn btn-primary btn-sm\">Delink</a>
+                    }
+
+                }
+            ],
+            "language": {
+                "emptyTable": "No account requests received",
+            },
+            "Initcomplete": "",
+            "destroy": true
+            });
+    }
+    function sendRQSTRej(id) {
+        debugger;
+        $("#RejectRQSmodalTitleText").html("Reject Request for Municipal Account Access");
+        $("#AcceptRequestAccount").hide();
+        $("#WarningDiv").hide();
+        $("#RejectRequestAccount").show();
+
+        $("#CommentDiv").show();
+        $("#RejectRequestModal").modal("show");
+        $("#Requestid").val(id);
+        $("#Comment").val("");
+    }
+    function sendRQSTAccept(id) {
+        debugger;
+        $("#RejectRQSmodalTitleText").html("Approve Request for Municipal Account Access");
+        $("#AcceptRequestAccount").show();
+        $("#WarningDiv").show();
+        $("#RejectRequestAccount").hide();
+        $("#CommentDiv").hide();
+        $("#RejectRequestModal").modal("show");
+        $("#Requestid").val(id);
+        $("#Comment").val("Request for access has been approved.");
+
+    }
+
+
+    function convertDate(data) {
+        try {
+            var dtStart = new Date(parseInt(data.substr(6)));
+            var dtStartWrapper = moment(dtStart);
+            return dtStartWrapper.format("DD/MM/YYYY");
+        }
+        catch (ex) {
+        }
+    }
+    $('#RejectRequestAccount').on('click', function () {
+        debugger;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("RejectRequest", "Comments")',
+                data: { ReqNo: $('#Requestid').val(), Comment: $('#Comment').val() }
+            }).success(function (data) {
+
+                $('#Comment').val("");
+                $('#Requestid').val("");
+                if (data.isValid) {
+                    var accNo ="";
+                    var span = document.createElement("span");
+                    span.setAttribute("id", "spanContent");
+                    span.innerHTML = 'Request for access has been rejected.';
+
+                    $("#modalTitleText").html("Request Rejected Successfully");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrModal").modal("show");
+                    loadAccountsReqRec();
+                }
+                    else {
+
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Request failed to send! Please try again late. ");
+                    $("#ErrModal").modal("show");
+
+            }
+
+
+            });
+        });
+     $('#AcceptRequestAccount').on('click', function () {
+        debugger;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AcceptRequest", "Comments")',
+                data: { ReqNo: $('#Requestid').val(), Comment: $('#Comment').val() }
+            }).success(function (data) {
+
+                $('#Comment').val("");
+                $('#Requestid').val("");
+                if (data.isValid) {
+                    var accNo ="";
+                    var span = document.createElement("span");
+                    span.setAttribute("id", "spanContent");
+                    span.innerHTML = 'Request for access has been approved. <br> The municipal account will now be linked to both your profile, <br> as well as the requesting users profile.';
+
+                    $("#modalTitleText").html("Request Approved Successfully");
+                    $("#spanContent").remove();
+                    $("#modalContentText").append(span);
+                    $("#ErrModal").modal("show");
+                    loadAccountsReqRec();
+                }
+                    else {
+
+                    $("#modalTitleText").html("Error");
+                    $("#spanContent").remove();
+                    $("#modalContentText").html("Request failed to approve! Please try again late. ");
+                    $("#ErrModal").modal("show");
+
+            }
+
+
+            });
+        });
+</script>
+
+
+
+

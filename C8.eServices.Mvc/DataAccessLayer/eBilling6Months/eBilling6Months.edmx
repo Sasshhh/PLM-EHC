@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="eBilling6MonthsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="BillsArchive">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="numeric" Precision="28" Scale="0" Nullable="false" />
+          <Property Name="QueueId" Type="numeric" Precision="28" Scale="0" />
+          <Property Name="Path" Type="varchar" MaxLength="128" />
+          <Property Name="Filename" Type="varchar" MaxLength="30" />
+          <Property Name="ProcessedDateTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="QueueArchive">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="numeric" Precision="28" Scale="0" Nullable="false" />
+          <Property Name="BillDate" Type="date" />
+          <Property Name="AccountNumber" Type="numeric" Precision="19" Scale="0" />
+          <Property Name="CustomerAccountName" Type="varchar" MaxLength="100" />
+          <Property Name="EmailSubject" Type="varchar" MaxLength="128" />
+          <Property Name="EmailAddressTo" Type="varchar" MaxLength="128" />
+          <Property Name="EmailAddressCc" Type="varchar" MaxLength="128" />
+          <Property Name="QueueDateTime" Type="datetime" />
+          <Property Name="ProcessedDateTime" Type="datetime" />
+          <Property Name="ArchivedDateTime" Type="datetime" />
+          <Property Name="StatusId" Type="int" />
+        </EntityType>
+        <EntityType Name="QueuePending">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="numeric" Precision="28" Scale="0" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BillDate" Type="date" />
+          <Property Name="AccountNumber" Type="numeric" Precision="19" Scale="0" />
+          <Property Name="CustomerAccountName" Type="varchar" MaxLength="100" />
+          <Property Name="EmailSubject" Type="varchar" MaxLength="128" />
+          <Property Name="EmailAddressTo" Type="varchar" MaxLength="128" />
+          <Property Name="EmailAddressCc" Type="varchar" MaxLength="128" />
+          <Property Name="QueueDateTime" Type="datetime" />
+          <Property Name="ProcessedDateTime" Type="datetime" />
+          <Property Name="StatusId" Type="int" />
+        </EntityType>
+        <EntityType Name="Statistics">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BillDate" Type="date" Nullable="false" />
+          <Property Name="Accounts" Type="int" />
+          <Property Name="EmailAccounts" Type="int" />
+          <Property Name="ExpectedAccounts" Type="int" />
+          <Property Name="PendingEmails" Type="int" />
+          <Property Name="CompletedEmails" Type="int" />
+          <Property Name="Errors" Type="int" />
+        </EntityType>
+        <EntityType Name="SystemErrors">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="numeric" Precision="28" Scale="0" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="QueueId" Type="numeric" Precision="28" Scale="0" />
+          <Property Name="ErrorDateTime" Type="datetime" />
+          <Property Name="Details" Type="nvarchar(max)" />
+        </EntityType>
+        <Function Name="pr_REPORT_BillingHistory" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="AccountNumber" Type="numeric" Mode="In" />
+        </Function>
+        <Function Name="pr_REPORT_BillingHistoryDetails" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="AccountNumber" Type="numeric" Mode="In" />
+          <Parameter Name="BillDate" Type="date" Mode="In" />
+        </Function>
+        <Function Name="pr_REPORT_BillingHistorySummary" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="AccountNumber" Type="numeric" Mode="In" />
+        </Function>
+        <Function Name="pr_SCRIPT_RequeueBill" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="AccountNumber" Type="numeric" Mode="In" />
+          <Parameter Name="BillDate" Type="date" Mode="In" />
+        </Function>
+        <EntityContainer Name="eBilling6MonthsModelStoreContainer">
+          <EntitySet Name="BillsArchive" EntityType="Self.BillsArchive" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QueueArchive" EntityType="Self.QueueArchive" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QueuePending" EntityType="Self.QueuePending" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Statistics" EntityType="Self.Statistics" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SystemErrors" EntityType="Self.SystemErrors" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="eBilling6MonthsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="eBilling6Months" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Statistics" EntityType="eBilling6MonthsModel.Statistic" />
+          <EntitySet Name="QueueArchives" EntityType="eBilling6MonthsModel.QueueArchive" />
+          <EntitySet Name="QueuePendings" EntityType="eBilling6MonthsModel.QueuePending" />
+          <EntitySet Name="SystemErrors" EntityType="eBilling6MonthsModel.SystemError" />
+          <FunctionImport Name="pr_REPORT_BillingHistorySummary" ReturnType="Collection(eBilling6MonthsModel.pr_REPORT_BillingHistorySummary_Result)">
+          <Parameter Name="AccountNumber" Mode="In" Type="Decimal" />
+          </FunctionImport>
+          <FunctionImport Name="pr_REPORT_BillingHistory" ReturnType="Collection(eBilling6MonthsModel.pr_REPORT_BillingHistory_Result)">
+          <Parameter Name="AccountNumber" Mode="In" Type="Decimal" />
+          </FunctionImport>
+          <FunctionImport Name="pr_REPORT_BillingHistoryDetails" ReturnType="Collection(eBilling6MonthsModel.pr_REPORT_BillingHistoryDetails_Result)">
+            <Parameter Name="AccountNumber" Mode="In" Type="Decimal" />
+            <Parameter Name="BillDate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <FunctionImport Name="pr_SCRIPT_RequeueBill" ReturnType="Collection(eBilling6MonthsModel.pr_SCRIPT_RequeueBill_Result)">
+            <Parameter Name="AccountNumber" Mode="In" Type="Decimal" />
+            <Parameter Name="BillDate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <EntitySet Name="BillsArchives" EntityType="eBilling6MonthsModel.BillsArchive" />
+        </EntityContainer>
+        <EntityType Name="Statistic">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BillDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Accounts" Type="Int32" />
+          <Property Name="EmailAccounts" Type="Int32" />
+          <Property Name="ExpectedAccounts" Type="Int32" />
+          <Property Name="PendingEmails" Type="Int32" />
+          <Property Name="CompletedEmails" Type="Int32" />
+          <Property Name="Errors" Type="Int32" />
+        </EntityType>
+        <EntityType Name="QueueArchive">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Decimal" Nullable="false" Precision="28" Scale="0" />
+          <Property Name="BillDate" Type="DateTime" Precision="0" />
+          <Property Name="AccountNumber" Type="Decimal" Precision="19" Scale="0" />
+          <Property Name="CustomerAccountName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EmailSubject" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="EmailAddressTo" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="EmailAddressCc" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="QueueDateTime" Type="DateTime" Precision="3" />
+          <Property Name="ProcessedDateTime" Type="DateTime" Precision="3" />
+          <Property Name="ArchivedDateTime" Type="DateTime" Precision="3" />
+          <Property Name="StatusId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="QueuePending">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Decimal" Nullable="false" Precision="28" Scale="0" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BillDate" Type="DateTime" Precision="0" />
+          <Property Name="AccountNumber" Type="Decimal" Precision="19" Scale="0" />
+          <Property Name="CustomerAccountName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="EmailSubject" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="EmailAddressTo" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="EmailAddressCc" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="QueueDateTime" Type="DateTime" Precision="3" />
+          <Property Name="ProcessedDateTime" Type="DateTime" Precision="3" />
+          <Property Name="StatusId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="SystemError">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Decimal" Nullable="false" Precision="28" Scale="0" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="QueueId" Type="Decimal" Precision="28" Scale="0" />
+          <Property Name="ErrorDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Details" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <ComplexType Name="pr_REPORT_BillingHistorySummary_Result">
+          <Property Type="Int32" Name="Year" Nullable="true" />
+          <Property Type="DateTime" Name="BillDate" Nullable="false" />
+          <Property Type="Int64" Name="AccountNumber" Nullable="true" />
+          <Property Type="Decimal" Name="BalanceBroughtForward" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Payments" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Electricity" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Water" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Sewage" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Rates" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Vat" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Decimal" Name="Other" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="Int32" Name="Multiplier" Nullable="true" />
+          <Property Type="Decimal" Name="Total" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="String" Name="DownloadLink" Nullable="false" MaxLength="1" />
+        </ComplexType>
+        <ComplexType Name="pr_REPORT_BillingHistory_Result">
+          <Property Type="Int32" Name="Year" Nullable="true" />
+          <Property Type="DateTime" Name="BillDate" Nullable="false" />
+          <Property Type="Decimal" Name="AccountNumber" Nullable="false" Precision="19" Scale="0" />
+          <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="AccountBodySection3" Nullable="true" MaxLength="256" />
+          <Property Type="Decimal" Name="BalanceBroughtForward" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Payments" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Electricity" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Water" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Sewage" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Rates" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Vat" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Other" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Int32" Name="Multiplier" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="pr_REPORT_BillingHistoryDetails_Result">
+          <Property Type="Int32" Name="Year" Nullable="true" />
+          <Property Type="DateTime" Name="BillDate" Nullable="false" />
+          <Property Type="Int64" Name="AccountNumber" Nullable="true" />
+          <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="AccountBodySection3" Nullable="true" MaxLength="256" />
+          <Property Type="Decimal" Name="BalanceBroughtForward" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Payments" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Electricity" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Water" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Sewage" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Rates" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Vat" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Decimal" Name="Other" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="Int32" Name="Multiplier" Nullable="false" />
+          <Property Type="Decimal" Name="Total" Nullable="true" Precision="20" Scale="2" />
+          <Property Type="String" Name="DownloadLink" Nullable="false" MaxLength="1" />
+        </ComplexType>
+        <ComplexType Name="pr_SCRIPT_RequeueBill_Result">
+          <Property Type="Int32" Name="ErrorNumber" Nullable="true" />
+          <Property Type="Int32" Name="ErrorSeverity" Nullable="true" />
+          <Property Type="Int32" Name="ErrorState" Nullable="true" />
+          <Property Type="String" Name="ErrorProcedure" Nullable="true" MaxLength="128" />
+          <Property Type="Int32" Name="ErrorLine" Nullable="true" />
+          <Property Type="String" Name="ErrorMessage" Nullable="true" MaxLength="4000" />
+        </ComplexType>
+        <EntityType Name="BillsArchive">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Decimal" Nullable="false" Precision="28" Scale="0" />
+          <Property Name="QueueId" Type="Decimal" Precision="28" Scale="0" />
+          <Property Name="Path" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="Filename" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="ProcessedDateTime" Type="DateTime" Precision="3" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="eBilling6MonthsModelStoreContainer" CdmEntityContainer="eBilling6Months">
+          <EntitySetMapping Name="Statistics">
+            <EntityTypeMapping TypeName="eBilling6MonthsModel.Statistic">
+              <MappingFragment StoreEntitySet="Statistics">
+                <ScalarProperty Name="Errors" ColumnName="Errors" />
+                <ScalarProperty Name="CompletedEmails" ColumnName="CompletedEmails" />
+                <ScalarProperty Name="PendingEmails" ColumnName="PendingEmails" />
+                <ScalarProperty Name="ExpectedAccounts" ColumnName="ExpectedAccounts" />
+                <ScalarProperty Name="EmailAccounts" ColumnName="EmailAccounts" />
+                <ScalarProperty Name="Accounts" ColumnName="Accounts" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QueueArchives">
+            <EntityTypeMapping TypeName="eBilling6MonthsModel.QueueArchive">
+              <MappingFragment StoreEntitySet="QueueArchive">
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="ArchivedDateTime" ColumnName="ArchivedDateTime" />
+                <ScalarProperty Name="ProcessedDateTime" ColumnName="ProcessedDateTime" />
+                <ScalarProperty Name="QueueDateTime" ColumnName="QueueDateTime" />
+                <ScalarProperty Name="EmailAddressCc" ColumnName="EmailAddressCc" />
+                <ScalarProperty Name="EmailAddressTo" ColumnName="EmailAddressTo" />
+                <ScalarProperty Name="EmailSubject" ColumnName="EmailSubject" />
+                <ScalarProperty Name="CustomerAccountName" ColumnName="CustomerAccountName" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QueuePendings">
+            <EntityTypeMapping TypeName="eBilling6MonthsModel.QueuePending">
+              <MappingFragment StoreEntitySet="QueuePending">
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
+                <ScalarProperty Name="ProcessedDateTime" ColumnName="ProcessedDateTime" />
+                <ScalarProperty Name="QueueDateTime" ColumnName="QueueDateTime" />
+                <ScalarProperty Name="EmailAddressCc" ColumnName="EmailAddressCc" />
+                <ScalarProperty Name="EmailAddressTo" ColumnName="EmailAddressTo" />
+                <ScalarProperty Name="EmailSubject" ColumnName="EmailSubject" />
+                <ScalarProperty Name="CustomerAccountName" ColumnName="CustomerAccountName" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SystemErrors">
+            <EntityTypeMapping TypeName="eBilling6MonthsModel.SystemError">
+              <MappingFragment StoreEntitySet="SystemErrors">
+                <ScalarProperty Name="Details" ColumnName="Details" />
+                <ScalarProperty Name="ErrorDateTime" ColumnName="ErrorDateTime" />
+                <ScalarProperty Name="QueueId" ColumnName="QueueId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="pr_REPORT_BillingHistorySummary" FunctionName="eBilling6MonthsModel.Store.pr_REPORT_BillingHistorySummary">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="eBilling6MonthsModel.pr_REPORT_BillingHistorySummary_Result">
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="BalanceBroughtForward" ColumnName="BalanceBroughtForward" />
+                <ScalarProperty Name="Payments" ColumnName="Payments" />
+                <ScalarProperty Name="Electricity" ColumnName="Electricity" />
+                <ScalarProperty Name="Water" ColumnName="Water" />
+                <ScalarProperty Name="Sewage" ColumnName="Sewage" />
+                <ScalarProperty Name="Rates" ColumnName="Rates" />
+                <ScalarProperty Name="Vat" ColumnName="Vat" />
+                <ScalarProperty Name="Other" ColumnName="Other" />
+                <ScalarProperty Name="Multiplier" ColumnName="Multiplier" />
+                <ScalarProperty Name="Total" ColumnName="Total" />
+                <ScalarProperty Name="DownloadLink" ColumnName="DownloadLink" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="pr_REPORT_BillingHistory" FunctionName="eBilling6MonthsModel.Store.pr_REPORT_BillingHistory">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="eBilling6MonthsModel.pr_REPORT_BillingHistory_Result">
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="AccountBodySection3" ColumnName="AccountBodySection3" />
+                <ScalarProperty Name="BalanceBroughtForward" ColumnName="BalanceBroughtForward" />
+                <ScalarProperty Name="Payments" ColumnName="Payments" />
+                <ScalarProperty Name="Electricity" ColumnName="Electricity" />
+                <ScalarProperty Name="Water" ColumnName="Water" />
+                <ScalarProperty Name="Sewage" ColumnName="Sewage" />
+                <ScalarProperty Name="Rates" ColumnName="Rates" />
+                <ScalarProperty Name="Vat" ColumnName="Vat" />
+                <ScalarProperty Name="Other" ColumnName="Other" />
+                <ScalarProperty Name="Multiplier" ColumnName="Multiplier" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="pr_REPORT_BillingHistoryDetails" FunctionName="eBilling6MonthsModel.Store.pr_REPORT_BillingHistoryDetails">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="eBilling6MonthsModel.pr_REPORT_BillingHistoryDetails_Result">
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="BillDate" ColumnName="BillDate" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="AccountBodySection3" ColumnName="AccountBodySection3" />
+                <ScalarProperty Name="BalanceBroughtForward" ColumnName="BalanceBroughtForward" />
+                <ScalarProperty Name="Payments" ColumnName="Payments" />
+                <ScalarProperty Name="Electricity" ColumnName="Electricity" />
+                <ScalarProperty Name="Water" ColumnName="Water" />
+                <ScalarProperty Name="Sewage" ColumnName="Sewage" />
+                <ScalarProperty Name="Rates" ColumnName="Rates" />
+                <ScalarProperty Name="Vat" ColumnName="Vat" />
+                <ScalarProperty Name="Other" ColumnName="Other" />
+                <ScalarProperty Name="Multiplier" ColumnName="Multiplier" />
+                <ScalarProperty Name="Total" ColumnName="Total" />
+                <ScalarProperty Name="DownloadLink" ColumnName="DownloadLink" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="pr_SCRIPT_RequeueBill" FunctionName="eBilling6MonthsModel.Store.pr_SCRIPT_RequeueBill">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="eBilling6MonthsModel.pr_SCRIPT_RequeueBill_Result">
+                <ScalarProperty Name="ErrorNumber" ColumnName="ErrorNumber" />
+                <ScalarProperty Name="ErrorSeverity" ColumnName="ErrorSeverity" />
+                <ScalarProperty Name="ErrorState" ColumnName="ErrorState" />
+                <ScalarProperty Name="ErrorProcedure" ColumnName="ErrorProcedure" />
+                <ScalarProperty Name="ErrorLine" ColumnName="ErrorLine" />
+                <ScalarProperty Name="ErrorMessage" ColumnName="ErrorMessage" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="BillsArchives">
+            <EntityTypeMapping TypeName="eBilling6MonthsModel.BillsArchive">
+              <MappingFragment StoreEntitySet="BillsArchive">
+                <ScalarProperty Name="ProcessedDateTime" ColumnName="ProcessedDateTime" />
+                <ScalarProperty Name="Filename" ColumnName="Filename" />
+                <ScalarProperty Name="Path" ColumnName="Path" />
+                <ScalarProperty Name="QueueId" ColumnName="QueueId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

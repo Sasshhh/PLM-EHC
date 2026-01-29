@@ -1,0 +1,115 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.BillInfo>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<h4>Loaded Statement Cycles</h4>
+
+
+
+<div class="row">
+    <table data-toggle="table" data-url="CyclesLoaded/Index" data-search="true" data-pagination="true" data-page-size="15" class="table table-bordered table-hover table-striped panel panel-default" id="tblemailnoti">
+        <thead>
+            <tr>
+                @*<th data-sortable="true" data-field="ApplicationId">
+            @Html.DisplayNameFor(model => model.ApplicationId)
+        </th>*@
+                @*<th data-sortable="true" data-field="EmailAccountId">
+            @Html.DisplayNameFor(model => model.EmailAccountId)
+        </th>*@
+                <th data-sortable="true" data-field="CycleNo">
+                    Cycle No
+                </th>
+                <th data-sortable="true" data-field="RunDate">
+                    Run Date
+                </th>
+                <th data-sortable="true" data-field="InvDate">
+                    Invoice Date
+                </th>
+                <th data-sortable="true" data-field="InvMonth">
+                    Statement For
+                </th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+        <tr>
+            @*<td>
+            @Html.DisplayFor(modelItem => item.ApplicationId)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EmailAccountId)
+        </td>*@
+            <td>
+                @Html.DisplayFor(modelItem => item.CycleNoStr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RunDate)
+            </td>
+            @*<td>
+            @Html.DisplayFor(modelItem => item.CcList)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.BccList)
+        </td>*@
+            <td>
+                @Html.DisplayFor(modelItem => item.InvDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InvMonth)
+            </td>
+            @*<td>
+            @Html.DisplayFor(modelItem => item.Body)
+        </td>*@
+            @*<td>
+            @Html.DisplayFor(modelItem => item.IsHtml)
+        </td>*@
+            @*<td>
+            @Html.DisplayFor(modelItem => item.FailureCount)
+        </td>*@
+
+            @*@if (item.FailureCount > @ViewBag.failurecounter)
+        {
+            <td>
+                FAILED
+            </td>
+        }
+
+        @if (item.FailureCount < @ViewBag.failurecounter)
+        {
+            <td>
+                SUCCESSFUL
+            </td>
+        }
+
+
+
+        @*<td>
+                @Html.DisplayFor(modelItem => item.ReferenceId)
+            </td>*@
+            @*<td>
+            @Html.DisplayFor(modelItem => item.ReferenceTypeId)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.HasAttachments)
+        </td>*@
+            @*<td>
+            @Html.DisplayFor(modelItem => item.ProcessedDateTime)
+        </td>
+        <td>
+            @Html.ActionLink("Resend Notification", "Resend", new { id = item.EmailQueueId })*@
+
+            @*@Html.ActionLink("Details", "Details", new { id = item.EmailQueueId }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.EmailQueueId })*@
+            @*</td>*@
+        </tr>
+        }
+
+    </table>
+</div>
+<script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+<script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+@section Scripts {
+}

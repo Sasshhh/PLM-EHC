@@ -1,0 +1,113 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.AccountType>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Account Types</h4>
+<hr/>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Current Account Types</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse-in">
+            <div class="panel-body">
+                <div class="col-md-8" align="left">
+                    @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-primary"})
+                </div>
+                <table class="table table-striped" id="table"
+                       data-toggle="table"
+                       data-height="500"
+                       data-search="true"
+                       data-pagination="true"
+                       data-page-list="[10,25, 50, 100, ALL]">
+                    <thead>
+                        <tr>
+                            @*<th>
+                        @Html.DisplayNameFor(model => model.CreatedBySystemUser.FirstName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ModifiedBySystemUser.FirstName)
+                    </th>*@
+                            <th>
+                                @Html.DisplayNameFor(model => model.Name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Description)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Key)
+                            </th>
+                            @*<th>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsDeleted)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsLocked)
+                    </th>*@
+                            @*<th>
+                        @Html.DisplayNameFor(model => model.CreatedDateTime)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ModifiedDateTime)
+                    </th>*@
+                            <th class="col-md-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                @*<td>
+                            @Html.DisplayFor(modelItem => item.CreatedBySystemUser.FirstName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ModifiedBySystemUser.FirstName)
+                        </td>*@
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Key)
+                                </td>
+                                @*<td>
+                            @Html.DisplayFor(modelItem => item.IsActive)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsDeleted)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsLocked)
+                        </td>*@
+                                @*<td>
+                            @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ModifiedDateTime)
+                        </td>*@
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary" })
+                                    @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-primary" })
+                                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-primary" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

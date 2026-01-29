@@ -1,0 +1,256 @@
+﻿@using System.Web.Optimization
+@using C8.eServices.Mvc.DataAccessLayer
+@model IEnumerable<C8.eServices.Mvc.Models.RatesRebate>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+
+    var db = new eServicesDbContext();
+    var identityManager = new IdentityManager(db);
+}
+
+<h4>Rates Rebate Applications Queue</h4>
+<hr />
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    Expand/Collapse panels by clicking on their titles. 
+                    The functions of this page are as follows :
+                    <ol>
+                        <li>
+                            <strong>Submitted Rates Rebate Applications </strong> - Contains all rates rebate applications submitted by applicants.
+                        </li>
+                        <li>
+                            <strong>Assign Case </strong> - Allows the super administrator to assign rates rebate applications to clerks. Once 
+                            clicked you be redirected to the assign rates rebate page.
+                        </li>
+                    </ol>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="caseDeclarationModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Rates Rebate Case</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                    @Html.Hidden("appNumber")
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processCaseBtn" type="button" class="btn btn-default" data-dismiss="modal">Process</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="caseResponseModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Rates Rebate Case</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalResponseText"></div>
+                    @Html.Hidden("caseResponse")
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="processResponseBtn" type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#applicationsCollapse">
+                    Submitted Rates Rebate Applications
+                </a>
+            </h4>
+        </div>
+        <div id="applicationsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.ActionLink("Assign Case", "AssignRatesRebateApplication", null, new { @class = "btn btn-primary" })
+                <div id="toolbar">
+                    &nbsp;
+                    <button id="btnSearch" class="btn btn-primary">Search</button>
+                    <button id="btnRefresh" class="btn btn-primary">Reset</button>
+                </div>
+                <table class="table table-striped" id="applicationsTable"
+                       data-toggle="table"
+                       data-toolbar="#toolbar"
+                       data-url="@Url.Action("LoadRebateApplications", "RatesRebateBackOffice")"
+                       data-query-params-type="Else"
+                       data-pagination="true"
+                       data-side-pagination="server"
+                       data-page-size="10"
+                       data-height="500"
+                       data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-field="FirstName" data-sortable="true">
+                                First Name
+                            </th>
+                            <th data-field="LastName" data-sortable="true">
+                                Last Name
+                            </th>
+                            <th data-field="EmailAddress" data-sortable="true">
+                                Email Address
+                            </th>
+                            <th data-field="ApplicationNumber" data-sortable="true">
+                                Application Number
+                            </th>
+                            <th data-field="ApplicationType" data-sortable="true">
+                                Application Type
+                            </th>
+                            <th data-field="IsConflict" data-sortable="true">
+                                Is Conflict
+                            </th>
+                            <th data-field="Status" data-sortable="true">
+                                Status
+                            </th>
+                            @*<th data-formatter="clerkActions">Action</th>*@
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var $table = $('#applicationsTable'),
+        $button = $('#btnRefresh'),
+        $btnSearch = $('#btnSearch');
+
+        $(function () {
+            $button.click(function () {
+                $('.fixed-table-toolbar').find('.search > :input').val('');
+                $table.bootstrapTable('refresh', {
+                    url: '@Url.Action("LoadRebateApplications", "RatesRebateBackOffice")',
+                    query: {
+                        searchText: '',
+                        pageNumber: 1
+                    }
+                });
+            });
+
+            $btnSearch.click(function () {
+                var searchVal = $('.fixed-table-toolbar').find('.search > :input').val();
+                $table.bootstrapTable('refresh', {
+                    url: '@Url.Action("LoadRebateApplications", "RatesRebateBackOffice")',
+                    query: {
+                        searchText: searchVal,
+                        pageNumber: 1
+                    }
+                });
+            });
+        });
+
+        @*window.clerkActions = function (value, row, index) {
+            return "<input type='button' value='Assign Case' onclick='AssignCase(\"" + row.Id + "\");' style = 'font-size:12px;' class = 'btn btn-primary'>";
+        }
+
+        window.AssignCase = function (Id) {
+            var url = '@Url.Action("AssignRatesRebateApplication", "RatesRebateBackOffice")' + "?Id=" + Id;
+            window.location = url;
+        }*@
+
+        @*window.ProcessCase = function (applicationNumber) {
+            try {
+                var currentUser = '@identityManager.CurrentUser(User).FullName';
+                var currentDateTime = new Date().toLocaleString();
+
+                $("#appNumber").val(applicationNumber);
+                $("#caseDeclarationModal").modal('show');
+                $("#modalContentText").html("I " + currentUser + " agree to accept case - " +
+                    "<strong>" + applicationNumber + "<br/></strong> at "
+                    + "<strong>" + currentDateTime
+                    + "</strong>");
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+
+        function redirectResponse() {
+            var response = $("#caseResponse").val();
+            if (response == "Redirect") {
+                var url = '@Url.Action("ClerkRateRebateApplications", "RatesRebateBackOffice")';
+                window.location = url;
+            }
+            else {
+                window.location.reload(true);
+            }
+        }
+
+        $("#processCaseBtn").click(function (evt) {
+            var applicationNumber = $("#appNumber").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ProcessApplicationToClerk", "RatesRebateBackOffice")",
+                data: { appNumber: applicationNumber },
+                cache: false,
+                success: function (response) {
+                    $("#caseResponse").val(response.result);
+                    $("#caseResponseModal").modal('show');
+
+                    switch (response.result) {
+                        case "Redirect":
+                            $("#modalResponseText").html("<strong>Success</strong> Rates rebate application accepted. Proceed to clerk dashboard.");
+                            break;
+                        case "Warning":
+                            $("#modalResponseText").html("<strong>Error</strong> Rates rebate application has been accepted already by <strong>" +
+                                response.clerkName + "</strong>.<br/> Current Applications refreshed.");
+                            break;
+                        default:
+                            $("#modalResponseText").html("<strong>Error</strong> An Unexpected error has occurred. Please contact the administrator");
+                            break;
+                    }
+                },
+                error: function (response) {
+                    console.log(response.result);
+                }
+            });
+        });
+
+        $("#processResponseBtn").click(function (evt) {
+            redirectResponse();
+        });
+
+        $("#caseResponseModal").on('hidden.bs.modal', function () {
+            redirectResponse();
+        });*@
+
+    });
+</script>

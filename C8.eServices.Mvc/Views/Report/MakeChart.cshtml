@@ -1,0 +1,15 @@
+﻿@model C8.eServices.Mvc.Models.Employees
+@*@model C8.eServices.Mvc.ViewModels.ConsumptionViewModel*@
+@{
+    ViewBag.Title = "MakeChart";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+@{
+    var myChart = new Chart(width: 600, height: 400)
+        .AddTitle("Chart Title")
+        .AddSeries(
+            name: "Employee",
+            xValue: @Model.Names,
+            yValues: @Model.Ids)
+        .Write();
+}

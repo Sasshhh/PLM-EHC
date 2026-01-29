@@ -1,0 +1,90 @@
+﻿@model C8.eServices.Mvc.Models.Query
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<br/>
+<br/>
+<div class="panel-group" id="customerQuery">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Query Details
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div>
+
+                    <dl class="dl-horizontal">
+                        <dt>
+                            Query Type:
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.QueryType.Name)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Comment):
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Comment)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Email):
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Email)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.FullName):
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.FullName)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.ReferenceNumber):
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.ReferenceNumber)
+                        </dd>
+                        <dt>@Html.DisplayNameFor(model => model.ResolvedDateTime):</dt>
+                        <dd>@Html.DisplayFor(model => model.ResolvedDateTime)</dd>
+
+                        <dt>
+                            Resolution Comment:
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.ResolutionComment)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.ContactNumber):
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.ContactNumber)
+                        </dd>
+                    </dl>
+                </div>
+                <p>
+                    @*@Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |*@
+                    @Html.ActionLink("Back to List", "Index")
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+                

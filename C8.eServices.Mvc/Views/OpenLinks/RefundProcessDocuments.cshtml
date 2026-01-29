@@ -1,0 +1,145 @@
+﻿
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Refund Process Documents";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @*@Html.Hidden("Id", (int)ViewBag.Id)*@
+                <br />
+                <br />
+                if (ViewBag.Message != "success")
+                {
+                    <div class="form-group">
+                        <div id="divComment" style="display:block">
+                            <div class="form-group">
+                                <span> @Html.Label("Password", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
+                                <div class="col-md-4">
+                                    <input type="password" class="form-control" id="Password" name="Password" />
+                                    @Html.ValidationMessage("Password", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnSubmmit" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                }
+            }
+        </div>
+
+
+        <br />
+        @if (Model.DocumentsViewModelRefundDeposits != null)
+        {
+            <div class="panel-heading">Refund Process documents</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <div style="display:block">
+                    @Html.Partial("_DocumentsPartialOpenLinkRefundProcess", Model.DocumentsViewModelRefundDeposits)
+                    <br />
+                </div>
+            </div>
+            <br />
+            <div class="panel-heading">Proof of Banking Details</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <div style="display:block">
+                    @Html.Partial("_DocumentsPartialOpenLinkRefundProcess", Model.DocumentsViewModel)
+                    <br />
+                </div>
+            </div>
+
+            <div class="panel-heading">Letting Officer</div>
+                <div style="width: 90%;margin: 0 auto;">
+                    <div style="display:block">
+                        <b>Name:</b>&nbsp;&nbsp; @Model.Customer.FirstName
+                        <br />
+                        <b>Contact:</b>&nbsp;&nbsp;  @Model.Customer.CellPhoneNumber
+                        <br />
+                        <b>Email:</b>&nbsp;&nbsp;  @Model.Customer.EmailAddress
+                        <br />
+                        @if (Model.LeaseTermination != null)
+                        {
+                           <b>Termination Date:&nbsp;&nbsp;</b>  @Model.LeaseTermination.TerminationDate
+                        }   
+                    </div>
+                </div>
+        }
+
+
+
+    </div>
+</div>
+
+<script>
+    function clickSubmit() {
+  
+        swal({
+            icon: "info",
+            title: "Are you sure you want to continue?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                var password = document.getElementById('Password').value;
+                if (password == null || password == "") {
+                    swal("error", "Please enter valid password to continue", "warning")
+                }
+                else {
+                    document.getElementById("btnApproval").click();
+                }
+            }
+        });
+    }
+
+    function opendocumentUploadDiv() {
+        $("#documentuploadModal").modal('show');
+    }
+
+</script>
+<script>
+        $(function () {
+            //$('#FailureTable').DataTable();
+
+            var display = "@ViewBag.Message";
+
+            if (display != null && display != "" && display !="success") {
+                $('#MessageModal4').modal('show');
+            }
+            });
+</script>
+
+
+
+

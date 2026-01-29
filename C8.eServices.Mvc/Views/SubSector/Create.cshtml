@@ -1,0 +1,63 @@
+﻿@model C8.eServices.Mvc.Models.SubSector
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#">
+                            Sub-Sector Type
+                        </a>
+                    </h4>
+                </div>
+                <hr />
+                @Html.ValidationSummary(true)
+            <div style="margin-left:30px">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.FocusAreaId, "Focus Area", new { @class = "control-label col-md-2" })
+                    <div class="col-md-3">
+                        @Html.DropDownList("FocusAreaId", null, "--- Select Focus Area ---", new { @class = "form-control"})
+                        @Html.ValidationMessageFor(model => model.FocusAreaId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubSectorName, new { @class = "control-label col-md-2" })
+                    <div class="col-md-3">
+                        @Html.TextBoxFor(model => model.SubSectorName, new { @class = "form-control"})
+                        @Html.ValidationMessageFor(model => model.SubSectorName)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubSectorDescription, new { @class = "control-label col-md-2" })
+                    <div class="col-md-3">
+                        @Html.TextAreaFor(model => model.SubSectorDescription, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SubSectorDescription)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                        @* @Html.ActionLink("Create", "Create", null, new { @class = "btn btn-primary"})*@
+                    </div>
+                </div>
+            </div></div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-primary" })
+</div>

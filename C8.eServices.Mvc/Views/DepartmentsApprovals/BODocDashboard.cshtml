@@ -1,0 +1,76 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.RCSApplicationStatus>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>Pending Documents Evaluations</h4>
+
+<br />
+
+<table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+    <thead>
+        <tr>
+            <th>
+                Applicant Full Name
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ApplicationReferenceNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedDateTime)
+            </th>
+            <th>
+                Status
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Customer.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status.Name)
+                </td>
+                <td>
+                    @if (item.Status.Key == StatusKeys.PendingDocumentsApproval)
+                    {
+                        @Html.ActionLink("View", "BOEval", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                    }
+                    else if (item.Status.Key == StatusKeys.PendingApplicationFeePaymentValidation)
+                    {
+                        @Html.ActionLink("View", "BOValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                    }
+                    else if (item.Status.Key == StatusKeys.PendingAssessmentFeePaymentValidation)
+                    {
+                        @Html.ActionLink("View", "BOAssessmentFeeValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                    }
+                    @Html.ActionLink("Application Details", "Details", "Capture", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.Id.ToString() + "&" + "id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                    @*@Html.ActionLink("Message", "CreateMessage", new { id = item.Id, CommunicationType = CommunicationTypeKeys.AttorneyToBo }, new { @class = "btn btn-primary" })*@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<script>
+    $(function () {
+        $('#RCSTable').DataTable();
+    });
+</script>

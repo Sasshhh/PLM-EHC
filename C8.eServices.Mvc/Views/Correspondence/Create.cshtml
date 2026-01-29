@@ -1,0 +1,570 @@
+﻿@model C8.eServices.Mvc.Models.Correspondence
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Correspondance Form
+                </a>
+            </h4>
+        </div>
+        <div class="panel-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+                    <hr />
+                    @Html.ValidationSummary(true)
+                    @if (ViewBag.Success != null && ViewBag.Success != "")
+                    {
+                        <div class="alert-info">
+                            @ViewBag.Success
+                        </div>
+                    }
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">Customer Details</legend>
+                        <p> Please check  @Html.CheckBox("isNewCustomer") for an existing customer</p>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerType, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerType, new { @class = "form-control" ,required="required"})
+                                @Html.ValidationMessageFor(model => model.CustomerType)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerTitleId, "Title", new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.DropDownList("TitleTypeId", null, "---Select title---", new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.CustomerTitleId)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerFirstName, "FirstName", new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerFirstName, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.CustomerFirstName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerLastName, "LastName", new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerLastName, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.CustomerLastName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerIdentificationNumber, "Identification Number", new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerIdentificationNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerIdentificationNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.AccountNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.AccountNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.AccountNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RatesNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.RatesNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.RatesNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ConnectionNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ConnectionNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ConnectionNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerWorkTelephoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerWorkTelephoneNumber, new { @class = "form-control", required="required" })
+                                @Html.ValidationMessageFor(model => model.CustomerWorkTelephoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerHomeTelephoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerHomeTelephoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerHomeTelephoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerCellPhoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerCellPhoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerCellPhoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerFaxNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerFaxNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerFaxNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerEmailAddress, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerEmailAddress, new { @class = "form-control", required="required" })
+                                @Html.ValidationMessageFor(model => model.CustomerEmailAddress)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BusinessName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.BusinessName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.BusinessName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.BusinessRegistrationNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.BusinessRegistrationNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.BusinessRegistrationNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPhysicalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerPhysicalAddress1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPhysicalAddress1)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPhysicalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerPhysicalAddress2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPhysicalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPhysicalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerPhysicalAddress3, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPhysicalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPhysicalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerPhysicalAddress4, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPhysicalAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPhysicalAddress5, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.CustomerPhysicalAddress5, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPhysicalAddress5)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPostalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CustomerPostalAddress1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPostalAddress1)
+                            </div>
+                            @Html.CheckBox("customerPostSameAsPhysical") @Html.Label("Same As Physical")
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPostalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(model => model.CustomerPostalAddress2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPostalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPostalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(model => model.CustomerPostalAddress3, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPostalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CustomerPostalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.CustomerPostalAddress4, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CustomerPostalAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddressType, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(model => model.ServiceAddressType, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddressType)
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">Service Details</legend>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ReferenceNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ReferenceNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ReferenceNumber)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceType, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.DropDownList("ServiceTypes", null, "---Select Service Type---", new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceType)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Category, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.Category, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Category)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.SubCategory, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.SubCategory, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.SubCategory)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceDescription, new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextAreaFor(model => model.ServiceDescription, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceDescription)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceUnitNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceUnitNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceUnitNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceFloorNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceFloorNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceFloorNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceSectionNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceSectionNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceSectionNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceBuildingComplex, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceBuildingComplex, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceBuildingComplex)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceAddress1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddress1)
+                            </div>
+                            @Html.CheckBox("serviceAddressSameAsCustomer") @Html.Label("Same As Customer")
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceAddress2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceAddress3, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.ServiceAddress4, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceAddress5, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.ServiceAddress5, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceAddress5)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceXCoordinate, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.ServiceXCoordinate, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceXCoordinate)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ServiceYCoordinate, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.ServiceYCoordinate, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ServiceYCoordinate)
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="scheduler-border">
+                        <legend class="scheduler-border">Writer Details</legend>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.TitleTypeId, "Title", new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.DropDownList("TitleTypeId", null, "---Select title---", new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.TitleTypeId)
+                            </div>
+                            @Html.CheckBox("isWriterAnonymous") @Html.Label("Send As Anonymous", new { @style = "color:red" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FirstName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.FirstName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LastName, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.LastName)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IdentificationNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.IdentificationNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.IdentificationNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WorkTelephoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WorkTelephoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WorkTelephoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.HomeTelephoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.HomeTelephoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.HomeTelephoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CellPhoneNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CellPhoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CellPhoneNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FaxNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.FaxNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.FaxNumber)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EmailAddress, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.EmailAddress, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.EmailAddress)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Relationship, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.Relationship, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Relationship)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.StatusNotification, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.StatusNotification, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.StatusNotification)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CorrespondanceNotification, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.CorrespondanceNotification, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CorrespondanceNotification)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPhysicalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPhysicalAddress1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPhysicalAddress1)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPhysicalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPhysicalAddress2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPhysicalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPhysicalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPhysicalAddress3, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPhysicalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPhysicalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPhysicalAddress4, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPhysicalAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPhysicalAddress5, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.WriterPhysicalAddress5, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPhysicalAddress5)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPostalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPostalAddress1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPostalAddress1)
+                            </div>
+                            @Html.CheckBox("writerPostSameAsPhysical") @Html.Label("Same As Physical")
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPostalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPostalAddress2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPostalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPostalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.WriterPostalAddress3, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPostalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.WriterPostalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-2">
+                                @Html.TextBoxFor(model => model.WriterPostalAddress4, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.WriterPostalAddress4)
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div style="float:left">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <div class="g-recaptcha" data-sitekey="6Ld0PAgUAAAAAGB3JFTS8PFWgo1AqLOrMyroBJP3" data-callback="validateCaptcha"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input id="btnCorresponSend" type="submit" value="Submit" disabled class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+
+<script type="text/javascript">
+    function validateCaptcha(response) {
+        if (response.length == 0)
+            $("#btnCorresponSend").prop('disabled', true);
+        else
+            $("#btnCorresponSend").prop('disabled', false);
+    }
+</script>
+
+@*<div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>*@

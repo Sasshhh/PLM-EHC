@@ -1,0 +1,44 @@
+﻿
+@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Manual Application Process
+                </div>
+            </div>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            @if (ViewBag.Response == "Complete")
+            {
+                <h3>All manual applications have been processed successfully, please upload Documents for fully migrated.</h3>
+            }
+            else
+            {
+                <h3>There is some problem occured while executing the manual applications</h3>
+            }
+            <br />
+            <br />
+
+            <div>
+                <button class="btn btn-primary" onclick="location.href='@Url.Action( "PlmManualApplications","PropertyLeaseApplication")';">Back</button>
+            </div>
+            <br />
+        </div>
+        
+    </div>
+
+</div>
+
+<script>
+
+</script> 

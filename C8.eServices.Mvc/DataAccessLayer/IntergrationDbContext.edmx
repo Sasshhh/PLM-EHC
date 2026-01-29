@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="CRMRCSModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'CRMRCS.dbo.TBL_RCS_ATTORNEYS' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="TBL_RCS_ATTORNEYS">
+          <Key>
+            <PropertyRef Name="Attorney_Code" />
+            <PropertyRef Name="Practice_number" />
+          </Key>
+          <Property Name="Attorney_Code" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="FirmName" Type="varchar" MaxLength="100" />
+          <Property Name="Practice_number" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="PostalAddress" Type="varchar" MaxLength="250" />
+          <Property Name="PostalCode" Type="varchar" MaxLength="20" />
+          <Property Name="Contact_Number" Type="varchar" MaxLength="10" />
+          <Property Name="Email_Address" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityContainer Name="CRMRCSModelStoreContainer">
+          <EntitySet Name="TBL_RCS_ATTORNEYS" EntityType="Self.TBL_RCS_ATTORNEYS" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [TBL_RCS_ATTORNEYS].[Attorney_Code] AS [Attorney_Code], 
+    [TBL_RCS_ATTORNEYS].[FirmName] AS [FirmName], 
+    [TBL_RCS_ATTORNEYS].[Practice_number] AS [Practice_number], 
+    [TBL_RCS_ATTORNEYS].[PostalAddress] AS [PostalAddress], 
+    [TBL_RCS_ATTORNEYS].[PostalCode] AS [PostalCode], 
+    [TBL_RCS_ATTORNEYS].[Contact_Number] AS [Contact_Number], 
+    [TBL_RCS_ATTORNEYS].[Email_Address] AS [Email_Address]
+    FROM [dbo].[TBL_RCS_ATTORNEYS] AS [TBL_RCS_ATTORNEYS]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CRMRCSModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="TBL_RCS_ATTORNEYS">
+          <Key>
+            <PropertyRef Name="Attorney_Code" />
+            <PropertyRef Name="Practice_number" />
+          </Key>
+          <Property Name="Attorney_Code" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FirmName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Practice_number" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PostalAddress" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="PostalCode" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Contact_Number" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Email_Address" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="IntegrationEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="TBL_RCS_ATTORNEYS" EntityType="Self.TBL_RCS_ATTORNEYS" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CRMRCSModelStoreContainer" CdmEntityContainer="IntegrationEntities">
+          <EntitySetMapping Name="TBL_RCS_ATTORNEYS">
+            <EntityTypeMapping TypeName="CRMRCSModel.TBL_RCS_ATTORNEYS">
+              <MappingFragment StoreEntitySet="TBL_RCS_ATTORNEYS">
+                <ScalarProperty Name="Attorney_Code" ColumnName="Attorney_Code" />
+                <ScalarProperty Name="FirmName" ColumnName="FirmName" />
+                <ScalarProperty Name="Practice_number" ColumnName="Practice_number" />
+                <ScalarProperty Name="PostalAddress" ColumnName="PostalAddress" />
+                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+                <ScalarProperty Name="Contact_Number" ColumnName="Contact_Number" />
+                <ScalarProperty Name="Email_Address" ColumnName="Email_Address" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

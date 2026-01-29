@@ -1,0 +1,507 @@
+﻿@model C8.eServices.Mvc.Models.Correspondance
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Correspondance</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.TitleType.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TitleType.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReferenceNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReferenceNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceType)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Category)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Category)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SubCategory)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SubCategory)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceUnitNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceUnitNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceFloorNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceFloorNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceSectionNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceSectionNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceBuildingComplex)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceBuildingComplex)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddress1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddress1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddress2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddress2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddress3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddress3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddress4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddress4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddress5)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddress5)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceXCoordinate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceXCoordinate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceyCoordinatre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceyCoordinatre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IdentificationNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdentificationNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WorkTelephoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WorkTelephoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HomeTelephoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HomeTelephoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CellPhoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CellPhoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FaxNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FaxNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EmailAddress)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EmailAddress)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Relationship)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Relationship)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusNotification)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusNotification)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CorrespondanceNotification)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CorrespondanceNotification)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPhysicalAddress1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPhysicalAddress1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPhysicalAddress2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPhysicalAddress2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPhysicalAddress3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPhysicalAddress3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPhysicalAddress4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPhysicalAddress4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPhysicalAddress5)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPhysicalAddress5)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPostalAddress1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPostalAddress1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPostalAddress2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPostalAddress2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPostalAddress3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPostalAddress3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.WriterPostalAddress4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.WriterPostalAddress4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerType)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerTitle)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerTitle)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerFirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerFirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerLastName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerLastName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerIdentificationNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerIdentificationNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AccountNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AccountNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.RatesNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.RatesNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ConnectionNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ConnectionNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerWorkTelephoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerWorkTelephoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerHomeTelephoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerHomeTelephoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerCellPhoneNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerCellPhoneNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerFaxNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerFaxNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerEmailAddress)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerEmailAddress)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BusinessName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BusinessName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BusinessRegistrationNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BusinessRegistrationNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPhysicalAddress1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPhysicalAddress1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPhysicalAddress2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPhysicalAddress2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPhysicalAddress3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPhysicalAddress3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPhysicalAddress4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPhysicalAddress4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPhysicalAddress5)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPhysicalAddress5)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPostalAddress1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPostalAddress1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPostalAddress2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPostalAddress2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPostalAddress3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPostalAddress3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CustomerPostalAddress4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CustomerPostalAddress4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ServiceAddressType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ServiceAddressType)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

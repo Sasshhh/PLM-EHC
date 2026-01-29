@@ -1,0 +1,2963 @@
+﻿@model C8.eServices.Mvc.ViewModels.TenantViewModel
+
+
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+
+
+</head>
+
+<style>
+    .requiredflex {
+        display: flex;
+    }
+
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    Fill in all lease details information that will be present on the lease agreement, once done. click submit<br />
+                </p>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.LeaseAgreementReview != null)
+{
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Lease Agreement Review Rejection Comment</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <p>
+                        @ViewBag.LeaseAgreementReview
+                    </p>
+
+
+                  
+                 
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    <body>
+        <br />
+
+
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "clientInfo-form", @onsubmit = "myFunction()" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div id="demo">
+
+                <div class="step-app">
+                    <ul class="step-steps">
+                        <li><a href="#step3"><span class="number">1</span>Tenant Information <span class="ion ion-person"></span></a></li>
+                        <li><a href="#step2"> <span class="number">2</span>Lease Information  <span class="ion ion-person"></span></a></li>
+                        @*<li><a href="#step4"> <span class="number">3</span> Supporting Document(s)<span class="ion ion-document-text"></span></a></li>*@
+
+                    </ul>
+                    <div class="step-content">
+                        <div class="step-tab-panel" id="step3">
+                            <fieldset>
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+
+                                                    <h4 class="panel-title" align="center">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                            Tenant Information
+                                                        </a>
+                                                    </h4>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                                            @Html.HiddenFor(Lease => Lease.PropertyLeaseApplication.ApplicationReferenceNumber, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @Id = "PropertyLeaseApplication.ApplicationReferenceNumber" } })
+                                            @Html.HiddenFor(Lease => Lease.PropertyLeaseApplication.Id, new { htmlAttributes = new { @class = "form-control", @style = "display:none;", @Id = "PropertyLeaseApplication.Id" } })
+                                            @Html.Hidden("UnitId", (int)ViewBag.UnitId, new { htmlAttributes = new { @class = "form-control", @style = "display:none;", @Id = "UnitId", @Name = "UnitId" } })
+                                            @Html.Hidden("PropertyLeaseApplicationId", (int)ViewBag.PropertyLeaseApplicationId, new { htmlAttributes = new { @class = "form-control", @style = "display:none;", @Id = "PropertyLeaseApplicationId", @Name = "PropertyLeaseApplicationId" } })
+
+                                            <div id="PurchaserDetails" align="left">
+                                                <div class="form-horizontal">
+                                                    <br />
+                                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                    <div class="form-group">
+                                                        @Html.LabelFor(Lease => Lease.Lease.PurchaserTypeId, "Tenant Type", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                        <div class="col-md-3">
+                                                            @Html.DropDownListFor(Lease => Lease.Lease.PurchaserTypeId, (SelectList)ViewBag.Purchaser,
+                                                           htmlAttributes: new { @class = "form-control", @required = "required", onchange = "switchDivsPurchaserInfo()", @Name = "Lease.PurchaserTypeId", @id = "PurchaserInformation_PurchaseType", @readonly = "readonly" })
+                                                            @Html.ValidationMessageFor(Lease => Lease.Lease.PurchaserTypeId, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+
+
+
+                                                    <div id="divNonNatural" style="display:none">
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.CompanyName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.CompanyName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CompanyName, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.CIPCRegistrationNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.CIPCRegistrationNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CIPCRegistrationNo, "", new { @class = "text-danger" })
+                                                            </div>
+
+
+                                                        </div>
+
+
+
+                                                        <div id="divPostalCompany2" style="display:none">
+                                                            <br />
+
+                                                            <div class="panel-group" style="margin-bottom: -1px;">
+                                                                <div class="panel panel-default">
+                                                                    <div class="panel-heading">
+
+                                                                        <h4 class="panel-title" align="center">
+                                                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                Company Address
+                                                                            </a>
+                                                                        </h4>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.ResAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.ResAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResAddress, "", new { @class = "text-danger" })
+                                                                </div>
+
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.ResSuburb, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.ResSuburb, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResSuburb, "", new { @class = "text-danger" })
+                                                                </div>
+
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.ResPostal, "Postal Code", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.ResPostal, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "4", @minlength = "4" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResPostal, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                        <div id="divPostalCompany" style="display:none">
+                                                            <br />
+
+                                                            <div class="panel-group" style="margin-bottom: -1px;">
+                                                                <div class="panel panel-default">
+                                                                    <div class="panel-heading">
+
+                                                                        <h4 class="panel-title" align="center">
+                                                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                Contact Person Details
+                                                                            </a>
+                                                                        </h4>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.ContactPSurname, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.ContactPSurname, new { htmlAttributes = new { @class = "form-control" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ContactPSurname, "", new { @class = "text-danger" })
+
+                                                                </div>
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.ContactPName, "First Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.ContactPName, new { htmlAttributes = new { @class = "form-control" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ContactPName, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.Capacity, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.Capacity, new { htmlAttributes = new { @class = "form-control", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.Capacity, "", new { @class = "text-danger" })
+                                                                </div>
+
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @required = "required", @onkeypress = "return isNumber(event)", @maxlength = "13", @onfocusout = "ValidateRSAIDNo(this.value)" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.IDNo, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="panel-group" style="margin-bottom: -1px;">
+                                                                <div class="panel panel-default">
+                                                                    <div class="panel-heading">
+
+                                                                        <h4 class="panel-title" align="center">
+                                                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                Company Contact Details
+                                                                            </a>
+                                                                        </h4>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.CPCellNo, "Cellphone", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.CPCellNo, new { htmlAttributes = new { @class = "form-control", @required = "required", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CPCellNo, "", new { @class = "text-danger" })
+
+                                                                </div>
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.CPHomeNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.CPHomeNo, new { htmlAttributes = new { @class = "form-control", @required = "required", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CPHomeNo, "", new { @class = "text-danger" })
+                                                                </div>
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.CPWorkNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.CPWorkNo, new { htmlAttributes = new { @class = "form-control", @required = "required", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CPWorkNo, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.CPEmail1, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.CPEmail1, new { htmlAttributes = new { @class = "form-control", @required = "required", @onfocusout = "validateEmail(this.id)" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CPEmail1, "", new { @class = "text-danger" })
+                                                                </div>
+
+                                                                @Html.LabelFor(model => model.PropertyLeaseApplication.CPEmail2, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.CPEmail2, new { htmlAttributes = new { @class = "form-control", @required = "required", @onfocusout = "validateEmail(this.id)" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CPEmail2, "", new { @class = "text-danger" })
+                                                                </div>
+
+
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="divNames" style="display:block">
+                                                        <div class="form-group">
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.TextBoxFor(model => model.PropertyLeaseApplication.FirstName, new { @class = "form-control", @maxLength = 50, @readonly = "readonly" })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.FirstName, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.LastName, "Surname", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.TextBoxFor(model => model.PropertyLeaseApplication.LastName, new { @class = "form-control", @maxLength = 50, @readonly = "readonly" })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.LastName, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "13", @onfocusout = "ValidateRSAIDNo(this.value)" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.IDNo, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.DOB, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.Editor("DOB", new
+                                                           {
+                                                               htmlAttributes = new
+                                                               {
+                                                                   @class = "form-control",
+                                                                   id = "DOBAuto",
+                                                                   @readonly = "readonly"
+                                                               }
+                                                           })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.DOB, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    @if (Model.Lease.ApplicantComment != null)
+                                                    {
+
+                                                        <br />
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Rejected Lease Details
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(Lease => Lease.Lease.ApplicantComment, "Applicant Comment", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-6">
+                                                                @Html.TextAreaFor(model => model.Lease.ApplicantComment, new { @class = "form-control", @readonly = "readonly" })
+                                                                @Html.ValidationMessageFor(Lease => Lease.Lease.ApplicantComment, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+
+                                                    }
+                                                    <div id="divContact" style="display:block">
+                                                        <br />
+
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Contact Details
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.CellNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.CellNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.CellNo, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.PurEmail, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-3">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.PurEmail, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onfocusout = "validateEmail(this.id)" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.PurEmail, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group" style="display:none;">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.HomeNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.HomeNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.HomeNo, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.WorkNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.WorkNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "10", @minlength = "10" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.WorkNo, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="divPostal" style="display:block">
+                                                        <br />
+
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Current Address
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.ResAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.ResAddress, new { htmlAttributes = new { @class = "form-control", @required = "required", @ID = "addressId" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResAddress, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.ResSuburb, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.ResSuburb, new { htmlAttributes = new { @class = "form-control", @required = "required", @ID = "suburId" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResSuburb, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.ResPostal, "Postal Code", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.PropertyLeaseApplication.ResPostal, new { htmlAttributes = new { @class = "form-control", @ID = "postalId", @required = "required", @onkeypress = "return isNumber(event)", @maxlength = "5", @minlength = "4" } })
+                                                                @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.ResPostal, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
+                                                    <br />
+                                                    <br />
+
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                            </fieldset>
+
+                        </div>
+
+                        <div class="step-tab-panel" id="step2">
+                            <fieldset>
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+
+                                                    <h4 class="panel-title" align="center">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                            Lease Details
+                                                        </a>
+                                                    </h4>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div id="accountInfoCollapse" class="panel-collapse collapse in">
+
+                                            <div id="PurchaserDetails" align="left">
+                                                <div class="form-horizontal">
+                                                    <br />
+                                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                                                    <div id="divNonNatural">
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @*@Html.LabelFor(model => model.Unit.Id, "Property ID", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.Unit.Id, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                    @Html.ValidationMessageFor(model => model.Unit.Id, "", new { @class = "text-danger" })
+                                                                </div>*@
+                                                            @Html.LabelFor(model => model.ApplicationAllocatedProperty.BuildingName, "Complex/Building Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.OfferedComplex.Name, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperty.BuildingName, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.ApplicationAllocatedProperty.SpaceUnitNumber, "Space/Unit Number ", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.SpaceUnitNumber, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperty.SpaceUnitNumber, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+
+                                                        <br />
+
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Leasing Address
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.ApplicationAllocatedProperty.Address, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Address, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.Unit.Address, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.ApplicationAllocatedProperty.Township, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Township, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                                @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperty.Township, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.ApplicationAllocatedProperty.Postal, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Postal, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "6", @minlength = "4" } })
+                                                                @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperty.Postal, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                        </div>
+
+                                                        <br />
+
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Leasing Period
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.StartDate, htmlAttributes: new { @class = "control-label col-md-2  require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.StartDate, "Date", new
+                                                           {
+                                                               htmlAttributes = new
+                                                               {
+                                                                   @class = " form-control",
+                                                                   onchange = "ChangeDate()",
+                                                                   @Name = "Lease.StartDate",
+                                                                   @Id = "lease_stattdate",
+                                                                   //@required = false
+                                                               }
+                                                           })
+                                                                @Html.ValidationMessageFor(model => model.Lease.StartDate, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+
+                                                            @Html.LabelFor(model => model.Lease.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.EndDate, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @Id = "end_date", @onkeypress = "return isNumber(event)", @placeholder = "yyyy/mm/dd" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.EndDate, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.Lease.RenewalNotice, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.RenewalNotice, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @Id = "renewal_notice", @onkeypress = "return isNumber(event)", @placeholder = "yyyy/mm/dd" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.RenewalNotice, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.Lease.TerminationNotice, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.TerminationNotice, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @Id = "termination_notice", @onkeypress = "return isNumber(event)", @placeholder = "yyyy/mm/dd" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.TerminationNotice, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <br />
+
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Lease Financials
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Unit.PropertyDeposit, "Deposit Amount", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.Editor("PropertyDeposite", null, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @readonly = "readonly", @name = "Lease.DepositeAmount", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Unit.PropertyDeposit, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Unit.PropertyPrice, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.Editor("PropertyPrice", null, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @readonly = "readonly", @name = "Lease.RentalAmount", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Unit.PropertyPrice, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.Lease.VATAmount, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.Editor("VAT", null, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @readonly = "readonly", @name = "Lease.VATAmount", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.VATAmount, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.Lease.TotalIncludingVAT, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-2">
+                                                                @Html.Editor("TotalIncludeVat", null, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @onkeypress = "return isNumber(event)", @maxlength = "20", @name = "Lease.TotalIncludingVAT" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.TotalIncludingVAT, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.Email, "Communication Method", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            <div class="col-md-1">
+                                                                @Html.CheckBoxFor(model => model.Lease.Email, new { htmlAttributes = new { @class = "form-control" } })
+                                                                @Html.LabelFor(model => model.Lease.Email, htmlAttributes: new { @class = "control-label" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+
+                                                            <div class="col-md-2"></div>
+                                                            <div class="col-md-1">
+                                                                @Html.CheckBoxFor(model => model.Lease.SMS, new { htmlAttributes = new { @class = "form-control" } })
+                                                                @Html.LabelFor(model => model.Lease.SMS, htmlAttributes: new { @class = "control-label" })
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-2"></div>
+                                                            <div class="col-md-1">
+                                                                @Html.CheckBoxFor(model => model.Lease.Postal, new { htmlAttributes = new { @class = "form-control" } })
+                                                                @Html.LabelFor(model => model.Lease.Postal, htmlAttributes: new { @class = "control-label" })
+                                                            </div>
+                                                        </div>
+
+
+
+
+                                                    </div>
+                                                    <div id="divOccupants">
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                            Billing Information
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.RentalAmount, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.MonthlyRentalAmount, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.RentalAmount", @onkeyup = "GetTotalMonhlyFees()", @Id = "RentalAmount", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Unit.PropertyPrice, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.Water, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Water, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.Water", @onkeyup = "GetTotalMonhlyFees()", @Id = "Water", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.Water, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.Refuse, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Refuse, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.Refuse", @onkeyup = "GetTotalMonhlyFees()", @Id = "Refuse", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.Refuse, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.Sewerage, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.Sewer, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.Sewerage", @onkeyup = "GetTotalMonhlyFees()", @Id = "Sewerage", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.Sewerage, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.LeaseAdministrationFee, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.LeaseAdministrationFee, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.LeaseAdministrationFee", @onkeyup = "GetTotalMonhlyFees()", @Id = "LeaseAdministrationFee", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.LeaseAdministrationFee, "", new { @class = "text-danger" })
+                                                            </div>
+
+                                                            @Html.LabelFor(model => model.Lease.DepositeAmount, "Deposit Required", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.RequiedDepositAmount, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.DepositeAmount", @onkeyup = "GetTotalMonhlyFees()", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.DepositeAmount, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.DepositHeld, "Deposit Held", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.RequiedDepositAmount, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.DepositHeld", @onkeyup = "GetTotalMonhlyFees()", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.DepositeAmount, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.PreparationFee, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.PreparationFee, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.PreparationFee", @onkeyup = "GetTotalMonhlyFees()", @Id = "PreparationFee", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.PreparationFee, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.CreditCheckFee, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.CreditCheckFee, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.CreditCheckFee", @onkeyup = "GetTotalMonhlyFees()", @Id = "CreditCheckFee", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.CreditCheckFee, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.CalculatedAsFolllows, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.CalculatedAsFolllows, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.CalculatedAsFolllows", @onkeyup = "GetTotalMonhlyFees()", @Id = "CalculatedAsFolllows", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.CalculatedAsFolllows, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.DepositTenantContribution, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.DepositTenantContribution, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.DepositTenantContribution", @onkeyup = "GetTotalMonhlyFees()", @Id = "DepositTenantContribution", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.DepositTenantContribution, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.InitialDepositPremises, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.InitialDepositPremises, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.InitialDepositPremises", @Id = "InitialDepositPremises", @onkeyup = "GetTotalMonhlyFees()", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.InitialDepositPremises, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.StoreRooms, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.StoreRooms, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.StoreRooms", @Id = "StoreRooms", @onkeyup = "GetTotalMonhlyFees()", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.StoreRooms, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.ShadePortBayNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.ShadePortBayNumber, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.ShadePortBayNumber", @Id = "ShadePortBayNumber", @onkeyup = "GetTotalMonhlyFees()", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.ShadePortBayNumber, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.OPenParkingBayNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.OPenParkingBayNumber, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.OPenParkingBayNumber", @Id = "OPenParkingBayNumber", @onkeyup = "GetTotalMonhlyFees()", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.OPenParkingBayNumber, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.CarportParkingBayNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.CarportParkingBayNumber, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.CarportParkingBayNumber", @Id = "CarportParkingBayNumber", @onkeyup = "GetTotalMonhlyFees()", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.CarportParkingBayNumber, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(model => model.Lease.ShadePortParking, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.ShadePortParking, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.ShadePortParking", @onkeyup = "GetTotalMonhlyFees()", @Id = "ShadePortParking", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.ShadePortParking, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.OpenParking, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.OpenParking, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.OpenParking", @onkeyup = "GetTotalMonhlyFees()", @Id = "OpenParking", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.CreditCheckFee, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.SecurityFee, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.SecurityFee, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.SecurityFee", @onkeyup = "GetTotalMonhlyFees()", @Id = "SecurityFee", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.SecurityFee, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            <div style="display:none">
+                                                                @Html.LabelFor(model => model.Lease.CarportParkingBay, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.Lease.CarportParkingBay, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.CarportParkingBay", @onkeyup = "GetTotalMonhlyFees()", @Id = "CarportParkingBay", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.CarportParkingBay, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+
+                                                            @Html.LabelFor(model => model.Lease.Electricity, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.Electricity, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.Electricity", @onkeyup = "GetTotalMonhlyFees()", @Id = "Electricity", @required = "required", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.Electricity, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.FloorNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.Lease.FloorNumber, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.FloorNumber", @Id = "FloorNumber", @required = "required" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.FloorNumber, "", new { @class = "text-danger" })
+                                                            </div>
+                                                            @Html.LabelFor(model => model.Lease.TotalMonthlyCharges, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                                            <div class="col-md-2">
+                                                                @Html.EditorFor(model => model.ApplicationAllocatedProperty.TotalMonthlyCharges, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.TotalMonthlyCharges", @readonly = "readonly", @Id = "TotalMonthlyCharges", @onkeypress = "return isNumber(event)" } })
+                                                                @Html.ValidationMessageFor(model => model.Lease.TotalMonthlyCharges, "", new { @class = "text-danger" })
+                                                            </div>
+                                                        </div>
+                                                        <br />
+                                                        <div class="form-group">
+
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <div id="divOccupants--" style="display:none">
+                                                            <br />
+
+                                                            <div class="panel-group" style="margin-bottom: -1px;">
+                                                                <div class="panel panel-default">
+                                                                    <div class="panel-heading">
+
+                                                                        <h4 class="panel-title" align="center">
+                                                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                Occupants Details
+                                                                            </a>
+                                                                        </h4>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.Lease.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.LastName, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.LastName" } })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.LastName, "", new { @class = "text-danger" })
+
+                                                                </div>
+                                                                @Html.LabelFor(model => model.Lease.FirstNames, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.FirstName, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.FirstNames" } })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.FirstNames, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.Lease.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-2">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseApplication.IDNo, new { htmlAttributes = new { @class = "form-control", @Name = "Lease.IDNo", @maxlength = "13", @onfocusout = "ValidateRSAIDNo(this.value)" } })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.IDNo, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <br />
+
+                                                            @*<div class="panel-group" style="margin-bottom: -1px;">
+                                                                    <div class="panel panel-default">
+                                                                        <div class="panel-heading">
+
+                                                                            <h4 class="panel-title" align="center">
+                                                                                <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                    Other Tenant(s)
+                                                                                </a>
+                                                                            </h4>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                                <br />*@
+
+                                                            @Html.EditorFor(model => model.WaterSessionList, new { htmlAttributes = new { @id = "WaterMeterList", @style = "display:none;" } })
+
+                                                            @*<div>
+                                                                    <br />
+                                                                    <div class="form-group">
+                                                                        @Html.LabelFor(model => model.PropertyResident.FirstNames, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                        <div class="col-md-2">
+                                                                            @Html.EditorFor(model => model.PropertyResident.FirstNames, new { htmlAttributes = new{ @class = "form-control", @Id = "PropertyResident.FirstNames"}})
+                                                                            @Html.ValidationMessageFor(model => model.PropertyResident.FirstNames, "", new { @class = "text-danger" })
+                                                                        </div>
+                                                                        @Html.LabelFor(model => model.PropertyResident.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                        <div class="col-md-2">
+                                                                            @Html.EditorFor(model => model.PropertyResident.LastName, new { htmlAttributes = new { @class = "form-control", @Id = "PropertyResident.LastName" } })
+                                                                            @Html.ValidationMessageFor(model => model.PropertyResident.LastName, "", new { @class = "text-danger" })
+                                                                        </div>
+                                                                        @Html.LabelFor(model => model.PropertyResident.IDNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                        <div class="col-md-2">
+                                                                            @Html.EditorFor(model => model.PropertyResident.IDNo, new { htmlAttributes = new { @class = "form-control", @Id = "PropertyResident.IDNo", @onkeypress = "return isNumber(event)", @maxlength = "13", @onfocusout = "ValidateRSAIDNo(this.value)" } })
+                                                                            @Html.ValidationMessageFor(model => model.PropertyResident.IDNo, "", new { @class = "text-danger" })
+                                                                        </div>
+
+                                                                        <div class="col-md-offset-2 col-md-3">
+                                                                            <br />
+                                                                            <br />
+                                                                            <a onclick="AddSession2()" id="btnAddWater" class="button1">Add Occupant</a>
+                                                                            <br />
+                                                                            <br />
+                                                                        </div>
+                                                                        <br />
+
+                                                                        <br />
+
+                                                                        <div class="panel-body" id="divWatertbl" style="display:block">
+                                                                            <br />
+                                                                            <br />
+                                                                            <br />
+
+
+                                                                            <table class="table table-striped table-bordered table-hover table cards" id="Watertbl">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>No.</th>
+                                                                                        <th>First Name</th>
+                                                                                        <th>Last Name</th>
+                                                                                        <th>ID Number</th>
+
+                                                                                        <th>Action</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody id="Watertblbody"></tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>*@
+                                                        </div>
+                                                        <br />
+                                                        <div id="BusinessActivities" style="display:none">
+                                                            <div class="panel-group" style="margin-bottom: -1px;">
+                                                                <div class="panel panel-default">
+                                                                    <div class="panel-heading">
+
+                                                                        <h4 class="panel-title" align="center">
+                                                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                                                                                Business Activities Details
+                                                                            </a>
+                                                                        </h4>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.Lease.TypeOfActivities, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-8">
+                                                                    @Html.TextAreaFor(model => model.Lease.TypeOfActivities, new { @class = "form-control" })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.TypeOfActivities, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                            <div class="form-group">
+                                                                @Html.LabelFor(model => model.Lease.ComplianceDetails, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                <div class="col-md-8">
+                                                                    @Html.TextAreaFor(model => model.Lease.ComplianceDetails, new { @class = "form-control" })
+                                                                    @Html.ValidationMessageFor(model => model.Lease.ComplianceDetails, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                        </div>
+
+                        <div class="step-tab-panel" id="step4">
+
+                            <legend align="center">Supporting Document(s)</legend>
+
+                            <div id="UploadDocs" class="tabcontent">
+                                <fieldset>
+                                    <div class="form-horizontal">
+
+                                        @*@Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)*@
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+
+                    <div class="step-footer col-md-offset-4" align="center" style="display:inline-flex; align-items:center; position:relative">
+                        <button class="button1" onclick="Cancel()">Cancel</button>
+                        <button data-direction="prev" class="button1" onclick="HideButton()">Previous</button>
+                        <button data-direction="next" class="button1" onclick="FinishButton()">Next</button>
+                        <button data-direction="finish" class="button1" onclick="ValidateStartDate()">Submit</button>
+                    </div>
+                    <div style="display:none;">
+                        <button data-direction="finish" value="Create" class="button1" id="btnCreate" onclick="ValidateStartDate()" style="display:none;" hidden>Submit</button>
+                    </div>
+                    <div class="step-footer" align="left">
+                        @Html.EncodedActionLink("Cancel", "UpdateLeaseDetails", "PropertyLeaseApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })
+
+                    </div>
+                </div>
+            </div>
+        }
+
+
+    </body>
+
+
+    <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+        $('#TransferInformation.DateOfFinal').datetimepicker({
+            format: 'Y/m/d',
+            timepicker: false,
+            minDate: 0,
+            scrollMonth: false,
+            scrollInput: false,
+            onSelectDate: function (dt, i) {
+
+            }
+        });
+    </script>
+    <script>
+
+        $('.lease_stattdate').on('click', function (event) {
+            debugger;
+            var Startdate = document.getElementById("Lease.StartDate").value;
+            var id = $(this).attr('lease_stattdate');
+
+            //if ($(this).text() === '+') {
+            //    $.ajax({
+            //        url: '/List/GetSubItems',
+            //        type: 'POST',
+            //        dataType: 'json',
+            //        data: '{"id":"' + id + '"}',
+            //        contentType: 'application/json; charset=utf-8',
+            //        success: function (data) {
+            //            $('.element_wrapper [data-id="' + id + '"]').html(data);
+            //        },
+            //        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            //            alert("responseText=" + XMLHttpRequest.responseText + "\n textStatus=" + textStatus + "\n errorThrown=" + errorThrown);
+            //        }
+            //    });
+            //    $(this).html('-');
+            //}
+            //else $(this).html('+');
+        });
+
+        $('#Date').change(function () {
+            debugger;
+            var num = 0;
+        });
+
+        function FinishButton() {
+
+            debugger;
+            var addre = document.getElementById("addressId").value;
+            var postal = document.getElementById("postalId").value;
+            var surb = document.getElementById("suburId").value;
+            if ((addre != null || addre != "") && (postal != null || postal != "") && (surb != null || surb != "")) {
+                jQuery('#idFinish').css("display", "block")
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function HideButton() {
+            jQuery('#idFinish').css("display", "none")
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function ValidateStartDate() {
+            debugger;
+            var rrq = true;
+            var Startdate = document.getElementById("lease_stattdate").value;
+            if (Startdate == null || Startdate == "") {
+                jQuery.noConflict();
+                onsubmit = "return false";
+                swal("Error!", "Please make sure you have selected start date!", "warning")
+                rrq = false;
+                return false;
+                $("clientInfo-form").submit("return", false);
+                window.location.reload()
+            }
+
+            document.querySelector('#LeaseAdministrationFee').required = true;
+            document.querySelector('#PreparationFee').required = true;
+            document.querySelector('#CreditCheckFee').required = true;
+            document.querySelector('#CalculatedAsFolllows').required = true;
+            document.querySelector('#DepositTenantContribution').required = true;
+            document.querySelector('#InitialDepositPremises').required = true;
+            document.querySelector('#StoreRooms').required = true;
+            document.querySelector('#ShadePortBayNumber').required = true;
+            document.querySelector('#OPenParkingBayNumber').required = true;
+            document.querySelector('#CarportParkingBayNumber').required = true;
+            document.querySelector('#ShadePortParking').required = true;
+            document.querySelector('#OpenParking').required = true;
+            document.querySelector('#SecurityFee').required = true;
+            document.querySelector('#Electricity').required = true;
+            document.querySelector('#FloorNumber').required = true;
+
+            document.querySelector('#termination_notice').required = true;
+            document.querySelector('#renewal_notice').required = true;
+            document.querySelector('#end_date').required = true;
+
+            if (rrq) {
+                debugger;
+                document.getElementById("btnCreate").click()
+            } else {
+
+            }
+        }
+
+        function stoperror() {
+            return true;
+        }
+
+        function ChangeDate() {
+            debugger;
+            var Startdate = document.getElementById("lease_stattdate").value;
+            var thisDate = new Date(Startdate);
+            var month = thisDate.getMonth();
+            var year = thisDate.getFullYear();
+            var dateSelected = thisDate.getUTCDate();
+            var firstDay = 1;
+            var LastDate = new Date(year, month + 1, 0);
+            var LastDay = LastDate.getDate();
+            var today = new Date();
+            var TodayMonth = today.getMonth();
+            var TodayYear = today.getFullYear();
+            var date = true;
+            if ((month <= TodayMonth && TodayYear == year)) {
+                jQuery.noConflict();
+                swal("Error!", "Please select upcoming month!", "warning");
+                document.getElementById("renewal_notice").value = "";
+                document.getElementById("end_date").value = "";
+                document.getElementById("termination_notice").value = "";
+                document.getElementById("lease_stattdate").value = "";
+                $('#lease_stattdate').val('');
+                $('#renewal_notice').val('');
+                $('#end_date').val('');
+                $('#termination_notice').val('');
+                //$.noConflict();
+                //myFunction.noConflict();
+            }
+            if ((month > TodayMonth && dateSelected > firstDay && TodayYear == year) || (dateSelected > firstDay && TodayYear < year)) {
+                jQuery.noConflict();
+                swal("Error!", "Please select first day of the month!", "warning");
+                document.getElementById("renewal_notice").value = "";
+                document.getElementById("end_date").value = "";
+                document.getElementById("termination_notice").value = "";
+                document.getElementById("lease_stattdate").value = "";
+                $('#lease_stattdate').val('');
+                $('#renewal_notice').val('');
+                $('#end_date').val('');
+                $('#termination_notice').val('');
+                /*   window.onerror = stoperror;*/
+
+            }
+            if ((month > TodayMonth && dateSelected == firstDay && TodayYear == year) || (dateSelected == firstDay && TodayYear < year)) {
+                var tempday = 15;
+                var nextdate = new Date(year, month + 23, tempday);
+                var NXmonth = nextdate.getMonth();
+                var NXyear = nextdate.getFullYear();
+                var terminateday = new Date(NXyear, NXmonth + 1, 0).getDate();
+                var exitdate = new Date(NXyear, NXmonth, terminateday).toLocaleDateString('en-ZA');
+                var renewalNotice = new Date(NXyear, NXmonth - 2, 1).toLocaleDateString('en-ZA');
+                var terminationNotice = new Date(NXyear, NXmonth, 1).toLocaleDateString('en-ZA');
+
+                document.getElementById("renewal_notice").value = renewalNotice;
+                document.getElementById("end_date").value = exitdate;
+                document.getElementById("termination_notice").value = terminationNotice;
+                $('#renewal_notice').val(renewalNotice);
+                $('#end_date').val(exitdate);
+                $('#termination_notice').val(terminationNotice);
+            }
+        }
+    </script>
+
+    <script>
+
+        //Masking amount fields
+        $(document).ready(function ($) {
+
+            $('#Watertbl').DataTable({ searching: false, paging: false, info: false });
+
+            $('#Electricitytbl').DataTable({ searching: false, paging: false, info: false });
+            var form = $("#clientInfo-form");
+            form.children("div").steps({
+
+                onFinish: function () {
+                    var Purchaser = document.getElementById("PurchaserInformation_PurchaseType").value;
+
+                    if (Purchaser != '' && Purchaser != null) {
+
+                        $("#clientInfo-form").submit();
+                    }
+                    else if ($("#NaturalPersontbl tr").length > 1) {
+                        $("#clientInfo-form").submit();
+
+                    }
+                    else {
+                        swal("Error!", "Please Select An Applicant Type", "warning");
+
+                    }
+
+                },
+                onChange: function (event, currentIndex, newIndex) {
+
+                    //submit(currentIndex, newIndex)
+
+                    if (newIndex < currentIndex) {
+                        return true;
+                    }
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+
+                }
+            });
+
+
+
+            function submit(currentIndex, newIndex) {
+
+
+                isValid = true;
+                var step = "";
+                if (currentIndex == 1) {
+                    step = "DivTransferInformation"
+                }
+
+                $('input,select', $("#" + step)).each(
+                    function () {
+                        if ($(this).attr('required') == "required" || $(this).attr('required') == true) {
+                            if (document.getElementById($(this).attr('id')).value == "") {
+                                document.getElementById($(this).attr('id')).style.border = '1px solid red'
+                                if (isValid == true) {
+                                    isValid = false;
+                                    //
+                                }
+                            }
+
+                            else {
+                                document.getElementById($(this).attr('id')).style.border = ''
+                            }
+                        }
+
+
+
+                        if (isValid == true) {
+                            alert("sbumit");
+
+                            if (btn == "Save") {
+
+                                document.getElementById("btnSave2").click()
+                            }
+                            else {
+
+                                if (newIndex < currentIndex) {
+                                    return true;
+                                }
+                                var form = $("#clientInfo-form");
+                                form.validate().settings.ignore = ":disabled,:hidden";
+                                return form.valid();
+
+                            }
+
+                        }
+                        else {
+                            document.getElementById("Erroralert").hidden = false;
+                            document.getElementById("error2").innerHTML = "Please fill in all Required Fields marked with an (*)";
+
+
+
+                        }
+
+                    });
+            }
+
+            $('#TransferInformationSellingPrice').mask('#,##0.00', { reverse: true });
+            $('#Lease.VATAmount').mask('#,##0.00', { reverse: true });
+            $('#Lease.RentalAmount').mask('#,##0.00', { reverse: true });
+            $('#Lease.DepositeAmount').mask('#,##0.00', { reverse: true });
+
+            debugger;
+            document.querySelector('#LeaseAdministrationFee').required = false;
+            document.querySelector('#PreparationFee').required = false;
+            document.querySelector('#CreditCheckFee').required = false;
+            document.querySelector('#CalculatedAsFolllows').required = false;
+            document.querySelector('#DepositTenantContribution').required = false;
+            document.querySelector('#InitialDepositPremises').required = false;
+            document.querySelector('#StoreRooms').required = false;
+            document.querySelector('#ShadePortBayNumber').required = false;
+            document.querySelector('#OPenParkingBayNumber').required = false;
+            document.querySelector('#CarportParkingBayNumber').required = false;
+            document.querySelector('#ShadePortParking').required = false;
+            document.querySelector('#OpenParking').required = false;
+            document.querySelector('#SecurityFee').required = false;
+            document.querySelector('#Electricity').required = false;
+            document.querySelector('#FloorNumber').required = false;
+
+
+
+            //$("LeaseAdministrationFee").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+            //$("").prop("required", false);
+
+            var CurrUrl = window.location.href;
+
+            jQuery('#returnUrl').val("" + CurrUrl);
+        });
+    </script>
+
+    <script>
+
+    function servicesCheckedFn() {
+        var servicesChecked = document.getElementById("MunicipalAccountInformation_ServicesOnProperty");
+        if (servicesChecked.checked) {
+            servicesChecked.value = true;
+            jQuery('#divServices').css("display", "block")
+        }
+        else {
+            servicesChecked.value = false;
+            jQuery('#divServices').css("display", "none")
+        }
+    }
+
+    function ValidateRatesNumber(rateNo) {
+
+        if (rateNo.length != 10) {
+            $('#TransferInformation_RatesNumber').val('');
+            //swal("Our First Alert");
+            swal("Error!", "Please enter a valid 10 digit Rate Number!", "warning");
+            //alert("Please enter a valid 10 digit Rate Number");
+            //swal({
+            //    title: "Good job!",
+            //    text: "Please enter a valid 10 digit Rate Number!",
+            //    icon: "success",
+            //});
+            jQuery('#divInformationFields').css("display", "none")
+            return false;
+        }
+        else {
+            searchrate(rateNo);
+            //searchmeters(rateNo);
+            jQuery('#divInformationFields').css("display", "block")
+
+        }
+
+    }
+    function searchrate(rateNo) {
+
+        var MunicipalAccNo = document.getElementById('rate').value;
+        $.getJSON("../Capture/LimsPropertyDetails?MunicipalAccNo="
+            + MunicipalAccNo,
+
+            function (result) {
+
+                if (result != "Error" && result != "") {
+
+                    try {
+
+                        if (result.Status != "Success") {
+
+                            if (result.StatusKey == "r_rcs_ccc_doesn't_exist") {
+                                swal(result.Title, result.Status, "error");
+                                $('#rate').val('');
+                                jQuery('#divInformationFields').css("display", "none")
+
+                            }
+                            else if (result.StatusKey == "r_rcs_ccc_not_setup") {
+                                swal(result.Title, result.Status, "error");
+                                $('#rate').val('');
+                                jQuery('#divInformationFields').css("display", "none")
+
+                            }
+                            else {
+                                swal("Error!", "No Results found!", "error");
+                                $('#rate').val('');
+                                jQuery('#divInformationFields').css("display", "none")
+
+                            }
+
+
+
+                        }
+
+                        else {
+                            $('#SellerInformation_OwnerName').val(result.registeredownernames);
+                            $('#TransferInformation_Town').val(result.regionname);
+                            $('#TransferInformation_Suburb').val(result.regionname);
+                            $('#TransferInformation_PhysicalAddress').val(result.streetaddress);
+                            $('#SellerInformation_OwnerIdNumber').val(result.registeredownerids);
+
+                            $('#TransferInformation_ErfDescription').val(result.erfnumber);
+
+                            $('#TransferInformation_ExtentSize').val(result.deedextents);
+                            $('#TransferInformation_Extent').val(result.ssourceaccountnumber);
+
+                            $('#TransferInformation_PropertyKey').val(result.ssourceaccountnumber);
+                            jQuery('#TransferInformation_Category').val(result.categoryname)
+                            //var ownernames = result.Initials + " " + result.Surname
+                            //$('#TransferInformation_Extent').val(result.UnitNo);
+                            //$('#TransferInformation_PhysicalAddress').val(result.StreetAddr);
+                            //$('#TransferInformation_NewSubConfirm').val(result.PostalCode);
+
+                            //$('#SellerInformation_OwnerIdNumber').val(result.IDNo);
+                            //$('#SellerInformation_CellNo').val(result.CellNo);
+                            //$('#SellerInformation_HomeNo').val(result.HomeTel);
+                            //$('#SellerInformation_WorkNo').val(result.WorkTel);
+                            //$('#SellerInformation_EmailAddress').val(result.EmailAddr);
+                            //$('#TransferInformation_Suburb').val(result.PostalAddress2);
+                            //$('#TransferInformation_Town').val(result.PostalAddress3);
+                            //alert("Beforre search owner");
+                            searchowner(rateNo);
+                            //alert("after search owner");
+                            searchmeters(rateNo);
+                            //alert("after search meters");
+                        }
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    jQuery('#divInformationFields').css("display", "none")
+                    $('#rate').val('');
+                    swal("Error", "Service Unavailable ", "error");
+
+
+
+                }
+            });
+    }
+
+    function searchowner(rateNo) {
+
+        var MunicipalAccNo = document.getElementById('rate').value;
+        $.getJSON("../Capture/VAInformation?MunicipalAccNo="
+            + MunicipalAccNo,
+
+            function (result) {
+                if (result != "Error") {
+                    try {
+
+
+                        var ownernames = result.Initials + " " + result.Surname
+                        $('#SellerInformation_OwnerName').val(ownernames);
+
+                        $('#TransferInformation_NewSubConfirm').val(result.PostalCode);
+
+                        $('#SellerInformation_OwnerIdNumber').val(result.IDNo);
+
+                        $('#SellerInformation_CellNo').val(result.CellNo);
+                        if (result.CellNo == " ") {
+                            $('#SellerInformation_CellNo').val('');
+                        }
+
+                        $('#SellerInformation_HomeNo').val(result.HomeTel);
+                        if (result.HomeTel == " ") {
+                            $('#SellerInformation_HomeNo').val('');
+                        }
+                        $('#SellerInformation_WorkNo').val(result.WorkTel);
+                        if (result.WorkTel == " ") {
+
+                            $('#SellerInformation_WorkNo').val('');
+                        }
+                        $('#SellerInformation_EmailAddress').val(result.EmailAddr);
+                        if (result.EmailAddr == " ") {
+
+                            $('#SellerInformation_EmailAddress').val('');
+                        }
+
+
+
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    swal("Error!", "Unsuccessfully captured.", "error");
+                }
+            });
+    }
+
+    function Cancel() {
+        /*document.getElementById("Cancelbtn").click();*/
+        window.location.href = "@Url.Action("UpdateLeaseDetails", "PropertyLeaseApplication")";
+    }
+
+    var ElectricitySession = [];
+    var ElectricitySessionDelete = [];
+    var ElectricitySessionCount = 0;
+    var ElectricityDeleteCount = 0;
+    function ElectricityDeleteSession(counter) {
+        //alert("Counter" + counter);
+        //ElectricitySessionDelete = new [];
+        var watert = $('#Electricitytbl').DataTable();
+        ElectricitySessionDelete = [];
+        watert.clear().draw();
+
+
+
+        ElectricityDeleteCount = 0;
+        //alert(ElectricitySession.length);
+        for (var i = 0; i < ElectricitySession.length; i++) {
+            // alert(ElectricitySession[i].SessionNumber);
+            if (ElectricitySession[i].Count != counter) {
+                ElectricityDeleteCount++;
+                //alert(counter + "counter + fees count " + ElectricitySession[i].Count + " ");
+                ElectricitySession[i].Count = ElectricityDeleteCount;
+                // alert(counter + "new fees count " + ElectricitySession[i].Count + " ");
+                ElectricitySessionDelete.push(ElectricitySession[i]);
+
+
+                if (ElectricitySession[i].DeleteEnabled == true) {
+                    watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                }
+                else {
+                    watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+                }
+
+                //watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].SessionNumber, ElectricitySession[i].StartDateString, ElectricitySession[i].EndDateString, ElectricitySession[i].sessionStartTime, ElectricitySession[i].sessionEndTime, ElectricitySession[i].TicketSaleEndDate, "<a onclick = 'DeleteEventSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+
+                // alert("Fees Length " + ElectricitySession.length);
+
+            }
+            else {
+                //alert(counter + "counter + fees count " + ElectricitySession[i].Count + " not equal to");
+
+            }
+
+
+
+        }
+        ElectricitySessionCount = ElectricityDeleteCount;
+        ElectricitySession = ElectricitySessionDelete;
+        //alert("ElectricitySession OLength " + ElectricitySession.length);
+        //alert("ElectricitySession Delete Length " + ElectricitySessionDelete.length);
+        document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySessionDelete);
+
+
+    }
+
+    function ElectricityAddSession() {
+        debugger;
+
+        var ElectricityMeterInformation_ElectricityMeterNo = document.getElementById("PropertyResident.IDNo").value;
+        var ElectricityMeterInformation_ElectricityMeterReading = document.getElementById("PropertyResident.LastName").value;
+        var ElectricityMeterInformation_ElectricityMeterReadingDateTaken = document.getElementById("PropertyResident.FirstNames").value;
+
+
+
+
+        var SessionList = document.getElementById("ElectricityMeterList").value;
+
+
+        var iNum2 = parseInt(ElectricitySessionCount)
+        //alert("Original count: " + iNum2);
+        //alert("New count: " + ElectricitySessionCount)
+        var i2 = iNum2 + 1;
+        ElectricitySessionCount = i2;
+
+        var currSessionList = {
+            "ElectricityMeterNo": ElectricityMeterInformation_ElectricityMeterNo,
+            "ElectricityMeterReading": ElectricityMeterInformation_ElectricityMeterReading,
+            "DateString": ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+            "Status": "Unprocessed",
+            "DeleteEnabled": true,
+            "Count": i2
+
+        };
+
+        if (SessionList == "") {
+            ElectricitySession.push(currSessionList);
+            document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+            console.log(ElectricitySession);
+        }
+        else {
+            ElectricitySession.push(currSessionList);
+            document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+            console.log(ElectricitySession);
+        }
+
+        console.log(document.getElementById("ElectricityMeterList").value);
+        var watert = $('#Electricitytbl').DataTable();
+        watert.clear().draw();
+
+
+
+
+
+        //alert(ElectricitySession.length);
+        for (var i = 0; i < ElectricitySession.length; i++) {
+
+            if (ElectricitySession[i].DeleteEnabled == true) {
+                watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+            }
+            else {
+                watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+            }
+            // alert(ElectricitySession.length);
+            //watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].WaterMeterNo, ElectricitySession[i].WaterMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'DeleteEventSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+        }
+
+
+
+
+
+        swal("Success!", "Added successfully. A picture of your meter will be required!", "success");
+        jQuery('#divElectricitytbl').css("display", "block")
+        clearElectricity();
+
+
+    }
+
+    function ElectricityAddSessionApi(ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status) {
+        debugger;
+
+
+        var SessionList = document.getElementById("ElectricityMeterList").value;
+
+        jQuery('#divPrepaid').css("display", "none")
+        jQuery('#divMunicipal').css("display", "block")
+        jQuery('#ElectricityMeterInformation_ElectricityMeterType').val("Municipal")
+        jQuery('#divElectricitytbl').css("display", "block")
+
+        var iNum2 = parseInt(ElectricitySessionCount)
+        //alert("Original count: " + iNum2);
+        //alert("New count: " + ElectricitySessionCount)
+        var i2 = iNum2 + 1;
+        ElectricitySessionCount = i2;
+        //alert("Past counter processing");
+        var currSessionList = {
+            "ElectricityMeterNo": ElectricityMeterInformation_ElectricityMeterNo,
+            "ElectricityMeterReading": ElectricityMeterInformation_ElectricityMeterReading,
+            "DateString": ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+            "Status": status,
+            "DeleteEnabled": false,
+            "Count": i2
+
+        };
+
+        if (SessionList == "") {
+            ElectricitySession.push(currSessionList);
+            document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+            console.log(ElectricitySession);
+        }
+        else {
+            ElectricitySession.push(currSessionList);
+            document.getElementById("ElectricityMeterList").value = JSON.stringify(ElectricitySession);
+            console.log(ElectricitySession);
+        }
+
+        console.log(document.getElementById("ElectricityMeterList").value);
+        var watert = $('#Electricitytbl').DataTable();
+        watert.clear().draw();
+
+
+
+
+
+        //alert(ElectricitySession.length);
+        for (var i = 0; i < ElectricitySession.length; i++) {
+
+            if (ElectricitySession[i].DeleteEnabled == true) {
+                watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, "<a onclick = 'ElectricityDeleteSession(" + ElectricitySession[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+            }
+            else {
+                watert.row.add([/*ElectricitySession[i].Count,*/ ElectricitySession[i].ElectricityMeterNo, ElectricitySession[i].ElectricityMeterReading, ElectricitySession[i].DateString, ElectricitySession[i].Status, ""]).draw(false);
+
+            }
+            // alert(ElectricitySession.length);
+
+        }
+        swal("Success!", "Added successfully.", "success");
+        jQuery('#divElectricitytbl').css("display", "block")
+
+
+
+    }
+
+
+
+    var Session = [];
+    var SessionDelete = [];
+    var SessionCount = 0;
+    var DeleteCount = 0;
+    function DeleteEventSession(counter) {
+        //alert("Counter" + counter);
+        //SessionDelete = new [];
+        var watert = $('#Watertbl').DataTable();
+        SessionDelete = [];
+        watert.clear().draw();
+
+
+
+        DeleteCount = 0;
+        //alert(Session.length);
+        for (var i = 0; i < Session.length; i++) {
+            // alert(Session[i].SessionNumber);
+            if (Session[i].Count != counter) {
+                DeleteCount++;
+                //alert(counter + "counter + fees count " + Session[i].Count + " ");
+                Session[i].Count = DeleteCount;
+                // alert(counter + "new fees count " + Session[i].Count + " ");
+                SessionDelete.push(Session[i]);
+
+
+                if (Session[i].DeleteEnabled == true) {
+                    watert.row.add([Session[i].Count, Session[i].FirstNames, Session[i].LastName, Session[i].IDNo, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+                }
+                else {
+                    watert.row.add([Session[i].Count, Session[i].FirstNames, Session[i].LastName, Session[i].IDNo/*, Session[i].Count*/, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+                    document.getElementById("PropertyResident.IDNo").value = "";
+                    document.getElementById("PropertyResident.LastName").value = "";
+                    document.getElementById("PropertyResident.FirstNames").value = "";
+
+                }
+
+                //watert.row.add([/*Session[i].Count,*/ Session[i].SessionNumber, Session[i].StartDateString, Session[i].EndDateString, Session[i].sessionStartTime, Session[i].sessionEndTime, Session[i].TicketSaleEndDate, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+
+                // alert("Fees Length " + Session.length);
+
+            }
+            else {
+                //alert(counter + "counter + fees count " + Session[i].Count + " not equal to");
+                swal("Success!", "Occupant Deleted successfully!", "success");
+            }
+
+
+
+        }
+        SessionCount = DeleteCount;
+        Session = SessionDelete;
+        //alert("Session OLength " + Session.length);
+        //alert("Session Delete Length " + SessionDelete.length);
+        document.getElementById("WaterMeterList").value = JSON.stringify(SessionDelete);
+
+
+    }
+
+    function AddSession2() {
+        debugger;
+        var WaterMeterInformation_WaterMeterNo = document.getElementById("PropertyResident.IDNo").value;
+        var WaterMeterInformation_WaterMeterReading = document.getElementById("PropertyResident.LastName").value;
+        var WaterMeterInformation_WaterMeterReadingDateTaken = document.getElementById("PropertyResident.FirstNames").value;
+        var newId = document.getElementById("PropertyLeaseApplicationId").value;
+        var PropertyId = document.getElementById("PropertyLeaseApplicationId").value;
+
+        if ((WaterMeterInformation_WaterMeterNo == null || WaterMeterInformation_WaterMeterNo == "") && (WaterMeterInformation_WaterMeterReading == null || WaterMeterInformation_WaterMeterReading == "") && (WaterMeterInformation_WaterMeterReadingDateTaken == null || WaterMeterInformation_WaterMeterReadingDateTaken=="")) {
+            swal("Error!", "Occupant not valid!", "error");
+        }
+
+
+        //Applicant details
+        //var ApplicantFirstName = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        //var ApplicantSurname = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        //var ApplicantGender = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        //var ApplicantTittle = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        //var ApplicantNationality = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+        //var ApplicantIdentityNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+
+        //alert("Past water textboxes");
+        var SessionList = document.getElementById("WaterMeterList").value;
+
+        //alert("getting water session list processing");
+
+        var iNum2 = parseInt(SessionCount)
+        //alert("Original count: " + iNum2);
+        //alert("New count: " + SessionCount)
+        var i2 = iNum2 + 1;
+        SessionCount = i2;
+        //alert("Past counter processing");
+        var currSessionList = {
+            "IDNo": WaterMeterInformation_WaterMeterNo,
+            "LastName": WaterMeterInformation_WaterMeterReading,
+            "FirstNames": WaterMeterInformation_WaterMeterReadingDateTaken,
+            "PropertyLeaseApplicationId": PropertyId,
+            "Count": i2
+
+        };
+
+        if (SessionList == "") {
+            Session.push(currSessionList);
+            document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+            console.log(Session);
+        }
+        else {
+            Session.push(currSessionList);
+            document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+            console.log(Session);
+        }
+
+        console.log(document.getElementById("WaterMeterList").value);
+        var watert = $('#Watertbl').DataTable();
+        watert.clear().draw();
+
+
+
+
+
+        //alert(Session.length);
+        for (var i = 0; i < Session.length; i++) {
+
+            if (Session[i].DeleteEnabled == true) {
+                watert.row.add([Session[i].Count, Session[i].FirstNames, Session[i].LastName, Session[i].IDNo,  "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+            }
+            else {
+                watert.row.add([Session[i].Count, Session[i].FirstNames, Session[i].LastName, Session[i].IDNo/*, Session[i].Count*/, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+                document.getElementById("PropertyResident.IDNo").value = "";
+               document.getElementById("PropertyResident.LastName").value = "";
+             document.getElementById("PropertyResident.FirstNames").value = "";
+                //watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+                //watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, ""]).draw(false);
+
+            }
+            // alert(Session.length);
+            //watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+        }
+
+        swal("Success!", "Occupant Added successfully!", "success");
+        jQuery('#divWatertbl').css("display", "block")
+        clearWater();
+
+
+    }
+
+    function AddSessionApi(WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status) {
+        debugger;
+
+        //alert("Past water textboxes");
+        var SessionList = document.getElementById("WaterMeterList").value;
+
+
+        var iNum2 = parseInt(SessionCount)
+        //alert("Original count: " + iNum2);
+        //alert("New count: " + SessionCount)
+        var i2 = iNum2 + 1;
+        SessionCount = i2;
+        //alert("Past counter processing");
+        var currSessionList = {
+            "WaterMeterNo": WaterMeterInformation_WaterMeterNo,
+            "WaterMeterReading": WaterMeterInformation_WaterMeterReading,
+            "DateString": WaterMeterInformation_WaterMeterReadingDateTaken,
+            "Status": status,
+            "DeleteEnabled": false,
+            "Count": i2
+
+        };
+
+        if (SessionList == "") {
+            Session.push(currSessionList);
+            document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+            console.log(Session);
+        }
+        else {
+            Session.push(currSessionList);
+            document.getElementById("WaterMeterList").value = JSON.stringify(Session);
+            console.log(Session);
+        }
+
+        console.log(document.getElementById("WaterMeterList").value);
+        var watert = $('#Watertbl').DataTable();
+        watert.clear().draw();
+
+
+
+
+
+        //alert(Session.length);
+        for (var i = 0; i < Session.length; i++) {
+
+            if (Session[i].DeleteEnabled == true) {
+                watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, "<a onclick = 'DeleteEventSession(" + Session[i].Count + ")' id = 'btnAddWater' class= 'fa fa-trash buttonIcon' data - toogle='tooltip' title = 'Delete Fee' ></a>"]).draw(false);
+
+
+            }
+            else {
+                watert.row.add([/*Session[i].Count,*/ Session[i].WaterMeterNo, Session[i].WaterMeterReading, Session[i].DateString, Session[i].Status, ""]).draw(false);
+
+            }
+            // alert(Session.length);
+
+        }
+        swal("Success!", "Added successfully.", "success");
+        jQuery('#divWatertbl').css("display", "block")
+
+
+
+    }
+    function searchmeters(rateNo) {
+        //alert("in search meters");
+        Session = [];
+        SessionDelete = [];
+        SessionCount = 0;
+        DeleteCount = 0;
+
+        ElectricitySession = [];
+        ElectricitySessionDelete = [];
+        ElectricitySessionCount = 0;
+        ElectricityDeleteCount = 0;
+        //alert("middle search meters");
+        document.getElementById("ElectricityMeterList").value = "";
+        document.getElementById("WaterMeterList").value = "";
+        //alert(" search meters before wtable");
+        // $("#Watertbl > tbody").html("");
+        //$('#Watertbl').DataTable().clear().draw();
+        //$('#Electricitytbl').DataTable().clear().draw();
+        var wtable = $('#Watertbl').DataTable();
+
+        wtable.clear().draw();
+
+        var etable = $('#Electricitytbl').DataTable();
+
+        etable.clear().draw();
+        //alert(" search meters before json");
+
+        var MunicipalAccNo = document.getElementById('rate').value;
+        $.getJSON("../Capture/MeterDetails?MunicipalAccNo="
+            + rateNo,
+
+            function (result) {
+
+
+                if (result != "Error") {
+                    try {
+
+                        if (result.length == 0) {
+
+                            swal("Error!", "No Results found!", "error");
+
+                            //$('#rate').val('');
+                        }
+
+                        else {
+                            var Active = false;
+                            if (result.RefuseServiceExist == "Yes") {
+                                $('#MunicipalAccountInformation_Refusechk').prop('checked', true);
+                                Active = true;
+
+                            }
+                            if (result.SewerServiceExist == "Yes") {
+                                $('#MunicipalAccountInformation_Sewerchk').prop('checked', true);
+                                Active = true;
+
+                            }
+                            if (result.RatesServiceExist == "Yes") {
+                                $('#MunicipalAccountInformation_RatesandTaxeschk').prop('checked', true);
+                                Active = true;
+
+                            }
+
+                            // if (result.MetersList != null) {
+                            //     result.MetersList.forEach(function (item) {
+
+                            //         // create an unordered list node
+                            //         alert(item);
+                            //     )}
+                            //}
+                            for (var i = 0; i < result.MetersList.length; i++) {
+                                //alert("here" + result.MetersList[i].Service);
+                                if (result.MetersList[i].Service == "WA") {
+                                    Active = true;
+
+                                    if (result.MetersList[i].hasPreviousMeter == true) {
+                                        AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].PreviousMeterReading, result.MetersList[i].PreviousMeterReadingDate, "Processed-SOLAR");
+
+                                    }
+
+
+                                    AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].MeterReading, result.MetersList[i].MeterReadingDate, "Processed-SOLAR");
+
+
+                                    if (result.MetersList[i].hasUnprocessedMeter == true) {
+                                        AddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].UnprocessedMeterReading, result.MetersList[i].UnprocessedMeterReadingDate, "Unprocessed-SOLAR");
+
+                                    }
+
+
+                                    //AddWaterApi(MeterNumber, MeterReading, MeterReadingDate);
+                                }
+                                if (result.MetersList[i].Service == "EL") {
+                                    Active = true;
+
+                                    if (result.MetersList[i].hasPreviousMeter == true) {
+                                        ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].PreviousMeterReading, result.MetersList[i].PreviousMeterReadingDate, "Processed-SOLAR");
+
+                                    }
+
+                                    ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].MeterReading, result.MetersList[i].MeterReadingDate, "Processed-SOLAR");
+
+                                    if (result.MetersList[i].hasUnprocessedMeter == true) {
+                                        ElectricityAddSessionApi(result.MetersList[i].MeterNumber, result.MetersList[i].UnprocessedMeterReading, result.MetersList[i].UnprocessedMeterReadingDate, "Unprocessed-SOLAR");
+
+                                    }
+                                    //AddWaterApi(MeterNumber, MeterReading, MeterReadingDate);
+                                }
+                            }
+                            if (Active == true) {
+
+                                $('#MunicipalAccountInformation_ServicesOnProperty').trigger('click');
+
+                            }
+
+
+                        }
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    swal("Error!", "Unsuccessfully captured.", "error");
+                }
+            });
+    }
+    function ValidateRSAIDNo(id) {
+        try {
+            if (id.length != 13) {
+                $('#PurchaserInformation_IDNo').val('');
+                //alert("Please enter a valid 13 digit ID no.");
+                swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                return false;
+            }
+            var y1o = id.substring(0, 1)
+            var y2e = id.substring(1, 2)
+            var m1o = id.substring(2, 3)
+            var m2e = id.substring(3, 4)
+            var d1o = id.substring(4, 5)
+            var d2e = id.substring(5, 6)
+            var go = id.substring(6, 7)
+            var s1e = id.substring(7, 8)
+            var s2o = id.substring(8, 9)
+            var s3e = id.substring(9, 10)
+            var co = id.substring(10, 11)
+            var ae = id.substring(11, 12)
+            var z = id.substring(12, 13)
+
+            var A = 0;
+            A = parseInt(A) + parseInt(y1o) + parseInt(m1o) + parseInt(d1o) + parseInt(go) + parseInt(s2o) + parseInt(co);
+            var B1 = y2e + m2e + d2e + s1e + s3e + ae;
+            var B2 = B1 * 2;
+            var i = 0;
+            var B3 = 0;
+            var B2string = B2.toString();
+            while (B2string.length > i) {
+                var x = B2string.substring(i, i + 1);
+                B3 = B3 + parseInt(x);
+                i = i + 1;
+            }
+
+            var C = A + B3;
+            var Cstring = C.toString();
+            var secNo = Cstring.substring(1, 2);
+            var D = 10 - parseInt(secNo);
+            while (D >= 10) D = D - 10;
+            if (D == z) {
+                //test for valid date in 1900
+                var valid = true;
+                var bd = new Date('19' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                else if (bd.getFullYear() != parseInt('19' + y1o + y2e)) valid = false;
+                else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+                //if invalid test again in 2000
+                valid = true;
+                bd = new Date('20' + y1o + y2e, parseInt(m1o + m2e) - 1, d1o + d2e);
+                if ((bd == 'NaN') | (bd == 'Invalid Date')) valid = false;
+                else if (bd.getFullYear() != parseInt('20' + y1o + y2e)) valid = false;
+                else if (bd.getMonth() + 1 != parseInt(m1o + m2e)) valid = false;
+                else if (bd.getDate() != parseInt(d1o + d2e)) valid = false;
+
+
+                var tempDate = new Date(id.substring(0, 2), id.substring(2, 4) - 1, id.substring(4, 6));
+
+                var id_date = tempDate.getDate();
+                var id_month = tempDate.getMonth();
+                var id_year = tempDate.getFullYear();
+
+                var fullDate = (id_month + 1) + "/" + id_date + "/" + id_year;
+
+                $('#DOBAuto').val(fullDate);
+
+
+
+                var today_date = new Date();
+                var today_year = today_date.getFullYear();
+                var today_month = today_date.getMonth();
+                var today_day = today_date.getDate();
+                var age = today_year - id_year;
+
+                if (today_month < (id_month - 1)) {
+                    age--;
+                }
+                if (((id_month - 1) == today_month) && (today_day < id_date)) {
+                    age--;
+                }
+
+                $('#AgeAuto').val(age);
+
+
+                if (!((tempDate.getYear() == id.substring(0, 2)) && (id_month == id.substring(2, 4) - 1) && (id_date == id.substring(4, 6)))) {
+                    error.append('<p>ID number does not appear to be authentic - date part not valid</p>');
+                    correct = false;
+                }
+
+
+                return valid;
+            }
+            else {
+                $('#PurchaserInformation_IDNo').val('');
+                //alert("Please enter a valid 13 digit ID no.");
+                swal("Error!", "Please enter a valid 13 digit ID no.", "warning");
+                return false;
+            }
+        }
+        catch (e) {
+            //alert(bd+"Catch");
+            return false;
+        }
+    }
+
+    function GetTotalMonhlyFees() {
+
+        debugger;
+        var RentalAmount = document.getElementById("RentalAmount").value;
+        var Water = document.getElementById("Water").value;
+        var Sewerage = document.getElementById("Sewerage").value;
+        var Refuse = document.getElementById("Refuse").value;
+        var ShadePortParking = document.getElementById("ShadePortParking").value;
+        var PreparationFee = document.getElementById("PreparationFee").value;
+        var CreditCheckFee = document.getElementById("CreditCheckFee").value;
+        var CalculatedAsFolllows = document.getElementById("CalculatedAsFolllows").value;
+        var StoreRooms = document.getElementById("StoreRooms").value;
+        var CarportParkingBay = document.getElementById("CarportParkingBay").value;
+        var OpenParking = document.getElementById("OpenParking").value;
+        var ShadePortParking = document.getElementById("ShadePortParking").value;
+        var LeaseAdministrationFee = document.getElementById("LeaseAdministrationFee").value;
+        var SecurityFee = document.getElementById("SecurityFee").value;
+        var Electricity = document.getElementById("Electricity").value;
+
+        var total = parseFloat(0);
+        total += parseFloat(RentalAmount == null || RentalAmount == 0 ? 0 : RentalAmount);
+        total += parseFloat(Water == null || Water == 0 ? 0 : Water);
+        total += parseFloat(Sewerage == null || Sewerage == 0 ? 0 : Sewerage);
+        total += parseFloat(Refuse == null || Refuse == 0 ? 0 : Refuse);
+        total += parseFloat(ShadePortParking == null || ShadePortParking == 0 ? 0 : ShadePortParking);
+        total += parseFloat(PreparationFee == null || PreparationFee == 0 ? 0 : PreparationFee);
+        total += parseFloat(CreditCheckFee == null || CreditCheckFee == 0 ? 0 : CreditCheckFee);
+        total += parseFloat(CalculatedAsFolllows == null || CalculatedAsFolllows == 0 ? 0 : CalculatedAsFolllows);
+        total += parseFloat(CarportParkingBay == null || CarportParkingBay == 0 ? 0 : CarportParkingBay);
+        total += parseFloat(OpenParking == null || OpenParking == 0 ? 0 : OpenParking);
+        total += parseFloat(StoreRooms == null || StoreRooms == 0 ? 0 : StoreRooms);
+        total += parseFloat(LeaseAdministrationFee == null || LeaseAdministrationFee == 0 ? 0 : LeaseAdministrationFee);
+        total += parseFloat(SecurityFee == null || SecurityFee == 0 ? 0 : SecurityFee);
+        total += parseFloat(Electricity == null || Electricity == 0 ? 0 : Electricity);
+
+        var last = total;
+     /*   $('#TotalMonthlyCharges').val(total);*/
+    }
+
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function switchDivsMeterType() {
+        var Purchaser = document.getElementById("ElectricityMeterInformation_ElectricityMeterType").value;
+
+        if (Purchaser == "Pre-Paid") {
+            jQuery('#divPrepaid').css("display", "block")
+            jQuery('#divMunicipal').css("display", "none")
+        }
+        else if (Purchaser == "Municipal") {
+            jQuery('#divPrepaid').css("display", "none")
+            jQuery('#divMunicipal').css("display", "block")
+        }
+
+        else {
+            jQuery('#divPrepaid').css("display", "none")
+            jQuery('#divMunicipal').css("display", "none")
+        }
+    }
+
+    function switchDivsTransfer() {
+
+        var Transfer = document.getElementById("TransferInformation_TransferType").value;
+
+        if (Transfer == "tt_SectionalTitle") {
+            jQuery('#divST').css("display", "block")
+
+        }
+        else if (Transfer != "tt_SectionalTitle") {
+
+            jQuery('#divST').css("display", "none")
+
+        }
+
+
+
+
+    }
+    function switchDiveSassa() {
+        var Option = document.getElementById("IncomeSource").value;
+        if (Option == "3") {
+            jQuery('#divSassa').css("display", "block")
+        }
+
+    }
+
+    function switchDivsPurchaserInfo() {
+        debugger;
+        var Purchaser = document.getElementById("PurchaserInformation_PurchaseType").value;
+
+        if (Purchaser == "1" || Purchaser == "10" || Purchaser == "11") {
+            jQuery('#divNaturalPerson').css("display", "block")
+            jQuery('#divNames').css("display", "block")
+            jQuery('#divContact').css("display", "block")
+            jQuery('#divPostal').css("display", "block")
+            jQuery('#divMultiple').css("display", "block")
+            jQuery('#divPostalIncome').css("display", "block")
+            jQuery('#divPersonHouse').css("display", "block")
+            jQuery('#divContactCoPer').css("display", "none")
+            jQuery('#divContactCompany').css("display", "none")
+            jQuery('#divDirector').css("display", "none")
+            jQuery('#divSpace').css("display", "none")
+            jQuery('#divNonNatural').css("display", "none")
+            jQuery('#BusinessActivities').css("display", "none")
+            jQuery('#divOccupants').css("display", "block")
+
+
+        }
+        else if (Purchaser == "t_Juristic") {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divJuristic').css("display", "block")
+            jQuery('#divNames').css("display", "block")
+            jQuery('#divContact').css("display", "block")
+            jQuery('#divPostal').css("display", "block")
+
+            jQuery('#divMultiple').css("display", "none")
+        }
+        else if (Purchaser == "5") {
+            jQuery('#divOccupants').css("display", "none")
+            jQuery('#BusinessActivities').css("display", "block")
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divNonNatural').css("display", "block")
+            jQuery('#divNames').css("display", "none")
+            jQuery('#divContact').css("display", "none")
+            jQuery('#divPostalCompany').css("display", "block")
+            jQuery('#divPostalCompany2').css("display", "block")
+            jQuery('#divContactCoPer').css("display", "block")
+            jQuery('#divDirector').css("display", "block")
+            jQuery('#divContactCompany').css("display", "block")
+            jQuery('#divSpace').css("display", "block")
+            jQuery('#divPostal').css("display", "none")
+            jQuery('#divPostalIncome').css("display", "none")
+            jQuery('#divPersonHouse').css("display", "none")
+            jQuery('#divMultiple').css("display", "none")
+        }
+        else if (Purchaser == "t_trust") {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divNonNatural').css("display", "block")
+            jQuery('#divNames').css("display", "block")
+            jQuery('#divContact').css("display", "block")
+            jQuery('#divPostal').css("display", "block")
+            jQuery('#divMultiple').css("display", "none")
+        }
+        else if (Purchaser == "t_closecorporation") {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divNonNatural').css("display", "block")
+            jQuery('#divNames').css("display", "block")
+            jQuery('#divContact').css("display", "block")
+            jQuery('#divPostal').css("display", "block")
+            jQuery('#divMultiple').css("display", "none")
+        }
+
+        else {
+            jQuery('#divNaturalPerson').css("display", "none")
+            jQuery('#divNonNatural').css("display", "none")
+            jQuery('#divNames').css("display", "none")
+            jQuery('#divContact').css("display", "none")
+            jQuery('#divPostal').css("display", "none")
+            jQuery('#divMultiple').css("display", "none")
+        }
+    }
+
+    function JuristicTypeChange() {
+        var JuristicType = document.getElementById("JuristicType").value;
+        if (JuristicType == 11) {
+            jQuery('#divDeemed').css("display", "block")
+            jQuery('#divCC').css("display", "none")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 6) {
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "block")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 7) {
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "block")
+
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+
+        else if (JuristicType == 9) {
+            jQuery('#divTrust').css("display", "block")
+            jQuery('#divDeemed').css("display", "none")
+
+            jQuery('#divCC').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+        else if (JuristicType == 15) {
+            jQuery('#divSpecify').css("display", "block")
+            jQuery('#divTrust').css("display", "none")
+
+            jQuery('#divDeemed').css("display", "none")
+            jQuery('#divCC').css("display", "none")
+        }
+
+        else {
+            jQuery('#divTrust').css("display", "none")
+            jQuery('#divDeemed').css("display", "none")
+
+            jQuery('#divCC').css("display", "none")
+            jQuery('#divSpecify').css("display", "none")
+        }
+
+    }
+
+
+    </script>
+
+    <script>
+
+        function IdentitificationTypesChange() {
+            var Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+
+            if (Nationality == 3) {
+                jQuery('#PassportDiv').css("display", "block")
+                jQuery('#IdNoDiv').css("display", "none")
+                jQuery('#PassportDiv').css("display", "block")
+                jQuery('#PassportDatediv').css("display", "block")
+                jQuery('#IdNoDiv').css("display", "none")
+                jQuery('#IDDatedivdiv').css("display", "none")
+            }
+            else if (Nationality == 1) {
+                jQuery('#IdNoDiv').css("display", "block")
+                jQuery('#IDDatedivdiv').css("display", "block")
+                jQuery('#PassportDiv').css("display", "none")
+                jQuery('#PassportDatediv').css("display", "none")
+            }
+            else {
+                jQuery('#IdNoDiv').css("display", "none")
+                jQuery('#PassportDiv').css("display", "none")
+                jQuery('#PassportDiv').css("display", "none")
+                jQuery('#PassportDatediv').css("display", "none")
+            }
+        }
+        function AddElectricity() {
+
+
+
+            var ElectricityMeterInformation_ElectricityMeterNo = document.getElementById("ElectricityMeterInformation_ElectricityMeterNo").value;
+            var ElectricityMeterInformation_ElectricityMeterReading = document.getElementById("ElectricityMeterInformation_ElectricityMeterReading").value;
+            var ElectricityMeterInformation_ElectricityMeterReadingDateTaken = document.getElementById("ElectricityMeterInformation_ElectricityMeterReadingDateTaken").value;
+
+
+            if (ElectricityMeterInformation_ElectricityMeterNo == "" || ElectricityMeterInformation_ElectricityMeterReading == "") {
+                //alert("Please enter all required fields!");
+                swal("Error!", "Please enter all required fields!.", "warning");
+            }
+            //else if (ElectricityMeterInformation_ElectricityMeterNo.length < 11) {
+            //    swal("Error!", "Please enter 11 digits!.", "warning");
+            //}
+
+            else {
+
+                $.getJSON("../Capture/AddElectricity?ElectricityMeterInformation_ElectricityMeterNo=" + ElectricityMeterInformation_ElectricityMeterNo
+                    + '&ElectricityMeterInformation_ElectricityMeterReading=' + ElectricityMeterInformation_ElectricityMeterReading
+                    + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+                                //alert("Added successfully !");
+                                swal("Success!", "Added successfully. A picture of your meter will be requried!  ", "success");
+                                jQuery('#divElectricitytbl').css("display", "block")
+                                //var row = $("<tr/>")
+                                //$("#Electricitytbl").append(row);
+
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterNo + "</td>"));
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReading + "</td>"));
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken + "</td>"));
+
+
+
+                                var electricityt = $('#Electricitytbl').DataTable();
+
+                                electricityt.row.add([ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, "Unprocessed"]).draw(false);
+
+                                clearElectricity();
+                                //$('#Electricitytbl').DataTable();
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+
+                            swal("Error!", "Unsuccessfully captured!", "error");
+                        }
+                    });
+            }
+        }
+        function AddElectricityApi(ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status) {
+
+
+
+
+            if (ElectricityMeterInformation_ElectricityMeterNo == "" /*|| ElectricityMeterInformation_ElectricityMeterReading == ""*/) {
+                //alert("Please enter all required fields!");
+
+
+                //if (ElectricityMeterInformation_ElectricityMeterNo == "" && ElectricityMeterInformation_ElectricityMeterReading == "") {
+                //    swal("Error!", "Electricity meter number and water meter reading are blank!.", "warning");
+                //}
+
+
+
+                if (ElectricityMeterInformation_ElectricityMeterNo == "") {
+                    swal("Error!", "Electricity meter number is blank!.", "warning");
+                }
+                //else if (ElectricityMeterInformation_ElectricityMeterNo != "" && ElectricityMeterInformation_ElectricityMeterReading == "") {
+                //    swal("Error!", "Electricity meter reading is blank!.", "warning");
+                //}
+                else {
+                    swal("Error!", "Please enter all required fields!.", "warning");
+
+
+                }
+
+
+            }
+            //else if (ElectricityMeterInformation_ElectricityMeterNo.length < 11) {
+            //    swal("Error!", "Please enter 11 digits!.", "warning");
+            //}
+
+            else {
+
+                $.getJSON("../Capture/AddElectricityApi?ElectricityMeterInformation_ElectricityMeterNo=" + ElectricityMeterInformation_ElectricityMeterNo
+                    + '&ElectricityMeterInformation_ElectricityMeterReading=' + ElectricityMeterInformation_ElectricityMeterReading
+                    + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + ElectricityMeterInformation_ElectricityMeterReadingDateTaken,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+                                //alert("Added successfully !");
+                                swal("Success!", "Added successfully.", "success");
+                                jQuery('#divPrepaid').css("display", "none")
+                                jQuery('#divMunicipal').css("display", "block")
+                                jQuery('#ElectricityMeterInformation_ElectricityMeterType').val("Municipal")
+                                jQuery('#divElectricitytbl').css("display", "block")
+
+                                var electricityt = $('#Electricitytbl').DataTable();
+
+                                electricityt.row.add([ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, status]).draw(false);
+
+
+
+                                //var row = $("<tr/>")
+                                //$("#Electricitytbl").append(row);
+
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterNo + "</td>"));
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReading + "</td>"));
+                                //row.append($("<td>" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken + "</td>"));
+                                clearElectricity();
+                                //$('#Electricitytbl').DataTable();
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+
+                            swal("Error!", "Unsuccessfully captured!", "error");
+                        }
+                    });
+            }
+        }
+        function clearElectricity() {
+            $('#ElectricityMeterInformation_ElectricityMeterNo').val('');
+            $('#ElectricityMeterInformation_ElectricityMeterReading').val('');
+            $('#ElectricityMeterInformation_ElectricityMeterReadingDateTaken').val('');
+
+        }
+
+        function AddWater() {
+            debugger;
+
+
+            var WaterMeterInformation_WaterMeterNo = document.getElementById("WaterMeterInformation_WaterMeterNo").value;
+            var WaterMeterInformation_WaterMeterReading = document.getElementById("WaterMeterInformation_WaterMeterReading").value;
+            var WaterMeterInformation_WaterMeterReadingDateTaken = document.getElementById("WaterMeterInformation_WaterMeterReadingDateTaken").value;
+
+            if (WaterMeterInformation_WaterMeterNo == "" || WaterMeterInformation_WaterMeterReading == "") {
+                //alert("Please enter all required fields!");
+                swal("Error!", "Please enter all required fields!.", "warning");
+            }
+            //else if (WaterMeterInformation_WaterMeterNo.length < 11) {
+            //    swal("Error!", "Please enter 11 digits!.", "warning");
+            //}
+
+            else {
+
+                $.getJSON("../Capture/AddWater?WaterMeterInformation_WaterMeterNo=" + WaterMeterInformation_WaterMeterNo
+                    + '&WaterMeterInformation_WaterMeterReading=' + WaterMeterInformation_WaterMeterReading
+                    + '&WaterMeterInformation_WaterMeterReadingDateTaken=' + WaterMeterInformation_WaterMeterReadingDateTaken,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+                                //alert("Added successfully !");
+                                swal("Success!", "Added successfully.A picture of your meter will be requried!", "success");
+                                jQuery('#divWatertbl').css("display", "block")
+                                //var row = $("<tr/>")
+                                //$("#Watertbl").append(row);
+
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterNo + "</td>"));
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterReading + "</td>"));
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterReadingDateTaken + "</td>"));
+
+
+                                var watert = $('#Watertbl').DataTable();
+
+                                watert.row.add([WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, "Unprocessed"]).draw(false);
+                                clearWater();
+                                //$('#Watertbl').DataTable();
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+
+                            swal("Error!", "Unsuccessfully captured!", "error");
+                        }
+                    });
+            }
+        }
+
+        function AddWaterApi(WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status) {
+
+
+
+
+            if (WaterMeterInformation_WaterMeterNo == "") {
+
+                //if (WaterMeterInformation_WaterMeterNo == "") {
+                //    swal("Error!", "Water meter number and water meter reading are blank!.", "warning");
+                //}
+
+
+
+                if (WaterMeterInformation_WaterMeterNo == "") {
+                    swal("Error!", "Water meter number is blank!.", "warning");
+                }
+                //else if (WaterMeterInformation_WaterMeterNo != "") {
+                //    swal("Error!", "Water meter reading is blank!.", "warning");
+                //}
+                else {
+                    swal("Error!", "Please enter all required fields!.", "warning");
+
+
+                }
+
+                //swal("Error!", "Please enter all required fields!.", "warning");
+                ////alert("Please enter all required fields!");
+
+            }
+            //else if (WaterMeterInformation_WaterMeterNo.length < 11) {
+            //    alert("2");
+            //    swal("Error!", "Please enter 11 digits!.", "warning");
+            //}
+
+            else {
+                //alert("3");
+                $.getJSON("../Capture/AddWaterApi?WaterMeterInformation_WaterMeterNo=" + WaterMeterInformation_WaterMeterNo
+                    + '&WaterMeterInformation_WaterMeterReading=' + WaterMeterInformation_WaterMeterReading
+                    + '&WaterMeterInformation_WaterMeterReadingDateTaken=' + WaterMeterInformation_WaterMeterReadingDateTaken,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+                                var watert = $('#Watertbl').DataTable();
+                                //alert("Added successfully !");
+                                swal("Success!", "Added successfully.", "success");
+                                jQuery('#divWatertbl').css("display", "block")
+                                watert.row.add([WaterMeterInformation_WaterMeterNo, WaterMeterInformation_WaterMeterReading, WaterMeterInformation_WaterMeterReadingDateTaken, status]).draw(false);
+                                //var row = $("<tr/>")
+                                //$("#Watertbl").append(row);
+
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterNo + "</td>"));
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterReading + "</td>"));
+                                //row.append($("<td>" + WaterMeterInformation_WaterMeterReadingDateTaken + "</td>"));
+                                //row.append($("<td>" + status + "</td>"));
+                                clearWater();
+
+
+                                //$('#Watertbl').DataTable();
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+
+                            swal("Error!", "Unsuccessfully captured!", "error");
+                        }
+                    });
+            }
+        }
+        function clearWater() {
+            $('#WaterMeterInformation_WaterMeterNo').val('');
+            $('#WaterMeterInformation_WaterMeterReading').val('');
+            $('#WaterMeterInformation_WaterMeterReadingDateTaken').val('');
+
+        }
+        function AddNaturalPerson() {
+
+            var Gender = document.getElementById("Gender").value;
+            var TitleType = document.getElementById("TitleType").value;
+            var MaritialStatus = document.getElementById("MaritialStatus").value;
+            var PurchaserInformation_Initial = document.getElementById("PurchaserInformation_Initial").value;
+            var PurchaserInformation_FirstName = document.getElementById("PurchaserInformation_FirstName").value;
+            var PurchaserInformation_LastName = document.getElementById("PurchaserInformation_LastName").value;
+            var PurchaserInformation_IDNo = document.getElementById("PurchaserInformation_IDNo").value;
+            var PurchaserInformation_Passport = document.getElementById("PurchaserInformation_Passport").value;
+            var PurchaserInformation_PurDateExpiry = document.getElementById("PurchaserInformation_PurDateExpiry").value;
+            var PurchaserInformation_Nationality = document.getElementById("PurchaserInformation_Nationality").value;
+            var PurchaserInformation_CellNo = document.getElementById("PurchaserInformation_CellNo").value;
+            var PurchaserInformation_HomeNo = document.getElementById("PurchaserInformation_HomeNo").value;
+            var PurchaserInformation_WorkNo = document.getElementById("PurchaserInformation_WorkNo").value;
+            var PurchaserInformation_PurEmail = document.getElementById("PurchaserInformation_PurEmail").value;
+            var PurchaserInformation_PostAddress = document.getElementById("PurchaserInformation_PostAddress").value;
+            var PurchaserInformation_PostSuburb = document.getElementById("PurchaserInformation_PostSuburb").value;
+            var PurchaserInformation_PostalCity = document.getElementById("PurchaserInformation_PostalCity").value;
+            var PurchaserInformation_PostPostalCode = document.getElementById("PurchaserInformation_PostPostalCode").value;
+            var PurchaserInformation_PurchaseType = document.getElementById("PurchaserInformation_PurchaseType").value;
+            var PurchaserInformation_NominatedAddress = document.getElementById("PurchaserInformation_NominatedAddress").value;
+
+            if (PurchaserInformation_IDNo != "") {
+                var PurchaserInformation_DOB = document.getElementById("DOBAuto").value;
+                var PurchaserInformation_Age = document.getElementById("AgeAuto").value;
+            }
+            else {
+                var PurchaserInformation_DOB = document.getElementById("PurchaserInformation_DOB").value;
+                var PurchaserInformation_Age = document.getElementById("PurchaserInformation_Age").value;
+            }
+
+            if (Gender == "" || TitleType == "" || MaritialStatus == "") {
+                //alert("Please enter all required fields!");
+                swal("Error!", "Please enter all required fields!.", "warning");
+            }
+
+            else {
+
+                $.getJSON("../Capture/AddNaturalPerson?Gender="
+                    + Gender + '&TitleType=' + TitleType
+                    + '&MaritialStatus=' + MaritialStatus
+                    + '&PurchaserInformation_Initial=' + PurchaserInformation_Initial
+                    + '&PurchaserInformation_FirstName=' + PurchaserInformation_FirstName
+                    + '&PurchaserInformation_LastName=' + PurchaserInformation_LastName
+                    + '&PurchaserInformation_IDNo=' + PurchaserInformation_IDNo
+                    + '&PurchaserInformation_DOB=' + PurchaserInformation_DOB
+                    + '&PurchaserInformation_Age=' + PurchaserInformation_Age
+                    + '&PurchaserInformation_Passport=' + PurchaserInformation_Passport
+                    + '&PurchaserInformation_PurDateExpiry=' + PurchaserInformation_PurDateExpiry
+                    + '&PurchaserInformation_Nationality=' + PurchaserInformation_Nationality
+                    + '&PurchaserInformation_CellNo=' + PurchaserInformation_CellNo
+                    + '&PurchaserInformation_HomeNo=' + PurchaserInformation_HomeNo
+                    + '&PurchaserInformation_WorkNo=' + PurchaserInformation_WorkNo
+                    + '&PurchaserInformation_PurEmail=' + PurchaserInformation_PurEmail
+                    + '&PurchaserInformation_PostAddress=' + PurchaserInformation_PostAddress
+                    + '&PurchaserInformation_PostSuburb=' + PurchaserInformation_PostSuburb
+                    + '&PurchaserInformation_PostalCity=' + PurchaserInformation_PostalCity
+                    + '&PurchaserInformation_PostPostalCode=' + PurchaserInformation_PostPostalCode
+                    + '&PurchaserInformation_PurchaseType=' + PurchaserInformation_PurchaseType
+                    + '&PurchaserInformation_NominatedAddress=' + PurchaserInformation_NominatedAddress,
+
+                    function (result) {
+                        if (result != "Error") {
+                            try {
+                                //alert("Added successfully !");
+                                swal("Success!", "Added successfully.", "success");
+                                jQuery('#divNaturalPersontbl').css("display", "block")
+                                var row = $("<tr/>")
+                                $("#NaturalPersontbl").append(row);
+                                row.append($("<td>" + PurchaserInformation_FirstName + " " + PurchaserInformation_LastName + "</td>"));
+                                if (PurchaserInformation_IDNo == "") {
+                                    row.append($("<td>" + PurchaserInformation_Passport + "</td>"));
+                                }
+                                else {
+                                    row.append($("<td>" + PurchaserInformation_IDNo + "</td>"));
+                                }
+                                row.append($("<td>" + PurchaserInformation_PurEmail + "</td>"));
+                                row.append($("<td>" + PurchaserInformation_PostAddress + "</td>"));
+                                row.append($("<td>" + PurchaserInformation_NominatedAddress + "</td>"));
+                                clearNaturalPerson();
+                                $('#NaturalPersontbl').DataTable();
+                            }
+                            catch (cat) { }
+                        }
+                        else {
+
+                            swal("Error!", "Unsuccessfully captured!", "error");
+                        }
+                    });
+            }
+        }
+
+        function clearNaturalPerson() {
+            $('#PurchaserInformation_PurchaseType').val('');
+            $('#Gender').val('');
+            $('#TitleType').val('');
+            $('#MaritialStatus').val('');
+            $('#PurchaserInformation_Initial').val('');
+            $('#PurchaserInformation_FirstName').val('');
+            $('#PurchaserInformation_LastName').val('');
+            $('#PurchaserInformation_IDNo').val('');
+            $('#PurchaserInformation_DOB').val('');
+            $('#PurchaserInformation_Age').val('');
+            $('#PurchaserInformation_Passport').val('');
+            $('#PurchaserInformation_PurDateExpiry').val('');
+            $('#PurchaserInformation_Nationality').val('');
+            $('#PurchaserInformation_CellNo').val('');
+            $('#PurchaserInformation_HomeNo').val('');
+            $('#PurchaserInformation_WorkNo').val('');
+            $('#PurchaserInformation_PurEmail').val('');
+            $('#PurchaserInformation_PostAddress').val('');
+            $('#PurchaserInformation_PostSuburb').val('');
+            $('#PurchaserInformation_PostalCity').val('');
+            $('#PurchaserInformation_PostPostalCode').val('');
+            $('#PurchaserInformation_NominatedAddress').val('');
+            $('#DOBAuto').val('');
+            $('#AgeAuto').val('');
+            jQuery('#IdNoDiv').css("display", "none")
+            jQuery('#PassportDiv').css("display", "none")
+            jQuery('#PassportDatediv').css("display", "none")
+            jQuery('#IDDatedivdiv').css("display", "none")
+        }
+
+        function clearJuristics() {
+            $('#CommentsAttachments_BICA_DATE').val('');
+            $('#CommentsAttachments_BICA_COMMENT').val('');
+        }
+
+        function validateEmail(email) {
+            var emailID = document.getElementById(email).value;
+            var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            var isEmail = re.test(emailID);
+            if (isEmail != true) {
+                //alert("Please enter a valid email");
+                swal("Error!", "Please enter a valid email.", "warning");
+                document.getElementById(email).value = "";
+            }
+        }
+    </script>

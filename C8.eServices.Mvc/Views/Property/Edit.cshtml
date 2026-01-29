@@ -1,0 +1,234 @@
+﻿@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.Models.Property
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+    var propertyId = Model.Id;
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">Principle Owner</li>
+        <li class="progtrckr-here">Properties</li>
+        <li class="progtrckr-todo">Accounts</li>
+        <li class="progtrckr-todo">Additional Owners</li>
+        <li class="progtrckr-todo">Documents</li>
+    </ol>
+</div>*@
+<br />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group" id="instuctions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 id="instructionsTitle" class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                        Instructions
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>
+                        You are currently at step 2:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li><strong>Properties - Update information about the properties owned by the principle owner.</strong></li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                    </ol>
+                    </p>
+                    <p>
+                        Please edit or correct your property information if it is incomplete or incorrect.
+                    </p>
+                    <p>
+                        If you wish to go back to the property listing page, you may click the "Back" button in the "Navigation" panel.
+                    </p>
+                    <p>
+                        You may save your property information by clicking the "Save" button in the "Navigation" panel.
+                    </p>
+                    <p>
+                        You may click the "Next" button in the "Navigation" panel to add accounts to this property, which will take you to step 3.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="panel-group" id="navigation">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">Navigation
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseNavigation" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div id="toolbar">
+                        <div class="form-inline" role="form">
+                            <div class="col-md-6">@Html.EncodedActionLink("Back", "Index","Property", new { customerId, ratesRebateId = ViewBag.RatesRebateId,isFromDocument=false }, new { @class = "btn btn-primary" })</div>
+                            <div class="col-md-6">
+                                <span class="pull-right">
+                                    <input type="submit" value="Next" class="btn btn-primary" />
+                                    &nbsp;
+                                   @* @Html.ActionLink("Next", "Index", "PropertyAccount", new { propertyId }, new { @class = "btn btn-primary" })*@
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-horizontal">
+
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.StatusId)
+        @Html.Hidden("customerId", (int)customerId)
+
+        <div class="panel-group" id="property">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseProperty">
+                            Edit Property
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseProperty" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <p>
+                            Please click here @Html.CheckBox("isConflict", new { id = "isConflict" }) to correct or fill in missing information.
+                        </p>
+                        <br />
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RatesNumber, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.RatesNumber, new { @class = "form-control", id = "RatesNumber", @required = true, @maxlength = "8", @readonly= true})
+                                @Html.ValidationMessageFor(model => model.RatesNumber)
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress1, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress1, new { @class = "form-control", id = "PhysicalAddress1", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress1)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress2, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress2, new { @class = "form-control", id = "PhysicalAddress2", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress2)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress3, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress3, new { @class = "form-control", id = "PhysicalAddress3", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress3)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress4, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress4, new { @class = "form-control", id = "PhysicalAddress4", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress4)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddress5, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.PhysicalAddress5, new { @class = "form-control", id = "PhysicalAddress5", @readonly = true, @required = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddress5)
+                            </div>
+                        </div>
+
+                        @*<div class="form-group">
+                            @Html.LabelFor(model => model.PhysicalAddressCode, new { @class = "control-label col-md-2" })
+                            <div class="col-md-1">
+                                @Html.TextBoxFor(model => model.PhysicalAddressCode, new { @class = "form-control", @required = true, pattern = @"\d{4}", @title = "Postal address code. should contain numbers only with a length of 4. e.g. 4000", @placeholder = "4000", @maxlength = 4, @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PhysicalAddressCode)
+                            </div>
+                        </div>*@
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.PropertyDescription, new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextAreaFor(model => model.PropertyDescription, new { @class = "form-control", id = "PropertyDescription", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.PropertyDescription)
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*<div>
+        @Html.ActionLink( "Back to List Of Properties", "Index", new { customerId, ratesRebateId = ViewBag.RatesRebateId } )
+    </div>*@
+<script type="text/javascript">
+    $(function () {
+
+        @*// Displays a triangle to tell users if the panel is collapsable.*@
+        $('#instructionsTitle').on("click", function () {
+            var span = $('#instructionsTitle').find('span');
+            if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                span.removeClass('glyphicon-triangle-top');
+                span.addClass('glyphicon-triangle-bottom');
+            } else {
+                span.removeClass('glyphicon-triangle-bottom');
+                span.addClass('glyphicon-triangle-top');
+            }
+        });
+
+        $("#isConflict").change(function () {
+            var isChecked = $(this).is(':checked');
+            if (isChecked) {
+                $("#PhysicalAddress1").attr("readonly", false);
+                $("#PhysicalAddress2").attr("readonly", false);
+                $("#PhysicalAddress3").attr("readonly", false);
+                $("#PhysicalAddress4").attr("readonly", false);
+                $("#PhysicalAddress5").attr("readonly", false);
+                //$("#PhysicalAddressCode").attr("readonly", false);
+                //$("#PropertyDescription").attr("readonly", false);
+                $("#ddlStatus").attr("disabled", false);
+                $('.isConflict').prop('checked', true);
+
+                $(":checkbox").bind("click", false);
+            } else {
+                $("#RatesNumber").attr("readonly", false);
+                $("#PhysicalAddress1").attr("readonly", true);
+                $("#PhysicalAddress2").attr("readonly", true);
+                $("#PhysicalAddress3").attr("readonly", true);
+                $("#PhysicalAddress4").attr("readonly", true);
+                $("#PhysicalAddress5").attr("readonly", true);
+                //$("#PropertyDescription").attr("readonly", true);
+            }
+        });
+    });
+</script>

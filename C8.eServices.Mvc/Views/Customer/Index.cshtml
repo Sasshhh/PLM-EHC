@@ -1,0 +1,138 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Customer>
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var listItems = new List<ListItem> { new ListItem { Text = "Excel", Value = "Excel" },
+                                         new ListItem { Text = "Word", Value = "Word" },
+                                         new ListItem { Text = "PDF", Value = "PDF" }};
+    var reportTypeKey = ReportTypeKeys.CustomerProfile;
+}
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css"/>
+
+<h4>@ViewBag.CustomerProfileStatus</h4>
+<hr />
+
+<div class="panel-group" id="instuctions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    This view shows customer details for customers currently registered on Siyakhokha. Please see steps below explaining each action.
+                </p>
+                <p>
+                    <b>Search</b> - Allows to search the database. Search can be done on any field currently listed on the table.<br />
+                    <b>Reset</b> - Refreshes the search results.<br />
+                    <b>Modify</b> - Allows Super Administrator/ Administrator to change customer's email address.<br />
+                    <b>Delete</b> - Allows to delete user from Siyakhokha.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Registered Customers
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">     
+                <div style="clear: both"></div>
+                <table id="customerTable" class="table table-striped" data-url="@Url.Action("LoadCustomers", "Customer", new {id = @ViewBag.CustomerProfileStatusId})">
+                    <thead>
+                        <tr>
+                            <th data-field="IDNumber">ID</th>
+                            <th data-field="FullName">Full Name</th>
+                            <th data-field="EmailAddress">Email</th>
+                            @*<th data-field="CustomerType">Customer Type</th>*@
+                            @*<th data-field="ProfileStatus">Attorney Code</th>*@
+                            <th data-field="DateCreated">Date Created</th>
+                            <th data-formatter="sendActivationEmail">Email Activation</th>
+                            @*<th data-formatter="edit">Edit</th>*@
+                            <th data-formatter="details">Action</th>
+                            @*<th data-formatter="deleteProfile">Delete</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td>
+                                @item.IdentificationNumber
+                            </td>
+                            <td>
+                                @item.FullName
+                            </td>
+                            <td>
+                                @item.EmailAddress
+                            </td>
+                            @*<td>
+                                @item.CustomerType.Name
+                            </td>*@
+                            @*<td>
+                                @item.AttorneyCode
+                            </td>*@
+                            <td>
+                                @item.CreatedDateTime
+                            </td>
+                            <td>
+                                @item.IsActive
+                            </td>
+                            <td>
+                                @Html.EncodedActionLink("Details", "Details", "Customer", new { id = item.Id.ToString() }, new { @class = "btn btn-primary" })
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                <hr/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="activationEmailModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Activation Email</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalResponseText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="@Url.Content( "~/Scripts/jquery.datetimepicker.js" )"></script>
+
+
+
+<script>
+    $(function () {
+        $('#customerTable').DataTable();
+    });
+</script>

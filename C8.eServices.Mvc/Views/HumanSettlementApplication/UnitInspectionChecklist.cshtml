@@ -1,0 +1,397 @@
+﻿
+
+@model C8.eServices.Mvc.Models.PropertyLeaseApplication
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Materia - Admin Template">
+    <meta name="keywords" content="materia, webapp, admin, dashboard, template, ui">
+    <meta name="author" content="solutionportal">
+    <style>
+        .buttonIcon {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 7px 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .tablecss {
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        th {
+            /* font-size: 12px;
+            font-weight: 600;*/
+            background-color: #1e8449;
+            color: white;
+        }
+
+        .site-head {
+            background-color: #1e8449;
+        }
+
+        .main-container .nav-wrap .nav-head {
+            background: #1e8449;
+        }
+
+        .btn {
+            color: #1e8449;
+            border-color: #1e8449;
+            background-color: white;
+        }
+
+            .btn:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .btn12 {
+            color: #af7b0b;
+            border-color: #af7b0b;
+            background-color: white;
+        }
+
+            .btn12:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+            color: #ffffff;
+            background-color: grey;
+            border-color: #ffffff;
+        }
+
+        .BoToDoHide {
+            display: none;
+        }
+
+        .button1 {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .step-app > .step-steps > li.active a {
+            background-color: darkgrey !important;
+            color: #fff;
+        }
+
+
+        .sk-cube-grid {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 10px;
+            background-color: grey;
+        }
+
+            .sk-cube-grid .sk-cube-child {
+                width: 33%;
+                height: 33%;
+                background-color: white;
+                float: left;
+                -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+                animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out
+            }
+
+            .sk-cube-grid .sk-cube-grid9 {
+                -webkit-animation-delay: .2s;
+                animation-delay: .2s
+            }
+
+
+        .modal-dialog {
+            position: relative;
+            display: table; /* This is important */
+            overflow-y: auto;
+            overflow-x: auto;
+            width: auto;
+            min-width: 300px;
+        }
+
+        .page-content {
+        }
+
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 1cm auto;
+            border: 1px #D3D3D3 solid;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body id="app" class="app off-canvas">
+    <div class="main-container clearfix" id="page">
+        <div class="page-content">
+            <div class="page">
+                <div>
+                    @*<h2>Unit Inspection Checklist</h2>*@
+
+                    <p></p>
+
+                    <img src="~/Content/Images/Picture1.jpg" />
+                    <p> </p>
+                    <div>
+                        @*<p>&lt;![if !vml]&gt;<img src="UNIT%20INSPECTION%20CHECKLIST_files/image002.jpg" alt="HeadOffice" width="496" height="111" />&lt;![endif]&gt;</p>*@
+                        <div style="font-style: italic; padding-right:50px">&nbsp;<strong>INSPECTION CHECK LIST</strong></div>
+                        <p><strong></strong></p>
+                        <p><strong>FLAT/UNIT NO.:<u> e1 </u></strong></p>
+                        <p></p>
+                        <p><strong>COMPLEX:<u> e2 </u></strong></p>
+                        <p></p>
+
+
+                        <table border="1" cellspacing="0" cellpadding="0" width="100%" style="padding-bottom:100px;">
+
+                            <tbody>
+                                <tr>
+                                <tr>
+                                    <td width="196">
+                                        <p><strong>ITEMS</strong></p>
+                                    </td>
+                                    <td width="161">
+                                        <p><strong>GOOD/POOR</strong></p>
+                                    </td>
+                                    <td width="227">
+                                        <p><strong>REMARKS</strong></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>WALLS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E3</p>
+
+                                    </td>
+                                    <td width="227">
+                                        <p>E4</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>DOORS &amp; HANDLES</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E5</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E6</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>CURTAIN RAILS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E7</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E8</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>FLOORS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E9</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E10</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>PLUGS/SWITCHES/LIGHTS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E11</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E12</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>TAPS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E13</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E14</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>GLOBES</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E15</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E16</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>BATH</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E17</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E18</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>HAND BASIN</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E19</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E20</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>KITCHEN SINK</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E21</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E22</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>CISTERN</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E23</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E24</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>TOILET SEAT</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E25</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E26</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>WINDOW GLASSES</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E27</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E27</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>WINDOW LEVER/HANDLES</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E28</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E29</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>BUILT-INS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E30</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E31</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>GEYSER</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E32</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E33</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="196">
+                                        <p>CEILINGS</p>
+                                    </td>
+                                    <td width="161">
+                                        <p>E34</p>
+                                    </td>
+                                    <td width="227">
+                                        <p>E35</p>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+
+                    </div>
+                    <br />
+                    <br />
+                    <p></p>
+                    <p></p>
+                    <p><strong>UNIT ACCEPTED/REJECTED</strong></p>
+                    <p></p>
+                    <p><strong>TENANT SIGNATURE <u style="padding-right:50px"> </u>E36<u style="padding-right:50px"> </u>DATE: <u style="padding-right:50px"></u>E37<u> </u></strong></p>
+
+
+
+                    <br />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

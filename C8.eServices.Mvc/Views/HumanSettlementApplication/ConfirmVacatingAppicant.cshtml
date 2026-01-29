@@ -1,0 +1,239 @@
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+
+        input[type='date'] {
+            position: relative;
+        }
+
+        ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+            position: absolute;
+        }
+
+        ::-webkit-clear-button {
+            right: 2.5em;
+        }
+
+        ::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        ::-webkit-calendar-picker-indicator {
+            right: 0;
+            padding: .539em .34em;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: rgba(0, 0, 0, 0);
+            opacity: 1;
+            display: block;
+            background: url('../Content/RcsStyles/calenderIcon.png') no-repeat;
+            background-size: 20px 20px;
+            width: 20px;
+            height: 20px;
+            border-width: thin;
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference Number</th>
+                        <th>Agreement End Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.HumanSettlementApplication.ApplicantFullName</td>
+                        <td>@Model.HumanSettlementApplication.PurchaserType.Name</td>
+                        <td>@Model.HumanSettlementApplication.ApplicationReferenceNumber</td>
+                        @if (Model.HumanSettlementApplication.IsMaster)
+                        {
+                            <td>@Model.HumanSettlementLeaseMaster.EndDate.Value</td>
+                            <td>@Model.HumanSettlementLeaseMaster.Status.Name</td>
+                        }
+                        else
+                        {
+                            <td>@Model.HumanSettlementLeaseDetails.EndDate.Value</td>
+                            <td>@Model.HumanSettlementLeaseDetails.Status.Name</td>
+                        }
+                        <td>
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div class="panel-heading">Vacating Applicant Action</div>
+        @using (Html.BeginForm("HumanAgreementTermination", "HumanSettlementApplication", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.HumanSettlementApplication.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;", @Name = "ApplicatoinId" })
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                @Html.HiddenFor(model => model.PropertyLeaseApplication.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
+                @Html.HiddenFor(model => model.LeaseDetails.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
+                @Html.HiddenFor(model => model.LeaseDetails.LeaseReferenceNo, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        @Html.Label("Tenant Vacated", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Id = "ApprovalStatus", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block; margin-left:100px;">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+
+    <script type="text/javascript">
+
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+
+        var grosincome = document.getElementById("ElectricityMeterInformation_ElectricityMeterType").value;
+        var netIncome = document.getElementById("ElectricityMeterInformation_ElectricityMeterType").value;
+    }
+
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to confirm this applicant vacating?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                //var statuskey = document.getElementById('ApprovalStatus').value;
+                //var comment = document.getElementById('Comments').value;
+                //if (statuskey == "Rcs_Rejected") {
+                //    if (comment == null || comment == "") {
+                //        swal("error", "Please enter reason for rejecting termination", "warning")
+                //    }
+                //} else {
+                document.getElementById("btnApproval").click();
+                //}
+            }
+        });
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }});
+</script>
+
+

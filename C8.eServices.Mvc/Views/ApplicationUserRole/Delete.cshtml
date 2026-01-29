@@ -1,0 +1,87 @@
+﻿@model C8.eServices.Mvc.Models.ApplicationUserRole
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>Are you sure you want to delete role for - @Model.SystemUser.FullName</h4>
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("applicationId", (int)@ViewBag.ApplicationId)
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
+                        User Role Information
+                    </a>
+                </h4>
+            </div>
+            <div id="userRoleCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.SystemUser.FullName)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.SystemUser.FullName)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Application")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Application.Name)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Role")
+                        </dt>
+
+                        <dd>
+                            @*@Html.DisplayFor(model => model.IdentityRole.Name)*@
+                            @Html.DisplayFor(modelItem => modelItem.Data)
+                        </dd>
+                    </dl>
+
+                    <div class="form-group">
+                        <input type="submit" value="Delete" class="button1" />
+                         @*@Html.ActionLink("Delete", "Delete", null, new { @class = "btn btn-primary"})*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div>
+    @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
+    {
+        @Html.ActionLink("Back to List", "AdminUserIndex", new { id = @ViewBag.ApplicationId }, new { @class = "btn btn-primary" })
+    }
+    else
+    {
+        @Html.ActionLink("Back to List", "UserIndex", new { id = @ViewBag.ApplicationId }, new { @class = "btn btn-primary" })
+    }
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        
+             var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+    });
+</script>
+

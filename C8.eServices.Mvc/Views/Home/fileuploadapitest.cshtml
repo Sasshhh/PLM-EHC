@@ -1,0 +1,91 @@
+﻿
+@{
+    ViewBag.Title = "fileuploadapitest";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    if (@ViewBag.NetConnection == false)
+    {
+        <h4 style="color:red"> You are not Online. Law Trust Requires an Internet Connection! </h4>
+    }
+
+
+
+    if (@ViewBag.NetConnection == true)
+    {
+
+    <div class="panel-group" id="documentsUpload">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        <h4>Upload Rates Clearance Certficate To Sign</h4>
+                    </a>
+                </h4>
+            </div>
+            
+            <div>
+                <div class="form-group">
+                    <input type="file" name="UPQ1" id="UPQ1" />
+
+                    @*<button type="button" id="btnUpload" name="btnUploadFile" class="btnUpload btn theme btn-sm waves-effect waves-light" onclick="uploadFile()" value="Upload">
+                    <span class="glyphicon glyphicon-upload"></span> Upload
+                </button>*@
+
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Submit" class="button1" />
+                    </div>
+                </div>
+
+
+                <br />
+
+
+
+            </div>
+
+
+            <br />
+            <br />
+
+        </div>
+
+    </div>
+
+
+
+    }
+}
+@* old way of upload with ajax now using base context instead <script>
+
+        function uploadFile() {
+            debugger;
+
+            SendFormData = new FormData();
+            var xhr = new XMLHttpRequest();
+            var fileDescriptionComment = "";
+            var fileType = "StrategicSpatialPlanning";//Folder to save o on shairpoint
+
+            SendFormData.append("UPQ1", document.getElementById('UPQ1').files[0]);
+
+
+
+
+
+
+            xhr.open("POST", "../Home/testupload?fileName=" + document.getElementById('UPQ1').innerHTML + "&fileType=" + fileType)
+
+            xhr.send(SendFormData);
+
+
+
+
+        }
+
+
+    </script>*@

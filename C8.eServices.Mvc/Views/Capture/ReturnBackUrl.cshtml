@@ -1,0 +1,78 @@
+﻿
+
+@using C8.eServices.Mvc.Keys
+
+@{
+    ViewBag.Title = "ReturnBackUrl";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var e = ViewBag.Value;
+}
+
+
+<h2>Payment Complete</h2>
+<div class=WordSection1>
+
+    @if (e[0] == PaymentGatewayKeys.CemeterySystem)
+    {
+
+        <p class=MsoNormal>Department: @e[1] </p>
+
+        <p class=MsoNormal>Vote Number:@e[2] </p>
+
+        <p class=MsoNormal>Application Reference Number: @e[3] </p>
+
+        <p class=MsoNormal>Receipt Number: @e[4] </p>
+
+        <p class=MsoNormal>Date: @e[5] </p>
+
+        <p class=MsoNormal>Time: @e[6]. </p>
+
+        <p class=MsoNormal>Total Amount paid: @e[7] </p>
+
+        <p class=MsoNormal>Method of Payment: @e[8] </p>
+
+        <p class=MsoNormal>Payment Description: @e[9] </p>
+        <p class=MsoNormal>Name of Deceased: @e[15] </p>
+        <p class=MsoNormal>ID No of Deceased: @e[16] </p>
+
+        <p class=MsoNormal>Processed By: @e[10] </p>
+
+        <p class=MsoNormal>Name of Undertaker: @e[11] </p>
+        <p class=MsoNormal>Transaction Status: @e[13] </p>
+        <p class=MsoNormal>Transaction Status Message: @e[14] </p>
+        <p class=MsoNormal>
+            Receipt:<a href="@e[12]" title="Receipt" target="_blank">Click to Download Receipt</a>
+        </p>
+    }
+    else
+    {
+
+        <p class=MsoNormal>Department: @e[1] </p>
+
+        <p class=MsoNormal>Vote Number:@e[2] </p>
+
+        <p class=MsoNormal>Application Reference Number: @e[3] </p>
+
+        <p class=MsoNormal>Receipt Number: @e[4] </p>
+
+        <p class=MsoNormal>Date: @e[5] </p>
+
+        <p class=MsoNormal>Time: @e[6]. </p>
+
+        <p class=MsoNormal>Total Amount paid: @e[7] </p>
+
+        <p class=MsoNormal>Method of Payment: @e[8] </p>
+
+        <p class=MsoNormal>Payment Description: @e[9] </p>
+
+        <p class=MsoNormal>Processed By: @e[10] </p>
+
+        <p class=MsoNormal>Customer Name: @e[11] </p>
+        <p class=MsoNormal>Transaction Status: @e[13] </p>
+        <p class=MsoNormal>Transaction Status Message: @e[14] </p>
+        <p class=MsoNormal>
+            Receipt:<a href="@e[12]" title="Receipt">Click to Download Receipt</a>
+        </p>
+    }
+</div>
+

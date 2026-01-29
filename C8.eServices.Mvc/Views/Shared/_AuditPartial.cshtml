@@ -1,0 +1,62 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Audit>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Audits</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Action)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TableName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ColumnName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OriginalValue)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CurrentValue)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AuditBySystemUserId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AuditDateTime)
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Action)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TableName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ColumnName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OriginalValue)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CurrentValue)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AuditBySystemUser.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AuditDateTime)
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>

@@ -1,0 +1,378 @@
+﻿@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@{
+    ViewBag.Title = "Revenue Manager Assessment";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /* --- CUSTOM GREEN STYLING --- */
+    .bg-green-header {
+        background-color: #1E8449 !important;
+        color: white !important;
+    }
+
+    .panel-green {
+        border-color: #1E8449;
+    }
+
+        .panel-green > .panel-heading {
+            background-color: #1E8449;
+            color: white;
+            border-color: #1E8449;
+            width: 100%;
+            padding: 10px 15px;
+            margin: 0;
+        }
+
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions (Revenue Manager)</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    1) Review the Client Services Officer's assessment and uploaded documents.
+                    <br />
+                    2) Enter your Official Number.
+                    <br />
+                    3) Select "Supported" or "Not Supported".
+                    <br />
+                    4) Enter your comments/reason (Mandatory).
+                    <br />
+                    5) Click Submit to forward to CEO.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
+<div class="panel-group">
+
+    @* --- APPLICATION DETAILS TABLE --- *@
+    <div class="panel panel-green">
+        <div class="panel-heading" align="center">
+            <h4 class="panel-title" style="color: white;">Application Details</h4>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead class="bg-green-header">
+                    <tr>
+                        <th style="color:white;"> Applicant Name </th>
+                        <th style="color:white;"> Application Type </th>
+                        <th style="color:white;"> Application Reference No. </th>
+                        <th style="color:white;"> Application Created Date </th>
+                        <th style="color:white;"> Status </th>
+                        <th style="color:white;"> Action </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.FullName) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.PurchaserType.Name) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.ApplicationReferenceNumber) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.CreatedDateTime) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.Status.Name) </td>
+                        <td>
+                            @*@Html.ActionLink("View Application", "Details", "PropertyLeaseApplication",
+                            new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplication.Id.ToString()), target = "_blank" },
+                            new { @class = "btn btn-success btn-sm", @target = "_blank" })*@
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+
+    <div style="width: 90%; margin: 0 auto;">
+        @using (Html.BeginForm("RiskAssessmentRM", "RiskAssessmentOutcomes",
+            new { q = Request.QueryString["q"] },
+            FormMethod.Post,
+            new { id = "rmForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary()
+            @Html.ValidationMessage("error")
+
+            @Html.Hidden("rcsAppId", Model.PropertyLeaseApplication.Id)
+
+            <div class="form-horizontal">
+                <div class="step-app">
+                    <ul class="step-steps">
+                        <li style="text-align:center;"><a href="#step3">Revenue Manager Assessment<span class=""></span></a></li>
+                    </ul>
+                </div>
+
+                @* --- SECTION 1: READ-ONLY CSO DATA --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">Previous Assessment (Client Services Officer)</h4>
+                    </div>
+                    <div class="panel-body" style="background-color: #f9f9f9;">
+                        <div class="form-group">
+                            <label class="control-label col-md-2">CSO Name</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.FirstName @Model.RiskAssessmentOutcome.LastName" disabled />
+                            </div>
+                            <label class="control-label col-md-2">CSO Official No</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.OfficialNumber" disabled />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Outcome</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.Outcome" disabled style="font-weight:bold;" />
+                            </div>
+                            <label class="control-label col-md-2">Date Assessed</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.DateStamp" disabled />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Comments</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" disabled>@Model.RiskAssessmentOutcome.Reason</textarea>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Proposed Complex</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.PropertyLeaseApplication.PreferredComplexArea.Name" disabled />
+                            </div>
+                            <label class="control-label col-md-2">Proposed Typology</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.PropertyLeaseApplication.HumanEHCOptions.Name" disabled />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                @* --- SECTION 2: DOCUMENTS (ADDED HERE) --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">Attached Documents</h4>
+                    </div>
+                    <div class="panel-body">
+                        @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+                    </div>
+                </div>
+                <br />
+
+                @* --- SECTION 3: EDITABLE RM DATA --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">Revenue Manager Decision</h4>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RiskAssessmentOutcome.RM_OfficialNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.RiskAssessmentOutcome.RM_OfficialNumber, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.RM_OfficialNumber, "", new { @class = "text-danger" })
+                            </div>
+
+                            <label class="control-label col-md-2 require">Action</label>
+                            <div class="col-md-3">
+                                <select class="form-control" name="ApprovalStatusddl" id="ApprovalStatus" required>
+                                    <option value="">-- Select Action --</option>
+                                    <option value="Supported">Supported</option>
+                                    <option value="Not Supported">Not Supported</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RiskAssessmentOutcome.RM_Reason, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.RiskAssessmentOutcome.RM_Reason, new { @class = "form-control", @required = "required", @rows = "3", @id = "RMComment" })
+                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.RM_Reason, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @* FOOTER BUTTONS *@
+                    <div class="step-footer" align="center">
+                        <input type="button" value="Cancel" onclick="location.href='@Url.Action("InboxRM", "RiskAssessmentOutcomes")'" class="button1" />
+                        <input type="button" value="Submit" onclick="clickSubmit()" class="button1" />
+
+                        @* Hidden Submit Button Triggered by JS *@
+                        <input type="submit" value="Submit" style="display:none;" id="btnRealSubmit" />
+                        <br /><br /><br />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function clickSubmit() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        var comment = document.getElementById("RMComment").value;
+        var officialNo = document.getElementById("RiskAssessmentOutcome_RM_OfficialNumber").value;
+
+        if (officialNo == "") {
+            swal("Error", "Please enter your Official Number.", "warning");
+            return;
+        }
+
+        if (statusval == "") {
+            swal("Error", "Please select an Action (Supported/Not Supported).", "warning");
+            return;
+        }
+
+        if (comment == "") {
+            swal("Error", "Please enter a Reason/Comment.", "warning");
+            return;
+        }
+
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this decision?",
+            buttons: ['No', 'Yes, I am sure!']
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                document.getElementById("btnRealSubmit").click();
+            }
+        });
+    }
+</script>

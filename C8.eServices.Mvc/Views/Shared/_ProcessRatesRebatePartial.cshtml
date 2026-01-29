@@ -1,0 +1,47 @@
+﻿@model C8.eServices.Mvc.Models.Property
+
+
+@using (Html.BeginForm())
+{
+    <div class="form-group">
+        @Html.Label("Property", new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("Id", ((IEnumerable<SelectListItem>)ViewBag.Props), "Select", new { @class = "form-control" })
+            @if (Model != null)
+            {
+
+            }
+        </div>
+    </div>
+    <div id="PropertyPartial">
+        @{ Html.RenderPartial("_PropertyPartial");}
+    </div>
+}
+
+
+
+@section Scripts {
+
+    <script>
+        $("#Property").change(function(e) {
+
+            var data = $('#Property').val();
+           $.ajax({
+                type: "GET",
+                url: "@Url.Action("Populate", "RatesRebateBackOffice")",
+                dataType: 'html',
+                data: { id: data},
+                success: function (result) {
+                    $('#PropertyPartial').html(result);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+        });
+
+
+
+        });
+
+    </script>
+}

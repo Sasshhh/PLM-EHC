@@ -1,0 +1,175 @@
+{
+
+  "SolarERP": {
+
+    "Header": {
+
+      "Version": "3.1",
+
+      "TimeStamp": "2022-11-24T04:33:33.866478100Z",
+
+      "CorrelationID": "2b6b36cc-6b9d-11ed-a1eb-0242ac120002",
+
+      "TransactionID": "314aaff0-6b9d-11ed-a1eb-0242ac120002",
+
+      "MessageID": "3690a60e-6b9d-11ed-a1eb-0242ac120002",
+
+      "SenderID": "Property Lease",
+
+      "RecipientID": "SAMS",
+
+      "Action": "Create",
+
+      "User": "Username",
+
+      "Message": {
+
+        "Name": "Get Asset Details",
+
+        "Type": "Request"
+
+      },
+
+      "Result": {
+
+        "Status": "SUCCESS",
+
+        "ErrorCode": "",
+
+        "ErrorDescription": ""
+
+      },
+
+      "Context": [
+
+        {
+
+          "Property": {
+
+            "Name": "Entity",
+
+            "Value": "CoE"
+
+          }
+
+        }
+
+      ]
+
+    },
+
+    "Payload": {
+
+      "sg_number": "",
+
+      "address_street": "",
+
+      "building_number": "193",
+
+      "floor_number": "UNKNOWN",
+
+      "room_number": "RR973"
+    }
+
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//{
+//  "SolarERP": {
+
+//    "Header": {
+
+//      "Version": "3.1",
+
+//      "TimeStamp": "{0}", //2022-11-24T04:33:33.866478100Z
+
+//      "CorrelationID": "{1}", //2b6b36cc-6b9d-11ed-a1eb-0242ac120002
+
+//      "TransactionID": "{2}", //314aaff0-6b9d-11ed-a1eb-0242ac120002
+
+//      "MessageID": "{3}", //3690a60e-6b9d-11ed-a1eb-0242ac120002
+
+//      "SenderID": "Property Lease",
+
+//      "RecipientID": "SAMS",
+
+//      "Action": "Create",
+
+//      "User": "Username",
+
+//      "Message": {
+
+//        "Name": "Get Asset Details",
+
+//        "Type": "Request"
+
+//      },
+
+//      "Result": {
+
+//        "Status": "",
+
+//        "ErrorCode": "",
+
+//        "ErrorDescription": ""
+
+//      },
+
+//      "Context": [
+
+//        {
+
+//          "Property": {
+
+//            "Name": "Entity",
+
+//            "Value": "CoE"
+
+//          }
+
+//        }
+
+//      ]
+
+//    },
+
+//    "Payload": {
+
+//      "sg_number": "{4}", //T0IR04660000098700000
+
+//      "address_street": "{5}",
+
+//      "building_number": "{6}",
+
+//      "floor_number": "{7}",
+
+//      "room_number": "{8}"
+
+//    }
+
+//  }
+
+//}

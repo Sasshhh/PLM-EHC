@@ -1,0 +1,377 @@
+﻿@using System.Collections
+@using System.Text
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@using iTextSharp.text.pdf.qrcode
+@model C8.eServices.Mvc.Models.LinkedAccount
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+
+    var uploadLog = ViewBag.UploadLog as IEnumerable<BulkUploadLog>;
+}
+
+<style>
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-file input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            background: white;
+            cursor: inherit;
+            display: block;
+        }
+</style>
+
+@if (Request.HttpMethod == "POST")
+{
+    if (TempData["Success"].Equals(true))
+    {
+        if (ViewBag.UploadLog != null)
+        {
+            <div id="uploadLogModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Bulk Upload Log</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="table"
+                                       data-toggle="table"
+                                       data-height="300">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayName("Cell")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Result")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Account")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Message")
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in uploadLog)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CellId)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Result)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.AccountNumber)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Message)
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" data-dismiss="modal" aria-hidden="true" class="btn btn-primary">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Success!</strong> @ViewBag.CompletedAction.
+
+                <span> Click here</span>
+                <a id="uploadLogLink" href="#"> to view bulkupload log</a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Success!</strong> @ViewBag.CompletedAction.
+
+                @if (ViewBag.DocumentsRequired.Equals(true))
+                {
+                    <span> Please</span>
+                    @Html.EncodedActionLink(" Upload documentation", "Details", "LinkedAccount", new
+                               {
+                                   id = Model.Id
+                               }, null)
+                }
+            </div>
+        }
+
+        if (ViewBag.IsActivationEmailSent.Equals(true))
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                Activation email(s) sent to customer.
+            </div>
+        }
+    }
+    else
+    {
+        <div id="errorStatusPanel" class="alert alert-danger">
+            <a class="close" data-dismiss="alert">×</a>
+            <strong>Error!</strong> @ViewBag.CompletedAction.
+        </div>
+    }
+}
+
+<h4>Link New Account</h4><hr />
+
+@using (Html.BeginForm("Create", "LinkedAccount", null, FormMethod.Post, new { enctype = "multipart/form-data", id = "create-form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="panel-group" id="instructions">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                            <span>Instructions</span>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseInstructions" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <p>Link New Account allows the Administrator/Super Administrator to link customer accounts. Please see steps below to create a new linked account.</p>
+                        <p>1. Enter the customer's Identification Number (RSA ID number or passport number). To show the customer's current linked accounts click the "Show Linked Accounts" button.</p>
+                        <p>2. Enter the account number to be linked to the relevant customer, then click the "Link" button. Once the account has been linked you will be redirected to the "Active Linked Accounts" page.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#accountInfoCollapse">
+                            Linked Account Information
+                        </a>
+                    </h4>
+                </div>
+                <div id="accountInfoCollapse" class="panel-collapse collapse in">
+                    @Html.ValidationSummary(true)
+                    <div class="panel-body">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @Html.Label("Customer ID/Registration Number:", new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("customerIdNo", null, new { @class = "form-control", @required = "required" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 control-label">
+                                    <label>
+                                        @Html.RadioButton("createType", "BulkUpload")
+                                        Bulk Upload
+                                    </label>
+                                    &nbsp;
+                                    <label>
+                                        @Html.RadioButton("createType", "SingleAccount")
+                                        Single Account
+                                    </label>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div id="bulkUploadGrp" style="display: none;">
+                                <div class="form-group">
+                                    @Html.Label("Select File:", new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <label class="input-group-btn">
+                                                <span class="btn btn-primary">
+                                                    Browse&hellip; <input type="file" id="fileUpload" name="file" style="display: none;">
+                                                </span>
+                                            </label>
+                                            <input type="text" class="form-control" id="upload-file-info" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.Label("Select Document(s):", new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <label class="input-group-btn">
+                                                <span class="btn btn-primary">
+                                                    Browse&hellip; <input type="file" id="documentUpload" multiple name="documents" style="display: none;">
+                                                </span>
+                                            </label>
+                                            <input type="text" class="form-control" id="upload-document-info" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="singleAccountGrp" style="display: none;">
+                                <div class="form-group">
+                                    @Html.Label("Account Number:", new { @class = "control-label col-md-3" })
+                                    <div class="col-md-3">
+                                        @Html.TextBox("accountNo", null, new { @class = "form-control", @required = true })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("Recipient Type", new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.DropDownList("RecipientTypeDdl", (SelectList)ViewBag.RecipientTypeId, "Select type ...", htmlAttributes: new { @class = "form-control", id = "RecipientDdl", @required = true })
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="secondaryEmailGrp" style="display:none;">
+                                @Html.Label("Email Addresses", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("SecondaryEmails", null, new { @class = "form-control", @id = "txtSecondaryEmail" })
+                                </div>
+                                <div><input id="Add" type="button" value="Add Email" class="btn btn-primary btn-sm" /></div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-offset-3 col-md-10">
+                                    <input id="btnLink" type="submit" disabled="disabled" value="Link" class="btn btn-primary" />
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('input[name="createType"]').prop('checked', false);
+        });
+
+        $("#uploadLogLink").on('click', function (eve) {
+            $("#uploadLogModal").modal('show');
+        });
+
+        $('#fileUpload').on('change', function (event) {
+            var numFiles = this.files.length;
+
+            if (numFiles > 1)
+                $('#upload-file-info').val(numFiles + " files selected");
+            else
+                $('#upload-file-info').val($(this).val());
+        });
+
+        $('#documentUpload').on('change', function (event) {
+            var numFiles = this.files.length;
+
+            if (numFiles > 1)
+                $('#upload-document-info').val(numFiles + " files selected");
+            else
+                $('#upload-document-info').val($(this).val());
+        });
+
+        $("#uploadLogModal").on('hidden.bs.modal', function () {
+            e.preventDefault();
+        });
+
+        $("input[name=createType]:radio").change(function () {
+            if ($("input:radio[name='createType']:checked").val() == 'BulkUpload') {
+                $("#bulkUploadGrp").show();
+                $("#singleAccountGrp").hide();
+                $("#btnLink").prop('disabled', false);
+                $("#accountNo").prop('required', false);
+            } else {
+                $("#singleAccountGrp").show();
+                $("#bulkUploadGrp").hide();
+                $("#btnLink").prop('disabled', true);
+                $("#accountNo").prop('required', true);
+            }
+        });
+
+        $('#RecipientDdl').change(function () {
+            var selected = $('#RecipientDdl option:selected');
+            $("#txtPrimaryEmail").val("");
+
+            switch (selected.val()) {
+                case "1":
+                    $("#txtPrimaryEmail").val('Primary');
+                    $("#txtPrimaryEmail").prop("readonly", true);
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").show();
+                    $("#btnLink").prop('disabled', false);
+                    break;
+                case "9":
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").hide();
+                    $("#btnLink").prop('disabled', false);
+                    break;
+                default:
+                    $("#primaryEmailGrp").hide();
+                    $("#secondaryEmailGrp").show();
+                    $("#btnLink").prop('disabled', true);
+                    $("#txtPrimaryEmail").prop("readonly", false);
+                    break;
+            }
+        });
+
+        $("#txtSecondaryEmail").multiple_emails();
+
+        $("#txtSecondaryEmail").change(function () {
+            var value = $(this).val();
+
+            if (value == "[]") {
+                $("#btnLink").prop('disabled', true);
+            } else {
+                $("#btnLink").prop('disabled', false);
+            }
+        });
+
+        //$(document).on('change', ':file', function () {
+        //    var input = $(this),
+        //        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        //        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        //    input.trigger('fileselect', [numFiles, label]);
+        //});
+
+        //$(document).ready(function () {
+        //    $('input[name="createType"]').prop('checked', false);
+
+        //    $(':file').on('fileselect', function (event, numFiles, label) {
+
+        //        var input = $(this).parents('.input-group').find(':text'),
+        //            log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+        //        if (input.length) {
+        //            input.val(log);
+        //        } else {
+        //            if (log) alert(log);
+        //        }
+
+        //    });
+        //});
+    </script>
+}

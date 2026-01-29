@@ -1,0 +1,362 @@
+﻿@{
+    ViewBag.Title = "Queue Pending";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h4>Queue Pending</h4>
+<hr />
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Search</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <form class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Account Number </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Customer Name </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">Email Address To </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtAccountNumber" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" type="text" id="txtCustomerName" />
+                                </div>
+                                <div class="col-md-4">
+                                    <input class="input-sm" id="txtEmailAddressName" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+                                    <label class="control-label">Start Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="control-label">End Bill Date </label>
+
+                                </div>
+                                <div class="col-md-4">
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox1", "Select Date", new { @class = "input-sm" })
+                                </div>
+                                <div class="col-md-4">
+
+                                    @Html.TextBox("txtBox2", "Select Date", new { @class = "input-sm " })
+                                </div>
+                                <div class="col-md-4" style="padding-top:0px">
+                                    <button type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-search"></span>Search</button>
+                                    @*<input type="button" value="Search" id="btnSearch" class="btn btn-default btn-xs">*@
+                                    @*<input type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs" />*@
+                                    <button type="button" value="Clear" id="btnClear" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-5">
+                            <label class="control-label">Number of bills in queue : </label>
+                            <span>
+                                <label class="control-label" id="numBillsinQueue"></label>
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" value="Refresh" id="btnRefresh" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-refresh"></span> Refresh</button>
+                            @*<input type=button value="Refresh" id="btnRefresh" class="btn btn-default btn-xs" />*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"></div>
+
+                        <div class="col-md-5">
+                            <label class="control-label">Last Billdate: </label>
+                            <span>
+                                <label class="control-label" id="billDate"></label>
+                            </span>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"></div>
+
+                        <div class="col-md-5">
+                            <label class="control-label">Bills processed Last Billdate: </label>
+                            <span>
+                                <label class="control-label" id="numProcessed"></label>
+                            </span>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-5">
+                            <label class="control-label">No. Errors Last Billdate: </label>
+                            <span>
+                                <label class="control-label" id="numErrors"></label>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                    Pending Linked Accounts
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table id="myTable" class="table table-bordered table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th id="headings">Account Number</th>
+                            <th id="headings">Customer Name</th>
+                            <th id="headings" class="sorting_asc_disabled">Bill Date</th>
+                            <th id="headings">Email Address To</th>
+                            <th id="headings">Email Address CC</th>
+                            <th id="headings">Queue Date</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
+<style>
+    tr.even {
+        background-color: #F5F5F5 !important;
+    }
+</style>
+
+@*Modal for confirming resending*@
+<div class="modal fade" id="resendModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    @using (Ajax.BeginForm("ResendBill", "eBillingDashBoard", new AjaxOptions(), new { @class = "form-horizontal", role = "form", id = "resendForm" }))
+    {
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Resend Bill</h4>
+                </div>
+                <div class="modal-body" id="">
+                    Are you sure you want to resend this bill ?
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="resendBill">Resend Bill</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* Load datatable css *@
+
+<link rel="stylesheet" type="text/css" href="~/content/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="~/content/dashboard.css" />
+
+@* Load datatable js *@
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script src="@Url.Content("~/scripts/ellipsis.js")"></script>
+    <script src="@Url.Content("~/scripts/moment.js")"></script>
+    <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
+    <script>
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("RefreshStats", "eBillingDashBoard")',
+        }).success(function (data) {
+            $('#billDate').html(data.Date);
+            $('#numBillsinQueue').html(data.Pending);
+            $('#numProcessed').html(data.Completed);
+            $('#numErrors').html(data.Errors);
+        });
+    });
+
+    $('#btnRefresh').on('click', function () {
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("RefreshStats", "eBillingDashBoard")',
+        }).success(function (data) {
+            $('#billDate').html(data.Date);
+            $('#numBillsinQueue').html(data.Pending);
+            $('#numProcessed').html(data.Completed);
+            $('#numErrors').html(data.Errors);
+        });
+    });
+
+
+    $('#txtBox1').datetimepicker({
+        format: 'Y/m/d',
+        timepicker: false,
+        onSelectDate: function (dt, i) {
+            $('#txtBox2').datetimepicker({
+                format: 'Y/m/d',
+                minDate: dt,
+                timepicker: false
+
+            });
+        }
+    });
+
+    function convertToDate(data) {
+        var dtStart = new Date(parseInt(data.substr(6)));
+        var dtStartWrapper = moment(dtStart);
+        return dtStartWrapper.format("YYYY/MM/DD");
+    }
+
+
+    $(document).ready(function () {
+        $('#myTable').DataTable({
+            "processing": true, @*// for show progress bar*@
+            "serverSide": true, @*// for process server side*@
+            "orderMulti": true, @*// for disable multiple column at once*@
+            "orderable": false,
+            "order": [2, 'asc'],
+            "scrollY": "500px",
+            "info": false,
+            "dom": '<"top"i>rt<"bottom"p><"clear">',
+            "ajax": {
+                "url": "@Url.Action("loaddata", "eBillingDashBoard")",
+                "type": "POST",
+                "datatype": "json"
+            },
+            "pageLength": 100,
+            "columns": [
+            { "data": "AccountNumber", "autowidth": true, "orderable": false },
+            {
+                "data": "CustomerAccountName",
+                "autowidth": true,
+                "className": "show-tooltip",
+                "orderable": false,
+                "render": $.fn.dataTable.render.ellipsis(40)
+
+            },
+            {
+                "data": "BillDate",
+                "render": function (data) {
+                    return convertToDate(data);
+                },
+                "name": "BillDate",
+                "autowidth": true,
+                "orderable": false
+            },
+            {
+                "data": "EmailAddressTo",
+                "autowidth": true,
+                "className": "show-tooltip",
+                "orderable": false,
+                "render": $.fn.dataTable.render.ellipsis(40)
+            },
+            {
+                "data": "EmailAddressCc",
+                "autowidth": true,
+                "orderable": false,
+                "render": $.fn.dataTable.render.ellipsis(20)
+
+            },
+            {
+                "data": "QueueDateTime",
+                "render": function (data) {
+                    return convertToDate(data);
+                },
+                "autowidth": true,
+                "orderable": false
+            }
+            ]
+
+        });
+
+
+
+        oTable = $('#myTable').DataTable();
+
+        function submitParams() {
+            oTable.columns(0).search($('#txtAccountNumber').val().trim());
+            oTable.columns(1).search($('#txtCustomerName').val().trim());
+            oTable.columns(2).search($('#txtEmailAddressName').val().trim());
+            oTable.columns(3).search($('#txtBox1').val().trim());
+            oTable.columns(4).search($('#txtBox2').val().trim());
+            oTable.draw();
+        };
+
+
+        $(document).on('click', '[id^=resend]', function () {
+            var nId = $(this).attr('data-id');
+            @*//$('#resendModal').modal('show');*@
+            $('#resendBill').on('click', function () {
+                console.log("btn clicked");
+                $.ajax({
+                    type: "POST",
+                    dataType: 'html',
+                    url: '@Url.Action("ResendBill", "eBillingDashBoard")',
+                    data: { id: nId }
+                }).success(function (data) {
+                    $('#resendModal').modal('hide');
+                    console.log("Success");
+                });;
+            });
+
+        });
+
+
+        $('#btnSearch').click(function () {
+            submitParams();
+        });
+
+        $('#btnClear').click(function () {
+            $('#txtAccountNumber').val('');
+            $('#txtCustomerName').val('');
+            $('#txtEmailAddressName').val('');
+            $('#txtBox1').val('Select Date');
+            $('#txtBox2').val('Select Date');
+            submitParams();
+        });
+    });
+</script>
+}
+
+

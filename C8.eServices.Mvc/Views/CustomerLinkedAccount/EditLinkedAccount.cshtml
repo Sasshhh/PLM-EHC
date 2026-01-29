@@ -1,0 +1,469 @@
+﻿@model C8.eServices.Mvc.ViewModels.CustomerLinkedAccountViewModel
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Keys
+
+@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    //var documentsList = (IEnumerable<Document>)ViewData["UploadList"];
+    var documentsVm = ViewData["DocumentsVm"];
+}
+
+<script src="@Url.Content("~/Scripts/moment.js")"></script>
+
+<h4>Edit Linked Account</h4>
+<hr />
+
+@if (TempData["Success"] != null)
+{
+    if (TempData["Success"].Equals(true))
+    {
+        <div class="alert alert-success">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>Success!</strong> @ViewBag.CompletedAction
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            <strong>Error! </strong> @ViewBag.CompletedAction
+        </div>
+    }
+}
+
+<div id="linkAccountModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div id="modalContentText"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @Html.EncodedActionLink("Unlink Account", "UnLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "unlinkConfirmBtn", @class = "btn btn-primary" })
+                @*@Html.EncodedActionLink("Relink Account", "ReLinkAccount", "CustomerLinkedAccount", new { id = Model.Id }, new { @id = "relinkConfirmBtn", @class = "btn btn-primary" })*@
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm())
+{
+
+    @Html.HiddenFor(model => model.Id)
+    @*@Html.HiddenFor(model => Model.LinkedEmail)
+        @Html.HiddenFor(model => Model.CustomerId)
+        @Html.HiddenFor(model => Model.RecipientType)
+        @Html.HiddenFor(model => Model.AccountNumber)*@
+    @Html.AntiForgeryToken()
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                        Customer Account Details
+                    </a>
+                </h4>
+            </div>
+            <div id="accountsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.Id)
+
+                        @*<div class="form-group">
+                                @Html.Label("First Name", new { @class = "control-label col-md-2" })
+                                <div class="col-md-2 form-control-static">
+                                    @Html.DisplayFor(model => model.FirstName, new { @style = "margin-left:5%!important;" })
+                                </div>
+                            </div>*@
+
+                        @*<div class="form-group">
+                                @Html.Label("Last Name", new { @class = "control-label col-md-2" })
+                                <div class="col-md-2 form-control-static">
+                                    @Html.DisplayFor(model => model.LastName, new { @style = "margin-left:5%!important;" })
+                                </div>
+                            </div>*@
+
+                        @*<div class="form-group">
+                                @Html.LabelFor(model => model.AccountNumber, new { @class = "control-label col-md-2" })
+                                <div class="col-md-2 form-control-static">
+                                    @Html.DisplayFor(model => model.AccountNumber, new { @style = "margin-left:1%!important;" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("Account Status", new { @class = "control-label col-md-2" })
+                                <div class="col-md-2 form-control-static">
+                                    @Html.DisplayFor(model => model.Status.Name, new { @style = "margin-left:5%!important;" })
+                                </div>
+                            </div>*@
+                        <dl class="dl-horizontal">
+                            <dt>
+                                @Html.DisplayName("First Name")
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.FirstName, new { })
+                            </dd>
+
+                            <dt>
+                                @Html.DisplayName("Last Name")
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.LastName, new { })
+                            </dd>
+
+                            <dt>
+                                @Html.DisplayName("Municipal Account No")
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.AccountNumber, new { })
+                            </dd>
+
+                            <dt>
+                                @Html.DisplayName("Account Status")
+                            </dt>
+
+                            <dd>
+                                @Html.DisplayFor(model => model.Status.Name, new { })
+                            </dd>
+
+
+                        </dl>
+                        <br />
+                        <div class="form-group">
+                            @Html.Label("Notification Type", new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @*@Html.DisplayFor(model => model.LinkedAccount.RecipientType.Name)*@
+                                @Html.DropDownList("RecipientTypeId", null, new { id = "ddlRecipientId", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="primaryEmailGrp" style="display:none;">
+                            @Html.Label("Email Address", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBox("PrimaryEmail", null, new { @class = "form-control", @id = "txtPrimaryEmail", @readonly = true })
+                                @Html.ValidationMessageFor(model => model.LinkedEmail.EmailAddress, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="secondaryEmailGrp" style="display:none;">
+                            @Html.Label("Linked Emails", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                @Html.TextBox("SecondaryEmails", null, new { @class = "form-control", @id = "txtSecondaryEmail" })
+                            </div>
+                            <div><input id="Add" type="button" value="Add Email" class="btn btn-primary btn-sm" /></div>
+                        </div>
+
+                        <div class="form-group" id="mobileNumberGrp" style="display:none;">
+                            @Html.Label("Mobile Numbers", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-3">
+                                <div class="phone-list">
+
+                                    <div class="input-group phone-input">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="type-text">Type</span> <span class="caret"></span></button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                @*<li><a class="changeType" href="javascript:;" data-type-value="phone">Phone</a></li>
+                                                    <li><a class="changeType" href="javascript:;" data-type-value="fax">Fax</a></li>*@
+                                                <li><a class="changeType" href="javascript:;" data-type-value="mobile">Mobile</a></li>
+                                            </ul>
+                                        </span>
+                                        <input type="hidden" name="phone[1][type]" class="type-input" value="" />
+                                        <input type="text" name="phone[1][number]" id="MobileNumber" class="form-control" placeholder="0888888888" />
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success btn-sm btn-add-phone"><span class="glyphicon glyphicon-plus"></span> Add More</button>
+                        </div>
+
+                        @if (Model.Status.Key == StatusKeys.LinkedAccountUnlinked)
+                        {
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    @*//check out if functionality is still available*@
+                                    @*<input type="button" id="relinkBtn" value="Relink Account" class="btn btn-primary" />*@
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" id="submitBtn" value="Submit Changes" class="btn btn-primary" />
+                                    <input type="button" id="unlinkBtn" value="Unlink Account" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    if (Model.LinkedAccount.LinkedAccountType.Key == LinkedAccountTypeKeys.Unassociated)
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                            Customer Documents
+                        </a>
+                    </h4>
+                </div>
+                <div id="documentsCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                @Html.Partial("~/Views/Shared/_DocumentsPartial.cshtml", documentsVm)
+                            </div>
+                        </div>
+                        @if (!ViewBag.DocumentsVerified)
+                        {
+                            <div class="col-md-offset-3 col-md-10">
+                                @Html.EncodedActionLink("Edit", "Index", "Document", new
+                                                   {
+                                                       referenceId = @ViewBag.LinkedAccountId,
+                                                       customerId = Model.CustomerId,
+                                                       referenceTypeId = @ViewBag.ReferenceTypeId,
+                                                       applicationId = @ViewBag.ApplicationId,
+                                                       returnUrl = Url.Action("Index", "Profile", new { agentId = Model.AgentId, customerId = (Model.AgentId != 0) ? Model.AgentCustomerId : Model.CustomerId })
+                                                   }, new { @class = "btn btn-primary" })
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+}
+
+<div>
+    @Html.EncodedActionLink("Back", "Index", "Profile", new { agentId = Model.AgentId, customerId = (Model.AgentId != 0) ? Model.AgentCustomerId : Model.CustomerId }, new { @class = "btn btn-primary" })
+</div>
+
+@*return RedirectToAction("Index2", new { customerId = customerId, agentId = agentId });*@
+
+@*<div class="container" style="padding-top: 50px;">
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#unlinkModal">
+            Create Employee
+        </button>
+    </div>*@
+
+
+@*Modal for delete*@
+@*<div class="modal fade" id="unlinkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        @using (Html.BeginForm("UnLinkAccount", "CustomerLinkedAccount", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "unlink-form" }))
+        {
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Confirm Unlinking</h4>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="Unlink-button">Unlink Account</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>*@
+
+<script type="text/javascript">
+    $(function () {
+
+        populateMobileNumbers();
+
+        var currentRecipientType = '@ViewBag.RecipientType';
+        $("#ddlRecipientId").val('@Model.LinkedAccount.RecipientTypeId').change();
+
+        switch (currentRecipientType) {
+            case "rt_to_primary":
+                $("#txtPrimaryEmail").val('@Model.CustomerEmail');
+                $("#primaryEmailGrp").show();
+                $("#secondaryEmailGrp").hide();
+                $("#mobileNumberGrp").hide();
+                break;
+            case "rt_view_only":
+                $("#primaryEmailGrp").hide();
+                $("#secondaryEmailGrp").hide();
+                $("#txtSecondaryEmail").multiple_emails();
+                $("#mobileNumberGrp").hide();
+                break;
+            case "rt_mobile":
+                $("#primaryEmailGrp").hide();
+                $("#secondaryEmailGrp").hide();
+                $("#txtSecondaryEmail").hide();
+                $("#mobileNumberGrp").show();
+                break;
+            default:
+                var jsonEmails = JSON.parse('@Html.Raw(Json.Encode(ViewBag.EmailAddresses))');
+                var emailList = JSON.stringify(jsonEmails);
+
+                $("#txtSecondaryEmail").val(emailList);
+                $("#txtSecondaryEmail").multiple_emails();
+                $("#secondaryEmailGrp").show();
+                $("#primaryEmailGrp").hide();
+                break;
+        }
+
+        $("#unlinkBtn").on('click', function () {
+            $("#unlinkConfirmBtn").show();
+            $("#relinkConfirmBtn").hide();
+
+            $("#modalTitleText").html("Unlink Customer Account");
+            $("#modalContentText").html("Are you sure you want to unlink this account?");
+
+            $("#linkAccountModal").modal("show");
+        });
+
+        $("#relinkBtn").on('click', function () {
+            $("#unlinkConfirmBtn").hide();
+            $("#relinkConfirmBtn").show();
+
+            $("#modalTitleText").html("Relink Customer Account");
+            $("#modalContentText").html("Are you sure you want to relink this account?");
+
+            $("#linkAccountModal").modal("show");
+        });
+
+        $('#ddlRecipientId').change(function () {
+            var selected = $('#ddlRecipientId option:selected');
+            $("#txtPrimaryEmail").val("");
+
+            @*//use keys later
+            //if (selected.val() == "rt_to_primary") {*@
+            switch (selected.val()) {
+                case "1":
+                    $("#txtPrimaryEmail").val('@Model.CustomerEmail');
+                    $("#txtPrimaryEmail").prop("readonly", true);
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").show();
+                    $("#mobileNumberGrp").hide();
+                    break;
+                case "9": // JK.20190622a - Make sure these are changed to keys.
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").hide();
+                    $("#mobileNumberGrp").hide();
+                    $("#submitBtn").prop('disabled', false);
+                    break;
+                case "10":
+                    $("#secondaryEmailGrp").hide();
+                    $("#primaryEmailGrp").hide();
+                    $("#mobileNumberGrp").hide();
+                    $("#submitBtn").prop('disabled', false);
+                    break;
+                default:
+                    validateEmails();
+                    $("#primaryEmailGrp").hide();
+                    $("#secondaryEmailGrp").show();
+                    $("#txtPrimaryEmail").prop("readonly", false);
+                    break;
+            }
+        });
+
+        $("#txtSecondaryEmail").change(function () {
+            validateEmails();
+        });
+
+        $("#txtMobileNumber").change(function () {
+            validateEmails();
+        });
+
+        @*//$('#Unlink-button').on('click', function () {
+        //    var form = $('#unlink-form');
+        //    form.validate();
+        //    if ($('#unlink-form').valid()) {
+        //        form.submit();
+        //    }
+        //});*@
+
+        function validateEmails() {
+            var value = $("#txtSecondaryEmail").val();
+
+            if (value === "[]" || value === "") {
+                $("#submitBtn").prop('disabled', true);
+            }
+            else {
+                $("#submitBtn").prop('disabled', false);
+            }
+        }
+
+
+        $('.btn-add-phone').click(function () {
+
+            var index = $('.phone-input').length + 1;
+
+            $('.phone-list').append('' +
+                '<div class="input-group phone-input">' +
+                '<span class="input-group-btn">' +
+                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="type-text">Type</span> <span class="caret"></span></button>' +
+                '<ul class="dropdown-menu" role="menu">' +
+                //'<li><a class="changeType" href="javascript:;" data-type-value="phone">Phone</a></li>' +
+                //'<li><a class="changeType" href="javascript:;" data-type-value="fax">Fax</a></li>' +
+                '<li><a class="changeType" href="javascript:;" data-type-value="mobile">Mobile</a></li>' +
+                '</ul>' +
+                '</span>' +
+                '<input type="text" name="phone[' + index + '][number]" id="phone[' + index + '][number]" class="form-control" placeholder="0888888888" />' +
+                '<input type="hidden" name="phone[' + index + '][type]" class="type-input" value="" />' +
+                '<span class="input-group-btn">' +
+                '<button class="btn btn-danger btn-remove-phone" type="button"><span class="glyphicon glyphicon-remove"></span></button>' +
+                '</span>' +
+                '</div>'
+            );
+
+        });
+
+        // JK.20190622 - Shows all the linked mobile numbers.
+        function populateMobileNumbers() {
+
+            var jsonMobiles = JSON.parse('@Html.Raw(Json.Encode(ViewBag.MobileNumbers))');
+            var mobileList = JSON.stringify(jsonMobiles);
+            var index = 1;
+
+            for (index = 0; index < jsonMobiles.length; index++) {
+
+                if (index == 0)
+                    $('#MobileNumber').val(jsonMobiles[index]);
+                else
+                    $('.phone-list').append('' +
+                        '<div class="input-group phone-input">' +
+                        '<span class="input-group-btn">' +
+                        '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="type-text">Type</span> <span class="caret"></span></button>' +
+                        '<ul class="dropdown-menu" role="menu">' +
+                        //'<li><a class="changeType" href="javascript:;" data-type-value="phone">Phone</a></li>' +
+                        //'<li><a class="changeType" href="javascript:;" data-type-value="fax">Fax</a></li>' +
+                        '<li><a class="changeType" href="javascript:;" data-type-value="mobile">Mobile</a></li>' +
+                        '</ul>' +
+                        '</span>' +
+                        '<input type="text" name="phone[' + index + '][number]" id="phone[' + index + '][number]" class="form-control" placeholder="0888888888" />' +
+                        '<input type="hidden" name="phone[' + index + '][type]" class="type-input" value="' + jsonMobiles[index] +'" />' +
+                        '<span class="input-group-btn">' +
+                        '<button class="btn btn-danger btn-remove-phone" type="button"><span class="glyphicon glyphicon-remove"></span></button>' +
+                        '</span>' +
+                        '</div>'
+                    );
+            }
+        }
+    });
+</script>

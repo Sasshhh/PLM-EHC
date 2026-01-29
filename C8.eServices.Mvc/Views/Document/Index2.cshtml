@@ -1,0 +1,149 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.ViewModels.CustomerProfileViewModel
+@{
+    ViewBag.Title = "Index2";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<div id="documentsCollapse" class="panel-collapse collapse in">
+    <div class="panel-body">
+        <div id="currentDocumentsGrp">
+            <div class="form-group">
+                @Html.Partial("~/Views/Shared/_DocumentsPartial.cshtml", Model.Document)
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-10">
+                        @Html.EncodedActionLink("Edit", "Index", "Document", new
+                        {
+                            referenceId = Model.Customer.Id,
+                            customerId = Model.Customer.Id,
+                            referenceTypeId = @ViewBag.ReferenceTypeId,
+                            applicationId = @ViewBag.ApplicationId,
+                            returnUrl = Url.Action("Details", "Customer", SecureActionLinkExtension.Encrypt(new { id = Model.Customer.Id })
+                                )
+                        }, new { @class = "btn btn-primary" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    var model = @Html.Raw(Json.Encode(ViewBag.CustomerModel))
+
+    $("#btnSaveEmail").on("click", function () {
+        var systemUserId = $("#systemUserId").val(),
+            customerId = $("#customerId").val(),
+            email = $("#txtNewEmail").val();
+        var isValid = $("#txtNewEmail")[0].checkValidity();
+
+        if (!isValid) {
+            bootbox.alert("Please enter valid email address.");
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("ModifyCustomerEmail", "Customer")",
+                data: { systemUserId: systemUserId, email: email },
+                success: function (response) {
+                    $("#modifyEmailModal").modal('hide');
+                    resetFields();
+                    console.log(response.result);
+                    bootbox.alert(response.result, function () {
+                        location.reload();
+                    });
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+    });
+
+    window.modifyEmail = function () {
+        try {
+            $("#txtIdNo").val(model.IdentificationNumber);
+            $("#txtFullName").val(model.FullName);
+            $("#txtCurrentEmail").val(model.EmailAddress);
+            $("#systemUserId").val(model.SystemUserId);
+            $("#customerId").val(model.CustomerId);
+
+            $("#modifyEmailModal").modal('show');
+        } catch (ex) {
+            console.log(ex);
+        }
+    };
+
+    window.activateCustomer = function (customerId) {
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("ActivateCustomerProfile", "Customer")",
+            data: { customerId: customerId },
+            success: function (data) {
+                if (data.status == "success") {
+                    var result = "Profile successfully activated.";
+
+                    bootbox.confirm({
+                        message: result,
+                        buttons: {
+                            confirm: {
+                                label: '<i class="fa fa-check"></i> Ok',
+                                className: 'btn-primary'
+                            },
+                            cancel: {
+                                className: 'btn-primary'
+                            }
+                        },
+                        closeButton: false,
+                        callback: function (confirmed) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    };
+
+    $("#btnSaveNote").on("click", function () {
+        var note = $("#note").val();
+        var customerId = $("#customerId").val();
+
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("AddNote", "Customer")",
+            data: { customerId: customerId, note: note },
+            success: function (response) {
+                $("#addNoteModal").modal('hide');
+                location.reload();
+            },
+            error: function (response) {
+                console.log(response.result);
+            }
+        });
+    });
+
+    window.addNote = function (customerId) {
+        $("#customerId").val(customerId);
+        $("#addNoteModal").modal({ autoOpen: true, position: { my: "center", at: "top+350", of: window } });
+    };
+
+    function resetFields() {
+        $("#txtIdNo").val("");
+        $("#txtFullName").val("");
+        $("#txtCurrentEmail").val("");
+        $("#systemUserId").val("");
+        $("#customerId").val("");
+        $("#txtNewEmail").val("");
+    }
+
+    $("#modifyEmailModal").on('hidden.bs.modal', function () {
+        resetFields();
+    });
+
+
+</script>
+

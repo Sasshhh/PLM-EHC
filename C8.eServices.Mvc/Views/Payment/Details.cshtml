@@ -1,0 +1,270 @@
+﻿@model C8.eServices.Mvc.Models.Payment
+
+@{
+    ViewBag.Title = "Pay Bill";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<h2>Pay Bill</h2>
+<hr />
+<div class="alert alert-info">
+    <strong>Please note :</strong> Updating your profile with the latest contact details will allow you to view the MasterPass QR Code and get notifications on payments.
+</div>
+<br />
+@*<div class="alert alert-info">
+        @Url.Action("Login", "Account")
+        <strong>Pay using : </strong><span><a style="color: #31708f;" href="#">Instant EFT</a></span>
+    </div>
+    <br />
+    <form action="https://www.likafintec.co.za/eft/secure/index" method="post">
+            <input type="hidden" name="MerchantId" value="fc22c9b4-73d0-4443-8531-adb1c55338a7"><br>
+            <input type="hidden" name="Reference" value="test"><br>
+            <input type="hidden" name="ReturnUrl" value="https://siyakhokha.ekurhuleni.gov.za/"><br>
+            Amount: <input type="text" name="Amount" value="0.00"><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    <div>
+        <form class="panel-body" action="https://www.likafintec.co.za/eft/secure/index" method="post">
+            <input type="hidden" name="MerchantId" value="fc22c9b4-73d0-4443-8531-adb1c55338a7">
+            <input type="hidden" name="Reference" value="test"><br>
+            <input type="hidden" name="ReturnUrl" value="https://siyakhokha.ekurhuleni.gov.za/">
+            <br />
+            <table width="500">
+                <tr>
+                    <td>Account No: </td>
+                    <td><input type="text" class="form-control" name="Acc" id="Acc" value="@Html.Raw(Model.AccountNumber)" disabled /></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Amount Due (Rand): </td>
+                    <td><input type="text" class="form-control" name="Amount" id="Amount" value="@Html.Raw(Model.Amount)" /></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                <td></td>
+                <td><input type="hidden" class="form-control" name="name_first" id="name_first" value="@Html.Raw(Model.FullName)" /></td>
+            </tr>
+
+                <tr>
+                    <td>Reference: </td>
+                    <td><input type="text" class="form-control" name="Reference1" id="Reference1" value="" readonly /></td>
+                </tr>
+                <tr>
+                    <td>Due Date: </td>
+                    <td><input type="text" class="form-control" name="DueDate" id="DueDate" value="@Html.Raw(Model.BillDate)" disabled /></td>
+                </tr>
+                <tr style="display:none">
+                    <td>Reference 2: </td>
+                    <td><input type="text" class="form-control" name="Reference2" id="Reference2" value="" readonly /></td>
+                </tr>
+                <tr>
+                <td>&nbsp;</td>
+            </tr>
+                <tr>
+                <td>Receipt Email: </td>
+                <td><input type="text" class="form-control" name="email_address" id="email_address" value="@Html.Raw(Model.IdentificationNumber)" disabled /></td>
+            </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="right">
+                        <img onclick="ArtificialSubmit()" id="payEFT" src="~/Content/paynow.png" align="bottom" vspace="3" width="70%" height="auto" title="Pay Now with Instant EFT" />
+                    </td>
+                </tr>
+            </table>
+            <div style="display:none">
+                <input type="submit" id="EFTSubmit" value="Submit">
+            </div>
+        </form>
+    </div>
+
+    <hr />
+    <h2 style="text-align: center;">OR</h2>
+    <hr />*@
+
+
+<div class="alert alert-info">
+    @*@Url.Action("Login", "Account")*@
+    <strong>Pay using : </strong><span><a style="color: #31708f;" href="@Url.Action("IndexBatchEFTPayment", "InstantEFT")">Instant EFT Payment</a></span>.
+</div>
+<hr />
+<h2 style="text-align: center;">OR</h2>
+<hr />
+
+<div class="alert alert-info">
+    @*@Url.Action("Login", "Account")*@
+    <strong>Pay using : </strong><span><a style="color: #31708f;" href="@Url.Action("Index", "DebitOrder")">Once Off Payments/ Debit Orders</a></span>.
+</div>
+<hr />
+<h2 style="text-align: center;">OR</h2>
+<hr />
+<div class="alert alert-info">
+    <strong>Pay using :</strong> Masterpass.
+</div>
+<div class="row">
+    <div class="col-md-1">
+        &nbsp;
+    </div>
+    <div class="col-md-3">
+        <img src="https://masterpasstest.oltio.co.za/pluto/public/qr/@Html.Raw(Model.Code)" style="width:210px;height:350px;" />
+        <h5>@ViewBag.MasPassCode</h5>
+        <p>Alternatively please enter the 10-digit code above into your Masterpass App</p>
+        <br />
+        <p>OR</p>
+        <h5>@ViewBag.USSDMasPass</h5>
+        <p>USSD Code available for MTN and Vodacom Customers only</p>
+
+
+    </div>
+    <div class="col-md-7">
+        <dl class="dl-horizontal">
+
+            <dt>
+                @Html.DisplayNameFor(model => model.AccountNumber)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.AccountNumber)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.BillDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.BillDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Amount)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Amount)
+            </dd>
+
+            @*<dt>
+                    @Html.DisplayNameFor( model => model.BillYear )
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor( model => model.BillYear )
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor( model => model.BillMonth )
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor( model => model.BillMonth )
+                </dd>*@
+
+        </dl>
+
+    </div>
+
+</div>
+<br />
+@*<div>
+        @Html.EncodedActionLink("Back", "Index", "Profile", new { agentId = Model.AgentId, customerId = (Model.AgentId != 0) ? Model.AgentCustomerId : Model.CustomerId }, new { @class = "btn btn-primary" })
+    </div>*@
+
+<p>
+    <a class="btn btn-primary" href="javascript:void(0);" onclick="history.go(-1);">Done</a>
+</p>
+@{Html.RenderAction("BatchDailySequence", "InstantEFT");}
+<script>
+                var BatchstrikeDate =@DateTime.Now.Day;
+            var BatchYear =@DateTime.Now.Year.ToString();
+            var BatchMonth =@DateTime.Now.Month.ToString();
+            if (BatchMonth < 10) {
+                BatchMonth = "0" + BatchMonth;
+                    }
+        var BatchDay =@DateTime.Now.Day.ToString();
+        if (BatchDay < 10) {
+            BatchDay = "0" + BatchDay;
+        }
+            var BatchHour =@DateTime.Now.Hour.ToString();
+            var BatchMinute =@DateTime.Now.Minute.ToString();
+            var BatchSec =@DateTime.Now.Second.ToString();
+            var BatchSSec =@DateTime.Now.Millisecond.ToString();
+            var BatchBool = 1;
+        var startDateFormat = BatchYear + "/" + BatchMonth + "/" + BatchDay;
+        var BatchSequence = @Session["EFTBatchCount"];
+        var SequenceChar = "00";
+        if (BatchSequence.length == 1) {
+            SequenceChar = "00";
+        }
+        else if (BatchSequence.length == 2) {
+            SequenceChar = "0";
+        }
+        else if (BatchSequence.length == 3) {
+            SequenceChar = "";
+        }
+
+        console.log(BatchSequence);
+        console.log(SequenceChar);
+
+        var batchChar = "."
+        //Batch Format- YYYYMMDD-SEQ(3)-BatchID(1)-StrikeDay(2) -20190101-001-1
+        var BatchDateFormat = "." + BatchYear + BatchMonth + BatchDay + SequenceChar+ BatchSequence + BatchBool;
+        //var BatchDateFormat = "." + BatchYear + BatchMonth + BatchDay + BatchHour + BatchMinute + BatchSec + BatchSSec + BatchBool + BatchstrikeDate;
+    document.getElementById('Reference1').value = BatchDateFormat;
+    document.getElementById('Reference2').value = "Single Instant EFT";
+    function ArtificialSubmit() {
+        document.getElementById("EFTSubmit").click();
+    }
+
+    setInputFilter(document.getElementById("amount"), function (value) {
+        return /^\d*[,.]?\d{0,2}$/.test(value);
+    });
+
+    //setInputFilter(document.getElementsByClassName("PayAmtVal"), function (value) {
+    //    return /^\d*[,.]?\d{0,2}$/.test(value);
+    //});
+    //setInputFilter(document.getElementById("BankAccNo"), function (value) {
+    //return /^\d*$/.test(value);
+    //});
+    //setInputFilter(document.getElementById("BankAccHold"), function (value) {
+    //return /^([a-zA-Z _-]*)$/.test(value);
+    //});
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                }
+            });
+        });
+    }
+
+    function blockSpecialChar(e) {
+        var k;
+        document.all ? k = e.keyCode : k = e.which;
+        return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+    }
+    function isNumberKey(evt, obj) {
+
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        var value = obj.value;
+        var dotcontains = value.indexOf(".") != -1;
+        if (dotcontains)
+            if (charCode == 46) return false;
+        if (charCode == 46) return true;
+        if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+</script>

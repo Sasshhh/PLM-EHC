@@ -1,0 +1,56 @@
+﻿@*@using C8.TradeLicense.Models*@
+@using C8.eServices.Mvc.Models
+@*@model C8.TradeLicense.ViewModels.RegisterClientBusinessViewModel *@
+
+
+@{
+    var caseHistoryLog = (List<Audit>)ViewData["CaseHistoryLog"];
+}
+
+<div>
+    <table class="table table-bordered table-hover table-striped panel panel-default display" id="table">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Module Name</th>
+                <th>Column Name</th>
+                <th>Original Value</th>
+                <th>Current Value</th>
+                <th>Audit By SystemUser</th>
+                <th>IP Address</th>
+                <th>Audit Date Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in caseHistoryLog)
+            {
+                <tr>
+                    <td>@item.Action</td>
+                    <td>@item.TableName</td>
+                    <td>@item.ColumnName</td>
+                    <td>@item.OriginalValue</td>
+                    <td>@item.CurrentValue</td>
+                    <td>@if (item.AuditBySystemUser != null) {
+                        @item.AuditBySystemUser.FullName}</td>
+                    <td>@item.IPAddress</td>
+                    <td>@item.AuditDateTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<script type="text/javascript">
+
+    $(function () {
+    //    $('#table').DataTable();
+    });
+</script>
+
+
+<script>
+    $(function () {
+        $('#table').DataTable();
+    });
+</script>

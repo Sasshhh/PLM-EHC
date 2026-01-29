@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://xmlns.example.com/1474018577615" xmlns:ns0="http://www.tibco.com/schemas/CaseStart_OfflineFormService/SharedResources/Schemas/Schema.xsd2" name="Untitled" targetNamespace="http://xmlns.example.com/1474018577615" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema xmlns="http://www.tibco.com/schemas/CaseStart_OfflineFormService/SharedResources/Schemas/Schema.xsd2" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.tibco.com/schemas/CaseStart_OfflineFormService/SharedResources/Schemas/Schema.xsd2" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="Error_T">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ErrorCode" type="xs:string" />
+          <xs:element minOccurs="0" name="ErrorMsg" type="xs:string" />
+          <xs:element minOccurs="0" name="ErrorDescription" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Status_T">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="StatusCode" type="xs:string" />
+          <xs:element minOccurs="0" name="StatusMsg" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="Anonymous">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:Yes" />
+            <xs:element minOccurs="0" ref="ns0:No" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="BuildingComplex" type="xs:string" />
+      <xs:element name="CASE_DETAIL">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="ReferenceNumber" type="xs:string" />
+            <xs:element name="MainStatus" type="xs:string" />
+            <xs:element name="CurrentStatus" type="xs:string" />
+            <xs:element name="CaseCloseDate" type="xs:string" />
+            <xs:element name="CaseOpenDate" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CUSTOMER_ADDRESS_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:UnitNo" />
+            <xs:element minOccurs="0" ref="ns0:FloorNo" />
+            <xs:element minOccurs="0" ref="ns0:SectionNo" />
+            <xs:element minOccurs="0" ref="ns0:BuildingComplex" />
+            <xs:element minOccurs="0" ref="ns0:StreetNo" />
+            <xs:element minOccurs="0" ref="ns0:StreetName" />
+            <xs:element minOccurs="0" ref="ns0:StreetType" />
+            <xs:element minOccurs="0" ref="ns0:SuburbDistrict" />
+            <xs:element minOccurs="0" ref="ns0:CityTown" />
+            <xs:element minOccurs="0" ref="ns0:X-Coordinates" />
+            <xs:element minOccurs="0" ref="ns0:Y-Coordinates" />
+            <xs:element ref="ns0:SameAsPhysical" />
+            <xs:element ref="ns0:Post" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CUSTOMER_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ns0:NewOrExistingCustomer" />
+            <xs:element name="Type" type="xs:string" />
+            <xs:element name="Title" type="xs:string" />
+            <xs:element name="Name" type="xs:string" />
+            <xs:element name="Surname" type="xs:string" />
+            <xs:element name="IDNo" type="xs:string" />
+            <xs:element minOccurs="0" name="AccountNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="RatesNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="ConnectionNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="PassportNumber" type="xs:string" />
+            <xs:element name="TelWorkNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="TelHomeNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="FaxNumber" type="xs:string" />
+            <xs:element name="EmailAddress" type="xs:string" />
+            <xs:element minOccurs="0" name="BusinessName" type="xs:string" />
+            <xs:element minOccurs="0" name="RegistrationNumber" type="xs:string" />
+            <xs:element minOccurs="0" name="ErfNo" type="xs:string" />
+            <xs:element minOccurs="0" name="WardNo" type="xs:string" />
+            <xs:element minOccurs="0" name="Councillor" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CaseStartOffline_Request">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ns0:CASE_DETAIL" />
+            <xs:element ref="ns0:SERVICE_DETAILS" />
+            <xs:element ref="ns0:SERVICE_ADDRESS_DETAILS" />
+            <xs:element ref="ns0:WRITER_DETAILS" />
+            <xs:element ref="ns0:WRITER_ADDRESS_DETAILS" />
+            <xs:element ref="ns0:CUSTOMER_DETAILS" />
+            <xs:element ref="ns0:CUSTOMER_ADDRESS_DETAILS" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CaseStartOffline_Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="ReferenceNo" type="xs:string" />
+            <xs:element ref="ns0:Status" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CityTown" type="xs:string" />
+      <xs:element name="Error" type="ns0:Error_T" />
+      <xs:element name="FloorNo" type="xs:string" />
+      <xs:element name="NewOrExistingCustomer">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:Yes" />
+            <xs:element minOccurs="0" ref="ns0:No" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="No" type="xs:boolean" />
+      <xs:element name="Post">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:UnitNo" />
+            <xs:element minOccurs="0" ref="ns0:FloorNo" />
+            <xs:element minOccurs="0" ref="ns0:SectionNo" />
+            <xs:element minOccurs="0" ref="ns0:BuildingComplex" />
+            <xs:element minOccurs="0" ref="ns0:PostalBox" />
+            <xs:element minOccurs="0" ref="ns0:StreetNo" />
+            <xs:element minOccurs="0" ref="ns0:StreetName" />
+            <xs:element minOccurs="0" ref="ns0:StreetType" />
+            <xs:element minOccurs="0" ref="ns0:SuburbDistrict" />
+            <xs:element minOccurs="0" ref="ns0:CityTown" />
+            <xs:element minOccurs="0" name="Code" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PostalBox" type="xs:string" />
+      <xs:element name="PostalCode" type="xs:string" />
+      <xs:element name="SERVICE_ADDRESS_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ns0:SameAsCustomer" />
+            <xs:element minOccurs="0" ref="ns0:UnitNo" />
+            <xs:element minOccurs="0" ref="ns0:FloorNo" />
+            <xs:element minOccurs="0" ref="ns0:SectionNo" />
+            <xs:element minOccurs="0" ref="ns0:BuildingComplex" />
+            <xs:element ref="ns0:StreetNo" />
+            <xs:element ref="ns0:StreetName" />
+            <xs:element minOccurs="0" ref="ns0:StreetType" />
+            <xs:element ref="ns0:SuburbDistrict" />
+            <xs:element ref="ns0:CityTown" />
+            <xs:element ref="ns0:StreetCode" />
+            <xs:element minOccurs="0" ref="ns0:X-Coordinates" />
+            <xs:element minOccurs="0" ref="ns0:Y-Coordinates" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SERVICE_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ServiceType" type="xs:string" />
+            <xs:element name="Category" type="xs:string" />
+            <xs:element minOccurs="0" name="Sub-Category" type="xs:string" />
+            <xs:element name="ServiceDescription" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SameAsCustomer">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:Yes" />
+            <xs:element minOccurs="0" ref="ns0:No" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SameAsPhysical">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:Yes" />
+            <xs:element minOccurs="0" ref="ns0:No" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SectionNo" type="xs:string" />
+      <xs:element name="Status" type="ns0:Status_T" />
+      <xs:element name="StreetCode" type="xs:string" />
+      <xs:element name="StreetName" type="xs:string" />
+      <xs:element name="StreetNo" type="xs:string" />
+      <xs:element name="StreetType" type="xs:string" />
+      <xs:element name="SuburbDistrict" type="xs:string" />
+      <xs:element name="UnitNo" type="xs:string" />
+      <xs:element name="WRITER_ADDRESS_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:UnitNo" />
+            <xs:element minOccurs="0" ref="ns0:FloorNo" />
+            <xs:element minOccurs="0" ref="ns0:SectionNo" />
+            <xs:element minOccurs="0" ref="ns0:BuildingComplex" />
+            <xs:element ref="ns0:StreetNo" />
+            <xs:element ref="ns0:StreetName" />
+            <xs:element minOccurs="0" ref="ns0:StreetType" />
+            <xs:element ref="ns0:SuburbDistrict" />
+            <xs:element ref="ns0:CityTown" />
+            <xs:element ref="ns0:StreetCode" />
+            <xs:element minOccurs="0" ref="ns0:X-Coordinates" />
+            <xs:element minOccurs="0" ref="ns0:Y-Coordinates" />
+            <xs:element ref="ns0:Writer_PostSameAsPhysical" />
+            <xs:element ref="ns0:WRITER_POSTAL" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="WRITER_DETAILS">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ns0:Anonymous" />
+            <xs:element name="Title" type="xs:string" />
+            <xs:element name="Surname" type="xs:string" />
+            <xs:element name="Name" type="xs:string" />
+            <xs:element minOccurs="0" name="IDNo" type="xs:string" />
+            <xs:element minOccurs="0" name="TelHomeNo" type="xs:string" />
+            <xs:element minOccurs="0" name="TelWorkNo" type="xs:string" />
+            <xs:element name="CellNo" type="xs:string" />
+            <xs:element minOccurs="0" name="FaxNo" type="xs:string" />
+            <xs:element name="EmailAddress" type="xs:string" />
+            <xs:element name="RelationToCustomer" type="xs:string" />
+            <xs:element name="StatusNotification" type="xs:string" />
+            <xs:element name="CorrespondenceNotification" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="WRITER_POSTAL">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ns0:PostalBox" />
+            <xs:element ref="ns0:SuburbDistrict" />
+            <xs:element ref="ns0:CityTown" />
+            <xs:element ref="ns0:PostalCode" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Writer_PostSameAsPhysical">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="ns0:Yes" />
+            <xs:element minOccurs="0" ref="ns0:No" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="X-Coordinates" type="xs:string" />
+      <xs:element name="Y-Coordinates" type="xs:string" />
+      <xs:element name="Yes" type="xs:boolean" />
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="OfflineInputRequest">
+    <wsdl:part name="OfflineInputRequest" element="ns0:CaseStartOffline_Request" />
+  </wsdl:message>
+  <wsdl:message name="OfflineInputResponse">
+    <wsdl:part name="OfflineInputResponse" element="ns0:CaseStartOffline_Response" />
+  </wsdl:message>
+  <wsdl:message name="Error">
+    <wsdl:part name="Error" element="ns0:Error" />
+  </wsdl:message>
+  <wsdl:portType name="PortType">
+    <wsdl:operation name="CaseStart_OfflineForm_Operation">
+      <wsdl:input message="tns:OfflineInputRequest" />
+      <wsdl:output message="tns:OfflineInputResponse" />
+      <wsdl:fault name="fault1" message="tns:Error" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PortTypeEndpoint0Binding" type="tns:PortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CaseStart_OfflineForm_Operation">
+      <soap:operation soapAction="/Services/WSDL-service0.serviceagent/PortTypeEndpoint0/CaseStart_OfflineForm_Operation" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" parts="OfflineInputRequest" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" parts="OfflineInputResponse" />
+      </wsdl:output>
+      <wsdl:fault name="fault1">
+        <soap:fault use="literal" name="fault1" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSDL-service0">
+    <wsdl:port name="PortTypeEndpoint0" binding="tns:PortTypeEndpoint0Binding">
+      <soap:address location="http://10.10.7.100:9040/Services/WSDL-service0.serviceagent/PortTypeEndpoint0" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

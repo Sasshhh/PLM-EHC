@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<div style="background-color:#80b946; text-align: center; margin-top: 51px; margin-bottom: 15px; padding: 4px;"><strong>Result</strong></div>
+<div class="container">
+    <form role="form" class="form-horizontal text-left" action="query.cshtml" method="post" name="query_paygate_form">
+        <div class="form-group">
+            <label for="checksumResult" class="col-sm-3 control-label">Checksum result</label>
+            <p id="checksumResult" class="form-control-static">@ViewBag.ValidText</p>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label for="PAY_REQUEST_ID" class="col-sm-3 control-label">Pay Request ID</label>
+            <p id="PAY_REQUEST_ID" class="form-control-static">@ViewBag.Data["PAY_REQUEST_ID"]</p>
+        </div>
+        <div class="form-group">
+            <label for="TRANSACTION_STATUS" class="col-sm-3 control-label">Transaction Status</label>
+            <p id="TRANSACTION_STATUS" class="form-control-static">@ViewBag.Data["TRANSACTION_STATUS"] - @ViewBag.Pg3.getTransactionStatusDescription(ViewBag.TransactionStatus)</p>
+        </div>
+        <div class="form-group">
+            <label for="CHECKSUM" class="col-sm-3 control-label">Checksum</label>
+            <p id="CHECKSUM" class="form-control-static">@ViewBag.Checksum</p>
+        </div>
+        <!-- Hidden fields to post to the Query service -->
+        <input type="hidden" name="PAYGATE_ID" value="@ViewBag.Data["PAYGATE_ID"]" />
+        <input type="hidden" name="PAY_REQUEST_ID" value="@ViewBag.Data["PAY_REQUEST_ID"]" />
+        <input type="hidden" name="REFERENCE" value="@ViewBag.Data["REFERENCE"]" />
+        <input type="hidden" name="encryption_key" value="@ViewBag.Key" />
+        <!-- -->
+        <div class="form-group">
+            <div class="col-sm-2">
+                <input type="submit" class="btn btn-success btn-block" value="Query PayGate" name="btnSubmit">
+            </div>
+            <div class="col-sm-offset-2 col-sm-2">
+                <input type="submit" formaction="simple_query.cshtml" class="btn btn-success btn-block" value="Simple Query">
+            </div>
+            <div class="col-sm-offset-2 col-sm-2">
+                <a href="index.cshtml" class="btn btn-primary btn-block">New Transaction</a>
+            </div>
+        </div>
+    </form>
+</div>

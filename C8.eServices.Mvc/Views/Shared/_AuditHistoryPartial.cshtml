@@ -1,0 +1,55 @@
+﻿@*@using C8.TradeLicense.Models*@
+@using C8.eServices.Mvc.Models
+@*@model C8.TradeLicense.ViewModels.RegisterClientBusinessViewModel *@
+
+
+@{
+    var caseHistoryLog = (List<PLMApplicationHistortyLog>)ViewData["CaseHistoryLog"];
+}
+
+<div>
+    <table class="table table-bordered table-hover table-striped panel panel-default display" id="table">
+        <thead>
+            <tr>
+                <th>
+                    Reference Number
+                </th>
+                <th>
+                    Action
+                </th>
+                <th>
+                    Actioned By
+                </th>
+                <th>
+                    TimeStamp
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in caseHistoryLog)
+            {
+                <tr>
+                    <td>@Html.Raw(item.PropertyLeaseApplication == null ? item.HumanSettlementApplication.ApplicationReferenceNumber : item.PropertyLeaseApplication.ApplicationReferenceNumber)</td>
+                    <td>@item.AuditAction</td>
+                    <td>@item.User.FullName</td>
+                    <td>@item.CreatedDateTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<script type="text/javascript">
+
+    $(function () {
+       $('#table').DataTable();
+    });
+</script>
+
+
+<script>
+    $(function () {
+        $('#table').DataTable();
+    });
+</script>

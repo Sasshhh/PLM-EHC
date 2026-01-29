@@ -1,0 +1,438 @@
+﻿@model C8.eServices.Mvc.ViewModels.DashboardViewModel
+@using C8.eServices.Mvc.Keys;
+@using C8.eServices.Mvc.Models;
+@using C8.eServices.Mvc.DataAccessLayer;
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+
+    var core = new eServicesDbContext();
+    BaseHelper _base = new BaseHelper();
+    _base.Initialise(core);
+
+    //var RenewalFirstRecommendation = Model;
+    //var AgreementRenewalAcceptance = Model;
+    //var RenewalUploadDocs = Model;
+    //var GenerateLeaseAgreement = Model;
+    //var AgreementSignature = Model;
+    //var FinalizeAgreement = Model;
+    //var UpdateAgreement = Model;
+    //var NoticedAgreements = Model;
+    //var PendingTakeOff = Model;
+    //var PostInspection = Model;
+    //var Renewal2ndRecommendation = Model;
+    //var AgreementReview = Model;
+    //var PendingTerminationreview = Model;
+    //var RenewalReview = Model;
+    //var AgreementApproval = Model;
+
+    //var AllApplications = Session["AllApplications"].ToString();
+    //var MasterApplications = Session["AllMasterApplications"].ToString();
+    //var NewApplications = Session["AllNewApplications"].ToString();
+    //var CurrentAgreeentsSigned = Session["SignedAgreements"].ToString();
+
+
+    //if (User.IsInRole("Housing Liaison Officer"))
+    //{
+    //    RenewalFirstRecommendation = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.RenewalFirstRecommendation).ToList();
+    //    AgreementRenewalAcceptance = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.AgreementRenewalAcceptance).ToList();
+    //    RenewalUploadDocs = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.RenewalUploadDocs).ToList();
+    //    GenerateLeaseAgreement = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.GenerateLeaseAgreement).ToList();
+    //    AgreementSignature = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.AgreementSignature).ToList();
+    //    FinalizeAgreement = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.FinalizeAgreement).ToList();
+    //    UpdateAgreement = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.UpdateAgreement).ToList();
+    //    NoticedAgreements = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.NoticedAgreements).ToList();
+    //    PendingTakeOff = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.PendingTakeOff).ToList();
+    //    PostInspection = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.PostInspection).ToList();
+    //}
+    //else if (User.IsInRole("Senior Housing Specialist"))
+    //{
+    //    Renewal2ndRecommendation = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.Renewal2ndRecommendation).ToList();
+    //    AgreementReview = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.AgreementReview).ToList();
+    //    PendingTerminationreview = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.PendingTerminationreview).ToList();
+    //}
+    //else if (User.IsInRole("Regional Manager"))
+    //{
+    //    RenewalReview = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.RenewalReview).ToList();
+    //    AgreementApproval = Model.Where(a => a.ResponsibilityType.Key == ResponsibilityTypeKeys.AgreementApproval).ToList();
+    //}
+}
+
+<style>
+    .grey-bg {
+        background-color: #F5F7FA;
+    }
+
+    body {
+        margin-top: 20px;
+        background: #FAFAFA;
+    }
+
+    .order-card {
+        color: #fff;
+    }
+
+    .bg-c-blue {
+        background: linear-gradient(45deg,#1d3c77,#1d3c77);
+    }
+
+    .bg-c-green {
+        background: linear-gradient(45deg,#006338,#006338);
+    }
+
+    .bg-c-yellow {
+        background: linear-gradient(45deg,#f7b512,#f7b512);
+    }
+
+    .bg-c-pink {
+        background: linear-gradient(45deg,#da291c,#da291c);
+    }
+
+
+    .card {
+        border-radius: 5px;
+        -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+        box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+        border: none;
+        margin-bottom: 30px;
+        -webkit-transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .card .card-block {
+            padding: 25px;
+        }
+
+    .order-card i {
+        font-size: 26px;
+    }
+
+    .f-left {
+        float: left;
+    }
+
+    .f-right {
+        float: right;
+    }
+
+
+    h4 {
+        color: #FFF;
+        letter-spacing: 1px;
+        padding: 5px;
+        margin: 0;
+    }
+
+    h4 {
+        color: #FFF;
+        letter-spacing: 1px;
+        padding: 5px;
+        margin: 0;
+    }
+
+    hr {
+        color: whitesmoke;
+    }
+
+    .alignleft {
+        float: left;
+    }
+
+    .alignright {
+        float: right;
+    }
+
+    .m-b-20 {
+        text-align: center;
+        padding-bottom: 0px;
+    }
+
+
+    .card-block:hover {
+        cursor: pointer;
+    }
+
+    .grey-bg {
+        padding: 25px;
+    }
+
+    .site-head.fixedHeader {
+        top: 0%;
+        position: fixed;
+        left: 0;
+        right: 0;
+    }
+</style>
+<link href="~/Content/Dashboard/font-awesome.min.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/Montserrat-display.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/bootstrap-extended.min.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/bootstrap2.min.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/colors.min.css" rel="stylesheet" />
+<link href="~/Content/Dashboard/simple-line-icons-style.min.css" rel="stylesheet" />
+
+<div class="grey-bg container-fluid">
+    <section id="stats-subtitle">
+        <div class="row">
+            <div class="col-12 mt-3 mb-1">
+                <h4 class="text-uppercase" style="color:dimgrey;">Human Settlement Dashboard - @_base.SystemUser.UserFullName</h4>
+                <p>&nbsp; <span id="span"></span></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementApplications", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Master=" + false + "&All=" + true + "&New=" + false) })'">
+                <div class="card bg-c-blue order-card">
+                    <div class="card-block">
+                        <div><h4 class="text-center" style="font-size:50px;">@Model.AllApplications</h4></div>
+                        <hr style="width: 80%;" />
+                        <div><h4 class="text-center">All Applications</h4></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementApplications", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Master=" + true + "&All=" + false + "&New=" + false) })'">
+                <div class="card bg-c-green order-card">
+                    <div class="card-block">
+                        <div><h4 class="text-center" style="font-size:50px;">@Model.MasterApplications</h4></div>
+                        <hr style="width: 80%;" />
+                        <div><h4 class="text-center">Master Applications</h4></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementApplications", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Master=" + false + "&All=" + false + "&New=" + true) })'">
+                <div class="card bg-c-yellow order-card">
+                    <div class="card-block">
+                        <div><h4 class="text-center" style="font-size:50px;">@Model.NewApplications</h4></div>
+                        <hr style="width: 80%;" />
+                        <div><h4 class="text-center">New Applications</h4></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <div class="card bg-c-pink order-card">
+                    <div class="card-block">
+                        <div><h4 class="text-center" style="font-size:50px;">@Model.CurrentAgreeentsSigned</h4></div>
+                        <hr style="width: 80%;" />
+                        <div><h4 class="text-center">Signed Agreements</h4></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </section>
+    <section id="minimal-statistics">
+        <div class="row">
+            <div class="col-12 mt-3 mb-1">
+                <h4 class="text-uppercase" style="color:dimgrey;">personalized Dashboard Cards</h4>
+                <p>@*@DateTime.Now.ToLongDateString() -  @DateTime.Now.ToShortTimeString()*@</p>
+            </div>
+        </div>
+        @if (User.IsInRole("Housing Liaison Officer") || (User.IsInRole("Super Administrators")) || (User.IsInRole("Back Office System Administrator")))
+        {
+            <div class="row">
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Recommend=" + true + "&Review=" + false + "&Approve=" + false + "&Accept=" + false + "&Renew=" + false) })'">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.RenewalFirstRecommendation.Count()</h4><h4 class="alignright">@Model.RenewalFirstRecommendation.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Renewal Reccomend...</h4><h4 class="alignright"><span>@Model.RenewalFirstRecommendation.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Recommend=" + false + "&Review=" + false + "&Approve=" + false + "&Accept=" + true + "&Renew=" + false) })'">
+                    <div class="card bg-c-green order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.AgreementRenewalAcceptance.Count()</h4><h4 class="alignright">@Model.AgreementRenewalAcceptance.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Renewal Acceptance</h4><h4 class="alignright"><span>@Model.AgreementRenewalAcceptance.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Recommend=" + false + "&Review=" + false + "&Approve=" + false + "&Accept=" + false + "&Renew=" + true) })'">
+                    <div class="card bg-c-yellow order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.RenewalUploadDocs.Count()</h4><h4 class="alignright">@Model.RenewalUploadDocs.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Renewal Documents</h4><h4 class="alignright"><span>@Model.RenewalUploadDocs.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + true + "&Review=" + false + "&Approve=" + false + "&Signature=" + false + "&Finalized=" + false + "&Update=" + false) })'">
+                    <div class="card bg-c-pink order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.GenerateLeaseAgreement.Count()</h4><h4 class="alignright">@Model.GenerateLeaseAgreement.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Generate Agreement</h4><h4 class="alignright"><span>@Model.GenerateLeaseAgreement.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + false + "&Approve=" + false + "&Signature=" + true + "&Finalized=" + false + "&Update=" + false) })'">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.AgreementSignature.Count()</h4><h4 class="alignright">@Model.AgreementSignature.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Agreement Signature</h4><h4 class="alignright"><span>@Model.AgreementSignature.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + false + "&Approve=" + false + "&Signature=" + false + "&Finalized=" + true + "&Update=" + false) })'">
+                    <div class="card bg-c-green order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.FinalizeAgreement.Count()</h4><h4 class="alignright">@Model.FinalizeAgreement.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Finalized Agreements</h4><h4 class="alignright"><span>@Model.FinalizeAgreement.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + false + "&Approve=" + false + "&Signature=" + false + "&Finalized=" + false + "&Update=" + true) })'">
+                    <div class="card bg-c-yellow order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.UpdateAgreement.Count()</h4><h4 class="alignright">@Model.UpdateAgreement.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Update Agreement</h4><h4 class="alignright"><span>@Model.UpdateAgreement.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("NoticedAgreementTerminations", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Search=" + true + "&Render=" + false + "&Id=0") })'">
+                    <div class="card bg-c-pink order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.NoticedAgreements.Count()</h4><h4 class="alignright">@Model.NoticedAgreements.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Noticed Agreements</h4><h4 class="alignright"><span>@Model.NoticedAgreements.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("AgreementTermination", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ViewName=" + ViewCodeKeys.PenndingTakeOffConfirmation) })'">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.PendingTakeOff.Count()</h4><h4 class="alignright">@Model.PendingTakeOff.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Pending Take-Off</h4><h4 class="alignright"><span>@Model.PendingTakeOff.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("PropertyLeaseInspections", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ViewName=" + ViewCodeKeys.PostInspection) })'">
+                    <div class="card bg-c-green order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.PostInspection.Count()</h4><h4 class="alignright">@Model.PostInspection.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Post Inspection</h4><h4 class="alignright"><span>@Model.PostInspection.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.IsInRole("Senior Housing Specialist") || (User.IsInRole("Super Administrators")) || (User.IsInRole("Back Office System Administrator")))
+        {
+
+            <div class="row">
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Recommend=" + false + "&Review=" + true + "&Approve=" + false + "&Accept=" + false + "&Renew=" + false) })'">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.Renewal2ndRecommendation.Count()</h4><h4 class="alignright">@Model.Renewal2ndRecommendation.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Renewal Reccomend...</h4><h4 class="alignright"><span>@Model.Renewal2ndRecommendation.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + true + "&Approve=" + false + "&Signature=" + false + "&Finalized=" + false + "&Update=" + false) })'">
+                    <div class="card bg-c-green order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.AgreementReview.Count()</h4><h4 class="alignright">@Model.AgreementReview.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Agreement Review</h4><h4 class="alignright"><span>@Model.AgreementReview.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("AgreementTermination", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ViewName=" + ViewCodeKeys.AgreementTermination) })'">
+                    <div class="card bg-c-yellow order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.PendingTerminationreview.Count()</h4><h4 class="alignright">@Model.PendingTerminationreview.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Termination Review</h4><h4 class="alignright"><span>@Model.PendingTerminationreview.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.IsInRole("Regional Manager") || (User.IsInRole("Super Administrators")) || (User.IsInRole("Back Office System Administrator")))
+        {
+            <div class="row">
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanAgreementRenewwals", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + false + "&Approve=" + true + "&Signature=" + false + "&Finalized=" + false + "&Update=" + false) })'">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.RenewalReview.Count()</h4><h4 class="alignright">@Model.RenewalReview.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Renewal Review</h4><h4 class="alignright"><span>@Model.RenewalReview.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-xl-3" onclick="window.location='@Url.Action("HumanSettlementAgreements", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Generate=" + false + "&Review=" + false + "&Approve=" + true + "&Signature=" + false + "&Finalized=" + false + "&Update=" + false) })'">
+                    <div class="card bg-c-green order-card">
+                        <div class="card-block">
+                            <div><h4 class="alignleft">@Model.AgreementApproval.Count()</h4><h4 class="alignright">@Model.AgreementApproval.Where(c => c.Status.Key == StatusKeys.Archived).Count()</h4><br style="clear:both;" /></div>
+                            <div><h4 class="alignleft">Recieved</h4><h4 class="alignright">Completed</h4><br style="clear:both;" /></div>
+                            <hr style="width: 80%;" />
+                            <div><h4 class="alignleft">Agreement Review</h4><h4 class="alignright"><span>@Model.AgreementApproval.Where(c => c.Status.Key == StatusKeys.Submitted).Count()</span></h4><br style="clear:both;" /></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </section>
+</div>
+
+<script>
+    $(document).ready(function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        var bun = document.getElementById('burgerbutton');
+        bun.click();
+    });
+    function time() {
+        var span = document.getElementById('span');
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+        var d = new Date();
+        var s = d.getSeconds();
+        var m = d.getMinutes();
+        var h = d.getHours();
+        span.textContent =
+            d.toLocaleDateString("en-US", options) + " - " + ("0" + h).substr(-2) + ":" + ("0" + m).substr(-2) + ":" + ("0" + s).substr(-2);
+    }
+    setInterval(time, 1000);
+</script>

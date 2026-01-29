@@ -1,0 +1,409 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Correspondance>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                    Correspondances
+                </a>
+            </h4>
+        </div>
+        <div class="panel-body">
+            <table class="table">
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TitleType.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ReferenceNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Category)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.SubCategory)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceUnitNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceFloorNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceSectionNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceBuildingComplex)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddress1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddress2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddress3)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddress4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddress5)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceXCoordinate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceyCoordinatre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.FirstName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.LastName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IdentificationNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WorkTelephoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.HomeTelephoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CellPhoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.FaxNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EmailAddress)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Relationship)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.StatusNotification)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CorrespondanceNotification)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPhysicalAddress1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPhysicalAddress2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPhysicalAddress3)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPhysicalAddress4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPhysicalAddress5)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPostalAddress1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPostalAddress2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPostalAddress3)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WriterPostalAddress4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerTitle)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerFirstName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerLastName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerIdentificationNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AccountNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.RatesNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ConnectionNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerWorkTelephoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerHomeTelephoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerCellPhoneNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerFaxNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerEmailAddress)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BusinessName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BusinessRegistrationNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPhysicalAddress1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPhysicalAddress2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPhysicalAddress3)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPhysicalAddress4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPhysicalAddress5)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPostalAddress1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPostalAddress2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPostalAddress3)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CustomerPostalAddress4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ServiceAddressType)
+                    </th>
+                    <th></th>
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TitleType.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceType)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Category)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SubCategory)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceUnitNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceFloorNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceSectionNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceBuildingComplex)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddress3)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddress4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddress5)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceXCoordinate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceyCoordinatre)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FirstName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.LastName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IdentificationNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WorkTelephoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.HomeTelephoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CellPhoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FaxNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EmailAddress)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Relationship)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.StatusNotification)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CorrespondanceNotification)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPhysicalAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPhysicalAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPhysicalAddress3)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPhysicalAddress4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPhysicalAddress5)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPostalAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPostalAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPostalAddress3)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WriterPostalAddress4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerType)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerTitle)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerFirstName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerLastName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerIdentificationNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AccountNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.RatesNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ConnectionNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerWorkTelephoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerHomeTelephoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerCellPhoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerFaxNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerEmailAddress)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.BusinessName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.BusinessRegistrationNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPhysicalAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPhysicalAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPhysicalAddress3)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPhysicalAddress4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPhysicalAddress5)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPostalAddress1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPostalAddress2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPostalAddress3)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CustomerPostalAddress4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceAddressType)
+                        </td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                            @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                        </td>
+                    </tr>
+                }
+
+            </table>
+
+        </div>
+    </div>
+</div>
+
+      

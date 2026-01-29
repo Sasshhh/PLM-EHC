@@ -1,0 +1,549 @@
+﻿@model C8.eServices.Mvc.ViewModels.CustomerLinkedAccountViewModel
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Helpers
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var db = new eServicesDbContext();
+    //var documentsList = (IEnumerable<Document>)ViewData["UploadList"];
+    var documentsVm = ViewData["DocumentsVm"];
+}
+
+<h4>Linked Account Details</h4>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.LinkedAccount.Id)
+
+    if (TempData["Success"] != null)
+    {
+        if (TempData["Success"].Equals(true))
+        {
+            <div class="alert alert-success">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Success!</strong> @ViewBag.CompletedAction
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Failed - </strong> @ViewBag.CompletedAction
+            </div>
+        }
+    }
+
+    <div id="emailResponseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Activation Email</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div id="modalContentText"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#accountsCollapse">
+                        Customer Account Details
+                    </a>
+                </h4>
+            </div>
+            <div id="accountsCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <dl class="dl-horizontal table-responsive">
+                        @if (Model.Customer.CustomerType.Key == CustomerTypeKeys.Entity || Model.Customer.CustomerType.Key == CustomerTypeKeys.ManagingAgent)
+                        {
+                            <dt>
+                                @Html.DisplayName("Business Registration:")
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Entity.EntityRegistrationNumber)
+                            </dd>
+                            <dt>
+                                @Html.DisplayName("Business Name:")
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Entity.EntityName)
+                            </dd>
+                        }
+                        <br />
+                        @if (Model.Agent.Id > 0)
+                        {
+                            <dt>
+                                @Html.DisplayName("Managing Agent ID/Passport No:")
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Agent.IdentificationNumber)
+                            </dd>
+                            <dt>
+                                @Html.DisplayName("Managing Agent Full Name:")
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Agent.FullName)
+                            </dd>
+                        }
+                        <br />
+                        <dt>
+                            @Html.DisplayName("Customer ID/Passport No:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.IdentificationNumber)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Account No:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.AccountNumber)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Linked Account Type:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.LinkedAccountType)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Status:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Status.Name)
+                        </dd>
+
+                        <br />
+
+                        <dt>
+                            @Html.DisplayName("Full Name:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.FullName)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Primary Email:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.EmailAddress)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Contact Number:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Customer.CellPhoneNumber)
+                        </dd>
+
+                        <br />
+
+                        <dt>
+                            @Html.DisplayName("Recipient Type:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.LinkedAccount.RecipientType.Name)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayName("Date Created:")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.LinkedAccount.CreatedDateTime)
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    if (Model.LinkedAccount.LinkedAccountType.Key == LinkedAccountTypeKeys.Unassociated)
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#documentsCollapse">
+                            Customer Documents
+                        </a>
+                    </h4>
+                </div>
+                <div id="documentsCollapse" class="panel-collapse">
+                    <div class="panel-body">
+                        <div>
+                            @Html.Partial("~/Views/Shared/_DocumentsPartial.cshtml", documentsVm)
+                        </div>
+                        @if (!ViewBag.DocumentsVerified)
+                        {
+                            <div class="form-group">
+                                <div class="col-md-offset-3 col-md-10">
+                                    @Html.EncodedActionLink("Edit", "Index", "Document", new
+                                    {
+                                        referenceId = @ViewBag.LinkedAccountId,
+                                        customerId = Model.CustomerId,
+                                        referenceTypeId = @ViewBag.ReferenceTypeId,
+                                        applicationId = @ViewBag.ApplicationId,
+                                        returnUrl = @ViewBag.ReturnUrl
+                                    }, new { @class = "btn btn-primary" })
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label class="checkbox-inline" style="font-weight: bold; font-size: medium; color: red;">
+                                <input id="documentOverrideChk" type="checkbox">Override Documents
+                            </label>
+
+                        </div>
+                        <div class="form-group">
+                            <div id="reasonForOverride">
+                                @Html.TextArea("overrideComment", null, new { id = "overrideComment", @class = "form-control", @style = "height:160px", @placeHolder = "Please enter the reason for overrride." })
+                            </div>
+                        </div>
+                        @*@if (documentsList.Count() > 0)
+                            {
+                               <table class="table table-striped" id="tableDocs"
+                                      data-toggle="table"
+                                      data-height="350"
+                                      data-search="true"
+                                      data-pagination="true"
+                                      data-page-list="[10,25, 50, 100, ALL]">
+                                   <thead>
+                                       <tr>
+                                           <th data-sortable="true">
+                                               Document Name
+                                           </th>
+                                           <th data-sortable="true">
+                                               Upload Date
+                                           </th>
+                                       </tr>
+                                   </thead>
+                                   <tbody>
+                                       @foreach (var item in documentsList)
+                                       {
+                                           <tr>
+                                               <td>
+                                                   <a href="@Url.Action("GetDocument", "File", new { fileId = @item.FileId})">@item.DocumentName</a>
+                                               </td>
+                                               <td>
+                                                   @item.CreatedDateTime
+                                               </td>
+                                           </tr>
+                                       }
+                                   </tbody>
+                               </table>
+                            }*@
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+
+    if (Model.LinkedAccount.RecipientType.Key != RecepientTypeKeys.ToPrimaryEmail && Model.LinkedAccount.RecipientType.Key != RecepientTypeKeys.ViewOnly)
+    {
+        var linkedEmails = db.LinkedEmails.Include("Status")
+                           .Where(le => le.LinkedAccountId == Model.Id && le.IsActive && !le.IsDeleted).ToList();
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#addemailsCollapse">
+                            Link New Emails
+                        </a>
+                    </h4>
+                </div>
+                <div id="addemailsCollapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="form-horizontal">
+                            <div class="form-group" id="secondaryEmailGrp">
+                                @Html.Label("Emails", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-3">
+                                    @Html.TextBox("SecondaryEmails", null, new { @class = "form-control", @id = "txtSecondaryEmail" })
+                                </div>
+                                <div><input id="Add" type="button" value="Add Email" class="btn btn-primary btn-sm" /></div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#emailsCollapse">
+                            Current Linked Emails
+                        </a>
+                    </h4>
+                </div>
+                <div id="emailsCollapse" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <table class="table table-striped" id="tableEmails"
+                               data-toggle="table"
+                               data-height="350"
+                               data-search="true"
+                               data-pagination="true"
+                               data-page-list="[10,25, 50, 100, ALL]">
+                            <thead>
+                                <tr>
+                                    <th data-sortable="true">
+                                        Email Address
+                                    </th>
+                                    <th data-sortable="true">
+                                        Date Created
+                                    </th>
+                                    <th>
+                                        Email Verification
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in linkedEmails)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.EmailAddress)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                        </td>
+
+                                        @if (item.Status.Key == StatusKeys.PendingEmailVerification)
+                                        {
+                                            <td>
+                                                @* @Html.ActionLink("Resend Activation Email", "SendActivationEmail", new { id = item.Id }, new {@class = "btn btn-default" })*@
+                                                <button id="sendActivationBtn" value="@item.Id" class="btn btn-primary">Resend Activation Email</button>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                Activated
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#">
+                        Linked Account Notes
+                    </a>
+                </h4>
+            </div>
+            <div id="notesCollapse" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <table class="table table-striped" id="tableEmails"
+                           data-toggle="table"
+                           data-height="300"
+                           data-search="true"
+                           data-pagination="true"
+                           data-page-list="[10,25, 50, 100, ALL]">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">
+                                    Date Created
+                                </th>
+                                <th data-sortable="true">
+                                    Note
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Notes)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDateTime)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NoteEntry)
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @if (Model.Status.Key == StatusKeys.LinkedAccountPending || Model.Status.Key == StatusKeys.DocumentPending)
+    {
+        @*@Html.EncodedActionLink("Approve Linked Account", "LinkAccount", "LinkedAccount", new { id = Model.Id }, new { @class = "btn btn-primary" })*@
+        <input type="button" id="btnApproval" value="Approve Linked Account" class="btn btn-primary" />
+    }
+
+    @Html.EncodedActionLink((Model.Status.Key == StatusKeys.LinkedAccountActive) ? "Unlink Account" : "Reject Linked Account", "Delete", "LinkedAccount", new { id = Model.Id }, new { @class = "btn btn-primary" })
+
+    <input type="button" onclick="addNote(@Model.LinkedAccount.Id)" id="btnAddNote" class="btn btn-primary" value="Add Note" />
+</div>
+
+<div id="addNoteModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="color:white;background-color:royalblue">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Corrrespondance Note</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addNoteForm">
+                    @Html.Hidden("linkedAccountId")
+                    <div class="form-group">
+                        @Html.Label("Note", new { @class = "control-label col-md-2" })
+                        <div class="col-md-12">
+                            @Html.TextArea("Note", null, new { id = "note", @class = "form-control", required = "required", maxlength = 1000, style = "height: 500px" })
+                        </div>
+                    </div>
+                    <br />
+                </form>
+            </div>
+            <hr />
+            <div class="modal-footer">
+                <button id="btnSaveNote" type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var currentRecipientType = '@ViewBag.RecipientType';
+        $("#reasonForOverride").hide();
+
+        switch (currentRecipientType) {
+            case "rt_to_primary":
+                $("#txtPrimaryEmail").val('@Model.CustomerEmail');
+                $("#secondaryEmailGrp").hide();
+                break;
+            case "rt_view_only":
+                $("#secondaryEmailGrp").hide();
+                break;
+            default:
+                var jsonEmails = JSON.parse('@Html.Raw(Json.Encode(ViewBag.EmailAddresses))');
+                var emailList = JSON.stringify(jsonEmails);
+
+                $("#txtSecondaryEmail").val(emailList);
+                $("#txtSecondaryEmail").multiple_emails();
+                break;
+        }
+
+        $("#sendActivationBtn").on("click", function () {
+            var linkedEmailId = $(this).val();
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("SendActivationEmail", "LinkedAccount")",
+                data: { id: linkedEmailId },
+                success: function (result) {
+                    $("#modalContentText").html(result);
+                    $("#emailResponseModal").modal('show');
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        });
+
+
+    });
+
+    window.addNote = function (linkeAccountId) {
+        $("#linkeAccountId").val(linkeAccountId);
+        $("#addNoteModal").modal({ autoOpen: true, position: { my: "center", at: "top+350", of: window } });
+    };
+
+    $("#btnApproval").on("click", function () {
+        var isDocOverride = $('#documentOverrideChk').is(':checked');
+        var overrrideComment = $("#overrideComment").val();
+
+        if (overrrideComment == '' && isDocOverride) {
+            bootbox.alert("Please provide a reason for overrriding documents.");
+            $("#overrideComment").focus();
+            return false;
+        } else {
+            window.open(
+           '@Url.Action("LinkAccount", "LinkedAccount")/?q=' + '@ViewBag.EncodedId' + "&overrideDoc=" + isDocOverride,
+           '_self'
+       );
+        }
+
+    });
+
+    $('#documentOverrideChk').change(function () {
+        if ($(this).is(":checked")) {           
+            $("#reasonForOverride").show();
+            $('#overrideComment').prop('required', true);
+        } else {
+            $("#reasonForOverride").hide();
+            $('#overrideComment').prop('required', false);
+        }
+      
+    });
+
+    $("#btnSaveNote").on("click", function () {
+        var note = $("#note").val();
+        var linkedAccountId = $("#linkedAccountId").val();
+
+        $.ajax({
+            type: 'POST',
+            url: "@Url.Action("AddNote", "LinkedAccount")",
+            data: { linkeAccountId: linkedAccountId, note: note },
+            success: function (response) {
+                $("#addNoteModal").modal('hide');
+                location.reload();
+            },
+            error: function (response) {
+                console.log(response.result);
+            }
+        });
+    });
+</script>

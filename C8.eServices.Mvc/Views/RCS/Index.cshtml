@@ -1,0 +1,47 @@
+﻿@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+
+
+    <body>
+
+        <h2>Tabs</h2>
+        <p>Click on the buttons inside the tabbed menu:</p>
+
+        <ul class="nav nav-tabs">
+            <li class="active" id="ApplicationDetailsNav"><a class="tab" href="#menu0" id="ApplicationDetailsA"><i class="fa fa-newspaper-o"></i> Application Details</a></li>
+            <li id="DistributionNav"><a class="tab" href="#menu1" id="DistributionA"><i class="fa fa-user-secret"></i> Distribution </a></li>
+            <li id="InspectionsAndContraventiosNav"><a class="tab" href="#menu2" id="InspectionsAndContraventionsA"><i class="fa fa-book"></i> Inspections and Contraventions</a></li>
+            <li id="CirculationsAndResponsesNav"><a class="tab" href="#menu3" id="CirculationsAndResponsesA"><i class="fa fa-outdent"></i> Circulations & Responses </a></li>
+            <li id="PBIDecisionNav"><a class="tab" href="#menuDecision" id="PBIDecisionA"><i class="fa fa-desktop"></i> PBI Decision </a></li>
+            <li id="FinalOutcomeNav"><a class="tab" href="#menu4" id="FinalOutcomeA"><i class="fa fa-outdent"></i> Final Outcome </a></li>
+            <li id="CommentsAndAttachmentsNav"><a class="tab" href="#menu5" id="CommentsAndAttachmentsA"><i class="fa fa-comments-o"></i> Comments & Attachments</a></li>
+            <li id="HIstoryAndAuditNav"><a class="tab" href="#menu6" id="HIstoryAndAuditA"><i class="fa fa-book-o"></i> History & Audit </a></li>
+            <li id="RequestsNav"><a class="tab" href="#menu7" id="RequestsA"><i class="fa fa-book-o"></i> Requests </a></li>
+
+        </ul>
+
+        <fieldset id="menu0" class="tab-pane fade in active">
+            <div class="form-horizontal">
+
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <h4>Distribution Details</h4>
+
+
+            </div>
+        </fieldset>
+        <fieldset id="menu1" class="tab-pane fade">
+            <div class="form-horizontal">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <h4>Distribution Details</h4>
+            </div>
+        </fieldset>
+        <fieldset id="menu2" class="tab-pane fade">
+            <h4>Inspection Details</h4>
+        </fieldset>
+
+
+    </body>

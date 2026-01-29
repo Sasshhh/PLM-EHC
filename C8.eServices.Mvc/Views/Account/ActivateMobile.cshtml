@@ -1,0 +1,60 @@
+﻿@model C8.eServices.Mvc.ViewModels.ActivateViewModel
+@{
+    ViewBag.Title = "ActivateMobile";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<h4>Activate Using SMS Code</h4>
+<hr />
+
+<div id="warningGroup" style="display: none;">
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> Invalid mobile activation code.<br /><br />
+        Click @Html.EncodedActionLink(" here", "ResendUserActivationCode", "Account", new { Id = ViewBag.EncodedSystemUserId }, null)
+        to resend mobile activation code
+    </div>
+</div>
+
+<div id="errorGroup" style="display:none;">
+    <div class="alert alert-warning">
+        <strong>Error!</strong> Invalid user.<br /><br />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <section id="loginForm">
+            @using (Html.BeginForm("ActivateMobile", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Data)
+                <div class="form-group">
+                    @Html.Label("Please enter your activation code", new { @class = "col-md-2 control-label" })
+                    <div class="col-md-4">
+                        @Html.TextBoxFor(m => m.Code, new { @class = "form-control", @required = true })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Activate" class="button1" />
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        var status = '@ViewBag.Status';
+
+        if (status === "Warning") {
+            $("#warningGroup").show();
+        } else if (status === "Error") {
+            $("#errorGroup").show();
+        }
+    });
+
+</script>

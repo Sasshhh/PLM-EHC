@@ -1,0 +1,504 @@
+﻿@using System.Activities.Statements
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@model C8.eServices.Mvc.ViewModels.DocumentsViewModel
+
+@{
+    ViewBag.Title = "UploadAssessmentFigure";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+    <head>
+        <style>
+            .swal-modal .swal-text {
+                text-align: center;
+            }
+        </style>
+    </head>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.EditorFor(model => model.RcsApplicationId, new { htmlAttributes = new { @id = "returnUrl", @style = "display:none;" } })
+
+
+    <div class="panel-group" id="documentsUpload">
+        <div class="panel panel-default">
+            <br />
+            <div class="panel-heading">
+
+
+                Rates Clearance Figures <br />
+                Discrepancies on Property - Any discrepancy idnetified will be assigned to relevant section to resolve
+
+
+            </div>
+            <hr />
+            <br />
+            
+
+            <div>
+                <div class="form-group">
+                    @Html.Label("Billing Discrepancies ", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Billing", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+
+
+                    <br />
+                    <br />
+
+                </div>
+
+
+
+                <div class="form-group">
+                    @Html.Label("Rates Discrepancies", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Rates", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+
+                    <br />
+                    <br />
+                </div>
+                <div class="form-group">
+                    @Html.Label("Sundries Discrepancies", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("Sundries", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+
+                    <br />
+                    <br />
+                </div>
+                <div class="form-group">
+                    @Html.Label("Credit Control Discrepancies ", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.DropDownList("CreditControl", new List<SelectListItem>
+                                {
+                                new SelectListItem {Value = "Yes", Text = "Yes"},
+                                new SelectListItem {Value = "No", Text = "No"},
+
+
+                                            }, "-Please Select-", new { @class = "form-control", @onchange = "switchDivsDiscrepancies()" })
+                        @*@Html.ValidationMessageFor(model => model.ElectricityMeterInformation.ElectricityMeterType, "", new { @class = "text-danger" })*@
+                    </div>
+
+                    <br />
+                    <br />
+                </div>
+                <br />
+                <div class="form-group">
+
+                    @Html.Label("Account Balance", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.Editor("AccountBalance", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                    </div>
+                    @Html.Label("Debt/Credit Flag", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-2" })
+                    <div class="col-md-2">
+                        @Html.Editor("DtCrFlag", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                    </div>
+                    <br />
+                    <br />
+
+                    @Html.Label("Payment By", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-3" })
+                    <div class="col-md-2">
+                        @Html.Editor("PaymentBy", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                    </div>
+
+                    <br />
+
+
+                    <br />
+                    <br />
+                </div>
+
+                <br />
+            </div>
+
+         <br />
+         <br />
+
+
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <strong>Error!</strong> @ViewBag.Error
+                        </div>
+
+                    }
+
+                <div id="divNoDiscrepancies" style="display:none">
+                    @Html.Partial("_DocumentsPartialBOAssessment", Model)
+
+
+                    <div class="col-md-offset-2 col-md-3">
+                        <input type="button" value="Extract RCS Figures" class="button1" onclick="GenAssessmentFigure()" />
+                    </div>
+                    <br />
+                    <br />
+                    @*<div class="form-group" style="margin: 28px;">
+            @Html.Label("Amount", htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-2">
+                @Html.Editor("amount", new { htmlAttributes = new { @class = "form-control", @required = "@required", @readonly = "readonly" } })
+                @Html.ValidationMessage("amount", "", new { @class = "text-danger" })
+            </div>
+            <br />
+            <br />
+        </div>*@
+
+
+                    @*<div class="form-group">
+            @Html.Label("RC Figures Total Due", htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-2">
+                @Html.Editor("amount", new { htmlAttributes = new { @class = "form-control", @required = "@required", @readonly = "readonly" } })
+                @Html.ValidationMessage("amount", "", new { @class = "text-danger" })
+            </div>
+
+            <br />
+            <br />
+        </div>*@
+                    @*<div class="form-group">
+            @Html.Label("Verify BillingCycle", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-2">
+                @Html.Editor("VerifyAccountBillingCycle", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                @Html.ValidationMessage("VerifyAccountBillingCycle", "", new { @class = "text-danger" })
+            </div>
+            @Html.Label("Verify Billing Cycle Number", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-2">
+                @Html.Editor("BillingCycleNumber", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+            </div>
+            <br />
+            <br />
+        </div>*@
+                    @*<div class="form-group">
+
+            @Html.Label("Verify Billing Cycle Change", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-2">
+                @Html.Editor("BillingCycleChange", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+            </div>
+            @Html.Label("RC Figures Pay Due Date", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-2">
+                @Html.Editor("BalanceDueDate", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+            </div>
+            <br />
+            <br />
+        </div>*@
+                    <br />
+                    <br />
+                    <div class="form-group">
+                    </div>
+                    <div class="form-group">
+                    </div>
+                    <div class="form-group">
+
+                        @Html.Label("RC Figures Total Due", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-2">
+                            @Html.Editor("amount", new { htmlAttributes = new { @class = "form-control", @required = "@required", @readonly = "readonly" } })
+                            @Html.ValidationMessage("amount", "", new { @class = "text-danger" })
+                        </div>
+                        @Html.Label("RC Figures Pay Due Date", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-2">
+                            @Html.Editor("BalanceDueDate", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("RC Figures Expiry Date", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-2">
+                            @Html.Editor("AssessmentFigureExpiryDate", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+                        </div>
+                        @Html.Label("Debit Estimate Period(Months)", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-2">
+                            @Html.Editor("CalculationMonths", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+
+
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                    <br />
+                    <br />
+                    @*<div>
+            <div class="panel-heading">Discrepancies - Debtors Notes</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default display">
+                    <thead>
+                        <tr>
+                            <th>
+                                User
+                            </th>
+                            <th>
+                                Type
+                            </th>
+                            <th>
+                                Note 1
+                            </th>
+                            <th>
+                                Note 2
+                            </th>
+                            <th>
+                                Date
+                            </th>
+                            <th>
+                                Time
+                            </th>
+
+
+                        </tr>
+                    </thead>
+                    @if (Model.DebtorsNote.Note == "Y")
+                    {
+                        <tbody>
+                            @foreach (var item in Model.DebtorsNote.NoteList)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.NoteUser
+                                    </td>
+
+                                    <td>
+                                        @item.NoteType
+                                    </td>
+                                    <td>
+                                        @item.Note1
+                                    </td>
+                                    <td>
+                                        @item.Note2
+                                    </td>
+                                    <td>
+                                        @if (item.ConvertedDate != null)
+                                        {
+                                            @item.ConvertedDate.ToShortDateString()
+                                        }
+                                        else
+                                        {
+                                            @item.NoteDate
+                                        }
+
+                                    </td>
+                                    <td>
+                                        @item.NoteTime
+                                    </td>
+
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    }
+                    else
+                    {
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    @Model.DebtorsNote.Status
+                                </td>
+
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+
+                                </td>
+                                <td>
+                                    -
+                                </td>
+
+                            </tr>
+
+
+
+                        </tbody>
+                    }
+
+                </table>
+
+
+
+            </div>
+        </div>*@
+
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-3">
+                                <input type="submit" value="Submit" class="button1" />
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+<script>
+    //Masking amount fields
+    $(document).ready(function ($) {
+        $('#amount').mask('#,##0.00', { reverse: true });
+        CheckAccountBalance();
+    });
+
+     $(function () {
+
+                var IncompleteDepartmentUsers = "@ViewBag.Message2";
+             var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }
+             $('#RCSTable').DataTable();
+
+
+                var display = "@ViewBag.Error";
+
+        if (display != null && display != "") {
+            jQuery('#divNoDiscrepancies').css("display", "block")
+        }
+    });
+
+    function switchDivsDiscrepancies() {
+        var Billing = document.getElementById("Billing").value;
+        var CreditControl = document.getElementById("CreditControl").value;
+        var Rates = document.getElementById("Rates").value;
+        var Sundries = document.getElementById("Sundries").value;
+
+
+        if (Billing == "No" && CreditControl == "No" && Rates == "No" && Sundries=="No") {
+            jQuery('#divNoDiscrepancies').css("display", "block")
+
+        }
+
+
+        else {
+            jQuery('#divNoDiscrepancies').css("display", "none")
+
+        }
+    }
+
+    function GenAssessmentFigure() {
+        debugger;
+
+        var rcsid = document.getElementById('returnUrl').value;
+
+        $.getJSON("../DepartmentsApprovals/GenerareAssessmentFigures?RCSId="
+            + rcsid,
+
+            function (result) {
+                if (result.Status == "Success") {
+                    try {
+
+                          $('#amount').val(result.FormattedOutstandingAmount);
+                            $('#VerifyAccountBillingCycle').val(result.VerifyAccountBillingCycle);
+                            $('#BillingCycleNumber').val(result.BillingCycleNumber);
+                            $('#BillingCycleChange').val(result.BillingCycleChange);
+                            $('#BalanceDueDate').val(result.BalanceDueDate);
+                            //alert("al1" + result.AssessmentFigureExpiryDate);
+                            //alert(result.date);
+                            //alert(result.FormattedOutstandingAmount);
+                            //alert("al" + result.FormattedAssessmentFigureExpiryDate);
+                            $('#AssessmentFigureExpiryDate').val(result.AssessmentFigureExpiryDate);
+                            $('#CalculationMonths').val(result.CalculationMonths);
+
+
+
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    //alert(result.AccountNumber);
+                    //alert(result.Status);
+                    swal("" + result.Status, "", "info");
+                }
+            });
+    }
+
+    function CheckAccountBalance() {
+        debugger;
+
+        var rcsid = document.getElementById('returnUrl').value;
+
+        $.getJSON("../DepartmentsApprovals/CheckAccountBalancce?RCSId="
+            + rcsid,
+
+            function (result) {
+                if (result != "Error") {
+                    try {
+                        debugger
+                        if (result.length == 0) {
+
+                            swal("Error!", "No Results found!", "error");
+                            $('#rate').val('');
+                        }
+
+                        else {
+
+
+                            $('#AccountBalance').val(result.AccountBalance);
+                            $('#DtCrFlag').val(result.DtCrFlag);
+                            $('#PaymentBy').val(result.PaymentBy);
+
+
+
+                        }
+                    }
+                    catch (cat) { }
+                }
+                else {
+                    //alert("Unsuccessfully captured!");
+                    swal("Error!", "Unsuccessfully captured.", "error");
+                }
+            });
+    }
+
+</script>

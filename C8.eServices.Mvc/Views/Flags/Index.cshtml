@@ -1,0 +1,115 @@
+﻿@model IEnumerable<C8.eServices.Mvc.Models.Flag>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse">
+                    Users
+                </a>
+            </h4>
+        </div>
+        <div id="accountsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @*<div class="col-md-8" align="left">
+                        @Html.ActionLink("Add New User", "Create", new { id = @ViewBag.ApplicationId }, new { @class = "btn btn-primary" })
+                    </div>*@
+                <table class="table table-striped" id="table" data-url="/Application/Index">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayName("Process")
+                            </th>
+                            <th>
+                                @Html.DisplayName("Key Activity")
+                                @*@Html.DisplayNameFor(model => model.Name)*@
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Description)
+                            </th>
+                            @*<th>
+                                @Html.DisplayNameFor(model => model.Key)
+                            </th>*@
+                            <th>
+                                @Html.DisplayNameFor(model => model.TurnAroundDays)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.OnTargetColor)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RunningLateColor)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.OverdueColor)
+                            </th>
+                            <th>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ResponsibilityType.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            @*<td>
+                                @Html.DisplayFor(modelItem => item.Key)
+                            </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TurnAroundDays)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.OnTargetColor)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RunningLateColor)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.OverdueColor)
+                            </td>
+              
+                            <td>
+                                @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary" })
+                          
+
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<div>
+        @Html.ActionLink("Back to List", "Index", "Application", null, new { @class = "btn btn-primary" })
+    </div>*@
+
+
+
+<script>
+    $(function () {
+        $('#table').DataTable();
+    });
+</script>
+
+
+

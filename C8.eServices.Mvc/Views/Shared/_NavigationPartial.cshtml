@@ -1,0 +1,82 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.Models.NavigationProperty
+
+<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        @{
+            switch (Model.Step)
+            {
+                case ViewCodeKeys.StepOne:
+                case ViewCodeKeys.DefaultStep:
+                    <li class="progtrckr-here" title="Click to choose the step."><a href="#">Principle Owner</a></li>
+                    <li class="progtrckr-todo">Properties</li>
+                    <li class="progtrckr-todo">Accounts</li>
+                    <li class="progtrckr-todo">Additional Owners</li>
+                    <li class="progtrckr-todo">Documents</li>
+                    <li class="progtrckr-todo">Submit</li>
+                    break;
+                case ViewCodeKeys.StepTwo1:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-here">@Html.EncodedActionLink("Properties", "CreateProperty", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+
+                    if (Model.PropertyId == 0)
+                    {
+                        <li class="progtrckr-todo">Accounts</li>
+                        <li class="progtrckr-todo">Additional Owners</li>
+                        <li class="progtrckr-todo">Documents</li>
+                        <li class="progtrckr-todo">Submit</li>
+                    }
+                    else
+                    {
+                        <li class="progtrckr-todo">@Html.EncodedActionLink("Accounts", "Index", "PropertyAccount", new { propertyId = Model.PropertyId }, null)</li>
+                        <li class="progtrckr-todo">@Html.EncodedActionLink("Additional Owners", "Index", "AdditionalPropertyOwner", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                        <li class="progtrckr-todo">@Html.EncodedActionLink("Documents", "Index", "Document", new { referenceId = Model.ReferenceId, customerId = Model.CustomerId, referenceTypeId = Model.ReferenceTypeId, applicationId = Model.ApplicationId, agentId = Model.AgentId, returnUrl = Model.ReturnUrl, ratesRebateId = Model.RatesRebateId }, null)</li>
+                        <li class="progtrckr-todo">Submit</li>
+                    }
+                    break;
+                case ViewCodeKeys.StepTwo2:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-here">@Html.EncodedActionLink("Properties", "Index", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Accounts", "Index", "PropertyAccount", new { propertyId = Model.PropertyId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Additional Owners", "Index", "AdditionalPropertyOwner", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Documents", "Index", "Document", new { referenceId = Model.ReferenceId, customerId = Model.CustomerId, referenceTypeId = Model.ReferenceTypeId, applicationId = Model.ApplicationId, agentId = Model.AgentId, returnUrl = Model.ReturnUrl, ratesRebateId = Model.RatesRebateId }, null)</li>
+                @*<li class="progtrckr-todo">@Html.EncodedActionLink("Submit", "Index", "Property", new { customerId = Model.CustomerId, propertyId = Model.PropertyId, ratesRebateId = ViewBag.RatesRebateId }, null)</li>*@
+                <li class="progtrckr-todo">Submit</li>
+                    break;
+                case ViewCodeKeys.StepThree:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Properties", "Index", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-here">@Html.EncodedActionLink("Accounts", "Index", "PropertyAccount", new { propertyId = Model.PropertyId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Additional Owners", "Index", "AdditionalPropertyOwner", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Documents", "Index", "Document", new { referenceId = Model.ReferenceId, customerId = Model.CustomerId, referenceTypeId = Model.ReferenceTypeId, applicationId = Model.ApplicationId, agentId = Model.AgentId, returnUrl = Model.ReturnUrl, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">Submit</li>
+                    break;
+                case ViewCodeKeys.StepFour:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Properties", "Index", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Accounts", "Index", "PropertyAccount", new { propertyId = Model.PropertyId }, null)</li>
+                <li class="progtrckr-here">@Html.EncodedActionLink("Additional Owners", "Index", "AdditionalPropertyOwner", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">@Html.EncodedActionLink("Documents", "Index", "Document", new { referenceId = Model.ReferenceId, customerId = Model.CustomerId, referenceTypeId = Model.ReferenceTypeId, applicationId = Model.ApplicationId, agentId = Model.AgentId, returnUrl = Model.ReturnUrl, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">Submit</li>
+                    break;
+                case ViewCodeKeys.StepFive:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Properties", "Index", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Accounts", "Index", "PropertyAccount", new { propertyId = Model.PropertyId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Additional Owners", "Index", "AdditionalPropertyOwner", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-here">@Html.EncodedActionLink("Documents", "Index", "Document", new { referenceId = Model.ReferenceId, customerId = Model.CustomerId, referenceTypeId = Model.ReferenceTypeId, applicationId = Model.ApplicationId, agentId = Model.AgentId, returnUrl = Model.ReturnUrl, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-todo">Submit</li>
+                    break;
+                case ViewCodeKeys.FinalStep:
+                <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId = Model.PropertyId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">@Html.EncodedActionLink("Properties", "Index", "Property", new { customerId = Model.CustomerId, ratesRebateId = Model.RatesRebateId }, null)</li>
+                <li class="progtrckr-done">Accounts</li>
+                <li class="progtrckr-done">Additional Owners</li>
+                <li class="progtrckr-done">Documents</li>
+                <li class="progtrckr-here">Submit</li>
+                    break;
+
+            }
+        }
+    </ol>
+</div>

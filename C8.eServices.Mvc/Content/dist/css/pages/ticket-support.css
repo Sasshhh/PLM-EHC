@@ -1,0 +1,60 @@
+.light-skin .col-content, .light-skin .timeline {
+  background-color: #fcfcfc;
+}
+
+.light-skin .col-content {
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
+}
+
+.dark-skin .col-aside {
+  background-color: #262733;
+}
+
+.dark-skin .timeline {
+  background-color: #3B3D51;
+}
+
+.page-content .col-aside {
+  width: 240px;
+}
+
+.ticket-properties .bootstrap-select .btn {
+  line-height: 30px;
+}
+
+.page-content .col-content.col-left {
+  margin-right: 240px;
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 40px;
+}
+
+.summernote-wrapper {
+  margin-left: 40px;
+}
+
+@media only screen and (max-width: 768px) {
+  .page-content .col-content.col-left {
+    margin-right: 0px;
+  }
+  .ev-page .col-aside {
+    position: relative;
+    width: 100%;
+    padding-top: 40px;
+    padding-left: 20px;
+    z-index: 1;
+  }
+  .col-content .nav-tabs {
+    position: absolute;
+    top: 0;
+    margin-left: 0 !important;
+    z-index: 2;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .summernote-wrapper {
+    margin-left: 20px;
+    margin-right: 0px !important;
+  }
+}

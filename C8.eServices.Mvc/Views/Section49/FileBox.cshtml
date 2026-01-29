@@ -1,0 +1,23 @@
+﻿@*@model IEnumerable<C8.eServices.Mvc.Models.Section49Letter>*@
+
+@{
+    ViewBag.Title = "FileBox";
+    Layout = "~/Views/Shared/VideoLayout.cshtml";
+}
+
+<h2>Generation Complete</h2>
+<div class=WordSection1>
+
+    @foreach (var item in ViewBag.doclist)
+    {
+        @*<div class="btn btn-primary">*@
+            <a href="@item" class="btn btn-primary"> pdf</a>
+            <br />
+        @*</div>*@
+
+    }
+</div>
+
+
+
+

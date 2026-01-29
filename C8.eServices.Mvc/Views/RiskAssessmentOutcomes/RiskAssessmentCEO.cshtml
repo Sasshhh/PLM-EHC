@@ -1,0 +1,420 @@
+﻿@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@{
+    ViewBag.Title = "Risk Assessment CEO";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /* --- CUSTOM STYLING --- */
+    .bg-green-header {
+        background-color: #1E8449 !important;
+        color: white !important;
+    }
+
+    .panel-green {
+        border-color: #1E8449;
+    }
+
+    .panel-green > .panel-heading {
+        background-color: #1E8449;
+        color: white;
+        border-color: #1E8449;
+        width: 100%;
+        padding: 10px 15px;
+        margin: 0;
+    }
+
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    /* --- SIGNATURE PAD STYLING --- */
+    canvas#signature-pad {
+        background-color: #fff;
+        width: 100%;
+        height: 150px;
+        border: 2px dashed #ccc;
+        cursor: crosshair; /* Looks like a pen cursor */
+    }
+
+    /* --- RESPONSIVE CSS (Kept from your original) --- */
+    @@media only screen and (max-width: 1000px) {
+        .buttonIcon { font-size: 2.5rem !important; }
+        .chkboxmargin { margin-left: 30px; }
+        .cards tbody tr, .cards thead tr {
+            float: left; width: 90%; margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+        .cards tbody td { display: block; word-wrap: break-word; }
+        .cards thead th { display: none; }
+        .table tbody label { display: block; }
+        .cards tbody label {
+            display: inline; position: relative; font-size: 85%;
+            top: -0.5rem; color: #808080; min-width: 4rem;
+            margin-left: 0; margin-right: 1rem; text-align: left;
+        }
+        tr.selected label { color: #404040; }
+        .table .fa { font-size: 2.5rem; text-align: center; }
+        .cards .fa { font-size: 7.5rem; }
+        .step-app > .step-steps {
+            display: inline-block; padding: 1px; color: white;
+            background-color: #848484; text-decoration: none;
+            border-right: 1px solid #fff; word-wrap: break-word; width: 100%;
+        }
+    }
+
+    .button1 { font-size: 13px; }
+    .required:before { content: '*'; color: red; }
+    input[type='date'] { position: relative; }
+    body { font-family: Arial; }
+    .step-app > .step-steps > li > a {
+        display: block; padding: 10px; color: white;
+        background-color: #848484; text-decoration: none; border-right: 1px solid #fff;
+    }
+    legend {
+        display: block; width: 100%; padding: 0; margin-bottom: 20px;
+        font-size: 25px; line-height: inherit; color: #333; border: 0;
+        background-color: aliceblue; border-bottom: 1px solid #00d0ff;
+    }
+    .error { color: tomato; }
+</style>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions (CEO)</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>
+                    1) Review the assessment history.<br />
+                    2) Enter your Official Number.<br />
+                    3) <strong>Sign</strong> the digital pad.<br />
+                    4) Select "Approved" or "Rejected".<br />
+                    5) Enter comments (Mandatory if Rejected).<br />
+                    6) Click Submit.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
+<div class="panel-group">
+
+    @* --- APPLICATION DETAILS --- *@
+    <div class="panel panel-green">
+        <div class="panel-heading" align="center">
+            <h4 class="panel-title" style="color: white;">Application Details</h4>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead class="bg-green-header">
+                    <tr>
+                        <th style="color:white;"> Applicant Name </th>
+                        <th style="color:white;"> Application Type </th>
+                        <th style="color:white;"> Application Reference No. </th>
+                        <th style="color:white;"> Application Created Date </th>
+                        <th style="color:white;"> Status </th>
+                        <th style="color:white;"> Action </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.FullName) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.PurchaserType.Name) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.ApplicationReferenceNumber) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.CreatedDateTime) </td>
+                        <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.Status.Name) </td>
+                        <td>
+                            @* Action buttons *@
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+
+    <div style="width: 90%; margin: 0 auto;">
+        @using (Html.BeginForm("RiskAssessmentCEO", "RiskAssessmentOutcomes",
+            new { q = Request.QueryString["q"] },
+            FormMethod.Post,
+            new { id = "ceoForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary()
+            @Html.ValidationMessage("error")
+
+            @* Keep the ID for the Controller *@
+            @Html.Hidden("rcsAppId", Model.PropertyLeaseApplication.Id)
+
+            <div class="form-horizontal">
+                <div class="step-app">
+                    <ul class="step-steps">
+                        <li style="text-align:center;"><a href="#step3">CEO Final Approval<span class=""></span></a></li>
+                    </ul>
+                </div>
+
+                @* --- SECTION 1: HISTORY (CSO & RM) --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">Assessment History</h4>
+                    </div>
+                    <div class="panel-body" style="background-color: #f9f9f9;">
+
+                        @* CSO *@
+                        <div class="row"><div class="col-md-12"><label style="text-decoration:underline;">Client Services Officer (Step 1)</label></div></div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Name/No</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.FirstName (@Model.RiskAssessmentOutcome.OfficialNumber)" disabled />
+                            </div>
+                            <label class="control-label col-md-2">Outcome</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.Outcome" disabled style="font-weight:bold;" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Reason</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" disabled rows="2">@Model.RiskAssessmentOutcome.Reason</textarea>
+                            </div>
+                        </div>
+                        <hr />
+
+                        @* RM *@
+                        <div class="row"><div class="col-md-12"><label style="text-decoration:underline;">Revenue Manager (Step 2)</label></div></div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Official No</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.RM_OfficialNumber" disabled />
+                            </div>
+                            <label class="control-label col-md-2">Outcome</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.RM_Outcome" disabled style="font-weight:bold; color: #286090;" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Reason</label>
+                            <div class="col-md-8">
+                                <textarea class="form-control" disabled rows="2">@Model.RiskAssessmentOutcome.RM_Reason</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                @* --- SECTION 2: DOCUMENTS --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">Attached Documents</h4>
+                    </div>
+                    <div class="panel-body">
+                        @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+                    </div>
+                </div>
+                <br />
+
+                @* --- SECTION 3: CEO ACTION --- *@
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <h4 class="panel-title" align="center" style="color:white;">CEO Decision</h4>
+                    </div>
+                    <div class="panel-body">
+
+                        @* 1. Official Number *@
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RiskAssessmentOutcome.CEO_OfficialNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.RiskAssessmentOutcome.CEO_OfficialNumber, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.CEO_OfficialNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        @* 2. Signature Pad (Crucial Update) *@
+                        <div class="form-group">
+                            <label class="control-label col-md-2 require">Signature</label>
+                            <div class="col-md-6">
+                                @* CANVAS for drawing *@
+                                <canvas id="signature-pad"></canvas>
+
+                                <div style="margin-top:5px;">
+                                    <button type="button" class="btn btn-xs btn-default" onclick="clearSignature()">Clear Signature</button>
+                                </div>
+
+                                @* HIDDEN FIELD to hold the Base64 Data *@
+                                @Html.HiddenFor(model => model.RiskAssessmentOutcome.SignatureBlob, new { @id = "hdnSignatureBlob" })
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        @* 3. Decision Dropdown *@
+                        <div class="form-group">
+                            <label class="control-label col-md-2 require">Action</label>
+                            <div class="col-md-3">
+                                @Html.DropDownList("ApprovalStatusddl", ViewBag.ApprovalStatus as SelectList, "-- Select Action --", new { @class = "form-control", @required = "required", @id = "ApprovalStatus" })
+                            </div>
+                        </div>
+
+                        @* 4. Comments (Conditional Logic applied via JS) *@
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.RiskAssessmentOutcome.CEO_Reason, htmlAttributes: new { @class = "control-label col-md-2", @id = "lblReason" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.RiskAssessmentOutcome.CEO_Reason, new { @class = "form-control", @rows = "3", @id = "CEOComment" })
+                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.CEO_Reason, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Approval Date</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @* FOOTER BUTTONS *@
+                    <div class="step-footer" align="center">
+                        <input type="button" value="Cancel" onclick="location.href='@Url.Action("InboxCEO", "RiskAssessmentOutcomes")'" class="button1" />
+
+                        @* Trigger the JS Validation function *@
+                        <input type="button" value="Submit" onclick="clickSubmit()" class="button1" />
+
+                        @* Hidden Real Submit Button *@
+                        <input type="submit" value="Submit" style="display:none;" id="btnRealSubmit" />
+                        <br /><br /><br />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // ================================
+    // 1. CANVAS SIGNATURE LOGIC
+    // ================================
+    var canvas = document.getElementById('signature-pad');
+    var ctx = canvas.getContext('2d');
+    var drawing = false;
+
+    // Set canvas dimensions
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    // --- Mouse Events ---
+    canvas.addEventListener('mousedown', function (e) { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousemove', function (e) { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', function () { drawing = false; updateHiddenField(); });
+
+    // --- Touch Events (Mobile/Tablet) ---
+    canvas.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        drawing = true;
+        ctx.beginPath();
+        var touch = e.touches[0];
+        var rect = canvas.getBoundingClientRect();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+        if (drawing) {
+            var touch = e.touches[0];
+            var rect = canvas.getBoundingClientRect();
+            ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener('touchend', function () { drawing = false; updateHiddenField(); });
+
+    function updateHiddenField() {
+        // Save base64 data to the hidden input for the Controller
+        document.getElementById('hdnSignatureBlob').value = canvas.toDataURL();
+    }
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('hdnSignatureBlob').value = "";
+    }
+
+    // ================================
+    // 2. DYNAMIC UX (Reject = Required)
+    // ================================
+    document.getElementById('ApprovalStatus').addEventListener('change', function () {
+        var status = this.value;
+        var label = document.getElementById('lblReason');
+
+        if (status === 'Rejected') {
+            label.innerText = "Reason for Rejection *";
+            label.style.color = "red";
+            label.style.fontWeight = "bold";
+        } else {
+            label.innerText = "CEO Comments (Optional)";
+            label.style.color = "black";
+            label.style.fontWeight = "normal";
+        }
+    });
+
+    // ================================
+    // 3. SUBMIT VALIDATION CHAIN
+    // ================================
+    function clickSubmit() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        var comment = document.getElementById("CEOComment").value.trim();
+        var officialNo = document.getElementById("RiskAssessmentOutcome_CEO_OfficialNumber").value;
+        var signature = document.getElementById("hdnSignatureBlob").value;
+
+        // 1. Check Official Number
+        if (officialNo == "") {
+            swal("Error", "Please enter your Official Number.", "warning");
+            return;
+        }
+
+        // 2. Check Signature (The "Gatekeeper")
+        if (signature == "") {
+            swal("Error", "Please sign the document before submitting.", "warning");
+            // Scroll user to signature pad
+            document.getElementById("signature-pad").scrollIntoView({ behavior: "smooth" });
+            return;
+        }
+
+        // 3. Check Outcome Selection
+        if (statusval == "") {
+            swal("Error", "Please select an Action (Approved/Rejected).", "warning");
+            return;
+        }
+
+        // 4. Check Forced Rejection Comment
+        if (statusval == "Rejected" && comment == "") {
+            swal("Error", "A reason is mandatory when rejecting an application.", "warning");
+            // Scroll user to comment box
+            document.getElementById("CEOComment").focus();
+            return;
+        }
+
+        // 5. Success
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this decision?",
+            buttons: ['No', 'Yes, I am sure!']
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                document.getElementById("btnRealSubmit").click();
+            }
+        });
+    }
+</script>

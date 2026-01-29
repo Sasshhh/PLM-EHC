@@ -1,0 +1,318 @@
+﻿@model C8.eServices.Mvc.Models.Units
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <style>
+        .form-control {
+            border-radius: 0;
+        }
+
+            .form-control:focus {
+                -webkit-box-shadow: none;
+                box-shadow: none;
+            }
+
+        .check {
+            background-image: url(http://individual.icons-land.com/IconsPreview/Medical/PNG/Documents/32x32/Calendar_DoctorVisit.png);
+            background-repeat: no-repeat;
+            background-position: 98% 50%;
+            cursor: pointer;
+        }
+
+        .date {
+            background-image: url(images/watch.png);
+            background-repeat: no-repeat;
+            background-position: 98% 50%;
+            cursor: pointer;
+        }
+
+        .ui-datepicker {
+            background: #333;
+            border: 1px solid #555;
+            color: #EEE;
+        }
+
+        .item-desc {
+            background: #E8E8E8 none repeat scroll 0% 0%;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin-top: 22px;
+            overflow: auto;
+        }
+
+        .date-time {
+            background-color: #E8E8E8;
+            margin-bottom: 20px;
+            padding-bottom: 1px;
+            padding-top: 16px;
+            max-width: 100%;
+            margin-left: -1px;
+        }
+        /**  Tabs Style  **/
+
+        .nav-tabs {
+            border-bottom: 2px solid #DDD;
+        }
+
+            .nav-tabs > li.active > a,
+            .nav-tabs > li.active > a:focus,
+            .nav-tabs > li.active > a:hover {
+                border-width: 0px;
+            }
+
+            .nav-tabs > li > a {
+                border: none;
+                color: #666;
+            }
+
+                .nav-tabs > li.active > a,
+                .nav-tabs > li > a:hover {
+                    border: none;
+                    color: #4285F4 !important;
+                    background: transparent;
+                }
+
+                .nav-tabs > li > a::after {
+                    content: "";
+                    background: #4285F4;
+                    height: 2px;
+                    position: absolute;
+                    width: 100%;
+                    left: 0px;
+                    bottom: -1px;
+                    transition: all 250ms ease 0s;
+                    transform: scale(0);
+                }
+
+            .nav-tabs > li.active > a::after,
+            .nav-tabs > li:hover > a::after {
+                transform: scale(1);
+            }
+
+        .tabnav > li > a::after {
+            background: #21527d none repeat scroll 0% 0%;
+            color: #fff;
+        }
+
+        .tab-pane {
+            padding: 15px 0;
+        }
+
+        .tab-content {
+            padding: 20px
+        }
+
+        .card {
+            background: #FFF none repeat scroll 0% 0%;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        section#map {
+            margin-top: 40px;
+        }
+
+        .meta-item-label {
+            display: block;
+            line-height: 18px;
+            font-weight: bold;
+        }
+
+        .meta-item-value {
+            line-height: 24px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            color: black !important;
+            border-color: green;
+            background-color: #1e8449;
+        }
+    </style>
+</head>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <body>
+
+        <div id="AccountInformation" align="left">
+            <fieldset>
+                <div class="form-horizontal">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+
+
+                            <div class="panel-group" style="margin-bottom: -80px;">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+
+                                        <h4 class="panel-title" align="center">
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#usersCollapse" class="fa fa-location-arrow">
+                                                Property Location - @Model.Address
+                                            </a>
+                                        </h4>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="container">
+
+                                <div class="row" style="width:1097px;">
+                                    <center>
+
+                                        <div class="col-md-12">
+                                            <div style="height: 40px; width:1097px;"></div>
+                                            <div class="row carousel-holder">
+                                                <div class="col-md-12" style="padding-top:100px;">
+
+                                                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" style="width: 1057px;">
+                                                        <ol class="carousel-indicators">
+                                                            <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                                                            <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                                                            @*<li data-target="#carousel-example-generic" data-slide-to="2"></li>*@
+                                                        </ol>
+                                                        <div class="carousel-inner">
+                                                            <div class="item active">
+                                                                <img class="slide-image" src="~/Content/Images/image_ehc2.jpg" />
+                                                                @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
+                                                            </div>
+                                                            <div class="item">
+                                                                <img class="slide-image" src="~/Content/Images/image_ehc2.jpg" />
+                                                                @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
+                                                            </div>
+                                                            <!--<div class="item">
+                    <img class="slide-image" src="~/Content/Images/house3.jpg" />-->
+                                                            @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
+                                                            <!--</div>-->
+                                                        </div>
+
+                                                        <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+                                                            <span class="glyphicon glyphicon-chevron-left" style="color:white;"><</span>
+                                                        </a>
+                                                        <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+                                                            <span class="glyphicon glyphicon-chevron-right" style="color:white;">></span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </center>
+
+                                    <div style="height:40px; width:1097px;"></div>
+                                    <form class="col-md-6" role="form">
+                                        <br />
+                                        <br />
+
+                                        <!-- button group ---->
+                                        <div class="card" style="margin-top:20px;">
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Property Information</a></li>
+                                                <li role="presentation"><a href="#property" aria-controls="profile" role="tab" data-toggle="tab">Letting Information</a></li>
+                                            </ul>
+                                            <!-- Tab panes -->
+                                            <div class="tab-content">
+                                                <div role="tabpanel" class="tab-pane active" id="home">
+
+                                                    <div class="row text-center" style="margin-left:80px;">
+                                                        <div class="col-lg-3">
+                                                            <span class="meta-item-label">Area</span>
+                                                            <i class="meta-item-icon icon-area"><svg xmlns="http://www.w3.org/2000/svg" class="meta-icon-container" width="30" height="30" viewBox="0 0 48 48"><path class="meta-icon" fill="#0DBAE8" d="M46 16v-12c0-1.104-.896-2.001-2-2.001h-12c0-1.103-.896-1.999-2.002-1.999h-11.997c-1.105 0-2.001.896-2.001 1.999h-12c-1.104 0-2 .897-2 2.001v12c-1.104 0-2 .896-2 2v11.999c0 1.104.896 2 2 2v12.001c0 1.104.896 2 2 2h12c0 1.104.896 2 2.001 2h11.997c1.106 0 2.002-.896 2.002-2h12c1.104 0 2-.896 2-2v-12.001c1.104 0 2-.896 2-2v-11.999c0-1.104-.896-2-2-2zm-4.002 23.998c0 1.105-.895 2.002-2 2.002h-31.998c-1.105 0-2-.896-2-2.002v-31.999c0-1.104.895-1.999 2-1.999h31.998c1.105 0 2 .895 2 1.999v31.999zm-5.623-28.908c-.123-.051-.256-.078-.387-.078h-11.39c-.563 0-1.019.453-1.019 1.016 0 .562.456 1.017 1.019 1.017h8.935l-20.5 20.473v-8.926c0-.562-.455-1.017-1.018-1.017-.564 0-1.02.455-1.02 1.017v11.381c0 .562.455 1.016 1.02 1.016h11.39c.562 0 1.017-.454 1.017-1.016 0-.563-.455-1.019-1.017-1.019h-8.933l20.499-20.471v8.924c0 .563.452 1.018 1.018 1.018.561 0 1.016-.455 1.016-1.018v-11.379c0-.132-.025-.264-.076-.387-.107-.249-.304-.448-.554-.551z"></path></svg></i>
+                                                            <div class="meta-inner-wrapper">
+
+                                                                <span class="meta-item-value">@Model.PropertySize<sub class="meta-item-unit">Sq Ft</sub></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3">
+                                                            <span class="meta-item-label">Bedrooms</span>
+                                                            <i class="meta-item-icon icon-bed" style="color:forestgreen"><svg xmlns="http://www.w3.org/2000/svg" class="meta-icon-container" width="30" height="30" viewBox="0 0 48 48"><path class="meta-icon" fill="#0DBAE8" d="M21 48.001h-19c-1.104 0-2-.896-2-2v-31c0-1.104.896-2 2-2h19c1.106 0 2 .896 2 2v31c0 1.104-.895 2-2 2zm0-37.001h-19c-1.104 0-2-.895-2-1.999v-7.001c0-1.104.896-2 2-2h19c1.106 0 2 .896 2 2v7.001c0 1.104-.895 1.999-2 1.999zm25 37.001h-19c-1.104 0-2-.896-2-2v-31c0-1.104.896-2 2-2h19c1.104 0 2 .896 2 2v31c0 1.104-.896 2-2 2zm0-37.001h-19c-1.104 0-2-.895-2-1.999v-7.001c0-1.104.896-2 2-2h19c1.104 0 2 .896 2 2v7.001c0 1.104-.896 1.999-2 1.999z"></path></svg></i>
+                                                            <div class="meta-inner-wrapper">
+
+                                                                <span class="meta-item-value">@Model.BedroomCount</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3">
+                                                            <span class="meta-item-label">Bathrooms</span>
+                                                            <i class="meta-item-icon icon-bath"><svg xmlns="http://www.w3.org/2000/svg" class="meta-icon-container" width="30" height="30" viewBox="0 0 48 48"><path class="meta-icon" fill="#0DBAE8" d="M37.003 48.016h-4v-3.002h-18v3.002h-4.001v-3.699c-4.66-1.65-8.002-6.083-8.002-11.305v-4.003h-3v-3h48.006v3h-3.001v4.003c0 5.223-3.343 9.655-8.002 11.305v3.699zm-30.002-24.008h-4.001v-17.005s0-7.003 8.001-7.003h1.004c.236 0 7.995.061 7.995 8.003l5.001 4h-14l5-4-.001.01.001-.009s.938-4.001-3.999-4.001h-1s-4 0-4 3v17.005000000000003h-.001z"></path></svg></i>
+                                                            <div class="meta-inner-wrapper">
+
+                                                                <span class="meta-item-value">@Model.BathroomCount</span>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div role="tabpanel" class="tab-pane " id="property">@Model.LettingRequirements</div>
+
+                                            </div>
+                                        </div>
+                                        @*<div class="btn-group btn-group-justified" style="width:1097px;">
+                        <a href="#" class="btn btn-default" onclick="AcceptPropertyListing()"><i class="fa fa-check" aria-hidden="true" style="color:forestgreen;"></i> Accept Property</a>
+                        <a href="#" class="btn btn-default" onclick="RejectPropertyListing()"><i class="fa fa-close" aria-hidden="true" style="color:red;"></i>Close</a>
+                    </div>*@
+                                        <!-- Tabs --->
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- /.container -->
+                            <section id="map">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <iframe src="https://www.google.com/maps?q=Randall @Model.Address&output=embed" width="1077px" height="300px" frameborder="0" style="border:0" allowfullscreen></iframe>
+                                            @*<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3609.173785739401!2d55.31978831501016!3d25.231070983880404!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f429827beca8b%3A0xa3f53db993aa16cd!2sDubai+Healthcare+City!5e0!3m2!1sen!2sae!4v1474978873785" width="1077px" height="300px" frameborder="0" style="border:0" allowfullscreen></iframe>*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <br />
+                            <div id="divbtn" style="display:block" class="col-md-offset-1">
+                                <input type="submit" value="Finish" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                                <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                                <br />
+                                <br />
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+           
+        </div>
+    </body>
+
+}
+</html>
+
+<script src="~/Scripts/jquery-2.2.0.min.js"></script>
+<script>
+    //Model.MatchedUnitId
+    @*function AcceptPropertyListing() {
+        $.getJSON("../MatchedUnits/AcceptMatchedUnit?id="+@Model.MatchedUnitId ,
+            function (result) {
+                 window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+            });
+    }*@
+
+    function RejectPropertyListing() {
+        window.location.href = "@Url.Action("Properties", "PropertyLeaseApplication")";
+        @*$.getJSON("../MatchedUnits/RejectMatchedUnit?id="+@Model.MatchedUnitId ,
+            function (result) {
+
+                window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+            });*@
+    }
+
+    function redirect() {
+         window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+    }
+</script>
+
+
+

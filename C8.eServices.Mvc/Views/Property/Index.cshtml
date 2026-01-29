@@ -1,0 +1,288 @@
+﻿@using C8.eServices.Mvc.Helpers
+@using C8.eServices.Mvc.Models
+@using C8.eServices.Mvc.ViewModels
+@using C8.eServices.Mvc.Keys
+@model IEnumerable<C8.eServices.Mvc.Models.RatesRebateProperty>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+    var customerId = ViewBag.CustomerId;
+    var ratesRebateId = ViewBag.RatesRebateId;
+    var referenceTypeId = ViewBag.ReferenceTypeId;
+    var applicationId = ViewBag.ApplicationId;
+    var referenceId = ViewBag.ReferenceId;
+    var status = ViewBag.RatesRebateStatus;
+    var propertyId = ViewBag.CurrentPropertyId;
+    var currentPropertyId = ViewBag.CurrentPropertyId;
+    var isFromDocument = (bool)ViewBag.IsFromDocument;
+    var customer = (CustomerProfileViewModel)ViewData["CustomerProfileViewModel"];
+    var navList = (NavigationProperty)ViewBag.NavigationParameters;
+}
+
+<h3>Home Owner's Rates Rebate Application for Residential Property</h3>
+<hr />
+@Html.Partial("_NavigationPartial", navList)
+@*<div style="display: block;">
+    <ol class="progtrckr" data-progtrckr-steps="2">
+        <li class="progtrckr-done">@Html.EncodedActionLink("Principle Owner", "Create", "RatesRebate", new { propertyId =navList.PropertyId, ratesRebateId = navList.RatesRebateId }, null)</li>
+        <li class="progtrckr-done">@Html.EncodedActionLink("Properties", "Index", "RatesRebate", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, null)</li>
+        <li class="progtrckr-done">@Html.EncodedActionLink("Accounts", "Create", "RatesRebate", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, null)</li>
+        <li class="progtrckr-done">@Html.EncodedActionLink("Additional Owners", "Create", "RatesRebate", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, null)</li>
+        <li class="progtrckr-done">@Html.EncodedActionLink("Documents", "Create", "RatesRebate", new { propertyId, ratesRebateId = ViewBag.RatesRebateId }, null)</li>
+        <li class="progtrckr-here">Submit</li>
+    </ol>
+</div>*@
+<br />
+<div class="panel-group" id="customerDetails">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseCustomer">
+                    Principle Owner
+                </a>
+            </h4>
+        </div>
+        <div id="collapseCustomer" class="panel-collapse collapse in">
+            <div class="panel-body">
+                @Html.Partial("_CustomerPartial", customer)
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 id="instructionsTitle" class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span>
+                    Instructions
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse">
+            <div class="panel-body">
+                <p>
+                    You are currently at step 6:
+                    <ol>
+                        <li>Principle Owner - Update information about the principle owner.</li>
+                        <li>Properties - Update information about the properties owned by the principle owner.</li>
+                        <li>Accounts - Update information about the accounts associated with a property.</li>
+                        <li>Additional Owners - Update information about the additional owners of a property.</li>
+                        <li>Documents - Upload documents to support and verify your application per property.</li>
+                        <li><strong>Submit - Submit your application. You may also add additional properties or edit a property and related infomation.</strong></li>
+                    </ol>
+                </p>
+                <p>
+                    In this step you are required to list all the properties owned by yourself or the owner you are applying on behalf of. The owner must be
+                    the primary/ principle registered owner as per the property title deed.
+                </p>
+                <p>
+                    You may click the "Back" button to go back to your previous screen.
+                </p>
+                <p>
+                    If you have already completed your application you may click the "Submit" button to submit your application to eThekwini Municipality. Once
+                    submitted you may not edit any information, unless the application is sent back to you from the municipality due to a query about your application.
+                </p>
+                <p>
+                    You may add properties by clicking the "Add Property" button. Each property will need accounts, documents and additional owners' information.
+                </p>
+                <p>
+                    You may edit/ review your property information by clicking the "Edit" button next to your property. Or you may want to delete a property by clicking the
+                    "Delete" button next to your property. You will need to click the "Edit" button for each property to complete the remaining steps per property, if
+                    not done already.
+                </p>
+                <p>
+                    Once you have completed all steps, you may submit your application. If you try to submit your application without certain
+                    information you will be alerted and your submission will be pending until the information is completed per property.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="navigation">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseNavigation">
+                    Navigation
+                </a>
+            </h4>
+        </div>
+        <div id="collapseNavigation" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <div class="col-md-6">
+                            @Html.EncodedActionLink("Back", (ViewBag.IsFromDocument) ? "Index" : "Create", (ViewBag.IsFromDocument) ? "Document" : "RatesRebate",
+                                                    new { referenceId, ratesRebateId, customerId, referenceTypeId, applicationId, @returnUrl = ViewBag.Data },
+                                new { @class = "btn btn-primary" })
+                        </div>
+                        <div class="col-md-6">
+                            <span class="pull-right">
+                                @Html.EncodedActionLink("Add Property", "CreateProperty", "Property", new { customerId, ratesRebateId, isPropertyList = true }, new { @class = "btn btn-primary" })
+                                @*<a class="btn btn-primary" href="@Url.Action("CreateProperty", new { customerId, ratesRebateId, isPropertyList = true })">
+                                        <span class="font-icon-group"></span>Add Property
+                                    </a>*@
+                                &nbsp;
+                                @if (Model.Any() && status == StatusKeys.RatesRebateApplicationPending && !ApplicationHelper.CanApprove())
+                                {
+                                    @Html.EncodedActionLink("Submit Application", "SubmitApplication", "RatesRebate", new { id = ratesRebateId, isFromDocument, currentPropertyId, ViewBag.returnUrl }, new { @class = "btn btn-primary" })
+                                }
+                                else if (status == StatusKeys.RatesRebateApplicationQuery)
+                                {
+                                    @Html.EncodedActionLink("Resubmit", "SubmitApplication", "RatesRebate", new { id = ratesRebateId, isFromDocument, currentPropertyId, ViewBag.returnUrl }, new { @class = "btn btn-primary" })
+                                }
+                                else if (Model.Any() && status == StatusKeys.RatesRebateApplicationPending && ApplicationHelper.CanApprove())
+                                {
+                                    @Html.EncodedActionLink("Approve Application", "SubmitApplication", "RatesRebate", new { id = ratesRebateId, isFromDocument, currentPropertyId }, new { @class = "btn btn-primary" })
+                                }
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="propertyList">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseProperties">
+                    List of Properties
+                </a>
+            </h4>
+        </div>
+        <div id="collapseProperties" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table class="table table-striped" id="table"
+                       data-toggle="table"
+                       data-height="500"
+                       data-search="true"
+                       data-pagination="true"
+                       data-page-list="[10,25, 50, 100, ALL]">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.RatesNumber)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.PhysicalAddress1)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.PhysicalAddress2)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.PhysicalAddress3)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.PhysicalAddress4)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Property.PhysicalAddress5)
+                            </th>
+                            @*<th>
+                                    @Html.DisplayNameFor(model => model.Property.PhysicalAddressCode)
+                                </th>*@
+                            @*<th>
+                                    @Html.DisplayNameFor(model => model.Property.Status)
+                                </th>*@
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.RatesNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.PhysicalAddress1)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.PhysicalAddress2)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.PhysicalAddress3)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.PhysicalAddress4)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Property.PhysicalAddress5)
+                                </td>
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Property.PhysicalAddressCode)
+                                    </td>*@
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Property.Status.Name)
+                                    </td>*@
+                                <td>
+                                    @Html.EncodedActionLink("Edit", "Edit", "Property", new { id = item.PropertyId }, new { @class = "btn btn-primary btn-sm btn-responsive" })
+                                    @Html.EncodedActionLink("Delete", "Delete", "Property", new { id = item.PropertyId }, new { @class = "btn btn-primary btn-sm btn-responsive" })
+                                    @*<a href="@Url.Action( "Edit", "Property", new { id = item.PropertyId, ratesRebateId = item.RatesRebateId } )"><span class="glyphicon glyphicon-pencil" title="Edit"></span></a>
+                                        <a href="@Url.Action( "Delete", "Property", new { id = item.PropertyId, ratesRebateId = item.RatesRebateId } )"><span class="glyphicon glyphicon-remove" title="Delete"></span></a>
+                                        <a href="@Url.Action( "Index", "PropertyAccount", new { propertyId = item.PropertyId, ratesRebateId = item.RatesRebateId } )"><span class="glyphicon glyphicon-usd" title="Add accounts to this property"></span></a>
+                                        <a href="@Url.Action( "Index", "AdditionalPropertyOwner", new { propertyId = item.PropertyId, ratesRebateId = item.RatesRebateId } )"><span class="glyphicon glyphicon-user" title="Add/ verify additional owners of this property"></span></a>
+                                        <a href="@Url.Action( "Index", "Document", new { referenceId = item.Id, referenceTypeId = referenceTypeId, applicationId = applicationId, @returnUrl = ViewContext.HttpContext.Request.Url.PathAndQuery } )"><span class="glyphicon glyphicon-upload" title="Upload Documents"></span></a>*@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@*modal for missing documents*@
+
+
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                 @*<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>*@
+                <h4 class="modal-title">Errors</h4>
+            </div>
+            <div class="modal-body text-danger" id="errorList">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+        var jsvar = '@ViewBag.Errors';
+        var errors = jsvar.replace(/\n/g, "<br />");
+        console.log(errors);
+
+
+        $(document).ready(function () {
+            // Displays a triangle to tell users if the panel is collapsable.
+            $('#instructionsTitle').on("click", function () {
+                var span = $('#instructionsTitle').find('span');
+                if (span.attr('class') === 'glyphicon glyphicon-triangle-top') {
+                    span.removeClass('glyphicon-triangle-top');
+                    span.addClass('glyphicon-triangle-bottom');
+                } else {
+                    span.removeClass('glyphicon-triangle-bottom');
+                    span.addClass('glyphicon-triangle-top');
+                }
+
+            });
+            if (errors !== null && errors.length > 0) {
+                $('#errorList').html(errors);
+                $('#errorModal').modal('show');
+                errors = "";
+            }
+        });
+
+    </script>
+}

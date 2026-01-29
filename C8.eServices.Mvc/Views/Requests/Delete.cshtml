@@ -1,0 +1,111 @@
+﻿@using C8.eServices.Mvc.Keys
+@model C8.eServices.Mvc.Models.Request
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_LayoutPage.cshtml";
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#">
+                   Request for Account Access Details
+                </a>
+            </h3>
+        </div>
+        <div id="accountReqsDetsCollapse" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ReferenceAlpha)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ReferenceAlpha)
+                    </dd>
+
+                    @*<dt>
+                    @Html.DisplayNameFor(model => model.RecipientContact)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.RecipientContact)
+                </dd>*@
+
+                    <dt>
+                        @Html.DisplayName("Date of Request")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CreatedDateTime)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Status.Name)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Status.Name)
+                    </dd>
+
+                    @if (Model.Status.Key == StatusKeys.IncentivePolicyApplicationDeclined)
+                    {
+                        <dt>
+                            @Html.DisplayName("Reason for Rejection")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Comment.Comments)
+                        </dd>
+                    }
+                    else
+                    {
+                        <dt>
+                            @Html.DisplayName("Reason for Request")
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Comment.Comments)
+                        </dd>
+                    }
+                </dl>
+            </div>
+         
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#accountReqsCollapse">
+                    Cancel Request
+                </a>
+            </h3>
+        </div>
+        <div id="accountReqsCollapse" class="panel-collapse collapse in">
+            
+            <div class="panel-body">
+                <h5>This request will no longer be available on the system, are you sure you want to cancel this request?</h5>
+               
+            </div>
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+                <div class="form-actions no-color">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="Close Request" class="btn btn-primary" />
+                    @*@Html.ActionLink("Back to List", "Index")*@
+                </div>
+                <br />
+                <br />
+            }
+        </div>
+    </div>
+</div>
+<div>
+    @Html.EncodedActionLink("Back", "AccountRequests", "Profile", new { customerId = Model.CustomerId }, new { @class = "btn btn-primary" })
+</div>
+<br />
+<br />
+

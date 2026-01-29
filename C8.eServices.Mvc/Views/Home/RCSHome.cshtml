@@ -1,0 +1,130 @@
+﻿@{
+    ViewBag.Title = "RCSHome";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .lead {
+            margin-bottom: 600px;
+            font-size: 16px;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+    }
+
+    h1, .h1, h2, .h2, h3, .h3 {
+        margin-top: 246px;
+        margin-bottom: 10.5px;
+    }
+    /* Banner - swap background-image lines when deploying. */
+    .banner {
+        background-color: #f1f3f6;
+        height: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+        margin-top: -400px;
+    }
+
+    .banner-inner {
+        /*height: 54px;*/
+        color: #455463;
+        background-color: rgba(0, 0, 0, 0);
+        padding: 15px;
+        /*min-width: 523px;*/
+        display: inline-block;
+        position: absolute;
+        top: 70%;
+        left: 30%;
+        transform: translate(-50%,-50%);
+        max-width: 50%;
+        border-radius: 5px;
+    }
+
+    /* Footer Home - swap background-image lines when deploying. */
+    .footer-home {
+        /*background-image: url("img/footer_1080.png");*/
+        /* JK.20200717a - Swap when deploying to a virtual directory inside website. */
+        /*background-image: url("../../Content/img/footer_1080.png");*/
+        background-color: #f1f3f6;
+        height: 160px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 100%;
+        padding: 10px 18px;
+        /*background: #fff;*/
+        /*border-top: 1px solid #455463;*/
+        transition: margin .4s ease 0s;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0
+    }
+
+    /* Set padding to keep content from hitting the edges */
+    .body-content {
+        padding-top: 0px;
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-top: 0px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    #header {
+        height: 45px;
+    }
+</style>
+
+
+
+
+<div>
+
+    <img src="~/Content/Images/Home2.png" style="height: 100% !important; width: 100% !important; background-position: center;" />
+
+
+    <div class="banner">
+
+        <div class="banner-inner">
+            <h1>CoE PLM</h1>
+            <p class="lead">The PLM solution intends to improve property lease management processing speed thereby shortening turnaround time for revenue collection targets as well as minimising paper usage and storage requirements. </p>
+        </div>
+
+    </div>
+
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Property Lease Management</h2>
+            <p>The PLM solution intends to improve property lease processing speed thereby shortening turnaround time for revenue collection targets as well as minimising paper usage and storage requirements.</p>
+        </div>
+        <div class="col-md-4  col-md-offset-1">
+            <h2>Contact Us</h2>
+            <p>For any enquiries or support  please email us at info@ehco.org.za or call us on 011 825 0158  </p>
+        </div>
+        <div class="col-md-4">
+            @*<h2>Property Lease Management</h2>
+            <p>The PLM solution intends to improve property lease processing speed thereby shortening turnaround time for revenue collection targets as well as minimising paper usage and storage requirements.</p>*@
+        </div>
+    </div>
+
+
+    <div class="divider">&nbsp;</div>
+    @*<img src="~/Content/Images/footer_scm.png" style="height: 100% !important; width: 100% !important; background-position: center;" />*@
+</div>
+
+

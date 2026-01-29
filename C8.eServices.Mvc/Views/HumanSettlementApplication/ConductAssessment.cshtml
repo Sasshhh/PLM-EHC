@@ -1,0 +1,488 @@
+﻿
+@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var Id = Model.HumanSettlementApplication.Id;
+}
+
+<style>
+    .require::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    @@media only screen and (max-width: 1000px) {
+
+      
+
+        .buttonIcon {
+            font-size: 2.5rem !important;
+        }
+
+        .chkboxmargin {
+            margin-left: 30px;
+        }
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    @@media only screen and (max-width: 1000px) {
+        .step-app > .step-steps {
+            display: inline-block;
+            padding: 1px;
+            color: white;
+            background-color: #848484;
+            text-decoration: none;
+            border-right: 1px solid #fff;
+            word-wrap: break-word;
+            width: 100%;
+        }
+    }
+
+    .button1 {
+        font-size: 13px;
+    }
+
+    .required:before {
+        content: '*';
+        color: red;
+    }
+
+    input[type='date'] {
+        position: relative;
+    }
+
+    ::-webkit-datetime-edit, ::-webkit-clear-button, ::-webkit-calendar-picker-indicator {
+        position: absolute;
+    }
+
+    ::-webkit-clear-button {
+        right: 2.5em;
+    }
+
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+        right: 0;
+        padding: .539em .34em;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        color: rgba(0, 0, 0, 0);
+        opacity: 1;
+        display: block;
+        background: url('../plm/Content/RcsStyles/calenderIcon.png') no-repeat;
+        background-size: 20px 20px;
+        width: 20px;
+        height: 20px;
+        border-width: thin;
+        margin-left: 50px;
+    }
+
+    body {
+        font-family: Arial;
+    }
+
+    .number {
+        background-color: transparent !important;
+        border: 1.5px solid white;
+        border-radius: 50px;
+        color: white !important;
+    }
+
+    .step-app > .step-steps > li > a {
+        display: block;
+        padding: 10px;
+        color: white;
+        background-color: #848484;
+        text-decoration: none;
+        border-right: 1px solid #fff;
+    }
+
+    legend {
+        display: block;
+        width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+        font-size: 25px;
+        line-height: inherit;
+        color: #333;
+        border: 0;
+        background-color: aliceblue;
+        border-bottom: 1px solid #00d0ff;
+    }
+
+    .error {
+        color: tomato;
+    }
+</style>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Application Details
+                </div>
+            </div>
+        </div>
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>Application Reference No.</th>
+                        <th>Application Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.FullName)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.PurchaserType.Name)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.ApplicationReferenceNumber)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.CreatedDateTime.Value)</td>
+                        <td>@Html.DisplayFor(model => model.HumanSettlementApplication.Status.Name)</td>
+                        <td>@Html.ActionLink("View", "Details", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.HumanSettlementApplication.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+            <br />
+        </div>
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+                    <div class="step-app">
+                        <ul class="step-steps">
+                            <li style="text-align:center;"><a href="#step3">Risk Assesment Response<span class=""></span></a></li>
+                        </ul>
+                    </div>
+                    <div class="panel-group" id="instructions">
+                        <div class="panel panel-default">
+
+                            <div id="collapseInstructions" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    @Html.HiddenFor(model => model.HumanSettlementApplication.Id, new { htmlAttributes = new { @class = "form-control", @Name = "HumanSettlementApplication.Id", @Style = "display:none;" } })
+                                    @Html.HiddenFor(model => model.LeaseDetails.Id, new { htmlAttributes = new { @class = "form-control", @Style = "display:none;" } })
+                                    <div class="form-group">
+
+
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.FirstName, "First Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.FirstName, new { htmlAttributes = new { @class = "form-control", @disabled = "disabled", @Name= "RiskAssessmentOutcome.FirstName" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.FirstName, "", new { @class = "text-danger" })
+                                        </div>
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.OfficialNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.OfficialNumber, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @required = "required", @Name = "RiskAssessmentOutcome.OfficialNumber" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.OfficialNumber, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.LastName, "Last Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(model => model.RiskAssessmentOutcome.LastName, new { htmlAttributes = new { @class = "form-control", @disabled = "disabled", @Name = "RiskAssessmentOutcome.LastName" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.LastName, "", new { @class = "text-danger" })
+                                        </div>
+                                        @Html.LabelFor(model => model.RiskAssessmentOutcome.DateStamp, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-3">
+                                            @Html.Editor("DateStampConduct", null, new { htmlAttributes = new { @class = " form-control", onchange = "ChangeDate()", @Name = "RiskAssessmentOutcome.DateStamp", @Id = "RiskAssessmentOutcome.DateStamp", @disabled = "disabled" } })
+                                            @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.DateStamp, "", new { @class = "text-danger" })
+                                            @*</div>*@
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group">
+                                        @Html.Label("Outcome", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                        <div class="col-md-2">
+                                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @onchange = "changestatus()", @Id = "ApprovalStatus", @required = "required" })
+                                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div id="reject" style="display:none">
+                                            @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Comment", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            <div class="col-md-8">
+                                                @Html.TextAreaFor(model => model.RiskAssessmentOutcome.Reason, new { @class = "form-control", @Id = "RejectComment", @Name = "OutcomeReason1" })
+                                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.Reason, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div id="Approve" style="display:block">
+                                            @Html.LabelFor(model => model.RiskAssessmentOutcome.Reason, "Comment", htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-8">
+                                                @Html.TextAreaFor(model => model.RiskAssessmentOutcome.Reason, new { @class = "form-control", @Id = "RejectComment", @Name = "OutcomeReason2" })
+                                                @Html.ValidationMessageFor(model => model.RiskAssessmentOutcome.Reason, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+                              
+
+                                    <div class="form-group">
+                                        @*@Html.HiddenFor(model => model.HumanSettlementApplication.Id)*@
+                                        @*@Html.HiddenFor(model => model.HumanSettlementApplication.Id, new { htmlAttributes = new { @class = "form-control", @Name = "ApplicationId", @Style = "display:none;" } })*@
+
+                                        @Html.HiddenFor(model => model.HumanSettlementApplication.PreferredComplexArea.Id)
+                                        @*@Html.HiddenFor(model => model.spaceUnitID)*@
+                                        @Html.HiddenFor(m => m.spaceUnitID, new { id = "spaceUnitID" })
+
+                                        <input type="hidden" name="selUnitVal" id="selUnitVal" value="">
+                                    </div>
+                                    <div class="panel-heading">Upload Risk Assessment Document/s</div>
+                                    @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+                                </div>
+
+
+                                <div class="step-footer" align="left">
+                                    @Html.EncodedActionLink("Cancel", "Index", "RCSApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="step-footer" align="center">
+                            <input type="button" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "HumanSettlementApplication")'" name="btnApprovalStatus" class="button1" />
+
+                            @*<button class="button1" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")'">Cancel</button>*@
+                            <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                            <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                            <br />
+                            <br />
+                            <br />
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+            
+</div>
+<div id="waitinglist_busy" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitleText"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="alert alert-success col-md-5" id="AMYAlert" style="display:block;">
+                        <p>Please wait 20 seconds, then action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function Cancel() {
+        window.location.href = "@Url.Action("ApplicantRiskAssessment", "HumanSettlementApplication")";
+    }
+    function clickSubmit() {
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this risk assessment?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                var statusval = document.getElementById("ApprovalStatus").value;
+                var reject = document.getElementById("reject");
+                var accept = document.getElementById("Approve");
+                if (statusval == "Rcs_Rejected") {
+                    var RejectComment = document.getElementById("RejectComment").value;
+
+                    if ((RejectComment == null || RejectComment == "")) {
+                        swal("error", "Please enter the risk assessment outcome comment!", "warning");
+                    } else {
+                        WaitingListBusy();
+                    }
+                } else if (statusval != "Rcs_Rejected" && statusval != "") {
+                    WaitingListBusy();
+                }
+            }
+        });
+    }
+
+
+    function WaitingListBusy() {
+        debugger;
+        $.getJSON("../HumanSettlementApplication/ValidateWaitingListSorting",
+            function (result) {
+                debugger;
+                if (result == true) {
+                    jQuery.noConflict();
+                    $("#waitinglist_busy").modal('show');
+                    $('#waitinglist_busy').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
+            });
+    }
+
+    function changestatus() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            jQuery('#reject').css("display", "block")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#ComplexAreaSel').css("display", "none")
+        } else {
+            jQuery('#reject').css("display", "none")
+            jQuery('#Approve').css("display", "block")
+            jQuery('#ComplexAreaSel').css("display", "block")
+
+        }
+    }
+
+
+    function changeUnitSelection() {
+
+        var unitval1 = document.getElementById("preferreUnitdll").value;
+        document.getElementById("spaceUnitID").value = unitval1;
+
+        
+
+        }
+    function changeComplexSelection() {
+
+        var unitval = document.getElementById("PreferredAreadll").value;
+
+        $(document).ready(function () {
+
+            //Dropdownlist Selectedchange event
+            $("#PreferredAreadll").change(function () {
+                console.log("testing110111....");
+                $("#PreferredUnitdll").empty();
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("GetUnitbyPreferredAreaId")',
+                    dataType: 'json',
+                    // data: { id: $("#PreferredUnitdll").val() },
+                    data: { id: unitval },
+                    success: function (mems) {
+                        console.log("success --- TestEnd");
+                        // states contains the JSON formatted list
+                        // of states passed from the controller
+                        jQuery('#PreferredUnitSel').css("display", "block")
+                        $.each(mems, function (i, member) {
+                            $("#preferreUnitdll").append('<option value="' + member.Value + '">' + member.Text + '</option>');
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieve units.' + ex);
+                    }
+                });
+                return false;
+            })
+        });
+
+
+    }
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function Submit() {
+        var statusval = document.getElementById("ApprovalStatus").value;
+        if (statusval == "Rcs_Rejected") {
+            var RejectComment = document.getElementById("RejectComment").value;
+            if ((RejectComment == null || RejectComment == "")) {
+                swal("error", "Please enter rejection comment!", "warning");
+            } else {
+                document.getElementById("btnApproval").click();
+            }
+
+        }
+    }
+
+</script>

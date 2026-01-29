@@ -1,0 +1,1518 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Materia - Admin Template">
+    <meta name="keywords" content="materia, webapp, admin, dashboard, template, ui">
+    <meta name="author" content="solutionportal">
+
+    <title>RCS</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/Images/ekurhuleni_ico.ico" />
+    @*<script src="~/Content/RcsStyles/jquery-3.3.1.min.js"></script>*@
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("Scripts", required: false)
+    <script src="~/Content/RcsStyles/SadSweetAlert.min.js"></script>
+    @*<script src="~/Scripts/RCSScripts/sweetalert.min.js"></script>
+        <link href="~/Content/RcsStyles/Sweetalert2.min.css" rel="stylesheet" />*@
+    <!-- Icons -->
+    <link rel="stylesheet" href="~/Content/RcsStyles/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="~/Content/RcsStyles/fonts/font-awesome/css/font-awesome.min.css">
+  
+
+    <!-- Plugins -->
+    <link rel="stylesheet" href="~/Content/RcsStyles/styles/plugins/c3.css">
+    <link rel="stylesheet" href="~/Content/RcsStyles/styles/plugins/waves.css">
+    <link rel="stylesheet" href="~/Content/RcsStyles/styles/plugins/perfect-scrollbar.css">
+
+
+    <!-- Css/Less Stylesheets -->
+    <link rel="stylesheet" href="~/Content/RcsStyles/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Content/RcsStyles/styles/main.min.css">
+
+    @*Datatables*@
+    <link href="~/Content/RcsStyles/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <script src="~/Content/RcsStyles/jquery.dataTables.min.js"></script>
+    <script src="~/Content/RcsStyles/dataTables.bootstrap4.min.js"></script>
+
+    <link href="~/Content/RcsStyles/HoldOn.min.css" rel="stylesheet" />
+    <script src="~/Content/RcsStyles/HoldOn.min.js"></script>
+
+    <link href="~/Content/RcsStyles/fonts/css.css" rel="stylesheet" />
+
+    <script src="~/Content/RcsStyles/Scripts/jquery.mask.min.js"></script>
+    <link href="~/Content/jquery-steps.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-steps.js"></script>
+
+    <link href="~/Content/siyakhokhaStyles/pikaday.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+
+    @*<script src="~/Content/dist/js/plugins/validation/jquery.validate.js"></script>
+        <script src="~/Content/dist/js/plugins/validation/jquery.validate.min.js"></script>*@
+
+
+    <style>
+        .buttonIcon {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 7px 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .tablecss {
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+        th {
+            /* font-size: 12px;
+            font-weight: 600;*/
+            background-color: #1e8449;
+            color: white;
+        }
+        .site-head {
+            background-color: #1e8449;
+        }
+
+        .main-container .nav-wrap .nav-head {
+            background: #1e8449;
+        }
+
+        .btn {
+            color: #1e8449;
+            border-color: #1e8449;
+            background-color: white;
+        }
+
+            .btn:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .btn12 {
+            color: #af7b0b;
+            border-color: #af7b0b;
+            background-color: white;
+        }
+
+            .btn12:hover {
+                color: white;
+                border-color: white;
+                background-color: #1e8449;
+            }
+
+        .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
+            color: #ffffff;
+            background-color: grey;
+            border-color: #ffffff;
+        }
+
+        .BoToDoHide {
+            display: none;
+        }
+
+        .button1 {
+            background-color: #1e8449 !important;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .step-app > .step-steps > li.active a {
+            background-color: darkgrey !important;
+            color: #fff;
+        }
+
+
+        .sk-cube-grid {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 10px;
+            background-color: grey;
+        }
+
+            .sk-cube-grid .sk-cube-child {
+                width: 33%;
+                height: 33%;
+                background-color: white;
+                float: left;
+                -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+                animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out
+            }
+
+            .sk-cube-grid .sk-cube-grid9 {
+                -webkit-animation-delay: .2s;
+                animation-delay: .2s
+            }
+
+
+        .modal-dialog {
+            position: relative;
+            display: table; /* This is important */
+            overflow-y: auto;
+            overflow-x: auto;
+            width: auto;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body id="app" class="app off-canvas">
+
+    <!-- header -->
+    <header class="site-head" id="site-head">
+        <ul class="list-unstyled left-elems">
+            <li>
+                <a href="javascript:;" class="nav-trigger ion ion-drag"></a>
+            </li>
+            <li>
+                <font color="white">
+                    @ViewBag.RefNo
+                </font>
+            </li>
+
+            <li>
+                <div class="site-logo visible-xs">
+                    <a href="javascript:;" class="text-uppercase h3">
+                        <span class="text">RCS</span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </header>
+    <!-- #end header -->
+    <!-- main-container -->
+    <div class="main-container clearfix">
+        <!-- main-navigation -->
+        <aside class="nav-wrap" id="site-nav" data-perfect-scrollbar>
+            <div class="nav-head">
+                <!-- site logo -->
+                <a href="" class="site-logo text-uppercase">
+
+                    @*<i class="ion ion-disc"></i>*@
+                    @*<img src="~/Content/Images/ekurhuleni_logo.png" style=" width: 73px; top: -2px; position: relative; right: 6px;" />*@
+                    @*<img src="~/Content/Images/coenotext.png" style=" width: 44px; top: -2px; position: relative; right: 6px;" />*@
+                    @*<img src="~/Content/Images/CoE Logo .png" style=" width: 36px; top: -2px; position: relative; right: 6px;" />*@
+                    @*<i rel="shortcut icon" type="image/x-icon" href="~/Content/Images/ekurhuleni_ico.ico"></i>*@
+                    <span class="text" style=" text-transform: none;">CoE RCS</span>
+                </a>
+            </div>
+
+            <!-- Site nav (vertical) -->
+
+            <nav class="site-nav clearfix" role="navigation">
+                <!-- navigation -->
+                <ul class="list-unstyled clearfix nav-list mb15">
+                    <li>
+                        <a href="javascript:;">
+                            <i class="ion ion-person"></i>
+                            <span class="text">Profile</span>
+                            <i class="arrow ion-chevron-left"></i>
+                        </a>
+                        <ul class="inner-drop list-unstyled">
+                            @using Microsoft.AspNet.Identity
+                            @if (Request.IsAuthenticated)
+                            {
+                                using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                                {
+                                    @Html.AntiForgeryToken()
+
+                                    <ul class="nav navbar-nav navbar-right" style="margin-left: 1%;">
+                                        <li>
+                                            @Html.ActionLink(User.Identity.GetUserName(), "Index", "Profile", routeValues: null, htmlAttributes: new { title = "Manage" })
+                                        </li>
+                                        <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+                                    </ul>
+                                }
+                            }
+                            else
+                            {
+                                <li>
+                                    <a href="~/Account/Login">
+                                        <i class="ion ion-person" style="margin-left: -20%;"></i>
+                                        <span class="text">Sign In</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="~/Account/Register">
+                                        <i class="ion ion-person" style="margin-left: -20%;"></i>
+                                        <span class="text">Register</span>
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+                    </li>
+                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Acknowledge Refund Application") || User.IsInRole("Issue Refunds collection") || User.IsInRole("Acknowledge RCS Application") || User.IsInRole("Submit Figures") || User.IsInRole("Issue Certificate")))
+                    {
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-walk"></i>
+                                <span class="text">Walk-In</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+                                <li>
+                                    <a href="~/Capture/CaptureWalkin">
+                                        <i class="ion ion-monitor" style="margin-left: -20%;"></i>
+                                        <span class="text">Capture Walkin</span>
+                                    </a>
+                                </li>
+
+
+                            </ul>
+
+
+                        </li>
+                    }
+
+                    @if (Request.IsAuthenticated && (User.IsInRole("Acknowledge RCS Application") || User.IsInRole("Submit Figures") || User.IsInRole("Issue Certificate")))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">RCS Applications</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Acknowledge RCS Application"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AcknowledgementDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Documents Evaluation</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Submit Figures"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AssessmentFiguresDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Clearance Figures</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Issue Certificate"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RCCertificateDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">RCC Certificate</span>
+                                        </a>
+                                    </li>
+                                }
+
+
+                            </ul>
+
+
+                        </li>
+
+                    }
+
+                    @if (Request.IsAuthenticated && (User.IsInRole("Rates") || User.IsInRole("Billing") || User.IsInRole("Sundry Account") || User.IsInRole("Credit Control")))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">Discrepancies/Section</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Rates"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RatesDepartmentDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Discrepancies</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Billing"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/BillingDepartmentDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Billing Discrepancies</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Credit Control"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/CreditDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Credit Control Discrepancies</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Sundry Account"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/SundryDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Sundries Discrepancies</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+
+
+                        </li>
+
+                    }
+
+                    @if (Request.IsAuthenticated && ((User.IsInRole("Internal Registration")) || (User.IsInRole("Area Manager")) || (User.IsInRole("Back Office System Administrator"))))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-filing"></i>
+                                <span class="text">Registration</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Internal Registration"))
+                                {
+                                    <li>
+                                        <a href="~/Account/InternalRegister">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Start Registration</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/AreaManager/Index">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Awaiting Registrations</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Back Office System Administrator"))
+                                {
+                                    <li>
+                                        <a href="~/AreaManager/AdminInbox">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Awaiting Registrations</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+
+
+                        </li>
+
+
+                    }
+
+                    @if (Request.IsAuthenticated && ((User.IsInRole("Super Administrators")) || (User.IsInRole("Area Manager")) || (User.IsInRole("Back Office System Administrator"))))
+                    {
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-document"></i>
+                                <span class="text">Reports</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>
+                                    <a href="~/RCSReport/Reports">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Reports</span>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+
+
+
+
+                        </li>
+
+                    }
+                    @if (Request.IsAuthenticated && ((User.IsInRole("Support Admin"))||(User.IsInRole("Rates Clearance Sectional Head"))||(User.IsInRole("Super Administrators")) || (User.IsInRole("Area Manager")) || (User.IsInRole("Back Office System Administrator"))))
+                    {
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-document"></i>
+                                <span class="text">All Cases</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>
+                                    <a href="~/DepartmentsApprovals/viewallcases">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">View All</span>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+
+
+
+
+                        </li>
+
+                    }
+                    @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">Work Queues</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AcknowledgementDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Documents Evaluation</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AssessmentFiguresDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Clearance Figures</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RCCertificateDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">RCC Certificate</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/BillingDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Billing Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/CreditDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Credit Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RatesDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/SundryDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Sundry Department</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RefundAcknowledgementDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Refund Documents</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/IssueRefundDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Issue Refund</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+
+
+                        </li>
+
+                    }
+                    @if (Request.IsAuthenticated &&  ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">Work Queues</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AcknowledgementDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Documents Evaluation</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/AssessmentFiguresDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Clearance Figures</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RCCertificateDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">RCC Certificate</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/BillingDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Billing Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/CreditDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Credit Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RatesDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Rates Department</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/SundryDepartmentDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Sundry Department</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RefundAcknowledgementDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Refund Documents</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && ((User.IsInRole("Rates Clearance Sectional Head")) || (User.IsInRole("Support Admin"))))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/IssueRefundDashboard">
+                                            <i class="ion ion-android-document" style="margin-left: -20%;"></i>
+                                            <span class="text">Issue Refund</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+
+
+                        </li>
+
+                    }
+                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-wrench"></i>
+                                <span class="text">User Maintenance</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
+                                {
+                                    <li>
+                                        <a href="~/ApplicationUserRole/AdminUserIndex">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Manage Users</span>
+                                        </a>
+                                    </li>
+                                }
+                                else if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/ApplicationUserRole/UserIndex">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Manage Users</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator")|| User.IsInRole("Support Admin")))
+                                {
+                                    <li>
+                                        <a href="~/Capture/RRActiveUsers">
+                                            <i class="ion ion-android-person-add" style="margin-left: -20%;"></i>
+                                            <span class="text">Manage RoundRobin</span>
+                                        </a>
+                                    </li>
+                                }
+                                else if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                                {
+                                    <li>
+                                        <a href="~/Capture/RRActiveUsers">
+                                            <i class="ion ion-android-person-add" style="margin-left: -20%;"></i>
+                                            <span class="text">Manage RoundRobin</span>
+                                        </a>
+                                    </li>
+                                }
+
+
+
+                            </ul>
+
+
+                        </li>
+
+                    }
+                    @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator")) || (User.IsInRole("Super Administrators")))
+
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">Content Management</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>
+                                    <a href="~/EmailContentTypes/Index">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Email Content</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/TitleType/Index">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Title Dropdowns</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Flags/Index">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Flags</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/RCSUserMessages/Index">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Message Content</span>
+                                    </a>
+                                </li>
+                            </ul>
+
+
+
+
+
+                        </li>
+                    }
+                    @if (Request.IsAuthenticated && User.IsInRole("Customers"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-folder-open"></i>
+                                <span class="text">RCS Applications</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/Capture/Capture">
+                                        <i class="ion ion-plus-circled" style="margin-left: -20%;"></i>
+                                        <span class="text">Capture</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/RCSApplication/Index">
+                                        <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                        <span class="text">Inbox</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else if (Request.IsAuthenticated && User.IsInRole("Clerks"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">RCS Applications</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.Identity.Name.Trim() == "SashenMoodley")
+                                {
+                                    <li>
+                                        <a href="~/Capture/CaptureWalkin">
+                                            <i class="ion ion-monitor" style="margin-left: -20%;"></i>
+                                            <span class="text">Capture Walkin</span>
+                                        </a>
+                                    </li>
+                                }
+
+                            </ul>
+
+
+                        </li>
+                    }
+
+                    else if (Request.IsAuthenticated && (User.IsInRole("Rates Clearance Senior Clerk")) || (User.IsInRole("Back Office System Administrator")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-person"></i>
+                                <span class="text">Maintenance</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>@Html.EncodedActionLink("Pending Approval", "Index", "Customer", new { id = 0 }, null)</li>
+                                <li>@Html.EncodedActionLink("Pending Documentation", "Index", "Customer", new { id = 1 }, null)</li>
+                                <li>@Html.EncodedActionLink("Active Profiles", "Index", "Customer", new { id = 2 }, null)</li>
+                                @*<li>@Html.ActionLink("Agent Customers", "AgentCustomer", "Customer")</li>
+                    <li>@Html.ActionLink("Customer Queries", "Index", "Query")</li>*@
+                                <li>@Html.ActionLink("Deactivated Users", "DeactivatedUsers", "Customer")</li>
+                                @*<li>@Html.ActionLink("Locked Users", "LockedUsers", "Customer")</li>*@
+                                @*<li>@Html.ActionLink("Customer Queries", "Index", "Customer")</li>*@
+                            </ul>
+
+                        </li>
+                    }
+
+                    @if (Request.IsAuthenticated && (User.IsInRole("Issue Refunds Collection") || User.IsInRole("Acknowledge Refund Application") || User.IsInRole("Customers")))
+                    {
+
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-cash"></i>
+                                <span class="text">Refunds</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                @if (Request.IsAuthenticated && User.IsInRole("Customers"))
+                                {
+                                    <li>
+                                        <a href="~/RefundApplications/Create">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Apply For Refund</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && User.IsInRole("Customers"))
+                                {
+                                    <li>
+                                        <a href="~/RefundApplications/Index">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Inbox</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (Request.IsAuthenticated && User.IsInRole("Acknowledge Refund Application"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/RefundAcknowledgementDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Documents Evaluation</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Issue Refunds Collection"))
+                                {
+                                    <li>
+                                        <a href="~/DepartmentsApprovals/IssueRefundDashboard">
+                                            <i class="ion ion-android-folder-open" style="margin-left: -20%;"></i>
+                                            <span class="text">Issue Refunds</span>
+                                        </a>
+                                    </li>
+                                }
+
+
+
+
+                            </ul>
+
+
+                        </li>
+
+                    }
+                    @using Microsoft.AspNet.Identity
+                    @if (Request.IsAuthenticated && User.IsInRole("Super Administrators"))
+                    {
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-person"></i>
+                                <span class="text">Maintenance</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/Application/Index">
+                                        <i class="ion ion-android-person-add" style="margin-left: -20%;"></i>
+                                        <span class="text">Users Maintenance</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/Capture/RRActiveUsers">
+                                        <i class="ion ion-android-person-add" style="margin-left: -20%;"></i>
+                                        <span class="text">RR Maintenance</span>
+                                    </a>
+                                </li>
+
+
+                                <li>@Html.EncodedActionLink("Pending Approval", "Index", "Customer", new { id = 0 }, null)</li>
+                                <li>@Html.EncodedActionLink("Pending Documentation", "Index", "Customer", new { id = 1 }, null)</li>
+                                <li>@Html.EncodedActionLink("Active Profiles", "Index", "Customer", new { id = 2 }, null)</li>
+                                @*<li>@Html.ActionLink("Agent Customers", "AgentCustomer", "Customer")</li>
+                    <li>@Html.ActionLink("Customer Queries", "Index", "Query")</li>*@
+                                <li>@Html.ActionLink("Deactivated Users", "DeactivatedUsers", "Customer")</li>
+                                @*<li>@Html.ActionLink("Customer Queries", "Index", "Customer")</li>*@
+                            </ul>
+
+                        </li>
+                    }
+
+                    @if (Request.IsAuthenticated)
+                    {
+
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-clipboard"></i>
+                                <span class="text">Audit</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>@Html.ActionLink("Login History", "UserLogsIndex", "Home", new { }, null)</li>
+
+                                @if (Request.IsAuthenticated && (User.IsInRole("Super Administrators") || User.IsInRole("Super Administrators") || User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Senior Clerk") || User.IsInRole("Back Office System Administrator")))
+                                {
+                                    <li>@Html.ActionLink("User Activity Tracker", "AuditLogsIndex", "Home", new { }, null)</li>
+
+                                }
+                                @*<li>@Html.EncodedActionLink("Active Profiles", "Index", "Customer", new { id = 2 }, null)</li>
+
+                    <li>@Html.ActionLink("Deactivated Users", "DeactivatedUsers", "Customer")</li>*@
+                                @*<li>@Html.ActionLink("Locked Users", "LockedUsers", "Customer")</li>*@
+                                @*<li>@Html.ActionLink("Customer Queries", "Index", "Customer")</li>*@
+                            </ul>
+
+                        </li>
+
+
+                    }
+                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Acknowledge Refund Application") || User.IsInRole("Issue Refunds collection") || User.IsInRole("Acknowledge RCS Application") || User.IsInRole("Submit Figures") || User.IsInRole("Issue Certificate")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-book"></i>
+                                <span class="text">User Manual</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+
+
+                                <li>
+                                    <a href="">
+                                        <i class="ion ion-android-download" style="margin-left: -20%;"></i>
+                                        <span class="text">Download</span>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+
+
+
+
+                        </li>
+                    }
+                </ul> <!-- #end navigation -->
+            </nav>
+
+
+        </aside>
+        <!-- #end main-navigation -->
+        <!-- content-here -->
+        <div class="content-container" id="content">
+            <!-- dashboard page -->
+            <div class="page page-dashboard">
+
+                <div class="page-wrap">
+                    @RenderBody()
+                    <hr />
+                    <footer>
+                        <p>&copy; @DateTime.Now.Year - RCS</p>
+                    </footer>
+
+
+
+                </div> <!-- #end page-wrap -->
+            </div>
+            <!-- #end dashboard page -->
+        </div>
+
+    </div> <!-- #end main-container -->
+    <!-- theme settings -->
+    <div class="site-settings clearfix hidden-xs">
+        <div class="settings clearfix">
+            <div class="wrapper left" hidden>
+                <ul class="list-unstyled other-settings">
+                    <li class="clearfix mb10">
+                        <div class="left small">Fixed Header</div>
+                        <div class="md-switch right">
+                            <label>
+                                <input type="checkbox" id="fixedHeader">
+                                <span>&nbsp;</span>
+                            </label>
+                        </div>
+                    </li>
+                    <li class="clearfix mb10">
+                        <div class="left small">Nav Full</div>
+                        <div class="md-switch right">
+                            <label>
+                                <input type="checkbox" id="navFull">
+                                <span>&nbsp;</span>
+                            </label>
+                        </div>
+                    </li>
+                </ul>
+                <hr />
+                <ul class="themes list-unstyled" id="themeColor">
+                    <li data-theme="theme-zero" class="active"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="~/Content/siyakhokhaStyles/pikaday.js"></script>
+    <script src="~/Scripts/jquery-steps.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/d3.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/c3.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/screenfull.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/perfect-scrollbar.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/waves.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/jquery.sparkline.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/jquery.easypiechart.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/plugins/bootstrap-rating.min.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/app.js"></script>
+    <script src="~/Content/RcsStyles/Scripts/index.init.js"></script>
+
+    @*Loader Javascript*@
+    <script>
+        function initLoadHoldOnClose() {
+            HoldOn.close();
+        }
+        var setMessageIn = "";
+        function SetMessageIn(messageIn) {
+            setMessageIn = messageIn;
+        }
+        function initLoadHoldOn(messageIn) {
+            if (messageIn == "" || messageIn == null) {
+                messageIn = 'Loading...Please Wait';
+            }
+            HoldOn.open({
+                theme: "sk-cube-grid",
+                message: messageIn,
+                textColor: "green"
+            });
+            messageIn = "";
+        }
+        function initLoadHoldOnCustom(messageIn) {
+            HoldOn.open({
+                theme: "sk-bounce",
+                message: messageIn,
+                textColor: "white",
+            });
+        }
+
+        $(document).ready(function () {
+            initLoadHoldOn();
+            setTimeout(HoldOn.close(), 5000);
+
+            $(window).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            })
+
+        });
+
+        $(window).load(function () {
+            HoldOn.close();
+        });
+
+        $(document).on('submit', 'form', function () {
+            initLoadHoldOn();
+        });
+
+        $(document).on('invalid-form.validate', 'form', function () {
+            HoldOn.close();
+        });
+
+        $(document).ajaxStart(function () {
+            initLoadHoldOn(setMessageIn);
+        });
+
+        $(document).ajaxStop(function () {
+            HoldOn.close();
+        });
+    </script>
+</body>
+</html>
+
+
+@*Modal popup*@
+<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <fieldset disabled>
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+
+                    </button>
+
+                </div>
+
+                <div class="modal-body" disabled="true" id="divReadOnlyFields">
+
+
+                    <div role="tabpanel">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#uploadTab" aria-controls="uploadTab" role="tab" data-toggle="tab">Contact Info</a>
+                        </ul>
+                        <!-- Tab panes -->
+                        <div class="tab-content" id="DivContents">
+                            <div role="tabpanel" class="tab-pane active" id="uploadTab">
+
+                                <br />
+
+                                <table class="table table-bordered" id="ContactInfotbl">
+                                    <thead>
+
+                                        <tr>
+                                            <th class="col-md-4">
+                                                Region
+                                            </th>
+
+                                            <th class="col-md-4">
+                                                Department Name
+                                            </th>
+
+                                            <th class="col-md-4">
+                                                Name
+                                            </th>
+
+                                            <th class="col-md-4">
+                                                Email Address
+                                            </th>
+
+                                            <th class="col-md-4">
+                                                Contact Number
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ContactInfotblbody"></tbody>
+
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </fieldset>
+</div>
+@*Modal popup*@
+<div class="modal fade" id="GetStartedModalLong" tabindex="-1" role="dialog" aria-labelledby="GetStartedModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="GetStartedModalLongTitle">Getting Started on Siyakhokha</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <p>How to use Siyakhokha:</p>
+                <br />
+                <p>1.	Access the Website <a href="https://siyakhokha.ekurhuleni.gov.za">Siyakhokha</a></p>
+                <p>2.	Register on the Siyakhokha Portal</p>
+                <p>3.	Complete the Registration Form</p>
+                <p>4.	Activate your profile via Email link or SMS Activation Code</p>
+                <p>5.	Login to the Siyakhokha Portal</p>
+                <p>6.	Update your Profile Details</p>
+                <p>7.	Link your Municipal Accounts</p>
+                <p>8.	Add your Banking Details</p>
+                <p>9.	View your Municipal Statements</p>
+                <p>10.	Make Payment for your Municipal Account (Once-Off Payment/ Recurring Debit Order/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Masterpass)</p>
+                <p>11.	View Payment History/Status</p>
+                <p>12.	View Consumption (Water/ Electricity)</p>
+                <p>13.	Log a Complaints/ Compliments</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal10" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modalHeading" runat="server" class="modal-title">Session time out</h4>
+            </div>
+            <div class="modal-body">
+                <label runat="server">Your session is about to expire.</label>
+                <span id="spanTimeLeft" style="color: red; font-size:large; display:none"> </span>
+                <label runat="server"> Click cancel to reset the session.</label>
+
+            </div>
+            <div class="modal-footer" style="align-content: flex-end">
+                <button id="btn" class="form-control" runat="server" data-dismiss="modal" onclick="ResetThisSession()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*Modal popup*@
+
+
+
+<script>
+    $(function () {
+        $("body").on('click keypress', function () {
+            ResetThisSession();
+        });
+    });
+    var timeInSecondsAfterSessionOut = 600; // change this to change session time out (in seconds).
+    var secondTick = 0;
+    function ResetThisSession() {
+        secondTick = 0;
+    }
+
+          @if (User.Identity.IsAuthenticated) {
+        <text>
+    function StartThisSessionTimer() {
+        secondTick++;
+        var timeLeft = ((timeInSecondsAfterSessionOut - secondTick) / 60).toFixed(0); // in minutes
+        timeLeft = timeInSecondsAfterSessionOut - secondTick; // override, we have 30 secs only
+        $("#spanTimeLeft").html(timeLeft);
+        if (timeLeft == 60) {
+            $('#myModal10').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        }
+        if (secondTick > timeInSecondsAfterSessionOut) {
+            clearTimeout(tick);
+           // window.location.href ="@Url.Action("LogOff", "Account")";
+            document.getElementById('logout').click();
+            return;
+        }
+        tick = setTimeout("StartThisSessionTimer()", 1000);
+    }
+    StartThisSessionTimer();
+        </text>
+
+    }
+</script>
+<script type="text/javascript">
+
+    @*// Triggers the browser back button.*@
+    function goBack() {
+        window.history.back();
+    }
+    $(document).ready(function () {
+        var userAgent = navigator.userAgent.toLowerCase();
+
+        @*// Test if the browser is IE and check the version number is lower than 9*@
+        if (/msie/.test(userAgent) && parseFloat((userAgent.match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 10) {
+            $("#ieMessage").attr('style', 'display: block;');
+        }
+    });
+</script>
+
+
+<div id="MessageModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                @if (ViewBag.MessageBody != null)
+                {
+                    <h4 class="modal-title">@ViewBag.MessageTitle <strong>@Html.Raw(ViewBag.MessageBody)</strong></h4>
+                }
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @using C8.eServices.Mvc.Keys
+                    <br />
+
+                    @if (ViewBag.Value != null)
+                    {
+                        var e = ViewBag.Value;
+
+                        if (e[0] == PaymentGatewayKeys.CemeterySystem)
+                        {
+
+                            <p class=MsoNormal>Department: @e[1] </p>
+
+                            <p class=MsoNormal>Vote Number:@e[2] </p>
+
+                            <p class=MsoNormal>Application Reference Number: @e[3] </p>
+
+                            <p class=MsoNormal>Receipt Number: @e[4] </p>
+
+                            <p class=MsoNormal>Date: @e[5] </p>
+
+                            <p class=MsoNormal>Time: @e[6]. </p>
+
+                            <p class=MsoNormal>Total Amount paid: @e[7] </p>
+
+                            <p class=MsoNormal>Method of Payment: @e[8] </p>
+
+                            <p class=MsoNormal>Payment Description: @e[9] </p>
+                            <p class=MsoNormal>Name of Deceased: @e[15] </p>
+                            <p class=MsoNormal>ID No of Deceased: @e[16] </p>
+
+                            <p class=MsoNormal>Processed By: @e[10] </p>
+
+                            <p class=MsoNormal>Name of Undertaker: @e[11] </p>
+                            <p class=MsoNormal>Transaction Status: @e[13] </p>
+                            <p class=MsoNormal>Transaction Status Message: @e[14] </p>
+                            <p class=MsoNormal>
+                                Receipt:<a href="@e[12]" title="Receipt" target="_blank">Click to Download Receipt</a>
+                            </p>
+                        }
+                        else
+                        {
+
+                            <p class=MsoNormal>Department: City of Ekurhuleni</p>
+
+                            <p class=MsoNormal>Municipal Account Number:@e[2] </p>
+
+                            <p class=MsoNormal>Application Reference Number: @e[3] </p>
+
+                            @*<p class=MsoNormal>Receipt Number: @e[4] </p>*@
+
+                            <p class=MsoNormal>Date: @e[5] </p>
+
+                            <p class=MsoNormal>Time: @e[6]. </p>
+
+                            <p class=MsoNormal>Total Amount paid: @e[7] </p>
+
+                            <p class=MsoNormal>Method of Payment: @e[8] </p>
+
+                            <p class=MsoNormal>Payment Description: @e[9] </p>
+
+                            @*<p class=MsoNormal>Processed By: @e[10] </p>*@
+
+                            <p class=MsoNormal>Customer Name: @e[11] </p>
+                            @*<p class=MsoNormal>Transaction Status: @e[13] </p>*@
+                            <p class=MsoNormal>Transaction Status: @e[14] </p>
+                            <p class=MsoNormal>
+                                Receipt:<a href="@e[12]" title="Receipt">Click to Download Receipt</a>
+                            </p>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="OkayResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="MessageModal2" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@ViewBag.MessageTitle</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @*@{
+                        Html.RenderAction("MessageTimeline", "RCSApplication", new { RCSApplicationID = 112, CommunicationType = 1 });
+                                    }*@
+                    @if (ViewBag.MessageBody != null)
+                    {
+                        <strong>@Html.Raw(ViewBag.MessageBody)</strong>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="OkayResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="MessageModal3" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <h4 class="modal-title">@ViewBag.MessageTitle3</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @*@{
+                        Html.RenderAction("MessageTimeline", "RCSApplication", new { RCSApplicationID = 112, CommunicationType = 1 });
+                                    }*@
+                    @if (ViewBag.MessageBody3 != null)
+                    {
+                        <strong>@Html.Raw(ViewBag.MessageBody3)</strong>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="OkayResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="MessageModal4" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <h4 class="modal-title">@ViewBag.MessageTitle</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    @*@{
+                        Html.RenderAction("MessageTimeline", "RCSApplication", new { RCSApplicationID = 112, CommunicationType = 1 });
+                                    }*@
+                    @if (ViewBag.Message != null)
+                    {
+                        <strong>@Html.Raw(ViewBag.Message)</strong>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="OkayResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
