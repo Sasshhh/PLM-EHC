@@ -1958,9 +1958,78 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
+
         [DecryptParameter]
         [HttpPost]
         public ActionResult ClientTraining(int? id, string ApprovalStatusddl, DepartmentsApprovalViewModel dvm)
+        {
+            using (var cxt = new eServicesDbContext())
+            {
+                Initialise();
+                var userID = Customer.Id;
+                var Keys = cxt.Status;
+                var rcsApps = cxt.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).FirstOrDefault();
+
+                // Create MeetingRequest
+                MeetingRequest meeting = dvm.MeetingRequest;
+                meeting.PropertyLeaseApplicationId = (int)id;
+                meeting.CustomerId = userID;
+                cxt.MeetingRequests.Add(meeting);
+                cxt.SaveChanges();
+
+                // ✅ CREATE TENANT TRAINING RECORD HERE!
+                var existingTraining = cxt.TenantTrainings.FirstOrDefault(t => t.PropertyLeaseApplicationId == id && !t.IsDeleted);
+
+                if (existingTraining == null)
+                {
+                    // Generate unique token
+                    var token = Guid.NewGuid().ToString();
+                    var expiryDate = DateTime.Now.AddDays(30); // 30 days to complete
+
+                    var training = new TenantTraining
+                    {
+                        PropertyLeaseApplicationId = (int)id,
+                        InvitationToken = token,
+                        TokenExpiryDate = expiryDate,
+                        InvitationSentDate = DateTime.Now,
+                        CurrentSlideNumber = 0,
+                        IsTrainingCompleted = false,
+                        IsExamPassed = false,
+                        ExamAttempts = 0,
+                        CreatedDateTime = DateTime.Now,
+                        ModifiedDateTime = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsLocked = false
+                    };
+
+                    cxt.TenantTrainings.Add(training);
+                    cxt.SaveChanges();
+                }
+
+                // Send email
+                int emailboodyId = cxt.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InviteTenantForTraining).Id;
+                EmailHelper.CustomerEmailNotification(cxt, rcsApps.Id, emailboodyId);
+
+                // ✅ REMOVE THE OLD STATUS LINE - KEEP ONLY THE NEW ONE
+                // MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, rcsApps.Id);
+
+                // Change status to AwaitingOnlineTraining
+                MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingOnlineTraining).Id, rcsApps.Id);
+
+                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.CommunityDevelopmentOfficer).FirstOrDefault().Value);
+                var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
+                MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
+
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+                Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                return RedirectToAction("PropertyLeaseTenantTraining");
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult ClientTrainingOLD(int? id, string ApprovalStatusddl, DepartmentsApprovalViewModel dvm)
         {
             using (var cxt = new eServicesDbContext())
             {
@@ -1976,8 +2045,8 @@ namespace C8.eServices.Mvc.Controllers
 
                 int emailboodyId = cxt.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InviteTenantForTraining).Id;
                 EmailHelper.CustomerEmailNotification(cxt, rcsApps.Id, emailboodyId);
-                MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, rcsApps.Id);
-
+                //MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, rcsApps.Id);
+                MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingOnlineTraining).Id, rcsApps.Id);
                 var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.CommunityDevelopmentOfficer).FirstOrDefault().Value);
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);

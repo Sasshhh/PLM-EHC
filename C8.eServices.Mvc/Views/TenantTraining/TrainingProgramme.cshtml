@@ -1,0 +1,195 @@
+@model C8.eServices.Mvc.ViewModels.TrainingProgrammeViewModel
+@{
+    ViewBag.Title = "Pre-Tenancy Training Programme";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    body { background: #f5f5f5; }
+    .training-container { max-width: 900px; margin: 20px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .progress-bar-custom { height: 30px; font-size: 14px; line-height: 30px; }
+    .slide-image { width: 100%; max-height: 600px; object-fit: contain; border: 1px solid #ddd; border-radius: 5px; margin: 20px 0; }
+    .slide-content { background: #f9f9f9; padding: 20px; border-left: 4px solid #1e8449; margin: 20px 0; border-radius: 4px; }
+    
+    /* Button styling to match your standard PLM buttons */
+    .btn-navigation { 
+        min-width: 120px; 
+        padding: 10px 20px; 
+        font-size: 16px;
+        background-color: white !important;
+        border-color: #1e8449 !important; 
+        color: #1e8449 !important;
+    }
+    .btn-navigation:hover {
+        background-color: #1e8449 !important;
+        border-color: white !important;
+        color: white !important;
+    }
+    .btn-navigation:disabled {
+        background-color: #f5f5f5 !important;
+        border-color: #ccc !important;
+        color: #999 !important;
+        cursor: not-allowed;
+    }
+    .btn-navigation i { margin: 0 5px; }
+    
+    /* Button container spacing */
+    .button-row { margin-top: 30px; }
+    .button-col-left { text-align: left; }
+    .button-col-right { text-align: right; }
+</style>
+
+<div class="training-container">
+    <div class="text-center mb-4">
+        <h2><i class="ion ion-ios-book"></i> PRE-TENANCY TRAINING PROGRAMME</h2>
+        <p class="text-muted">Welcome, <strong>@Model.ApplicantName</strong></p>
+        <hr/>
+    </div>
+
+    <div class="progress" style="margin-bottom: 30px; height: 30px;">
+        <div id="progressBar" class="progress-bar progress-bar-success progress-bar-striped" 
+             role="progressbar" aria-valuenow="@((Model.CurrentSlideIndex + 1))" 
+             aria-valuemin="0" aria-valuemax="@Model.TotalSlides" 
+             style="width: @(((Model.CurrentSlideIndex + 1) * 100.0 / Model.TotalSlides).ToString("0"))%; line-height: 30px; font-size: 14px;">
+            Slide @(Model.CurrentSlideIndex + 1) of @Model.TotalSlides
+        </div>
+    </div>
+
+    <div id="slideContainer">
+        <h3 id="slideTitle" style="color: #1e8449;">@Model.CurrentSlide.Title</h3>
+        
+        @if (!string.IsNullOrEmpty(Model.CurrentSlide.ImagePath))
+        {
+            <img id="slideImage" src="@Url.Content(Model.CurrentSlide.ImagePath)" alt="@Model.CurrentSlide.Title" class="slide-image" />
+        }
+        
+        <div id="slideContent" class="slide-content">
+            <p id="slideText">@Html.Raw(Model.CurrentSlide.Content)</p>
+        </div>
+    </div>
+
+    <div class="row button-row">
+        <div class="col-xs-6 button-col-left">
+            <button id="btnPrev" class="btn btn-lg btn-navigation" 
+                    @(Model.CurrentSlideIndex == 0 ? "disabled" : "")>
+                <i class="ion ion-ios-arrow-back"></i> Previous
+            </button>
+        </div>
+        <div class="col-xs-6 button-col-right">
+            <button id="btnNext" class="btn btn-lg btn-navigation">
+                Next <i class="ion ion-ios-arrow-forward"></i>
+            </button>
+            <button id="btnFinish" class="btn btn-lg btn-navigation" style="display:none;">
+                <i class="ion ion-checkmark-circled"></i> Complete Training
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="trainingId" value="@Model.TrainingId" />
+<input type="hidden" id="currentIndex" value="@Model.CurrentSlideIndex" />
+<input type="hidden" id="totalSlides" value="@Model.TotalSlides" />
+
+@section Scripts {
+    <script src="@Url.Content("~/Content/RcsStyles/SadSweetAlert.min.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            var trainingId = parseInt($('#trainingId').val());
+            var currentIndex = parseInt($('#currentIndex').val());
+            var totalSlides = parseInt($('#totalSlides').val());
+
+            function updateSlide(slideData) {
+                $('#slideTitle').text(slideData.title);
+                
+                if (slideData.imagePath) {
+                    $('#slideImage').attr('src', slideData.imagePath).attr('alt', slideData.title).show();
+                } else {
+                    $('#slideImage').hide();
+                }
+                
+                $('#slideText').html(slideData.content);
+
+                currentIndex = slideData.currentIndex;
+
+                // Update progress bar
+                var progress = ((currentIndex + 1) / totalSlides) * 100;
+                $('#progressBar').css('width', progress + '%')
+                    .attr('aria-valuenow', currentIndex + 1)
+                    .text('Slide ' + (currentIndex + 1) + ' of ' + totalSlides);
+
+                // Update buttons
+                $('#btnPrev').prop('disabled', currentIndex === 0);
+
+                if (slideData.isLastSlide) {
+                    $('#btnNext').hide();
+                    $('#btnFinish').show();
+                } else {
+                    $('#btnNext').show();
+                    $('#btnFinish').hide();
+                }
+            }
+
+            $('#btnNext, #btnPrev').click(function () {
+                var direction = $(this).attr('id') === 'btnNext' ? 'next' : 'prev';
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("NavigateSlide", "TenantTraining")',
+                    data: { trainingId: trainingId, slideIndex: currentIndex, direction: direction },
+                    success: function (response) {
+                        if (response.success) {
+                            updateSlide(response);
+                            $('html, body').animate({ scrollTop: 0 }, 'smooth');
+                        } else {
+                            swal("Error", response.message || "An error occurred", "error");
+                        }
+                    },
+                    error: function () {
+                        swal("Error", "Failed to load slide. Please try again.", "error");
+                    }
+                });
+            });
+
+            $('#btnFinish').click(function () {
+                swal({
+                    title: "Complete Training?",
+                    text: "You have completed all training slides. Click 'Continue' to proceed to the examination.",
+                    icon: "success",
+                    buttons: ["Go Back", "Continue to Exam"],
+                }).then((proceed) => {
+                    if (proceed) {
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("CompleteTraining", "TenantTraining")',
+                            data: { trainingId: trainingId },
+                            success: function (response) {
+                                if (response.success) {
+                                    swal({
+                                        title: "Training Complete!",
+                                        text: "Redirecting to examination...",
+                                        icon: "success",
+                                        timer: 2000,
+                                        buttons: false
+                                    }).then(function() {
+                                        window.location.href = '@Url.Action("Examination", "TenantTraining")?trainingId=' + trainingId;
+                                    });
+                                } else {
+                                    swal("Error", response.message || "Failed to complete training", "error");
+                                }
+                            },
+                            error: function () {
+                                swal("Error", "An error occurred. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Show finish button if on last slide
+            if (currentIndex === totalSlides - 1) {
+                $('#btnNext').hide();
+                $('#btnFinish').show();
+            }
+        });
+    </script>
+}

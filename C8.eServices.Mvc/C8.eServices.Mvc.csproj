@@ -1004,6 +1004,19 @@
     <Content Include="Content\sweetalert\sweet-alert.css" />
     <Content Include="Content\sweetalert\sweet-alert.less" />
     <Content Include="Content\sweetalert\thumbs-up.jpg" />
+    <Content Include="Content\Training Content\ExamQuestions.txt" />
+    <Content Include="Content\Training Content\TrainingSlides.txt" />
+    <Content Include="Content\Training Slides\slide-01.jpg" />
+    <Content Include="Content\Training Slides\slide-02.jpg" />
+    <Content Include="Content\Training Slides\slide-03.jpg" />
+    <Content Include="Content\Training Slides\slide-04.jpg" />
+    <Content Include="Content\Training Slides\slide-05.jpg" />
+    <Content Include="Content\Training Slides\slide-06.jpg" />
+    <Content Include="Content\Training Slides\slide-07.jpg" />
+    <Content Include="Content\Training Slides\slide-08.jpg" />
+    <Content Include="Content\Training Slides\slide-09.jpg" />
+    <Content Include="Content\Training Slides\slide-10.jpg" />
+    <Content Include="Content\Training Slides\slide-11.jpg" />
     <Content Include="DataAccessLayer\IntergrationDbContext.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>IntergrationDbContext1.cs</LastGenOutput>
@@ -1070,11 +1083,27 @@
     <Content Include="Manuals\PLM H-Regional Manager Manual.pdf" />
     <Content Include="Manuals\PLM H-Senior Housing Specialist Manual.pdf" />
     <Content Include="Content\Images\Ekurhuleni.xcf" />
+    <Content Include="ClearTempFiles.ps1" />
     <None Include="Content\RcsStyles\Scripts\jquery-1.10.2.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery-3.3.1.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery.validate-vsdoc.js" />
     <None Include="Content\RcsStyles\Scripts\_references.js" />
+    <Content Include="IMPLEMENTATION_GUIDE.md" />
+    <Content Include="MIGRATIONS_GUIDE.md" />
+    <Content Include="MIGRATIONS_SUMMARY.md" />
+    <Content Include="FIXED_FK_CONSTRAINT_ERROR.md" />
+    <Content Include="DATABASE_SETUP_COMPLETE.md" />
+    <Content Include="NEXT_STEPS_CHECKLIST.md" />
+    <Content Include="CURRENT_SLIDE_STATUS.md" />
+    <Content Include="FIX_CLIENTTRAINING_STATUS.md" />
+    <Content Include="CUSTOMER_TRAINING_NAV_COMPLETE.md" />
+    <Content Include="EXAMINATION_FLOW_TESTING.md" />
+    <Content Include="FINAL_VERIFICATION_CHECKLIST.md" />
+    <Content Include="EXAMRESULTS_ALL_FIXES.md" />
+    <Content Include="FIX_CLIENTTRAINING_REMOVE_INSPECTION.md" />
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
+    <Content Include="QUICKSTART_SASH38.md" />
+    <Content Include="README_SASH38.md" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\c3.min.js" />
     <Content Include="Scripts\d3.min.js" />
@@ -1256,6 +1285,14 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <Content Include="SQL Scripts\Check_Training_Progress.sql" />
+    <Content Include="SQL Scripts\Create_TestTrainingRecord.sql" />
+    <Content Include="SQL Scripts\Create_TrainingTables_Migration.sql" />
+    <Content Include="SQL Scripts\Create_Training_For_EHC2023101800005.sql" />
+    <Content Include="SQL Scripts\Insert_TrainingData.sql" />
+    <Content Include="SQL Scripts\QuickTest_Training.sql" />
+    <Content Include="SQL Scripts\Verify_SlideCount.sql" />
+    <Content Include="SQL Scripts\Verify_Training_Setup.sql" />
     <Content Include="Views\HumanSettlementApplication\AcceptanceLetter.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AddProperty.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AffectedDepart.cshtml" />
@@ -1613,6 +1650,16 @@
     <Content Include="Views\RiskAssessmentOutcomes\InboxCEO.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentCEO.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\WaitingListIndex.cshtml" />
+    <Content Include="Views\TenantTraining\Index.cshtml" />
+    <Content Include="TENANT_TRAINING_VIEWS_TO_CREATE.md" />
+    <Content Include="Views\TenantTraining\TrainingProgramme.cshtml" />
+    <Content Include="Views\TenantTraining\Examination.cshtml" />
+    <Content Include="Views\TenantTraining\ExamResults.cshtml" />
+    <Content Include="SYSTEM_COMPLETE_SUMMARY.md" />
+    <Content Include="TESTING_GUIDE.md" />
+    <Content Include="Views\TenantTraining\MyTraining.cshtml" />
+    <Content Include="TRAININGPROGRAMME_FIXED.md" />
+    <Content Include="TODO_TRAINING_WORKFLOW_FIXES.md" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1728,6 +1775,7 @@
     <Compile Include="Controllers\SweetController.cs" />
     <Compile Include="Controllers\SystemRoleController.cs" />
     <Compile Include="Controllers\SystemUserTypeController.cs" />
+    <Compile Include="Controllers\TenantTrainingController.cs" />
     <Compile Include="Controllers\TitleTypeController.cs" />
     <Compile Include="Controllers\UnitsController.cs" />
     <Compile Include="DataAccessLayer\BillingDbContext.cs" />
@@ -1913,6 +1961,10 @@
     <Compile Include="Migrations\202512050804436_initmig4.Designer.cs">
       <DependentUpon>202512050804436_initmig4.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202601300510359_initmig.cs" />
+    <Compile Include="Migrations\202601300510359_initmig.Designer.cs">
+      <DependentUpon>202601300510359_initmig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Account.cs" />
     <Compile Include="Models\AccountInformation.cs" />
@@ -1924,6 +1976,11 @@
     <Compile Include="Models\Agent.cs" />
     <Compile Include="Models\AgentCustomer.cs" />
     <Compile Include="Models\ApplicationsEntity.cs" />
+    <Compile Include="Models\Audits\ExaminationQuestionAudit.cs" />
+    <Compile Include="Models\Audits\TenantExamAnswerAudit.cs" />
+    <Compile Include="Models\Audits\TenantTrainingAudit.cs" />
+    <Compile Include="Models\Audits\TrainingSlideAudit.cs" />
+    <Compile Include="Models\ExaminationQuestion.cs" />
     <Compile Include="Models\LeaseReviewComment.cs" />
     <Compile Include="Models\AllocatedUnitMaintenance.cs" />
     <Compile Include="Models\ApplicationAllocatedProperty.cs" />
@@ -2291,8 +2348,11 @@
     <Compile Include="Models\SystemUserLogTime.cs" />
     <Compile Include="Models\SystemUserType.cs" />
     <Compile Include="Models\TemporaryDisplayModel.cs" />
+    <Compile Include="Models\TenantExamAnswer.cs" />
+    <Compile Include="Models\TenantTraining.cs" />
     <Compile Include="Models\TimeSlot.cs" />
     <Compile Include="Models\TitleType.cs" />
+    <Compile Include="Models\TrainingSlide.cs" />
     <Compile Include="Models\TransferInformation.cs" />
     <Compile Include="Models\TransferInformationAudit.cs" />
     <Compile Include="Models\TransferType.cs" />
@@ -2375,6 +2435,7 @@
     <Compile Include="ViewModels\RegistrationViewModel.cs" />
     <Compile Include="ViewModels\SAMSViewModel.cs" />
     <Compile Include="ViewModels\SupportViewModel.cs" />
+    <Compile Include="ViewModels\TenantTrainingViewModels.cs" />
     <Compile Include="ViewModels\TenantViewModel.cs" />
     <Compile Include="ViewModels\UnitViewModel.cs" />
     <Compile Include="ViewModels\UserAdminViewModel.cs" />
@@ -2859,6 +2920,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512050804436_initmig4.resx">
       <DependentUpon>202512050804436_initmig4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202601300510359_initmig.resx">
+      <DependentUpon>202601300510359_initmig.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

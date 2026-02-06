@@ -1,0 +1,166 @@
+@model C8.eServices.Mvc.ViewModels.ExamResultsViewModel
+@{
+    ViewBag.Title = "Examination Results";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .results-container { max-width: 900px; margin: 20px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .score-display { font-size: 72px; font-weight: bold; margin: 30px 0; }
+    .pass-badge { color: #28a745; }
+    .fail-badge { color: #dc3545; }
+    .answer-review { margin-top: 30px; }
+    .answer-item { padding: 15px; margin-bottom: 15px; border-radius: 4px; border-left: 4px solid #ddd; background: #f9f9f9; }
+    .answer-correct { background: #d4edda; border-left-color: #28a745; }
+    .answer-incorrect { background: #f8d7da; border-left-color: #dc3545; }
+    .answer-details { margin-top: 10px; padding: 10px; background: white; border-radius: 4px; }
+    .btn-retake { 
+        background-color: white !important;
+        border-color: #f39c12 !important; 
+        color: #f39c12 !important;
+        min-width: 200px;
+        padding: 10px 30px;
+    }
+    .btn-retake:hover {
+        background-color: #f39c12 !important;
+        border-color: white !important;
+        color: white !important;
+    }
+</style>
+
+<div class="results-container">
+    <div class="text-center">
+        <h2><i class="ion ion-ios-paper"></i> EXAMINATION RESULTS</h2>
+        <p class="text-muted">Applicant: <strong>@Model.ApplicantName</strong></p>
+        <p class="text-info">Attempt @Model.AttemptNumber</p>
+        <hr/>
+
+        @if (Model.Passed)
+        {
+            <div class="alert alert-success">
+                <i class="ion ion-checkmark-circled" style="font-size: 48px;"></i>
+                <h3>CONGRATULATIONS! YOU PASSED!</h3>
+            </div>
+            <div class="score-display pass-badge">
+                <i class="ion ion-trophy"></i> @Model.Score.ToString("0")%
+            </div>
+            <p class="lead">Score: @Model.CorrectCount / @Model.TotalQuestions</p>
+            <p>You have successfully completed the pre-tenancy training requirements. You will be contacted regarding the next steps in your application process.</p>
+            
+            <div class="alert alert-info" style="margin-top: 20px;">
+                <i class="ion ion-information-circled"></i>
+                <strong>Well done!</strong> You have fully complied with the Pre-Tenancy Training Requirements.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <i class="ion ion-close-circled" style="font-size: 48px;"></i>
+                <h3>Unfortunately, you did not pass.</h3>
+            </div>
+            <div class="score-display fail-badge">
+                @Model.Score.ToString("0")%
+            </div>
+            <p class="lead">Score: @Model.CorrectCount / @Model.TotalQuestions</p>
+            <p><strong>Required to Pass:</strong> @Model.TotalQuestions / @Model.TotalQuestions (100%)</p>
+
+            <div class="alert alert-warning" style="margin-top: 20px;">
+                <i class="ion ion-information-circled"></i>
+                <strong>Don't worry!</strong> You can retake the examination as many times as needed. Please review the incorrect answers below and try again.
+            </div>
+            
+            <a href="@Url.Action("Examination", "TenantTraining", new { trainingId = Model.TrainingId })" class="btn btn-lg btn-retake">
+                <i class="ion ion-refresh"></i> Retake Examination
+            </a>
+        }
+    </div>
+
+    <hr />
+
+    <div class="answer-review">
+        <h4><i class="ion ion-ios-list"></i> Answer Review:</h4>
+        <p class="text-muted">Review your answers below. Incorrect answers are highlighted in red with the correct answer shown.</p>
+        
+        @foreach (var answer in Model.ExamAnswers)
+        {
+            <div class="answer-item @(answer.IsCorrect ? "answer-correct" : "answer-incorrect")">
+                <p><strong>Question: @answer.ExaminationQuestion.QuestionText</strong></p>
+                
+                <div class="answer-details">
+                    <p style="margin-bottom: 5px;">
+                        <strong>Your Answer:</strong> 
+                        <span style="color: @(answer.IsCorrect ? "#28a745" : "#dc3545");">
+                            @answer.SelectedAnswer. 
+                            @switch (answer.SelectedAnswer)
+                            {
+                                case "A": @answer.ExaminationQuestion.OptionA break;
+                                case "B": @answer.ExaminationQuestion.OptionB break;
+                                case "C": @answer.ExaminationQuestion.OptionC break;
+                                case "D": @answer.ExaminationQuestion.OptionD break;
+                            }
+                        </span>
+                        @if (answer.IsCorrect)
+                        {
+                            <span class="text-success"><i class="ion ion-checkmark-circled"></i> Correct</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger"><i class="ion ion-close-circled"></i> Incorrect</span>
+                        }
+                    </p>
+                    
+                    @if (!answer.IsCorrect)
+                    {
+                        <p style="margin-bottom: 0; color: #28a745;">
+                            <strong>Correct Answer:</strong> 
+                            @answer.ExaminationQuestion.CorrectAnswer. 
+                            @switch (answer.ExaminationQuestion.CorrectAnswer)
+                            {
+                                case "A": @answer.ExaminationQuestion.OptionA break;
+                                case "B": @answer.ExaminationQuestion.OptionB break;
+                                case "C": @answer.ExaminationQuestion.OptionC break;
+                                case "D": @answer.ExaminationQuestion.OptionD break;
+                            }
+                        </p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="text-center" style="margin-top: 30px;">
+        @if (!Model.Passed)
+        {
+            <a href="@Url.Action("Examination", "TenantTraining", new { trainingId = Model.TrainingId })" class="btn btn-lg btn-retake">
+                <i class="ion ion-refresh"></i> Retake Examination
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("MyTraining", "TenantTraining")" class="btn btn-lg" style="background-color: white; border-color: #1e8449; color: #1e8449;">
+                <i class="ion ion-home"></i> Return to My Training
+            </a>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            // Auto-scroll to first incorrect answer if failed
+            @if (!Model.Passed)
+            {
+                <text>
+                setTimeout(function() {
+                    var firstIncorrect = $('.answer-incorrect').first();
+                    if (firstIncorrect.length) {
+                        $('html, body').animate({
+                            scrollTop: firstIncorrect.offset().top - 100
+                        }, 1000);
+                    }
+                }, 500);
+                </text>
+            }
+        });
+    </script>
+}

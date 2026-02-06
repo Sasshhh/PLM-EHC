@@ -308,5 +308,12 @@ namespace C8.eServices.Mvc.Keys
         public const string PreUnitInspection = "Pre-Unit Inspection";
         public const string ExitUnitInspection = "Exit-Unit Inspection";
 
+        // Tenant Training & Examination (Added: 2025-01-30)
+        public const string AwaitingOnlineTraining = "s_awaiting_online_training";
+        public const string TrainingInProgress = "s_training_in_progress";
+        public const string TrainingCompleted = "s_training_completed";
+        public const string ExaminationPassed = "s_examination_passed";
+        public const string ExaminationFailed = "s_examination_failed";
+
     }
 }

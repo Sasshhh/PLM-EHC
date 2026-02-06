@@ -161,12 +161,21 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<ConductUnitInspectionAudit> ConductUnitInspectionAudits { get; set; }
         public DbSet<AllocatedUnitHistory> AllocatedUnitHistory { get; set; }
         public DbSet<ApplicationAllocatedProperty> ApplicationAllocatedProperty { get; set; }
-        public DbSet<AllocatedUnitMaintenanceEHC> allocatedUnitMaintenanceEHCs
-        { get; set; }
+        public DbSet<AllocatedUnitMaintenanceEHC> allocatedUnitMaintenanceEHCs { get; set; }
 
-        public DbSet<LeaseReviewComment> LeaseReviewComments
-        { get; set; }
+        public DbSet<LeaseReviewComment> LeaseReviewComments { get; set; }
 
+        // Training and Examination Tables
+        public DbSet<TenantTraining> TenantTrainings { get; set; }
+        public DbSet<TrainingSlide> TrainingSlides { get; set; }
+        public DbSet<ExaminationQuestion> ExaminationQuestions { get; set; }
+        public DbSet<TenantExamAnswer> TenantExamAnswers { get; set; }
+
+        // Training and Examination Audits
+        public DbSet<TenantTrainingAudit> TenantTrainingAudits { get; set; }
+        public DbSet<TrainingSlideAudit> TrainingSlideAudits { get; set; }
+        public DbSet<ExaminationQuestionAudit> ExaminationQuestionAudits { get; set; }
+        public DbSet<TenantExamAnswerAudit> TenantExamAnswerAudits { get; set; }
 
 
         // Entity Collections.
@@ -1004,6 +1013,19 @@ namespace C8.eServices.Mvc.DataAccessLayer
                             break;
                         case "ApplicantType":
                             ApplicantTypeAudits.Add((ApplicantTypeAudit)audit);
+                            break;
+
+                        case "TenantTraining":
+                            TenantTrainingAudits.Add((TenantTrainingAudit)audit);
+                            break;
+                        case "TrainingSlide":
+                            TrainingSlideAudits.Add((TrainingSlideAudit)audit);
+                            break;
+                        case "ExaminationQuestion":
+                            ExaminationQuestionAudits.Add((ExaminationQuestionAudit)audit);
+                            break;
+                        case "TenantExamAnswer":
+                            TenantExamAnswerAudits.Add((TenantExamAnswerAudit)audit);
                             break;
 
                     }

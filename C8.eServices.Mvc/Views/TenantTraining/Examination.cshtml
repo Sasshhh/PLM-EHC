@@ -1,0 +1,194 @@
+@model C8.eServices.Mvc.ViewModels.ExaminationViewModel
+@{
+    ViewBag.Title = "Pre-Tenancy Examination";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .exam-container { max-width: 900px; margin: 20px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .question-block { background: #f9f9f9; padding: 20px; margin-bottom: 20px; border-left: 4px solid #1e8449; border-radius: 4px; }
+    .example-question { border-left-color: #f39c12; background: #fff9e6; }
+    .radio-option { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    .radio-option:hover { background: #e9ecef; }
+    .radio-option input[type="radio"] { margin-right: 10px; }
+    .radio-option label { cursor: pointer; margin: 0; width: 100%; }
+    .pre-circled { background: #d4edda !important; border-color: #28a745; }
+    .btn-submit-exam { 
+        background-color: white !important;
+        border-color: #1e8449 !important; 
+        color: #1e8449 !important;
+        min-width: 200px;
+        padding: 10px 30px;
+    }
+    .btn-submit-exam:hover {
+        background-color: #1e8449 !important;
+        border-color: white !important;
+        color: white !important;
+    }
+</style>
+
+<div class="exam-container">
+    <div class="text-center mb-4">
+        <h2><i class="ion ion-ios-paper"></i> PRE-TENANCY EXAMINATION</h2>
+        <p class="text-muted">Applicant: <strong>@Model.ApplicantName</strong></p>
+        <p class="text-info">Attempt @Model.AttemptNumber</p>
+        <hr/>
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="ion ion-alert-circled"></i> 
+        <strong>Important:</strong> You must answer all 15 questions correctly (100%) to pass. You can retake the examination as many times as needed.
+    </div>
+
+    @using (Html.BeginForm("SubmitExamination", "TenantTraining", FormMethod.Post, new { id = "examForm" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="trainingId" value="@Model.TrainingId" />
+
+        if (Model.ExampleQuestion != null)
+        {
+            <div class="question-block example-question">
+                <h4><i class="ion ion-ios-lightbulb"></i> Example Question (Pre-circled for you):</h4>
+                <p><strong>@Model.ExampleQuestion.QuestionText</strong></p>
+                <div class="radio-option @(Model.ExampleQuestion.CorrectAnswer == "A" ? "pre-circled" : "")">
+                    <label>
+                        <input type="radio" name="example_@(Model.ExampleQuestion.Id)" value="A" @(Model.ExampleQuestion.CorrectAnswer == "A" ? "checked" : "") disabled />
+                        A. @Model.ExampleQuestion.OptionA
+                    </label>
+                </div>
+                <div class="radio-option @(Model.ExampleQuestion.CorrectAnswer == "B" ? "pre-circled" : "")">
+                    <label>
+                        <input type="radio" name="example_@(Model.ExampleQuestion.Id)" value="B" @(Model.ExampleQuestion.CorrectAnswer == "B" ? "checked" : "") disabled />
+                        B. @Model.ExampleQuestion.OptionB
+                    </label>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ExampleQuestion.OptionC))
+                {
+                    <div class="radio-option @(Model.ExampleQuestion.CorrectAnswer == "C" ? "pre-circled" : "")">
+                        <label>
+                            <input type="radio" name="example_@(Model.ExampleQuestion.Id)" value="C" @(Model.ExampleQuestion.CorrectAnswer == "C" ? "checked" : "") disabled />
+                            C. @Model.ExampleQuestion.OptionC
+                        </label>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ExampleQuestion.OptionD))
+                {
+                    <div class="radio-option @(Model.ExampleQuestion.CorrectAnswer == "D" ? "pre-circled" : "")">
+                        <label>
+                            <input type="radio" name="example_@(Model.ExampleQuestion.Id)" value="D" @(Model.ExampleQuestion.CorrectAnswer == "D" ? "checked" : "") disabled />
+                            D. @Model.ExampleQuestion.OptionD
+                        </label>
+                    </div>
+                }
+            </div>
+        }
+
+        <hr />
+        <h4>Examination Questions:</h4>
+
+        for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+            <div class="question-block">
+                <p><strong>Question @(i + 1): @question.QuestionText</strong></p>
+                <div class="radio-option">
+                    <label>
+                        <input type="radio" name="question_@(question.Id)" value="A" required />
+                        A. @question.OptionA
+                    </label>
+                </div>
+                <div class="radio-option">
+                    <label>
+                        <input type="radio" name="question_@(question.Id)" value="B" required />
+                        B. @question.OptionB
+                    </label>
+                </div>
+                @if (!string.IsNullOrEmpty(question.OptionC))
+                {
+                    <div class="radio-option">
+                        <label>
+                            <input type="radio" name="question_@(question.Id)" value="C" required />
+                            C. @question.OptionC
+                        </label>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(question.OptionD))
+                {
+                    <div class="radio-option">
+                        <label>
+                            <input type="radio" name="question_@(question.Id)" value="D" required />
+                            D. @question.OptionD
+                        </label>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-center" style="margin-top: 30px;">
+            <button type="button" id="btnSubmitExam" class="btn btn-lg btn-submit-exam">
+                <i class="ion ion-checkmark-circled"></i> Submit Examination
+            </button>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="@Url.Content("~/Content/RcsStyles/SadSweetAlert.min.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#btnSubmitExam').click(function () {
+                // Validate all questions answered
+                var unanswered = [];
+                var questionNames = [];
+                
+                $('input[type="radio"]:not(:disabled)').each(function () {
+                    var name = $(this).attr('name');
+                    if (questionNames.indexOf(name) === -1) {
+                        questionNames.push(name);
+                    }
+                });
+
+                for (var i = 0; i < questionNames.length; i++) {
+                    if ($('input[name="' + questionNames[i] + '"]:checked').length === 0) {
+                        unanswered.push(questionNames[i]);
+                    }
+                }
+
+                if (unanswered.length > 0) {
+                    swal("Incomplete!", "Please answer all " + questionNames.length + " questions before submitting.", "warning");
+                    return;
+                }
+
+                swal({
+                    title: "Submit Examination?",
+                    text: "Are you sure you want to submit? You cannot change your answers after submission.",
+                    icon: "warning",
+                    buttons: ["Review Answers", "Submit"],
+                    dangerMode: true,
+                }).then((willSubmit) => {
+                    if (willSubmit) {
+                        $('#btnSubmitExam').prop('disabled', true).html('<i class="ion ion-load-c"></i> Submitting...');
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("SubmitExamination", "TenantTraining")',
+                            data: $('#examForm').serialize(),
+                            success: function (response) {
+                                if (response.success) {
+                                    window.location.href = '@Url.Action("ExamResults", "TenantTraining")?trainingId=@Model.TrainingId';
+                                } else {
+                                    swal("Error!", response.message, "error");
+                                    $('#btnSubmitExam').prop('disabled', false).html('<i class="ion ion-checkmark-circled"></i> Submit Examination');
+                                }
+                            },
+                            error: function () {
+                                swal("Error!", "An error occurred while submitting your exam. Please try again.", "error");
+                                $('#btnSubmitExam').prop('disabled', false).html('<i class="ion ion-checkmark-circled"></i> Submit Examination');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

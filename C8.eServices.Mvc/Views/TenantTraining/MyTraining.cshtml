@@ -1,0 +1,213 @@
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "My Pre-Tenancy Training";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="container">
+    <h2><i class="ion ion-ios-book"></i> My Pre-Tenancy Training</h2>
+    <hr />
+
+    @if (ViewBag.Applications != null && ViewBag.Applications.Count > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4><i class="ion ion-ios-information"></i> Training Status for My Applications</h4>
+            </div>
+            <div class="panel-body">
+                <div class="alert alert-info">
+                    <i class="ion ion-information-circled"></i>
+                    <strong>Important:</strong> You must complete the pre-tenancy training and pass the examination (100%) to proceed with your application.
+                </div>
+
+                <table class="table table-bordered table-hover" id="trainingTable">
+                    <thead>
+                        <tr>
+                            <th>Application Reference</th>
+                            <th>Status</th>
+                            <th>Training Progress</th>
+                            <th>Exam Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in ViewBag.Applications)
+                        {
+                            var training = ((List<C8.eServices.Mvc.Models.TenantTraining>)ViewBag.Trainings)
+                                .FirstOrDefault(t => t.PropertyLeaseApplicationId == app.Id);
+                            <tr>
+                                <td><strong>@app.ApplicationReferenceNumber</strong></td>
+                                <td>
+                                    @if (app.Status.Key == StatusKeys.AwaitingOnlineTraining)
+                                    {
+                                        <span class="label label-info">
+                                            <i class="ion ion-ios-clock"></i> Awaiting Training
+                                        </span>
+                                    }
+                                    else if (app.Status.Key == StatusKeys.TrainingInProgress)
+                                    {
+                                        <span class="label label-warning">
+                                            <i class="ion ion-ios-play"></i> In Progress
+                                        </span>
+                                    }
+                                    else if (app.Status.Key == StatusKeys.TrainingCompleted)
+                                    {
+                                        <span class="label label-primary">
+                                            <i class="ion ion-ios-checkmark"></i> Completed
+                                        </span>
+                                    }
+                                    else if (app.Status.Key == StatusKeys.ExaminationFailed)
+                                    {
+                                        <span class="label label-danger">
+                                            <i class="ion ion-ios-close"></i> Exam Failed
+                                        </span>
+                                    }
+                                    else if (app.Status.Key == StatusKeys.ExaminationPassed)
+                                    {
+                                        <span class="label label-success">
+                                            <i class="ion ion-ios-checkmark-outline"></i> Exam Passed
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (training != null)
+                                    {
+                                        if (training.IsTrainingCompleted)
+                                        {
+                                            <span class="text-success">
+                                                <i class="ion ion-checkmark-circled"></i> Training Complete
+                                            </span>
+                                        }
+                                        else if (training.TrainingStartedDate != null)
+                                        {
+                                            <span class="text-info">
+                                                <i class="ion ion-ios-play"></i> In Progress - Slide @(training.CurrentSlideNumber + 1)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                <i class="ion ion-ios-circle-outline"></i> Not Started
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Invitation pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (training != null && training.ExamAttempts > 0)
+                                    {
+                                        if (training.IsExamPassed)
+                                        {
+                                            <span class="text-success">
+                                                <i class="ion ion-checkmark-circled"></i> Passed (@training.ExamScore.Value.ToString("F0")%)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">
+                                                <i class="ion ion-close-circled"></i> Failed - Attempt @training.ExamAttempts
+                                            </span>
+                                        }
+                                    }
+                                    else if (training != null && training.IsTrainingCompleted)
+                                    {
+                                        <span class="text-info">
+                                            <i class="ion ion-ios-paper"></i> Ready to take exam
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (training != null)
+                                    {
+                                        if (training.IsExamPassed)
+                                        {
+                                            <a href="@Url.Action("ExamResults", "TenantTraining", new { trainingId = training.Id })" 
+                                               class="btn btn-success btn-sm">
+                                                <i class="ion ion-ios-paper"></i> View Results
+                                            </a>
+                                        }
+                                        else if (training.IsTrainingCompleted)
+                                        {
+                                            <a href="@Url.Action("Examination", "TenantTraining", new { trainingId = training.Id })" 
+                                               class="btn btn-primary btn-sm">
+                                                <i class="ion ion-ios-compose"></i> @(training.ExamAttempts > 0 ? "Retake" : "Take") Exam
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("StartTraining", "TenantTraining", new { token = training.InvitationToken })" 
+                                               class="btn btn-primary btn-sm">
+                                                <i class="ion ion-ios-play"></i> @(training.TrainingStartedDate != null ? "Continue" : "Start") Training
+                                            </a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            <i class="ion ion-ios-clock"></i> Awaiting invitation
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4><i class="ion ion-ios-help"></i> Training Instructions</h4>
+            </div>
+            <div class="panel-body">
+                <h5><strong>How to Complete Your Training:</strong></h5>
+                <ol>
+                    <li><strong>Start Training:</strong> Click the "Start Training" button to begin your pre-tenancy training programme</li>
+                    <li><strong>Review All Slides:</strong> Navigate through all training slides using the Previous/Next buttons</li>
+                    <li><strong>Complete Training:</strong> After viewing all slides, click "Complete Training"</li>
+                    <li><strong>Take Examination:</strong> Complete the 15-question examination</li>
+                    <li><strong>Pass Requirement:</strong> You must score 100% (15/15) to pass</li>
+                    <li><strong>Retake Option:</strong> You can retake the examination as many times as needed until you pass</li>
+                </ol>
+
+                <div class="alert alert-warning">
+                    <i class="ion ion-alert-circled"></i>
+                    <strong>Note:</strong> You must pass the examination with 100% to continue with your application process.
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="ion ion-information-circled"></i>
+            <strong>No Training Available</strong>
+            <p>You don't have any applications requiring training at this time.</p>
+            <p>If you believe this is an error, please contact EHC support.</p>
+        </div>
+    }
+</div>
+
+<script>
+    $(document).ready(function () {
+        @if (ViewBag.Applications != null && ViewBag.Applications.Count > 0)
+        {
+            <text>
+            $('#trainingTable').DataTable({
+                "pageLength": 10,
+                "order": [[0, "desc"]],
+                "language": {
+                    "emptyTable": "No training applications found"
+                }
+            });
+            </text>
+        }
+    });
+</script>

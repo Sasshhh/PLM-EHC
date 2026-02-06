@@ -2052,6 +2052,21 @@
                             </li>
                             <li>
                                 <a href="javascript:;">
+                                    <i class="ion ion-ios-book"></i>
+                                    <span class="text">My Training</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
+                                    <li>
+                                        <a href="~/TenantTraining/MyTraining">
+                                            <i class="ion ion-ios-play" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Pre-Tenancy Training</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="javascript:;">
                                     <i class="ion ion-ios-paper-outline"></i>
                                     <span class="text">Notice</span>
                                     <i class="arrow ion-chevron-left"></i>
@@ -2440,40 +2455,40 @@
                         }
 
 
-                        if(!(User.IsInRole("Customers")))
-                          {
-
-                         
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-clipboard"></i>
-                                <span class="text">Audit</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
+                        if (!(User.IsInRole("Customers")))
+                        {
 
 
-                                <li>@Html.ActionLink("Login History", "UserLogsIndex", "Home", new { }, null)</li>
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="ion ion-clipboard"></i>
+                                    <span class="text">Audit</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
 
-                                @if (Request.IsAuthenticated && (User.IsInRole("Super Administrators") || User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Senior Clerk") || User.IsInRole("Back Office System Administrator")))
-                                {
-                                    <li>@Html.ActionLink("User Activity Tracker", "AuditLogsIndex", "Home", new { }, null)</li>
 
-                                }
+                                    <li>@Html.ActionLink("Login History", "UserLogsIndex", "Home", new { }, null)</li>
 
-                                @if (Request.IsAuthenticated && (User.IsInRole("Super Administrators") || User.IsInRole("Super Administrators") || User.IsInRole("Back Office System Administrator")))
-                                {
-                                    <li>@Html.ActionLink("PLM Module Audit", "TableAuditLogs", "Home", new { }, null)</li>
+                                    @if (Request.IsAuthenticated && (User.IsInRole("Super Administrators") || User.IsInRole("Area Manager") || User.IsInRole("Rates Clearance Senior Clerk") || User.IsInRole("Back Office System Administrator")))
+                                    {
+                                        <li>@Html.ActionLink("User Activity Tracker", "AuditLogsIndex", "Home", new { }, null)</li>
 
-                                }
-                                @*<li>@Html.EncodedActionLink("Active Profiles", "Index", "Customer", new { id = 2 }, null)</li>
+                                    }
 
-                    <li>@Html.ActionLink("Deactivated Users", "DeactivatedUsers", "Customer")</li>*@
-                                @*<li>@Html.ActionLink("Locked Users", "LockedUsers", "Customer")</li>*@
-                                @*<li>@Html.ActionLink("Customer Queries", "Index", "Customer")</li>*@
-                            </ul>
+                                    @if (Request.IsAuthenticated && (User.IsInRole("Super Administrators") || User.IsInRole("Super Administrators") || User.IsInRole("Back Office System Administrator")))
+                                    {
+                                        <li>@Html.ActionLink("PLM Module Audit", "TableAuditLogs", "Home", new { }, null)</li>
 
-                        </li>
+                                    }
+                                    @*<li>@Html.EncodedActionLink("Active Profiles", "Index", "Customer", new { id = 2 }, null)</li>
+
+                        <li>@Html.ActionLink("Deactivated Users", "DeactivatedUsers", "Customer")</li>*@
+                                    @*<li>@Html.ActionLink("Locked Users", "LockedUsers", "Customer")</li>*@
+                                    @*<li>@Html.ActionLink("Customer Queries", "Index", "Customer")</li>*@
+                                </ul>
+
+                            </li>
                         }
 
                     }

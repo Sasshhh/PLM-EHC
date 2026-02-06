@@ -189,5 +189,8 @@ namespace C8.eServices.Mvc.Keys
         public const string IsMigrated = "at_is_migrated";
         public const string FullyMigrated = "at_fully_migrated";
 
+        // Tenant Training Keys
+        public const string TenantInvitedToTraining = "at_tenant_invited_to_training";
+
     }
 }
