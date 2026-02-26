@@ -409,6 +409,20 @@ namespace C8.eServices.Mvc.Controllers
                     training.PropertyLeaseApplication.StatusId = db.Status
                         .FirstOrDefault(s => s.Key == StatusKeys.AwaitingInspectionScheduleSlots)?.Id ?? training.PropertyLeaseApplication.StatusId;
 
+                    // Schedule inspection slots via Round Robin (moved from ClientTraining)
+                    using (var cxt = new eServicesDbContext())
+                    {
+                        var controller = new PropertyLeaseApplicationController(cxt);
+                        controller.EHCRoundRobin(
+                            training.PropertyLeaseApplicationId,
+                            false, false, false, false, false, false, false, false,
+                            true,
+                            false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                            1,
+                            false, false,
+                            1);
+                    }
+
                     // Send pass email
                     SendExamPassEmail(training.PropertyLeaseApplication, score, correctCount, questions.Count);
                 }

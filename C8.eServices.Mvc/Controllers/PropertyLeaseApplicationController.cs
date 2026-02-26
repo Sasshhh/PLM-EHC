@@ -2021,7 +2021,6 @@ namespace C8.eServices.Mvc.Controllers
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
 
-                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
                 Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
                 return RedirectToAction("PropertyLeaseTenantTraining");
             }
@@ -2051,7 +2050,6 @@ namespace C8.eServices.Mvc.Controllers
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
 
-                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
                 Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
                 return RedirectToAction("PropertyLeaseTenantTraining");
             }
