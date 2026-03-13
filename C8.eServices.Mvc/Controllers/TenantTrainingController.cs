@@ -55,7 +55,7 @@ namespace C8.eServices.Mvc.Controllers
 
         #region Admin Dashboard
         // GET: TenantTraining/Index
-        [Authorize(Roles = "Community Development Officer,Super Administrators,Back Office System Administrator")]
+        [Authorize(Roles = "Community Development Officer,Client Services Officer,Super Administrators,Back Office System Administrator")]
         public ActionResult Index()
         {
             try
@@ -89,7 +89,7 @@ namespace C8.eServices.Mvc.Controllers
         #region Invite to Training
         // POST: TenantTraining/InviteToTraining
         [HttpPost]
-        [Authorize(Roles = "Community Development Officer,Super Administrators,Back Office System Administrator")]
+        [Authorize(Roles = "Community Development Officer,Client Services Officer,Super Administrators,Back Office System Administrator")]
         public ActionResult InviteToTraining(int applicationId)
         {
             try
@@ -146,6 +146,101 @@ namespace C8.eServices.Mvc.Controllers
                 MatchingHelper.ActivityTrackerAudit(db, applicationId, activityMessage, CustomerId);
 
                 return Json(new { success = true, message = "Training invitation sent successfully!" });
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                return Json(new { success = false, message = "An error occurred. Please try again." });
+            }
+        }
+        #endregion
+
+        #region Schedule Training (Alternative flow - CSO/CDO schedules a physical training slot)
+        // GET: TenantTraining/ScheduleTraining
+        [Authorize(Roles = "Community Development Officer,Client Services Officer,Super Administrators,Back Office System Administrator")]
+        public ActionResult ScheduleTraining()
+        {
+            try
+            {
+                Initialise();
+
+                var applications = db.PropertyLeaseApplications
+                    .Where(x => x.IsDeleted == false &&
+                                x.StatusId == db.Status.FirstOrDefault(s => s.Key == StatusKeys.AssessmentFeePaymentApproved).Id)
+                    .Include(r => r.Customer)
+                    .Include(r => r.Status)
+                    .Include(r => r.HumanEHCOptions)
+                    .ToList();
+
+                return View(applications);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                return View("_Error");
+            }
+        }
+
+        // POST: TenantTraining/ConfirmScheduleTraining
+        [HttpPost]
+        [Authorize(Roles = "Community Development Officer,Client Services Officer,Super Administrators,Back Office System Administrator,Customers")]
+        public ActionResult ConfirmScheduleTraining(int applicationId, DateTime trainingDate, string trainingTime, string venue, string comments)
+        {
+            try
+            {
+                Initialise();
+
+                var application = db.PropertyLeaseApplications
+                    .Include(a => a.Customer)
+                    .FirstOrDefault(a => a.Id == applicationId);
+
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found" });
+
+                // Generate unique token so tenant can also access online training
+                var token = Guid.NewGuid().ToString();
+                var expiryDate = trainingDate.AddDays(7);
+
+                // Create or update the TenantTraining record
+                var existing = db.TenantTrainings.FirstOrDefault(t => t.PropertyLeaseApplicationId == applicationId && !t.IsDeleted);
+                if (existing == null)
+                {
+                    var training = new TenantTraining
+                    {
+                        PropertyLeaseApplicationId = applicationId,
+                        InvitationToken = token,
+                        TokenExpiryDate = expiryDate,
+                        InvitationSentDate = DateTime.Now,
+                        CurrentSlideNumber = 0,
+                        IsTrainingCompleted = false,
+                        IsExamPassed = false,
+                        ExamAttempts = 0,
+                        CreatedDateTime = DateTime.Now,
+                        ModifiedDateTime = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsLocked = false
+                    };
+                    db.TenantTrainings.Add(training);
+                }
+
+                // Update application status to AwaitingOnlineTraining
+                var awaitingTrainingStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.AwaitingOnlineTraining);
+                if (awaitingTrainingStatus != null)
+                    application.StatusId = awaitingTrainingStatus.Id;
+
+                db.SaveChanges();
+
+                // Send scheduled training notification email and SMS
+                SendScheduledTrainingNotification(application, trainingDate, trainingTime, venue, comments);
+
+                // Activity log
+                var activityMessage = db.ActivityTrackerMessages
+                    .FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TenantInvitedToTraining)?.Description ??
+                    "Tenant scheduled for training";
+                MatchingHelper.ActivityTrackerAudit(db, applicationId, activityMessage, CustomerId);
+
+                return Json(new { success = true, message = "Training slot confirmed and notification sent to tenant!" });
             }
             catch (Exception ex)
             {
@@ -508,8 +603,7 @@ namespace C8.eServices.Mvc.Controllers
         // GET: TenantTraining/MyTraining
         [Authorize(Roles = "Customers")]
         public ActionResult MyTraining()
-        
-{
+        {
             try
             {
                 Initialise();
@@ -555,9 +649,77 @@ namespace C8.eServices.Mvc.Controllers
                 return View("_Error");
             }
         }
+
+        // GET: TenantTraining/MyScheduledTraining
+        [Authorize(Roles = "Customers")]
+        public ActionResult MyScheduledTraining()
+        {
+            try
+            {
+                Initialise();
+
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+
+                var assessmentApprovedStatusId = db.Status
+                    .Where(s => s.Key == StatusKeys.AssessmentFeePaymentApproved)
+                    .Select(s => s.Id)
+                    .FirstOrDefault();
+
+                var applications = db.PropertyLeaseApplications
+                    .Where(x => x.IsDeleted == false
+                             && x.CustomerId == CustomerId
+                             && x.StatusId == assessmentApprovedStatusId)
+                    .Include(r => r.Status)
+                    .Include(r => r.PurchaserType)
+                    .ToList();
+
+                ViewBag.Applications = applications;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                return View("_Error");
+            }
+        }
         #endregion
 
         #region Helper Methods
+
+        private void SendScheduledTrainingNotification(PropertyLeaseApplication application, DateTime trainingDate, string trainingTime, string venue, string comments)
+        {
+            try
+            {
+                var email = new Email();
+                var subject = "Your Pre-Tenancy Training Has Been Scheduled - EHC";
+                var body = $@"
+                    <html>
+                    <body>
+                        <h2>Pre-Tenancy Training Scheduled</h2>
+                        <p>Dear {application.FirstName} {application.LastName},</p>
+                        <p>Your pre-tenancy training session has been scheduled. Please find the details below:</p>
+                        <table style='border-collapse:collapse;width:100%;'>
+                            <tr><td style='padding:8px;border:1px solid #ddd;'><strong>Date</strong></td><td style='padding:8px;border:1px solid #ddd;'>{trainingDate:dd MMMM yyyy}</td></tr>
+                            <tr><td style='padding:8px;border:1px solid #ddd;'><strong>Time</strong></td><td style='padding:8px;border:1px solid #ddd;'>{trainingTime}</td></tr>
+                            <tr><td style='padding:8px;border:1px solid #ddd;'><strong>Venue</strong></td><td style='padding:8px;border:1px solid #ddd;'>{venue}</td></tr>
+                            {(!string.IsNullOrEmpty(comments) ? $"<tr><td style='padding:8px;border:1px solid #ddd;'><strong>Notes</strong></td><td style='padding:8px;border:1px solid #ddd;'>{comments}</td></tr>" : "")}
+                        </table>
+                        <p style='margin-top:15px;'>Please ensure you attend on time. If you have any questions, please contact your Client Services Officer.</p>
+                        <br/>
+                        <p>Best regards,<br/>Ekurhuleni Housing Company</p>
+                    </body>
+                    </html>
+                ";
+
+                email.GenerateEmail(application.PurEmail, subject, body, application.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, $"{application.FirstName} {application.LastName}");
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+        }
 
         private void SendTrainingInvitationEmail(PropertyLeaseApplication application, string token)
         {

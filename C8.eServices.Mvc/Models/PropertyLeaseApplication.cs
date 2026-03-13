@@ -136,15 +136,15 @@ namespace C8.eServices.Mvc.Models
 
         [Display(Name = "Combined Gross Income")]
         [Column(Order = 48)]
-        public decimal GrossIncome { get; set; }
+        public decimal? GrossIncome { get; set; }
 
         [Display(Name = "Combined Net Income")]
         [Column(Order = 49)]
-        public decimal NetIncome { get; set; }
+        public decimal? NetIncome { get; set; }
 
         [Display(Name = "Total Combined Income")]
         [Column(Order = 50)]
-        public decimal TotalCombinedIncome { get; set; }
+        public decimal? TotalCombinedIncome { get; set; }
 
         [Display(Name = "House Required ")]
         [Column(Order = 51)]

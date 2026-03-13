@@ -221,7 +221,7 @@ namespace C8.eServices.Mvc.DataAccessLayer
                 var roles = identity.Claims.Where(c => c.Type == ClaimTypes.Role)
                        .Select(c => c.Value).ToList();
                 roles = roles.Where(c => c.Contains(IamKeys.Caretaker) || c.Contains(IamKeys.BOAdministrator) || c.Contains(IamKeys.MaintananceSupervisor)
-                || c.Contains(IamKeys.SeniorHousingSpecialist) || c.Contains(IamKeys.RegionalManager) || c.Contains(IamKeys.HousingLiaisonOfficer) || c.Contains(IamKeys.SuperUser) || c.Contains(IamKeys.LettingOfficer) || c.Contains(IamKeys.HousingSupervisor) || c.Contains(IamKeys.PropertyManager) || c.Contains(IamKeys.RevenueOfficer) || c.Contains(IamKeys.RevenueManager) || c.Contains(IamKeys.CommunityDevelopmentOfficer)).ToList();
+                || c.Contains(IamKeys.SeniorHousingSpecialist) || c.Contains(IamKeys.RegionalManager) || c.Contains(IamKeys.HousingLiaisonOfficer) || c.Contains(IamKeys.SuperUser) || c.Contains(IamKeys.LettingOfficer) || c.Contains(IamKeys.HousingSupervisor) || c.Contains(IamKeys.ClientServicesOfficer) || c.Contains(IamKeys.PropertyManager) || c.Contains(IamKeys.RevenueOfficer) || c.Contains(IamKeys.RevenueManager) || c.Contains(IamKeys.CommunityDevelopmentOfficer)).ToList();
 
                 //if(systemUser.Department.Key == )
                 //    if (departmentKey == ApplicationEntityKeys.EkurhuleniHousingCompany)
@@ -241,22 +241,15 @@ namespace C8.eServices.Mvc.DataAccessLayer
                     switch (role)
                     {
                         case IamKeys.LettingOfficer:
-                            if (!rolesArray.Contains("Letting Officer"))
-                            {
-                                identityManager.AddUserToRole(userId, "Letting Officer");
-                                rolesAdded.Add("Letting Officer");
-                            }
-                            if (rolesArray.Contains("Letting Officer")) roles2.Remove(role);
-                            roles3.Add("Letting Officer");
-                            break;
                         case IamKeys.HousingSupervisor:
-                            if (!rolesArray.Contains("Housing Supervisor"))
+                        case IamKeys.ClientServicesOfficer:
+                            if (!rolesArray.Contains("Client Services Officer"))
                             {
-                                identityManager.AddUserToRole(userId, "Housing Supervisor");
-                                rolesAdded.Add("Housing Supervisor");
+                                identityManager.AddUserToRole(userId, "Client Services Officer");
+                                rolesAdded.Add("Client Services Officer");
                             }
-                            if (rolesArray.Contains("Housing Supervisor")) roles2.Remove(role);
-                            roles3.Add("Housing Supervisor");
+                            if (rolesArray.Contains("Client Services Officer")) roles2.Remove(role);
+                            roles3.Add("Client Services Officer");
                             break;
                         case IamKeys.PropertyManager:
                             if (!rolesArray.Contains("Property Manager"))

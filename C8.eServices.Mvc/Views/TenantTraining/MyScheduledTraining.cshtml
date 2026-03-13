@@ -1,0 +1,211 @@
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "My Scheduled Training";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-ios-calendar"></i> My Scheduled Training
+                </div>
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            @if (ViewBag.Applications != null)
+            {
+                var apps = (List<C8.eServices.Mvc.Models.PropertyLeaseApplication>)ViewBag.Applications;
+
+                if (apps.Any())
+                {
+                    <div class="alert alert-info" style="margin: 15px;">
+                        <i class="ion ion-information-circled"></i>
+                        <strong>Instructions:</strong> Select your application, choose a training date, time and venue, then click "Schedule Training".
+                        You will receive an email and SMS notification confirming the training details.
+                        Status will update to <strong>Awaiting Online Training</strong>.
+                    </div>
+
+                    <table id="ScheduledTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                        <thead>
+                            <tr>
+                                <th>Applicant Name</th>
+                                <th>Application Ref No.</th>
+                                <th>Application Type</th>
+                                <th>Created Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in apps)
+                            {
+                                <tr>
+                                    <td>@app.FirstName @app.LastName</td>
+                                    <td><strong>@app.ApplicationReferenceNumber</strong></td>
+                                    <td>@(app.PurchaserType != null ? app.PurchaserType.Name : "-")</td>
+                                    <td>@(app.CreatedDateTime.HasValue ? app.CreatedDateTime.Value.ToString("dd MMM yyyy") : "-")</td>
+                                    <td>@(app.Status != null ? app.Status.Name : "-")</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-schedule"
+                                                data-application-id="@app.Id"
+                                                data-applicant-name="@app.FirstName @app.LastName">
+                                            <i class="ion ion-ios-calendar"></i> Schedule Training
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="panel panel-info" style="margin-top: 15px;">
+                        <div class="panel-heading">
+                            <h4><i class="ion ion-ios-help"></i> What happens next?</h4>
+                        </div>
+                        <div class="panel-body">
+                            <p>Select a preferred date, time and venue for your training session. You will receive an email and SMS confirmation once submitted.</p>
+                            <div class="alert alert-warning">
+                                <i class="ion ion-alert-circled"></i>
+                                <strong>Only one route is required</strong> — attending the scheduled session OR completing the online training both count.
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" style="margin: 15px;">
+                        <i class="ion ion-information-circled"></i>
+                        <strong>No Applications Awaiting Scheduling</strong>
+                        <p>You don't have any applications awaiting a training session at this time.</p>
+                        <p>If you believe this is an error, please contact your Client Services Officer.</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Training Modal -->
+<div id="scheduleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><i class="ion ion-ios-calendar"></i> Schedule Training Slot</h4>
+            </div>
+            <div class="modal-body">
+                <p>Scheduling training for: <strong id="modalApplicantName"></strong></p>
+                <input type="hidden" id="modalApplicationId" />
+
+                <div class="form-group">
+                    <label>Training Date <span style="color:red;">*</span></label>
+                    <input type="date" id="trainingDate" class="form-control" required
+                           min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="form-group">
+                    <label>Training Time <span style="color:red;">*</span></label>
+                    <input type="time" id="trainingTime" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Venue <span style="color:red;">*</span></label>
+                    <input type="text" id="trainingVenue" class="form-control" placeholder="e.g. EHC Training Room A, Germiston" required />
+                </div>
+                <div class="form-group">
+                    <label>Additional Comments</label>
+                    <textarea id="trainingComments" class="form-control" rows="3"
+                              placeholder="Any additional information..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                <button type="button" id="btnConfirmSchedule" class="btn btn-primary">
+                    <i class="ion ion-ios-checkmark"></i> Confirm Training Slot
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            if ($('#ScheduledTable').length) {
+                $('#ScheduledTable').DataTable({
+                    "pageLength": 10,
+                    "order": [[3, "desc"]]
+                });
+            }
+
+            $('.btn-schedule').click(function () {
+                var appId = $(this).data('application-id');
+                var appName = $(this).data('applicant-name');
+                $('#modalApplicationId').val(appId);
+                $('#modalApplicantName').text(appName);
+                $('#trainingDate').val('');
+                $('#trainingTime').val('');
+                $('#trainingVenue').val('');
+                $('#trainingComments').val('');
+                $('#scheduleModal').modal('show');
+            });
+
+            $('#btnConfirmSchedule').click(function () {
+                var appId = $('#modalApplicationId').val();
+                var date = $('#trainingDate').val();
+                var time = $('#trainingTime').val();
+                var venue = $('#trainingVenue').val().trim();
+                var comments = $('#trainingComments').val().trim();
+
+                if (!date || !time || !venue) {
+                    swal("Incomplete", "Please fill in the training date, time and venue.", "warning");
+                    return;
+                }
+
+                swal({
+                    title: "Confirm Training Slot?",
+                    text: "Are you sure you want to confirm the Training slot? An email and SMS notification will be sent to you.",
+                    icon: "info",
+                    buttons: ["Cancel", "Yes I am sure"],
+                    dangerMode: false,
+                }).then(function (confirmed) {
+                    if (confirmed) {
+                        var btn = $('#btnConfirmSchedule');
+                        btn.prop('disabled', true).html('<i class="ion ion-load-c"></i> Confirming...');
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("ConfirmScheduleTraining", "TenantTraining")',
+                            data: {
+                                applicationId: appId,
+                                trainingDate: date,
+                                trainingTime: time,
+                                venue: venue,
+                                comments: comments
+                            },
+                            success: function (response) {
+                                btn.prop('disabled', false).html('<i class="ion ion-ios-checkmark"></i> Confirm Training Slot');
+                                $('#scheduleModal').modal('hide');
+
+                                if (response.success) {
+                                    swal("Success!", response.message, "success").then(function () {
+                                        location.reload();
+                                    });
+                                } else {
+                                    swal("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                btn.prop('disabled', false).html('<i class="ion ion-ios-checkmark"></i> Confirm Training Slot');
+                                swal("Error!", "An unexpected error occurred. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+

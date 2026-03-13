@@ -1196,7 +1196,7 @@ namespace C8.eServices.Mvc.Controllers
                             .Include(r => r.Status)
                             .Include(r => r.ModifiedBySystemUser).ToList();
                     }
-                    else if ((User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")))
+                    else if ((User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")))
                     {
                         var CustomerId = Customer.Id;
                         var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals).FirstOrDefault().Id;
@@ -1379,7 +1379,7 @@ namespace C8.eServices.Mvc.Controllers
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
                     List<LeaseDetails> rCSApplicationStatus = new List<LeaseDetails>();
 
-                    if (User.IsInRole("Housing Supervisor"))
+                    if (User.IsInRole("Housing Supervisor") || User.IsInRole("Client Services Officer") || User.IsInRole("Letting Officer"))
                     {
                         var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.VacatingConfirmation).FirstOrDefault().Id;
 
@@ -2367,7 +2367,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     return RedirectToAction("Inbox", "propertyLeaseApplication");
                 }
-                if ((User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")))
+                if ((User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")))
                 {
                     return RedirectToAction("Termination", "propertyLeaseApplication");
                 }
@@ -2546,14 +2546,14 @@ namespace C8.eServices.Mvc.Controllers
                 ViewBag.DepositRequired = applicationAllocatedProperty.RequiedDepositAmount.ToString("C", zar);
                 ViewBag.PropertyPrice = applicationAllocatedProperty.MonthlyRentalAmount.ToString("C", zar);
 
-                ViewBag.GrossIncome = propertyLeaseApplication.GrossIncome.ToString("C", zar);
-                ViewBag.NetIncome = propertyLeaseApplication.NetIncome.ToString("C", zar);
+                ViewBag.GrossIncome = propertyLeaseApplication.GrossIncome.GetValueOrDefault().ToString("C", zar);
+                ViewBag.NetIncome = propertyLeaseApplication.NetIncome.GetValueOrDefault().ToString("C", zar);
                 if (propertyLeaseApplication.SecondApplicant)
                 {
                     ViewBag.SecAppGrossIncome = ((decimal)propertyLeaseApplication.SecAppGrossIncome).ToString("C", zar);
                     ViewBag.SecAppNetIncome = ((decimal)propertyLeaseApplication.SecAppNetIncome).ToString("C", zar);
                 }
-                ViewBag.TotalCombinedIncome = propertyLeaseApplication.TotalCombinedIncome.ToString("C", zar);
+                ViewBag.TotalCombinedIncome = propertyLeaseApplication.TotalCombinedIncome.GetValueOrDefault().ToString("C", zar);
                 ViewBag.LeaseDetailsId = refNo;
                 ViewBag.SecondApplicant = propertyLeaseApplication.SecondApplicant;
 

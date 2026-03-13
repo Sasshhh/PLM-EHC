@@ -33,6 +33,7 @@ namespace C8.eServices.Mvc.Keys
 
         public const string LettingOfficer = "PLM LettingOfficer";
         public const string HousingSupervisor = "PLM HousingSupervisor";
+        public const string ClientServicesOfficer = "PLM ClientServicesOfficer";
         public const string PropertyManager = "PLM PropertyManager";
         public const string RevenueOfficer  = "PLM RevenueOfficer";
         public const string RevenueManager = "PLM RevenueManager";

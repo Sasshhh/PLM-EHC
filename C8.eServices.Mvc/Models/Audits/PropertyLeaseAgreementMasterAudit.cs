@@ -328,35 +328,56 @@ namespace C8.eServices.Mvc.Models.Audits
         public bool PropertyManagerSigned { get; set; }
 
         [Column(Order = 88)]
-        [Display(Name = "PenaltyMonth")]
-        public string RevenueManagersSignature { get; set; }
+        [Display(Name = "Property Manager Signature Date")]
+        public DateTime? PropertyManagerSignatureDate { get; set; }
 
         [Column(Order = 89)]
         [Display(Name = "PenaltyMonth")]
-        public int? RevenueManagerId { get; set; }
+        public string RevenueManagersSignature { get; set; }
 
         [Column(Order = 90)]
         [Display(Name = "PenaltyMonth")]
-        public bool RevenueManagerSigned { get; set; }
+        public int? RevenueManagerId { get; set; }
 
         [Column(Order = 91)]
         [Display(Name = "PenaltyMonth")]
-        public string SignatureMainLessee { get; set; }
+        public bool RevenueManagerSigned { get; set; }
 
         [Column(Order = 92)]
-        [Display(Name = "PenaltyMonth")]
-        public bool MainLesseeSigned { get; set; }
+        [Display(Name = "Revenue Manager Signature Date")]
+        public DateTime? RevenueManagerSignatureDate { get; set; }
 
         [Column(Order = 93)]
         [Display(Name = "PenaltyMonth")]
-        public string SignatureOfSpouse { get; set; }
+        public string SignatureMainLessee { get; set; }
 
         [Column(Order = 94)]
         [Display(Name = "PenaltyMonth")]
-        public bool SpouseSigned { get; set; }
+        public bool MainLesseeSigned { get; set; }
 
         [Column(Order = 95)]
         [Display(Name = "PenaltyMonth")]
+        public string SignatureOfSpouse { get; set; }
+
+        [Column(Order = 96)]
+        [Display(Name = "PenaltyMonth")]
+        public bool SpouseSigned { get; set; }
+
+        [Column(Order = 97)]
+        [Display(Name = "PenaltyMonth")]
         public string ApplicantIdentityNumber { get; set; }
+
+        [Column(Order = 108)]
+        [Display(Name = "Witness 1 Signature")]
+        public string Witness1Signature { get; set; }
+
+        [Column(Order = 109)]
+        [Display(Name = "Witness 1 Name")]
+        [StringLength(200)]
+        public string Witness1Name { get; set; }
+
+        [Column(Order = 110)]
+        [Display(Name = "Witness 1 Signature Date")]
+        public DateTime? Witness1SignatureDate { get; set; }
     }
 }

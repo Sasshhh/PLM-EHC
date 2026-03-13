@@ -1,0 +1,177 @@
+@model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Schedule Training";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-ios-calendar"></i> Schedule Pre-Tenancy Training
+                </div>
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <div class="alert alert-info" style="margin: 15px;">
+                <i class="ion ion-information-circled"></i>
+                <strong>Instructions:</strong> Select an applicant, choose a training date, time and venue, then click "Confirm Training Slot".
+                The tenant will receive an email and SMS notification with the training details.
+                Status will update to <strong>Awaiting Online Training</strong>.
+            </div>
+
+            <table id="ScheduleTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Ref No.</th>
+                        <th>Email Address</th>
+                        <th>Created Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(m => item.FirstName) @Html.DisplayFor(m => item.LastName)</td>
+                            <td>@Html.DisplayFor(m => item.ApplicationReferenceNumber)</td>
+                            <td>@Html.DisplayFor(m => item.PurEmail)</td>
+                            <td>@Html.DisplayFor(m => item.CreatedDateTime.Value)</td>
+                            <td>@Html.DisplayFor(m => item.Status.Name)</td>
+                            <td>
+                                <button class="btn btn-primary btn-schedule"
+                                        data-application-id="@item.Id"
+                                        data-applicant-name="@item.FirstName @item.LastName">
+                                    <i class="ion ion-ios-calendar"></i> Schedule Training
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Training Modal -->
+<div id="scheduleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><i class="ion ion-ios-calendar"></i> Schedule Training Slot</h4>
+            </div>
+            <div class="modal-body">
+                <p>Scheduling training for: <strong id="modalApplicantName"></strong></p>
+                <input type="hidden" id="modalApplicationId" />
+
+                <div class="form-group">
+                    <label>Training Date <span style="color:red;">*</span></label>
+                    <input type="date" id="trainingDate" class="form-control" required
+                           min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="form-group">
+                    <label>Training Time <span style="color:red;">*</span></label>
+                    <input type="time" id="trainingTime" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Venue <span style="color:red;">*</span></label>
+                    <input type="text" id="trainingVenue" class="form-control" placeholder="e.g. EHC Training Room A, Germiston" required />
+                </div>
+                <div class="form-group">
+                    <label>Additional Comments</label>
+                    <textarea id="trainingComments" class="form-control" rows="3"
+                              placeholder="Any additional information for the tenant..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                <button type="button" id="btnConfirmSchedule" class="btn btn-primary">
+                    <i class="ion ion-ios-checkmark"></i> Confirm Training Slot
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('#ScheduleTable').DataTable({
+                "order": [[3, "desc"]]
+            });
+
+            $('.btn-schedule').click(function () {
+                var appId = $(this).data('application-id');
+                var appName = $(this).data('applicant-name');
+                $('#modalApplicationId').val(appId);
+                $('#modalApplicantName').text(appName);
+                $('#trainingDate').val('');
+                $('#trainingTime').val('');
+                $('#trainingVenue').val('');
+                $('#trainingComments').val('');
+                $('#scheduleModal').modal('show');
+            });
+
+            $('#btnConfirmSchedule').click(function () {
+                var appId = $('#modalApplicationId').val();
+                var date = $('#trainingDate').val();
+                var time = $('#trainingTime').val();
+                var venue = $('#trainingVenue').val().trim();
+                var comments = $('#trainingComments').val().trim();
+
+                if (!date || !time || !venue) {
+                    swal("Incomplete", "Please fill in the training date, time and venue.", "warning");
+                    return;
+                }
+
+                swal({
+                    title: "Confirm Training Slot?",
+                    text: "Are you sure you want to confirm the Training slot? An email and SMS notification will be sent to the tenant.",
+                    icon: "info",
+                    buttons: ["Cancel", "Yes I am sure"],
+                    dangerMode: false,
+                }).then(function (confirmed) {
+                    if (confirmed) {
+                        var btn = $('#btnConfirmSchedule');
+                        btn.prop('disabled', true).html('<i class="ion ion-load-c"></i> Confirming...');
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("ConfirmScheduleTraining", "TenantTraining")',
+                            data: {
+                                applicationId: appId,
+                                trainingDate: date,
+                                trainingTime: time,
+                                venue: venue,
+                                comments: comments
+                            },
+                            success: function (response) {
+                                btn.prop('disabled', false).html('<i class="ion ion-ios-checkmark"></i> Confirm Training Slot');
+                                $('#scheduleModal').modal('hide');
+
+                                if (response.success) {
+                                    swal("Success!", response.message, "success").then(function () {
+                                        location.reload();
+                                    });
+                                } else {
+                                    swal("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                btn.prop('disabled', false).html('<i class="ion ion-ios-checkmark"></i> Confirm Training Slot');
+                                swal("Error!", "An unexpected error occurred. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -13,16 +13,20 @@ namespace C8.eServices.Mvc.Models.Audits
         public string Action { get; set; }
 
         public int PropertyLeaseApplicationId { get; set; }
-        public DateTime? TrainingInvitedDate { get; set; }
-        public DateTime? TrainingCompletedDate { get; set; }
-        public int ExamAttempts { get; set; }
-        public DateTime? ExamPassedDate { get; set; }
-        public decimal? ExamScore { get; set; }
-        public int CurrentSlideIndex { get; set; }
-        public bool IsTrainingCompleted { get; set; }
-        public bool IsExamPassed { get; set; }
-        public string TrainingLinkToken { get; set; }
+
+        [MaxLength(500)]
+        public string InvitationToken { get; set; }
+
         public DateTime? TokenExpiryDate { get; set; }
+        public DateTime? InvitationSentDate { get; set; }
+        public DateTime? TrainingStartedDate { get; set; }
+        public DateTime? TrainingCompletedDate { get; set; }
+        public int CurrentSlideNumber { get; set; }
+        public bool IsTrainingCompleted { get; set; }
+        public int ExamAttempts { get; set; }
+        public decimal? ExamScore { get; set; }
+        public bool IsExamPassed { get; set; }
+        public DateTime? ExamPassedDate { get; set; }
 
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }

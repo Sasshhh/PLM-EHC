@@ -520,8 +520,7 @@
 
                     @if (Request.IsAuthenticated && ((User.IsInRole("Super Administrators")) || (User.IsInRole("Area Manager")) || (User.IsInRole("Back Office System Administrator"))))
                     {
-
-                        if (SecurityHelper.UserDepartment().Equals(ApplicationEntityKeys.EkurhuleniHousingCompany))
+                        if (!User.IsInRole("Customers") && SecurityHelper.UserDepartment().Equals(ApplicationEntityKeys.EkurhuleniHousingCompany))
                         {
                             <li>
                                 <a href="javascript:;">
@@ -898,7 +897,7 @@
                             </ul>
                         </li>
                     }
-                    @if (Request.IsAuthenticated && User.IsInRole("Community Development Officer"))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Community Development Officer") || User.IsInRole("Client Services Officer")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -911,6 +910,12 @@
                                     <a href="~/PropertyLeaseApplication/PropertyLeaseTenantTraining">
                                         <i class="ion ion-settings" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Invite To Training</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/TenantTraining/ScheduleTraining">
+                                        <i class="ion ion-ios-calendar" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Schedule Training</span>
                                     </a>
                                 </li>
                             </ul>
@@ -978,7 +983,7 @@
                             </ul>
                         </li>
                     }
-                    @if (Request.IsAuthenticated && (User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1174,7 +1179,7 @@
                         </li>
                     }
 
-                    @if (Request.IsAuthenticated && (User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1218,6 +1223,12 @@
                                     <a href="~/RiskAssessmentOutcomes/INBOXCEO">
                                         <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Inbox Applications</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/RiskAssessmentOutcomes/WaitingListIndex">
+                                        <i class="ion ion-android-list" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Waiting List</span>
                                     </a>
                                 </li>
                             </ul>
@@ -1366,7 +1377,7 @@
                             </ul>
                         </li>
                     }
-                    @if (Request.IsAuthenticated && (User.IsInRole("Community Development Officer")) || (User.IsInRole("Property Manager")) || (User.IsInRole("Revenue Manager")) || (User.IsInRole("Revenue Officer")) || (User.IsInRole("Letting Officer") || (User.IsInRole("Housing Supervisor"))))
+                    @if (Request.IsAuthenticated && ((User.IsInRole("Community Development Officer")) || (User.IsInRole("Property Manager")) || (User.IsInRole("Revenue Manager")) || (User.IsInRole("Revenue Officer")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Housing Supervisor")) || (User.IsInRole("Client Services Officer"))))
                     {
                         <li>
                             <a href="javascript:;">
@@ -2063,6 +2074,12 @@
                                             <span class="text">Pre-Tenancy Training</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="~/TenantTraining/MyScheduledTraining">
+                                            <i class="ion ion-ios-calendar" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">My Scheduled Training</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -2388,7 +2405,7 @@
 
                     @if (Request.IsAuthenticated)
                     {
-                        if ((User.IsInRole("Community Development Officer")) || (User.IsInRole("Customers")) || (User.IsInRole("Housing Supervisor")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Property Manager")) || (User.IsInRole("Revenue Manager")) || (User.IsInRole("Revenue Officer")))
+                      if ((User.IsInRole("Community Development Officer")) || (User.IsInRole("Customers")) || (User.IsInRole("Housing Supervisor")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")) || (User.IsInRole("Property Manager")) || (User.IsInRole("Revenue Manager")) || (User.IsInRole("Revenue Officer")))
                         {
                             <li>
                                 <a href="javascript:;">

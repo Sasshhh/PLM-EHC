@@ -63,13 +63,13 @@ namespace C8.eServices.Mvc.Controllers
                         MatchingHelper.DocumentUploadBakingDetailsProof(dvm, _context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
                         MatchingHelper.DocumentDepositRefunds(refundDocs, _context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
 
-                        //Getting Letting officer
-                        var LettingOfficer = GetBackOfficeId(_context, rcsApps.Id, true);
+                        // Getting Client Services Officer (mapped from legacy Letting Officer complex mapping)
+                        var clientServicesOfficer = GetBackOfficeId(_context, rcsApps.Id, true);
                         var StoredUser = Convert.ToInt16(_context.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
-                        var activeDirectoryOn = LettingOfficer.Id != 0 ? LettingOfficer.Id : StoredUser;
+                        var activeDirectoryOn = clientServicesOfficer.Id != 0 ? clientServicesOfficer.Id : StoredUser;
                         var customerLettingOfficer = _context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
                                    .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == activeDirectoryOn);
-                        if (customerLettingOfficer == null) throw new Exception("Invalid Letting Officer");
+                        if (customerLettingOfficer == null) throw new Exception("Invalid Client Services Officer");
                         var LeaseTermination = _context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId);
 
                         var vm = new DepartmentsApprovalViewModel
@@ -111,7 +111,7 @@ namespace C8.eServices.Mvc.Controllers
             var pca = Units != null ? core.PreferredComplexAreas.FirstOrDefault(x => x.Id == Units.PreferredComplexAreaId) : null;
             if (pca != null)
             {
-                var result = LF == true && pca != null ? UserId = core.Customers.FirstOrDefault(x => x.Id == pca.LettingOfficerId) : UserId = core.Customers.FirstOrDefault(x => x.Id == pca.HousingSuperId);
+                UserId = core.Customers.FirstOrDefault(x => x.Id == pca.LettingOfficerId);
             }
             return UserId;
         }

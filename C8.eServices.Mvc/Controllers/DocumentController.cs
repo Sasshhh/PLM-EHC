@@ -31,7 +31,7 @@ namespace C8.eServices.Mvc.Controllers
         public UserManager<SystemIdentityUser> UserManager { get; private set; }
 
         private int SystemUserId = -1;
-        //
+        //[Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
         #region Documents For All Steps
 
 
@@ -47,7 +47,7 @@ namespace C8.eServices.Mvc.Controllers
 
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult HumanUploadOccupantDoc(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -113,7 +113,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult AddOccupants(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -180,7 +180,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
         public ActionResult Index(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
             eServicesDbContext _context = new eServicesDbContext();
@@ -247,7 +247,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
         public ActionResult Index3(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
             eServicesDbContext _context = new eServicesDbContext();
@@ -313,7 +313,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
         public ActionResult IndexTenants(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
             eServicesDbContext _context = new eServicesDbContext();
@@ -762,7 +762,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult Refund(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -899,7 +899,7 @@ namespace C8.eServices.Mvc.Controllers
 
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult ReUpload(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -1131,7 +1131,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult ProofOfPayment(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -1251,7 +1251,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult UploadRefundDocs(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int refundappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -1442,7 +1442,7 @@ namespace C8.eServices.Mvc.Controllers
 
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult ProofOfPaymentAssessment(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -1641,7 +1641,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult ProofOfApplicationFeePayment(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int rcsappId, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -2029,7 +2029,7 @@ namespace C8.eServices.Mvc.Controllers
 
         // GET: /Document/
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult Register(int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, int? agentId, string returnUrl, int? ratesRebateId, int? incentivePolicyId, string errorList = null)
         {
@@ -2432,7 +2432,7 @@ namespace C8.eServices.Mvc.Controllers
         /// <param name="applicationId">The application identifier.</param>
         /// <returns></returns>
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Customer, Housing Liaison Officer, Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Customer, Housing Liaison Officer, Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer, Revenue Officer")]
 
         public ActionResult RenderDocumentDetails(int documentCheckListId, int referenceTypeId, int referenceId, int customerId, int applicationId, int rcsappId)
         {
@@ -2502,7 +2502,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Caretaker, Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+        [Authorize(Roles = "Caretaker, Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult RefundDocumentDetails(int documentCheckListId, int referenceTypeId, int referenceId, int customerId, int applicationId, int refundappId)
         {
@@ -2536,7 +2536,7 @@ namespace C8.eServices.Mvc.Controllers
             return Json(obj);
         }
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
+      [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Housing Liaison Officer,Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer,Revenue Officer")]
 
         public ActionResult RenderRegisterDocumentDetails(int documentCheckListId, int referenceTypeId, int referenceId, int customerId, int applicationId)
         {

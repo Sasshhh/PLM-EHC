@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -234,8 +234,575 @@ namespace C8.eServices.Mvc.Controllers
             return true;
         }
 
+
+
+        #region Revised Lease Agreement v1 Helper Methods
+
+        /// <summary>
+        /// Generates tenant initials from first name and last name (e.g., "John Doe" -> "JD")
+        /// </summary>
+        private string GetTenantInitials(PropertyLeaseApplication application)
+        {
+            if (string.IsNullOrEmpty(application?.FirstName) || string.IsNullOrEmpty(application?.LastName))
+                return "";
+
+            return application.FirstName.Substring(0, 1).ToUpper() +
+                   application.LastName.Substring(0, 1).ToUpper();
+        }
+
+        /// <summary>
+        /// Gets the signing location from the preferred complex area (e.g., "Airport Park")
+        /// </summary>
+        private string GetSignedAtLocation(PropertyLeaseApplication application)
+        {
+            if (application?.PreferredComplexAreaId.HasValue == true)
+            {
+                var complex = db.PreferredComplexAreas.Find(application.PreferredComplexAreaId.Value);
+                return complex?.Name ?? "Ekurhuleni";
+            }
+            return "Ekurhuleni";
+        }
+
+        /// <summary>
+        /// Retrieves building name from the matched unit's ApplicationAllocatedProperty
+        /// </summary>
+        private string GetBuildingName(int applicationId)
+        {
+            var matchedUnit = db.MatchedUnits
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == applicationId && x.IsActive && !x.IsDeleted);
+
+            if (matchedUnit?.ApplicationAllocatedPropertyId.HasValue == true)
+            {
+                var unit = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId.Value);
+                return unit?.BuildingName ?? "";
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Calculates total monthly charges (rent + water + refuse + sewerage + optional parking/storeroom)
+        /// </summary>
+        private double CalculateTotalMonthlyCharges(PropertyLeaseAgreementMaster master)
+        {
+            double total = 0;
+
+            // Base charges
+            total += master.UnitRentalAmountPM;
+            total += master._water;
+            total += master._refuse;
+            total += master._sewerage;
+
+            // Optional services
+            if (master.SPP == true) total += master.ShadePortParking;
+            if (master.OPP == true) total += master.OpenParking;
+            if (master.STR == true) total += master.StoreRooms;
+
+            return total;
+        }
+
+        /// <summary>
+        /// Sets a PDF form field value with specified font size (more aggressive approach)
+        /// </summary>
+        private void SetFieldWithFontSize(AcroFields fields, string fieldName, string value, float fontSize)
+        {
+            try
+            {
+                // Set the value first
+                fields.SetField(fieldName, value ?? "");
+
+                // Try multiple approaches to set font size
+                fields.SetFieldProperty(fieldName, "textsize", fontSize, null);
+                fields.SetFieldProperty(fieldName, "textfont", "Helvetica", null);
+
+                // Force regenerate appearance
+                fields.RegenerateField(fieldName);
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail - field might not exist or be read-only
+                System.Diagnostics.Debug.WriteLine($"Failed to set field '{fieldName}': {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region Revised Lease Agreement v1 PDF Generation
+
+        /// <summary>1
+        /// Generates PDF for the REVISED Lease Agreement v1 template (85 fields)
+        /// This REPLACES the original pdfDeneratePropertyLeaseAgreement() method.
+        /// The original method body has been updated to use the new template.
+        /// </summary>
         [DecryptParameter]
         public void pdfDeneratePropertyLeaseAgreement(int? ApplicationId)
+        {
+            if (ApplicationId == null) throw new Exception("Invalid Application.");
+
+            var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+            if (application == null) throw new Exception("Application not found.");
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
+            if (lease == null) throw new Exception("Invalid Property Lease.");
+
+            var master = db.propertyLeaseAgreementMasters
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.LeaseDetailsId == lease.Id && x.IsActive && !x.IsDeleted);
+            if (master == null) throw new Exception("Invalid Lease Agreement.");
+
+            // Template path handling (same pattern as original for consistency)
+            // TODO: Add AppSetting key "LA_TEMP_PDF_REVISED" for production deployment
+            var templateSetting = db.AppSettings.FirstOrDefault(r => r.Key == "LA_TEMP_PDF_REVISED");
+            var template = templateSetting?.Value ?? "";
+
+            string pdfTemplate = "";
+            string IP = System.Web.HttpContext.Current.Request.UserHostAddress;
+
+            pdfTemplate = IP == "::1"
+                ? Server.MapPath("~/PDFTemplates/Revised Lease Agreement_v2.pdf")
+                : Server.MapPath(template);
+
+            var timestamp2 = DateTime.Now.ToString("ddMMyyyyHHmmss");
+            string folderName = Server.MapPath("~/Templates");
+            string pathString = System.IO.Path.Combine(folderName, timestamp2);
+            System.IO.Directory.CreateDirectory(pathString);
+
+            string newFile = folderName + "\\" + timestamp2 + "_" + (application?.IDNo ?? "") + "_RevisedLeaseAgreement.pdf";
+            var filename = (application?.ApplicationReferenceNumber ?? "Lease") + "_REVISED_v1.pdf";
+
+            PdfReader pdfReader = new PdfReader(pdfTemplate);
+            PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(newFile, FileMode.Create));
+            AcroFields pdfFormFields = pdfStamper.AcroFields;
+
+            // Force iTextSharp to regenerate field appearances with our font settings
+            pdfStamper.AcroFields.GenerateAppearances = true;
+
+            if (application != null && master != null)
+            {
+                // ========================================================================
+                // CATEGORY 1: EXISTING FIELDS (33 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "AgentName", master.RepresentedBy ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "FullNames", master.ApplicantFullName ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "IdentityNumber", master.ApplicantIdentityNumber ?? application.IDNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitNumber", master.UnitNumber ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitBlock", master.BlockNumber ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Rent", master.MonthlyUnitRental.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Deposit", master.InitialDepositPremises.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CreditCheckFee", master.CreditCheckFee == 0 ? "N/A" : master.CreditCheckFee.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountRent", master.UnitRentalAmountPM.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountWater", master._water.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountElectricity", master.ELEC == true ? master.Electricity.ToString("F2") : "Prepaid", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountRefuse", master._refuse.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountSewerage", master._sewerage.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "ParkingBay", master.CarportParkingBayNumber ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Storeroom", master.STR == true ? master.StoreRooms.ToString("F2") : "N/A", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CommencementDate", master.CommencementDate ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedDay", master.TenantSignDay ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedMonth", master.TenantSignDate ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedDay2", master.ManagersSignDay ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedMonth2", master.ManagersSignDate ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationFee", master.LeaseAdministrationFee.ToString("F2"), 9.0f);
+
+                // ========================================================================
+                // CATEGORY 2: NEW MAPPINGS WITH EXISTING DATA (18 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Surname", application.LastName ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CellNumber", application.CellNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "WorkNumber", application.WorkNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Salary", application.GrossIncome?.ToString("F2") ?? "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "TenantFullName", $"{application.FirstName} {application.LastName}", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "BuildingName", GetBuildingName(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitAddress", lease.LeaAddress ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountTOTAL", CalculateTotalMonthlyCharges(master).ToString("F2"), 9.0f);
+
+                string signedLocation = GetSignedAtLocation(application);
+                SetFieldWithFontSize(pdfFormFields, "SignedAt", signedLocation, 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedAt2", signedLocation, 9.0f);
+
+                // ========================================================================
+                // SUBSIDIES: Set to 0 (9 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "RentSubsidy", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DepositSubsidy", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "keySubsidy", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessSubsidy", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationSubsidy", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "KeyDeposit", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessCard", "N/A", 9.0f);
+
+                // ========================================================================
+                // DSTV: Set to 0/NO (5 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "DSTV", "NO", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVFee", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountDSTV", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DstvMonthlyFee", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVActivationFee", "0.00", 9.0f);
+
+                // ========================================================================
+                // EMPLOYER & BANKING: Placeholder (2 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Employer", "To Be Captured", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "BankingDetails", "To Be Provided", 9.0f);
+
+                // ========================================================================
+                // OCCUPANTS: 3 occupants with expanded details (15 fields)
+                // ========================================================================
+                // Occupant 1
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Name", master.OccupantONE ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1ID", master.OccupantONEIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Relationship", master.OccupantONE != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Contact", master.OccupantONE != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Salary", master.OccupantONE != null ? "0.00" : "", 9.0f);
+
+                // Occupant 2
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Name", master.OccupantTWO ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2ID", master.OccupantTWOIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Relationship", master.OccupantTWO != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Contact", master.OccupantTWO != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Salary", master.OccupantTWO != null ? "0.00" : "", 9.0f);
+
+                // Occupant 3
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Name", master.OccupantTHREE ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3ID", master.OccupantTHREEIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Relationship", master.OccupantTHREE != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Contact", master.OccupantTHREE != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Salary", master.OccupantTHREE != null ? "0.00" : "", 9.0f);
+
+                // ========================================================================
+                // UNDEFINED FIELDS: Tenant initials for T&C agreement (14 fields)
+                // ========================================================================
+                string tenantInitials = GetTenantInitials(application);
+                SetFieldWithFontSize(pdfFormFields, "undefined", tenantInitials, 9.0f);
+                for (int i = 2; i <= 14; i++)
+                {
+                    SetFieldWithFontSize(pdfFormFields, $"undefined_{i}", tenantInitials, 9.0f);
+                }
+
+                // ========================================================================
+                // WITNESSES: Witness1 rendered as signature image below, others left blank
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Witness2", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Witness3", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Witness4", "", 9.0f);
+
+                // ========================================================================
+                // HEADING COLUMNS: Leave blank (4 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Subject", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Description", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Item", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Item_2", "", 9.0f);
+
+                // ========================================================================
+                // SIGNATURES: Render as images (3 signature fields)
+                // ========================================================================
+
+                // Tenant Signature
+                if (!string.IsNullOrEmpty(master.TenantSignature) && master.TenantSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.TenantSignature.Substring(master.TenantSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("TenantSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error if needed, but don't fail PDF generation
+                        System.Diagnostics.Debug.WriteLine($"Failed to render tenant signature: {ex.Message}");
+                    }
+                }
+
+                // Property Manager Signature
+                if (!string.IsNullOrEmpty(master.PropertyManagersSignature) && master.PropertyManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.PropertyManagersSignature.Substring(master.PropertyManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("PropertyManagerSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render property manager signature: {ex.Message}");
+                    }
+                }
+
+                // Revenue Manager Signature
+                if (!string.IsNullOrEmpty(master.RevenueManagersSignature) && master.RevenueManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.RevenueManagersSignature.Substring(master.RevenueManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("RevenueManagerSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render revenue manager signature: {ex.Message}");
+                    }
+                }
+
+                // Witness 1 Signature
+                if (!string.IsNullOrEmpty(master.Witness1Signature) && master.Witness1Signature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.Witness1Signature.Substring(master.Witness1Signature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("Witness1");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render witness 1 signature: {ex.Message}");
+                    }
+                }
+            }
+
+            // Flatten the form (make it non-editable)
+            pdfStamper.FormFlattening = true;
+            pdfStamper.Close();
+
+            // Send PDF to browser
+            string ReportURL = newFile;
+            byte[] temp = System.IO.File.ReadAllBytes(ReportURL);
+
+            Response.Clear();
+            MemoryStream ms = new MemoryStream(temp);
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-disposition", "attachment;filename=" + filename);
+            Response.Buffer = true;
+            ms.WriteTo(Response.OutputStream);
+            Response.End();
+        }
+
+        #endregion
+
+        [DecryptParameter]
+        public void NewOldpdfDeneratePropertyLeaseAgreement(int? ApplicationId)
+        {
+            if (ApplicationId == null) throw new Exception("Invalid Application.");
+
+            var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+            if (application == null) throw new Exception("Application not found.");
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
+            if (lease == null) throw new Exception("Invalid Property Lease.");
+
+            var master = db.propertyLeaseAgreementMasters
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.LeaseDetailsId == lease.Id && x.IsActive && !x.IsDeleted);
+            if (master == null) throw new Exception("Invalid Lease Agreement.");
+
+            var templateSetting = db.AppSettings.FirstOrDefault(r => r.Key == AppSettingKeys.LA_TEMP_PDF);
+            var template = templateSetting?.Value ?? "";
+
+            string pdfTemplate = "";
+            string IP = System.Web.HttpContext.Current.Request.UserHostAddress;
+
+            pdfTemplate = IP == "::1"
+                ? Server.MapPath("~/PDFTemplates/LA_Template.pdf")
+                : Server.MapPath(template);
+
+            var timestamp2 = DateTime.Now.ToString("ddMMyyyyHHmmss");
+
+            string folderName = Server.MapPath("~/Templates");
+            string pathString = System.IO.Path.Combine(folderName, timestamp2);
+            System.IO.Directory.CreateDirectory(pathString);
+
+            string nFolderName = folderName;
+
+            string newFile = nFolderName + "\\" + timestamp2 + "_" + (application?.IDNo ?? "") + "_PLMLeaseAgreement.pdf";
+
+            var filename = (application?.ApplicationReferenceNumber ?? "Lease") + ".LEASEAGREEMENT.pdf";
+
+            PdfReader pdfReader = new PdfReader(pdfTemplate);
+            PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(newFile, FileMode.Create));
+
+            AcroFields pdfFormFields = pdfStamper.AcroFields;
+
+            if (application != null && master != null)
+            {
+                pdfFormFields.SetField("AgentName", master.RepresentedBy ?? "");
+                pdfFormFields.SetField("FullNames", master.ApplicantFullName ?? "");
+                pdfFormFields.SetField("IdentityNumber", master.ApplicantIdentityNumber ?? application.IDNo ?? "");
+
+                pdfFormFields.SetField("UnitNumber", master.UnitNumber ?? "");
+
+                pdfFormFields.SetField("LeasePreparation", master.PreparationFee.ToString());
+
+                pdfFormFields.SetField("CreditCheckFee",
+                    master.CreditCheckFee == 0 ? "N/A" : master.CreditCheckFee.ToString());
+
+                pdfFormFields.SetField("CalculatedAsFollows", master.CalculatedAsFolllows.ToString());
+                pdfFormFields.SetField("InitialDepositPremises", master.InitialDepositPremises.ToString());
+                pdfFormFields.SetField("InitialDepositTContribution", master.DepositTenantContribution.ToString());
+                pdfFormFields.SetField("RentalUnit", master.MonthlyUnitRental.ToString());
+
+                pdfFormFields.SetField("ShadePortParking",
+                    master.SPP == true ? master.ShadePortParking.ToString() : "N/A");
+
+                pdfFormFields.SetField("OpenParkingBay",
+                    master.OPP == true ? master.OpenParking.ToString() : "N/A");
+
+                pdfFormFields.SetField("StoreRooms",
+                    master.STR == true ? master.StoreRooms.ToString() : "N/A");
+
+                pdfFormFields.SetField("Electricity",
+                    master.ELEC == true ? master.Electricity.ToString() : "Prepaid");
+
+                pdfFormFields.SetField("SecurityFees",
+                    master.SEC == true ? master.SecurityFee.ToString() : "N/A");
+
+                pdfFormFields.SetField("Water",
+                    master.WTR == true ? master.Water.ToString() : "N/A");
+
+                pdfFormFields.SetField("Refuse", master.Refuse.ToString());
+                pdfFormFields.SetField("Sewerage", master.Sewerage.ToString());
+
+                pdfFormFields.SetField("BedRooms", master.BedRooms.ToString());
+                pdfFormFields.SetField("FloorNumber", master.FloorNumber ?? "");
+                pdfFormFields.SetField("Block", master.BlockNumber ?? "");
+
+                pdfFormFields.SetField("Day", master.Day ?? "");
+                pdfFormFields.SetField("Date", master.CommencementDate ?? "");
+                pdfFormFields.SetField("EndDate", master.EndDate ?? "");
+
+                pdfFormFields.SetField("Month", master.NoPenaltyMonth ?? "");
+                pdfFormFields.SetField("RentalDue", master.RentalDueUntill ?? "");
+                pdfFormFields.SetField("MonthOfLastDay", master.PenaltyMonth ?? "");
+
+                pdfFormFields.SetField("InitialDepositeAmount", master.InitialDepositAmonunt.ToString());
+                pdfFormFields.SetField("LeaseAdministrationFee", master.LeaseAdministrationFee.ToString());
+
+                pdfFormFields.SetField("UnitRentalAmount", master.UnitRentalAmountPM.ToString());
+
+                pdfFormFields.SetField("Day2", master.UnitRentalDay ?? "");
+                pdfFormFields.SetField("Date2", master.UnitRentalDate ?? "");
+                pdfFormFields.SetField("IncreaseDate", master.RentalIncreaseDate ?? "");
+
+                pdfFormFields.SetField("CarportParkingBay", master.CarportParkingBayNumber ?? "");
+                pdfFormFields.SetField("OpenParkingBayNumber", master.OPenParkingBayNumber ?? "");
+
+                pdfFormFields.SetField("OpenParkingBayRental",
+                    master.OPenParkingBayRental == 0 ? "N/A" : master.OPenParkingBayRental.ToString());
+
+                pdfFormFields.SetField("ShadePortParkingBayNumber", master.ShadePortBayNumber ?? "");
+
+                pdfFormFields.SetField("ShadePortRental",
+                    master.ShadePortBayRental == 0 ? "N/A" : master.ShadePortBayRental.ToString());
+
+                pdfFormFields.SetField("_Of1July", master._Of1July ?? "");
+                pdfFormFields.SetField("IncreaseDayParking", master.ParkingIncreaseDay ?? "");
+                pdfFormFields.SetField("IncreaseMonthParking", master.ParkingIncreaseMonth ?? "");
+
+                pdfFormFields.SetField("Water", master._water.ToString());
+                pdfFormFields.SetField("Refuse", master._refuse.ToString());
+                pdfFormFields.SetField("Sewerage", master._sewerage.ToString());
+
+                pdfFormFields.SetField("NumberOfOccupants", master.PeopleAllowedOnPremises.ToString());
+                pdfFormFields.SetField("LandlordAddress", master.LandlordAddress ?? "");
+                pdfFormFields.SetField("TenantSignDate", master.TenantSignDate ?? "");
+                pdfFormFields.SetField("TenantSignDay", master.TenantSignDay ?? "");
+                pdfFormFields.SetField("TenantsWitness1", master.TenantWitnessONE ?? "");
+                pdfFormFields.SetField("TenantsWitness2", master.TenantWitnessTWO ?? "");
+                pdfFormFields.SetField("ManagersSignDate", master.ManagersSignDate ?? "");
+                pdfFormFields.SetField("ManagersSignDay", master.ManagersSignDay ?? "");
+                pdfFormFields.SetField("ManagersWitness1", master.ManagersWitnessONE ?? "");
+                pdfFormFields.SetField("ManagersWitness2", master.ManagersWitnessTWO ?? "");
+                pdfFormFields.SetField("SignatureMainLessee", master.SignatureMainLessee ?? "");
+                pdfFormFields.SetField("SignatureOFSpouse", master.SignatureOfSpouse ?? "");
+
+                if (!string.IsNullOrEmpty(master.TenantSignature) && master.TenantSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.TenantSignature.Substring(master.TenantSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        AcroFields.FieldPosition sigPos = null;
+                        var positions = pdfFormFields.GetFieldPositions("TenantsSignature");
+                        if (positions != null && positions.Count > 0)
+                            sigPos = positions[0];
+
+                        if (sigPos != null)
+                        {
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch { }
+                }
+            }
+            pdfStamper.FormFlattening = true;
+            pdfStamper.Close();
+
+            string ReportURL = newFile;
+            byte[] temp = System.IO.File.ReadAllBytes(ReportURL);
+
+            Response.Clear();
+
+            MemoryStream ms = new MemoryStream(temp);
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-disposition", "attachment;filename=" + filename);
+
+            Response.Buffer = true;
+
+            ms.WriteTo(Response.OutputStream);
+            Response.End();
+        }
+
+        [DecryptParameter]
+        public void oldpdfDeneratePropertyLeaseAgreement(int? ApplicationId)
         {
             if (ApplicationId == null) throw new Exception("Invalid Application.");
             var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
@@ -758,7 +1325,7 @@ namespace C8.eServices.Mvc.Controllers
 
             ResponsibilityType ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Inspections).FirstOrDefault();
             Customer User =  GetBackOfficeId(db, (Int32)id, false);
-            short activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+            short activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
             Int32 UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
 
@@ -1309,7 +1876,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 MatchingHelper.MarkUnitAsInpected(db, maintenance.Id);
                 var User =  GetBackOfficeId(db, rcsApps.Id, false);
-                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
                 maintenance.Inspection = false;
@@ -1523,102 +2090,108 @@ namespace C8.eServices.Mvc.Controllers
             CaptureController c = new CaptureController();
 
 
-            //var UM2 = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+            var UM2 = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
 
 
-            //if (UM2.InspectionType == StatusKeys.PreUnitInspection)
-            //{
-            //    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
-            //    {
-            //        Nullable<Int32> ApplicationAllocatedPropertyId = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched.ApplicationAllocatedPropertyId;
-            //        var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == ApplicationAllocatedPropertyId);
-            //        findItem.Inspection = false;
-            //        db.Entry(findItem).State = EntityState.Modified;
-            //        db.SaveChanges();
+            if (UM2.InspectionType == StatusKeys.PreUnitInspection)
+            {
+                if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                {
+                    Nullable<Int32> ApplicationAllocatedPropertyId = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched.ApplicationAllocatedPropertyId;
+                    var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == ApplicationAllocatedPropertyId);
+                    findItem.Inspection = false;
+                    db.Entry(findItem).State = EntityState.Modified;
+                    db.SaveChanges();
 
-            //        var User = GetBackOfficeId(db, rcsApps.Id, false);
-            //        var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
-            //        var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
+                    var User = GetBackOfficeId(db, rcsApps.Id, false);
+                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                    var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
-            //        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
-            //        MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
+                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
+                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
 
-            //        //var UM = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.InspectionType == StatusKeys.PreUnitInspection);
-            //        //UM.UnitMaintenanceCompleted = true;
-            //        //UM.StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
-            //        //db.SaveChanges();
+                    var UM = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.InspectionType == StatusKeys.PreUnitInspection);
+                    UM.UnitMaintenanceCompleted = true;
+                    UM.StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
+                    db.SaveChanges();
 
-            //        //if (UM.RCSActionType.Key == RCSActionTypeKeys.NotHabitable)
-            //        //{
-            //        //    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, (int)id);
+                    if (UM.RCSActionType.Key == RCSActionTypeKeys.NotHabitable)
+                    {
+                        MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (Int32)id);
+                        MatchingHelper.RoundRobinMarkJobAsFinished(db, (Int32)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
+                        EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
-            //        //    EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-            //        //    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to schedule inspection dates");
+                        //customer email here
+                        var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UnitInspectionApproved).Description.ToString();
+                        MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
+                        //MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, (int)id);
 
-            //        //}
-            //        //else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
-            //        //{
-            //        //    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
+                        //EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to schedule inspection dates");
 
-            //        //}
+                    }
+                    else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
+                    {
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
 
-            //        //                        1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
-            //    }
-            //    else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
-            //    {
-            //        MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
-            //        db.SaveChanges();
-            //        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
-            //    }
-            //}
-            //else if (UM2.InspectionType == StatusKeys.ExitUnitInspection)
-            //{
-            //    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
-            //    {
-            //        Nullable<Int32> ApplicationAllocatedPropertyId = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched.ApplicationAllocatedPropertyId;
-            //        var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == ApplicationAllocatedPropertyId);
-            //        findItem.Inspection = false;
-            //        db.Entry(findItem).State = EntityState.Modified;
-                    
+                    }
 
-            //        var User = GetBackOfficeId(db, rcsApps.Id, false);
-            //        var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
-            //        var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
+                }
+                else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+                {
+                    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
+                    db.SaveChanges();
+                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                }
+            }
+            else if (UM2.InspectionType == StatusKeys.ExitUnitInspection)
+            {
+                if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                {
+                    Nullable<Int32> ApplicationAllocatedPropertyId = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched.ApplicationAllocatedPropertyId;
+                    var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == ApplicationAllocatedPropertyId);
+                    findItem.Inspection = false;
+                    db.Entry(findItem).State = EntityState.Modified;
 
-            //        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
-            //        MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
 
-            //        var UM = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.InspectionType == StatusKeys.ExitUnitInspection);
-            //        UM.UnitMaintenanceCompleted = true;
-            //        UM.StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
-            //        db.SaveChanges();
+                    var User = GetBackOfficeId(db, rcsApps.Id, false);
+                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                    var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
-            //        if (UM.RCSActionType.Key == RCSActionTypeKeys.NotHabitable)
-            //        {
-            //            int AwaitingExitInspection = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection).Id;
-            //            //EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-            //            EHCRoundRobin((int)rcsApps.Id, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-            //            MatchingHelper.ChangeApplicationStatus(db, AwaitingExitInspection, rcsApps.Id);
-            //            Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to conduct exit inspection");
+                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
+                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
 
-            //        }
-            //        else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
-            //        {
-            //            Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
+                    var UM = db.allocatedUnitMaintenanceEHCs.Include(x => x.RCSActionType).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.InspectionType == StatusKeys.ExitUnitInspection);
+                    UM.UnitMaintenanceCompleted = true;
+                    UM.StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
+                    db.SaveChanges();
 
-            //        }
+                    if (UM.RCSActionType.Key == RCSActionTypeKeys.NotHabitable)
+                    {
+                        int AwaitingExitInspection = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection).Id;
+                        //EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+                        EHCRoundRobin((int)rcsApps.Id, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+                        MatchingHelper.ChangeApplicationStatus(db, AwaitingExitInspection, rcsApps.Id);
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to conduct exit inspection");
 
-            //        //                        1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
-            //    }
-            //    else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
-            //    {
-            //        MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
-            //        db.SaveChanges();
-            //        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
-            //    }
-            //}
+                    }
+                    else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
+                    {
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
 
-         
+                    }
+
+                    //                        1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
+                }
+                else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+                {
+                    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
+                    db.SaveChanges();
+                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                }
+            }
+
+
             return RedirectToAction("PropertyLeaseInspections");
         }
 
@@ -2861,10 +3434,10 @@ namespace C8.eServices.Mvc.Controllers
                     rrq.Add(Key.FirstOrDefault(r => r.Key == PrefferedComplexKeys.AirportparkStaff).Id);
                     rrq.Add(Key.FirstOrDefault(r => r.Key == PrefferedComplexKeys.ChrisHaniStaff).Id);
                     rrq.Add(Key.FirstOrDefault(r => r.Key == PrefferedComplexKeys.DelvilleStaff).Id);
-                    var rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Include(r => r.PreferredComplexArea).Include(r => r.HumanEHCOption).Where(x => x.IsDeleted == false && !x.IsTaken && x.PreferredComplexArea.HousingSuperId == Customer.Id).ToList();
-                    if (User.IsInRole("Housing Supervisor"))
+                    var rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Include(r => r.PreferredComplexArea).Include(r => r.HumanEHCOption).Where(x => x.IsDeleted == false && !x.IsTaken && x.PreferredComplexArea.LettingOfficerId == Customer.Id).ToList();
+                    if (User.IsInRole("Client Services Officer"))
                     {
-                        rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Include(r => r.PreferredComplexArea).Include(r => r.HumanEHCOption).Where(x => x.IsDeleted == false && !x.IsTaken && x.PreferredComplexArea.HousingSuperId == Customer.Id).ToList();
+                        rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Include(r => r.PreferredComplexArea).Include(r => r.HumanEHCOption).Where(x => x.IsDeleted == false && !x.IsTaken && x.PreferredComplexArea.LettingOfficerId == Customer.Id).ToList();
                     }
                     else
                     {
@@ -2896,9 +3469,9 @@ namespace C8.eServices.Mvc.Controllers
 
                     List<UnitsEkurhuleniHousingCompany> rCSApplicationStatus = new List<UnitsEkurhuleniHousingCompany>();
 
-                    if (User.IsInRole("Housing Supervisor"))
+                    if (User.IsInRole("Client Services Officer"))
                     {
-                        var Areas = db.PreferredComplexAreas.Where(x => x.HousingSuperId == Customer.Id).ToList();
+                        var Areas = db.PreferredComplexAreas.Where(x => x.LettingOfficerId == Customer.Id).ToList();
                         var List = Areas.Select(x => x.Id);
                         rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Where(x => x.IsDeleted == false && x.Inspection).Include(r => r.HumanEHCOption).Include(r => r.PreferredComplexArea).ToList();
                     }
@@ -2930,9 +3503,9 @@ namespace C8.eServices.Mvc.Controllers
 
                     List<UnitsEkurhuleniHousingCompany> rCSApplicationStatus = new List<UnitsEkurhuleniHousingCompany>();
                     
-                    if (User.IsInRole("Housing Supervisor"))
+                    if (User.IsInRole("Client Services Officer"))
                     {
-                        var Areas = db.PreferredComplexAreas.Where(x => x.HousingSuperId == Customer.Id).ToList();
+                        var Areas = db.PreferredComplexAreas.Where(x => x.LettingOfficerId == Customer.Id).ToList();
                         var List = Areas.Select(x => x.Id);
                         rCSApplicationStatus = db.UnitsEkurhuleniHousingCompany.Where(x => x.IsDeleted == false && x.Inspection).Include(r=>r.HumanEHCOption).Include(r => r.PreferredComplexArea).ToList();
                     }
@@ -3618,7 +4191,7 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        [Authorize(Roles = "Letting Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
+        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
         [HttpGet]
         public ActionResult PropertyTenantCommunication()
         {
@@ -3628,10 +4201,10 @@ namespace C8.eServices.Mvc.Controllers
                  
                 Initialise();
                 var vm = new DepartmentsApprovalViewModel();
-                if ((User.IsInRole("Letting Officer") || (User.IsInRole("Housing Supervisor"))))
+                if (User.IsInRole("Client Services Officer"))
                 {
                     var UserId = Customer.Id;
-                    var ComplexNames = db.PreferredComplexAreas.Where(x => (x.HousingSuperId == UserId || x.LettingOfficerId == UserId) && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
+                    var ComplexNames = db.PreferredComplexAreas.Where(x => x.LettingOfficerId == UserId && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
                     var cc = ComplexNames.Select(x => x.Id).ToList();
                     var mat = db.MatchedUnits.Include(r => r.UnitsEkurhuleniHousingCompany).Where(x => x.UnitsEkurhuleniHousingCompany.IsTaken && cc.Contains((int)x.UnitsEkurhuleniHousingCompany.PreferredComplexAreaId)).ToList();
                     var m = mat.Select(x => x.Id).ToList();
@@ -3688,7 +4261,7 @@ namespace C8.eServices.Mvc.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Letting Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
+        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
         [HttpPost]
         public ActionResult PropertyTenantCommunication(DepartmentsApprovalViewModel vm, string CommunicationType, string Title, string MessageBody, string Title2, string MessageBody2, bool EMAIL, bool SMS, bool POSTAL, int? User, List<PreferredComplexArea> Features, params string[] SelectedRoles)
         {
@@ -3915,7 +4488,7 @@ namespace C8.eServices.Mvc.Controllers
 
             if (matchedUnits != null)
                 captureViewModel.ApplicationAllocatedProperties = matchedUnits.ApplicationAllocatedProperty;
-            IEnumerable<Int32> systemIdentityUsers = IdentityManager.FindUsersInRole("Letting Officer").Select(a => a.SystemUserId);
+            IEnumerable<Int32> systemIdentityUsers = IdentityManager.FindUsersInRole("Client Services Officer").Select(a => a.SystemUserId);
             IEnumerable<Customer> customerObjects = db.Customers.Where(a => systemIdentityUsers.Contains((Int32)a.SystemUserId) && (Int32)a.SystemUserId != SystemUser.Id).ToList();
 
             ViewBag.Id = Id;
@@ -4274,7 +4847,7 @@ namespace C8.eServices.Mvc.Controllers
 
             }
         }
-        [Authorize(Roles = "Revenue Officer,Housing Supervisor")]
+        [Authorize(Roles = "Revenue Officer,Client Services Officer")]
         public ActionResult PropertyLeaseApplicationTerminations()
         {
             using (var cxt = new eServicesDbContext())
@@ -4310,7 +4883,7 @@ namespace C8.eServices.Mvc.Controllers
                             .Include(r => r.Status)
                             .Include(r => r.ModifiedBySystemUser).ToList();
                     }
-                    else if (User.IsInRole("Housing Supervisor"))
+                    else if (User.IsInRole("Client Services Officer"))
                     {
                         rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
                         var list = rrq.Select(x => x.LeaseDetailsId).ToList();
@@ -4536,7 +5109,7 @@ namespace C8.eServices.Mvc.Controllers
                             .Include(r => r.HumanEHCOptions).Include(r => r.Status).ToList();
                     }
 
-                    if ((User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")))
+                    if ((User.IsInRole("Lease Official")) || (User.IsInRole("Client Services Officer")))
                     {
                         var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.GenerateLeaseAgreement).FirstOrDefault().Id;
                         var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
@@ -6020,6 +6593,11 @@ ApplicationFeeValidation(int? id)
                 ViewBag.ReferenceTypeId = documentReferenceType.Id;
                 ViewBag.ApplicationId = application.Id;
 
+                var master = db.propertyLeaseAgreementMasters.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                ViewBag.PropertyManagerSigned = master?.PropertyManagerSigned ?? false;
+                ViewBag.RevenueManagerSigned = master?.RevenueManagerSigned ?? false;
+                ViewBag.BothManagersSigned = (master?.PropertyManagerSigned ?? false) && (master?.RevenueManagerSigned ?? false);
+
                 var obj = new
                 {
                     IdentificationNumber = vm.Customer.IdentificationNumber,
@@ -6194,6 +6772,11 @@ ApplicationFeeValidation(int? id)
                 ViewBag.PropertyLeaseAppliactionId = rcsApps.Id;
                 ViewBag.ReferenceTypeId = documentReferenceType.Id;
                 ViewBag.ApplicationId = application.Id;
+
+                var master = db.propertyLeaseAgreementMasters.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                ViewBag.PropertyManagerSigned = master?.PropertyManagerSigned ?? false;
+                ViewBag.RevenueManagerSigned = master?.RevenueManagerSigned ?? false;
+                ViewBag.BothManagersSigned = (master?.PropertyManagerSigned ?? false) && (master?.RevenueManagerSigned ?? false);
 
                 var obj = new
                 {
@@ -6441,6 +7024,194 @@ ApplicationFeeValidation(int? id)
             return Json(true, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        public JsonResult SaveTenantSignatureImage()
+        {
+            try
+            {
+                string body;
+                using (var reader = new StreamReader(Request.InputStream))
+                    body = reader.ReadToEnd();
+
+                var payload = JsonConvert.DeserializeObject<dynamic>(body);
+                int? ApplicationId = (int?)payload.ApplicationId;
+                string SignatureImageData = (string)payload.SignatureImageData;
+
+                if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
+                    return Json(new { success = false, message = "Invalid parameters." });
+
+                Initialise();
+                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found." });
+
+                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                if (master == null)
+                    return Json(new { success = false, message = "Lease agreement record not found." });
+
+                master.TenantSignature = SignatureImageData;
+                master.TenantSigned = true;
+                master.TenantSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SaveWitness1SignatureImage()
+        {
+            try
+            {
+                string body;
+                using (var reader = new StreamReader(Request.InputStream))
+                    body = reader.ReadToEnd();
+
+                var payload = JsonConvert.DeserializeObject<dynamic>(body);
+                int? ApplicationId = (int?)payload.ApplicationId;
+                string SignatureImageData = (string)payload.SignatureImageData;
+                string WitnessName = (string)payload.WitnessName;
+
+                if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData) || string.IsNullOrEmpty(WitnessName))
+                    return Json(new { success = false, message = "Invalid parameters." });
+
+                Initialise();
+                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found." });
+
+                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                if (master == null)
+                    return Json(new { success = false, message = "Lease agreement record not found." });
+
+                master.Witness1Signature = SignatureImageData;
+                master.Witness1Name = WitnessName;
+                master.Witness1SignatureDate = DateTime.Now;
+
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult CheckSignatureStatus(int applicationId)
+        {
+            try
+            {
+                Initialise();
+                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == applicationId);
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found." }, JsonRequestBehavior.AllowGet);
+
+                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                if (master == null)
+                    return Json(new { success = false, message = "Lease agreement record not found." }, JsonRequestBehavior.AllowGet);
+
+                return Json(new
+                {
+                    success = true,
+                    tenantSigned = master.TenantSigned,
+                    tenantSignatureData = master.TenantSignature,
+                    witness1Signed = !string.IsNullOrEmpty(master.Witness1Signature),
+                    witness1SignatureData = master.Witness1Signature,
+                    witness1Name = master.Witness1Name
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SavePropertyManagerSignatureImage()
+        {
+            try
+            {
+                string body;
+                using (var reader = new StreamReader(Request.InputStream))
+                    body = reader.ReadToEnd();
+
+                var payload = JsonConvert.DeserializeObject<dynamic>(body);
+                int? ApplicationId = (int?)payload.ApplicationId;
+                string SignatureImageData = (string)payload.SignatureImageData;
+
+                if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
+                    return Json(new { success = false, message = "Invalid parameters." });
+
+                Initialise();
+                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found." });
+
+                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                if (master == null)
+                    return Json(new { success = false, message = "Lease agreement record not found." });
+
+                master.PropertyManagersSignature = SignatureImageData;
+                master.PropertyManagerSigned = true;
+                master.PropertyManagerSignatureDate = DateTime.Now;
+
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SaveRevenueManagerSignatureImage()
+        {
+            try
+            {
+                string body;
+                using (var reader = new StreamReader(Request.InputStream))
+                    body = reader.ReadToEnd();
+
+                var payload = JsonConvert.DeserializeObject<dynamic>(body);
+                int? ApplicationId = (int?)payload.ApplicationId;
+                string SignatureImageData = (string)payload.SignatureImageData;
+
+                if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
+                    return Json(new { success = false, message = "Invalid parameters." });
+
+                Initialise();
+                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                if (application == null)
+                    return Json(new { success = false, message = "Application not found." });
+
+                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                if (master == null)
+                    return Json(new { success = false, message = "Lease agreement record not found." });
+
+                master.RevenueManagersSignature = SignatureImageData;
+                master.RevenueManagerSigned = true;
+                master.RevenueManagerSignatureDate = DateTime.Now;
+
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         public JsonResult PropertyManagerSignLeaseAgreement(int? Id)
         {
             if (Id == null) throw new Exception("Invalid Application");
@@ -6523,7 +7294,7 @@ ApplicationFeeValidation(int? id)
                     if (preferredComplexArea != null)
                         _ = (LF && preferredComplexArea != null) ?
                             UserId = core.Customers.FirstOrDefault(x => x.Id == preferredComplexArea.LettingOfficerId)
-                            : UserId = core.Customers.FirstOrDefault(x => x.Id == preferredComplexArea.HousingSuperId);
+                            : UserId = core.Customers.FirstOrDefault(x => x.Id == preferredComplexArea.LettingOfficerId);
                 }
             }
             return UserId;
@@ -6668,7 +7439,14 @@ ApplicationFeeValidation(int? id)
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
-                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.CommunityDevelopmentOfficer).FirstOrDefault().Value);
+                var appUnit = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == RCSAppID);
+                var matchedUnit = appUnit != null ? db.MatchedUnits.FirstOrDefault(x => x.Id == appUnit.MatchedID) : null;
+                var allocatedProperty = matchedUnit != null ? db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == matchedUnit.ApplicationAllocatedPropertyId) : null;
+                var offeredComplex = allocatedProperty != null ? db.PreferredComplexAreas.Include(x => x.LettingOfficer).FirstOrDefault(x => x.Id == allocatedProperty.OfferedComplexId) : null;
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                var activeDirectoryOn = (offeredComplex != null && offeredComplex.LettingOfficerId.HasValue)
+                    ? offeredComplex.LettingOfficerId.Value
+                    : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 if (activeDirectoryOn != null)
@@ -6723,7 +7501,7 @@ ApplicationFeeValidation(int? id)
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
                 var UserId = GetBackOfficeId(db, RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.ScheduleInspectionSlots).FirstOrDefault();
@@ -6779,7 +7557,7 @@ ApplicationFeeValidation(int? id)
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
                 var UserId =  GetBackOfficeId(db,  RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Inspections).FirstOrDefault();
@@ -6833,7 +7611,7 @@ ApplicationFeeValidation(int? id)
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
                 var UserId = GetBackOfficeId(db,  RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
@@ -7275,7 +8053,7 @@ ApplicationFeeValidation(int? id)
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var findItem = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
                 var UserId = GetBackOfficeId(db,  RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.VacatingConfirmation).FirstOrDefault();
@@ -7540,7 +8318,7 @@ ApplicationFeeValidation(int? id)
                 var appu = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
                 var unit = db.Units.FirstOrDefault(x => x.Id == appu.Matched.UnitsId);
                 var UserId =GetBackOfficeId(db, RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.UnitMaintenanance).FirstOrDefault();
@@ -8405,7 +9183,7 @@ ApplicationFeeValidation(int? id)
             var RoleName = userrole != null ? db.Roles.Where(x => x.Name == userrole.IdentityRole.Name).FirstOrDefault().Id : db.Roles.Where(x => x.Name == "Housing Supervisor").FirstOrDefault().Id;
 
             var userrole2 = area.LettingOfficer != null ? db.ApplicationUserRoles.Include(r => r.IdentityRole).OrderByDescending(x => x.Id).FirstOrDefault(x => x.SystemUserId == area.LettingOfficer.SystemUserId) : null;
-            var RoleName2 = userrole2 != null ? db.Roles.Where(x => x.Name == userrole2.IdentityRole.Name).FirstOrDefault().Id : db.Roles.Where(x => x.Name == "Letting Officer").FirstOrDefault().Id;
+            var RoleName2 = userrole2 != null ? db.Roles.Where(x => x.Name == userrole2.IdentityRole.Name).FirstOrDefault().Id : db.Roles.Where(x => x.Name == "Client Services Officer").FirstOrDefault().Id;
 
             var LOUsersList = GetUsersInRole(RoleName2).Where(x => x.RoundRobinIsActive == true).ToList();
             var HSUsersList = GetUsersInRole(RoleName).Where(x => x.RoundRobinIsActive == true).ToList();
@@ -10553,7 +11331,7 @@ ApplicationFeeValidation(int? id)
                                 var timeslot = db.TimeSlots.FirstOrDefault(x => x.Id == thisItem).Id;
                                 var scheduleddates = db.ScheduledInspections.ToList();
                                 var User = GetBackOfficeId(db,  departments.PropertyLeaseApplication.Id, false);
-                                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                                 var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
                                 if (ispsch != null)
@@ -10608,7 +11386,7 @@ ApplicationFeeValidation(int? id)
 
                     var User =  GetBackOfficeId(db,  Id, false);    
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.ScheduleInspectionSlots).FirstOrDefault();
-                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                     var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
                     MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)Id, null, ResponsibilityTypeId.Id, UserId);
 
@@ -10692,7 +11470,7 @@ ApplicationFeeValidation(int? id)
             {
                 var schedule = context.InspectionSchedules.FirstOrDefault(x => x.Id == Id);
                 var User =  GetBackOfficeId(db, (int)schedule.PropertyLeaseApplicationId, false);
-                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                 var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
                 bool result = MatchingHelper.ValidateSelectedWithApproved(context, Id, UserId);
@@ -11427,7 +12205,7 @@ ApplicationFeeValidation(int? id)
                     var LF = GetBackOfficeId(_context, (int)matchedUnits.PropertyLeaseApplicationId, true);
                     var HS = GetBackOfficeId(_context, (int)applicantUnit.PropertyLeaseApplicationId, false);
 
-                    var HousingSuperviso = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
+                    var HousingSuperviso = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                     var LettingOffice = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
                     LettingOfficer = LF.Id != 0 ? LF : _context.Customers.Include(r=>r.SystemUser).FirstOrDefault(x => x.Id == LettingOffice);
                     HousingSupervisor = HS.Id != 0 ? HS : _context.Customers.Include(r => r.SystemUser).FirstOrDefault(x => x.Id == HousingSuperviso);
@@ -15755,9 +16533,9 @@ ApplicationFeeValidation(int? id)
             var findItem = db.propertyLeaseAgreementMasters.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == id);
             if (findItem != null)
             {
-                if (!findItem.RevenueManagerSigned && !findItem.PropertyManagerSigned)
+                if (!findItem.RevenueManagerSigned || !findItem.PropertyManagerSigned)
                 {
-                    return Json("true", JsonRequestBehavior.AllowGet); // Neither signed, no need to check further
+                    return Json("true", JsonRequestBehavior.AllowGet); // At least one manager hasn't signed yet, no need to check documents
                 }
             }
 

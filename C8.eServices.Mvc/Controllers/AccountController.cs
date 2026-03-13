@@ -475,7 +475,7 @@ namespace C8.eServices.Mvc.Controllers
                                 await SignInAsync(user, model.RememberMe);
                                 return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
                             }
-                            if ((UserManager.IsInRole(user.Id, "Lease Official")) || (UserManager.IsInRole(user.Id, "Letting Officer")))
+                            if ((UserManager.IsInRole(user.Id, "Lease Official")) || (UserManager.IsInRole(user.Id, "Letting Officer")) || (UserManager.IsInRole(user.Id, "Client Services Officer")))
                             {
                                 await SignInAsync(user, model.RememberMe);
                                 return RedirectToAction("UpdateLeaseDetails", "PropertyLeaseApplication");
@@ -2545,7 +2545,7 @@ systemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, systemUser.Fu
                                     await SignInAsync(user, model.RememberMe);
                                     return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
                                 }
-                                if ((UserManager.IsInRole(user.Id, "Lease Official")) || (UserManager.IsInRole(user.Id, "Letting Officer")))
+                                if ((UserManager.IsInRole(user.Id, "Lease Official")) || (UserManager.IsInRole(user.Id, "Letting Officer")) || (UserManager.IsInRole(user.Id, "Client Services Officer")))
                                 {
                                     await SignInAsync(user, model.RememberMe);
                                     return RedirectToAction("UpdateLeaseDetails", "PropertyLeaseApplication");

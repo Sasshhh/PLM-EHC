@@ -529,15 +529,11 @@ namespace C8.eServices.Mvc.Controllers
             var userID = Customer.Id;
             var area = db.PreferredComplexAreas.Include(r => r.LettingOfficer).Include(r => r.HousingSuper).FirstOrDefault(x => x.Id == id);
 
-            var userrole = area.HousingSuper != null ? db.ApplicationUserRoles.Include(r => r.IdentityRole).OrderByDescending(x => x.Id).FirstOrDefault(x => x.SystemUserId == area.HousingSuper.SystemUserId) : null;
-            var RoleName = userrole != null ? db.Roles.Where(x => x.Name == userrole.IdentityRole.Name).FirstOrDefault().Id : db.Roles.Where(x => x.Name == "Housing Supervisor").FirstOrDefault().Id;
-
-            var userrole2 = area.LettingOfficer != null ? db.ApplicationUserRoles.Include(r => r.IdentityRole).OrderByDescending(x => x.Id).FirstOrDefault(x => x.SystemUserId == area.LettingOfficer.SystemUserId) : null;
-            var RoleName2 = userrole2 != null ? db.Roles.Where(x => x.Name == userrole2.IdentityRole.Name).FirstOrDefault().Id : db.Roles.Where(x => x.Name == "Letting Officer").FirstOrDefault().Id;
+            var CSORole = db.Roles.Where(x => x.Name == "Client Services Officer").FirstOrDefault();
+            var RoleName = CSORole != null ? CSORole.Id : db.Roles.Where(x => x.Name == "Letting Officer").FirstOrDefault().Id;
             PropertyLeaseApplicationController cc = new PropertyLeaseApplicationController();
 
-            var LOUsersList = cc.GetUsersInRole(RoleName2).Where(x => x.RoundRobinIsActive == true).ToList();
-            var HSUsersList = cc.GetUsersInRole(RoleName).Where(x => x.RoundRobinIsActive == true).ToList();
+            var CSOUsersList = cc.GetUsersInRole(RoleName).Where(x => x.RoundRobinIsActive == true).ToList();
 
             var vm = new ManualReAllocationViewModel();
             vm.PreferredComplexArea = area;
@@ -547,8 +543,7 @@ namespace C8.eServices.Mvc.Controllers
             vm.ViewName = ViewName;
             vm.TitleName = TitleName;
             vm.BodyName = BodyName;
-            ViewBag.BOUsers = new SelectList(HSUsersList, "SystemUser.Id", "SystemUser.FullName");
-            ViewBag.LOUsers = new SelectList(LOUsersList, "SystemUser.Id", "SystemUser.FullName");
+            ViewBag.CSOUsers = new SelectList(CSOUsersList, "SystemUser.Id", "SystemUser.FullName");
             return View(vm);
         }
 
@@ -559,8 +554,9 @@ namespace C8.eServices.Mvc.Controllers
 
             var area = db.PreferredComplexAreas.Include(r => r.LettingOfficer).Include(r => r.HousingSuper).FirstOrDefault(x => x.Id == vm.PropertyLeaseApplicationId);
 
-            area.HousingSuperId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.NewBackOfficeUser).Id;
-            area.LettingOfficerId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.LettingOfficerId).Id;
+            var csoCustomerId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.LettingOfficerId).Id;
+            area.LettingOfficerId = csoCustomerId;
+            area.HousingSuperId = csoCustomerId;
             area.ModifiedDateTime = DateTime.Now;
             db.Entry(area).State = EntityState.Modified;
             db.SaveChanges();
@@ -717,8 +713,9 @@ namespace C8.eServices.Mvc.Controllers
 
             var area = db.PreferredComplexAreas.Include(r => r.LettingOfficer).Include(r => r.HousingSuper).FirstOrDefault(x => x.Id == vm.PropertyLeaseApplicationId);
 
-            area.HousingSuperId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.NewBackOfficeUser).Id;
-            area.LettingOfficerId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.LettingOfficerId).Id;
+            var csoCustomerId = db.Customers.FirstOrDefault(x => x.SystemUserId == vm.LettingOfficerId).Id;
+            area.LettingOfficerId = csoCustomerId;
+            area.HousingSuperId = csoCustomerId;
             area.ModifiedDateTime = DateTime.Now;
             db.Entry(area).State = EntityState.Modified;
             db.SaveChanges();
