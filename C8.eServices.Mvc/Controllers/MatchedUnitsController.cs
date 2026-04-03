@@ -82,13 +82,29 @@ namespace C8.eServices.Mvc.Controllers
             var matchedUnit = db.MatchedUnits.FirstOrDefault(x => x.Id == id) ?? null;
             var unitInformation = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId);
             var result = MatchingHelper.AcceptMatchedUnit(db, unitInformation, (int)matchedUnit.PropertyLeaseApplicationId, 1, (int)id);
+
+            if (result)
+            {
+                var rcsApps = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == matchedUnit.PropertyLeaseApplicationId);
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == rcsApps.CustomerId);
+
+                // Activity Tracker
+                var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AcceptMatchedUnit).Description.ToString();
+                MatchingHelper.ActivityTrackerAudit(db, rcsApps.Id, ActivityTrackerMessage, custmusers.Id);
+
+                // Send unit accepted email
+                int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.Accetproperty).Id;
+                EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
+
+                // Send deposit payment email with banking details
+                int depositEmailId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UnitAcceptedDepositPaymentDetails)?.Id ?? 0;
+                if (depositEmailId > 0)
+                {
+                    EmailHelper.CustomerEmailNotification(db, rcsApps.Id, depositEmailId);
+                }
+            }
+
             var output = result == true ? "Success" : "Failure";
-            var rcsApps = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == matchedUnit.PropertyLeaseApplicationId);
-            var custmusers = db.Customers.FirstOrDefault(x => x.Id == rcsApps.CustomerId);
-            var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AcceptMatchedUnit).Description.ToString();
-            MatchingHelper.ActivityTrackerAudit(db, rcsApps.Id, ActivityTrackerMessage, custmusers.Id);
-            int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.Accetproperty).Id;
-            EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
             return Json(output, JsonRequestBehavior.AllowGet);
         }
         public JsonResult RejectMatchedUnit(int? id)

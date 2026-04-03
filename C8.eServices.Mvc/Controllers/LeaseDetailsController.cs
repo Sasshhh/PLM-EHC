@@ -229,6 +229,12 @@ namespace C8.eServices.Mvc.Controllers
               .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
               .Include(r => r.HumanEHCOptions).Include(r => r.Status)
               .Where(x => x.Id == id).FirstOrDefault();
+
+            // Get or create PropertyLeaseAgreementMaster for banking details
+            var propertyLeaseAgreementMaster = db.propertyLeaseAgreementMasters
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == id) 
+                ?? new PropertyLeaseAgreementMaster { PropertyLeaseApplicationId = id.Value };
+
             eServicesDbContext context = new eServicesDbContext();
 
             TenantViewModel model = new TenantViewModel
@@ -238,6 +244,7 @@ namespace C8.eServices.Mvc.Controllers
                 Unit = units,
                 ApplicantUnit = applicantUnit,
                 PropertyLeaseApplication = propertyLease,
+                PropertyLeaseAgreementMaster = propertyLeaseAgreementMaster,
                 //UnitsEkurhuleniHousingCompany = ekurhuleniHousingCompany,
                 ApplicationAllocatedProperty = applicationAllocatedProperty
             };
@@ -342,6 +349,45 @@ namespace C8.eServices.Mvc.Controllers
                     lease.StatusId = es.Status.Where(x => x.Key == StatusKeys.ActiveLease).ToList().FirstOrDefault().Id;
                     lease.IsNew = true;
                     lease.DetailsUpdated = true;
+
+                    // Handle PropertyLeaseAgreementMaster creation/update for new fields
+                    var existingMaster = es.propertyLeaseAgreementMasters
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == property.Id);
+
+                    if (existingMaster == null)
+                    {
+                        // Create new PropertyLeaseAgreementMaster record
+                        var agreementMaster = new PropertyLeaseAgreementMaster
+                        {
+                            PropertyLeaseApplicationId = property.Id,
+                            HasDSTV = tenant.PropertyLeaseApplication.HasDSTV,
+                            DSTVActivationFee = tenant.PropertyLeaseApplication.DSTVActivationFee ?? 0,
+                            DSTVMonthlyLevy = tenant.PropertyLeaseApplication.DSTVMonthlyLevy ?? 0,
+                            AccessCardDeposit = tenant.PropertyLeaseApplication.AccessCardDeposit ?? 0,
+                            KeyDeposit = tenant.PropertyLeaseApplication.KeyDeposit ?? 0,
+                            CommencementDay = tenant.Lease.StartDate?.ToString("dd"),
+                            CreatedDateTime = DateTime.Now,
+                            CreatedBySystemUserId = SystemUser.Id
+                        };
+
+                        es.propertyLeaseAgreementMasters.Add(agreementMaster);
+                    }
+                    else
+                    {
+                        // Update existing PropertyLeaseAgreementMaster record
+                        existingMaster.HasDSTV = tenant.PropertyLeaseApplication.HasDSTV;
+                        existingMaster.DSTVActivationFee = tenant.PropertyLeaseApplication.DSTVActivationFee ?? 0;
+                        existingMaster.DSTVMonthlyLevy = tenant.PropertyLeaseApplication.DSTVMonthlyLevy ?? 0;
+                        existingMaster.AccessCardDeposit = tenant.PropertyLeaseApplication.AccessCardDeposit ?? 0;
+                        existingMaster.KeyDeposit = tenant.PropertyLeaseApplication.KeyDeposit ?? 0;
+                        existingMaster.CommencementDay = tenant.Lease.StartDate?.ToString("dd");
+                        existingMaster.ModifiedDateTime = DateTime.Now;
+                        existingMaster.ModifiedBySystemUserId = SystemUser.Id;
+
+                        es.Entry(existingMaster).State = EntityState.Modified;
+                    }
+
+                    es.SaveChanges();
 
 
                     if (lease.PurchaserTypeId == (db.PurchaserType.Where(x=>x.Key==PurchaserTypeKeys.NaturalPerson).FirstOrDefault().Id))

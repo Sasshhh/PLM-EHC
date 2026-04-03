@@ -26,13 +26,19 @@ namespace C8.eServices.Mvc.Models
         [ForeignKey("HousingSuperId")]
         public Customer HousingSuper { get; set; }
 
+        [Display(Name = "Maintenance Manager")]
         [Column(Order = 16)]
+        public int? MaintenanceManagerId { get; set; }
+        [ForeignKey("MaintenanceManagerId")]
+        public Customer MaintenanceManager { get; set; }
+
+        [Column(Order = 17)]
         [Display(Name = "Region")]
         public int? RegionTypeId { get; set; }
         [ForeignKey("RegionTypeId")]
         public RegionType RegionType { get; set; }
 
-        [Column(Order = 17)]
+        [Column(Order = 18)]
         [Display(Name = "CCC")]
         public int? CCCTypeId { get; set; }
         [ForeignKey("CCCTypeId")]

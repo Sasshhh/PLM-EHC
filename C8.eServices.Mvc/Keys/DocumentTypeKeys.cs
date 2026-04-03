@@ -60,9 +60,9 @@ namespace C8.eServices.Mvc.Keys
 
         public const string RefundWaterMeterReading = "dt_refund_water_meter_reading";
 
-        
+
         public const string DeedSearch = "dt_application_deed_search";
-        
+
 
         public const string RefundConveyancerBankingDetails= "dt_refund_conveyancer_bank";
 
@@ -139,6 +139,11 @@ namespace C8.eServices.Mvc.Keys
         public const string ProofOfBankingDetails = "dt_banking_details_proof";
 
         public const string ExitInterviewForm = "dt_exit_interview_form";
+
+        // Maintenance Job Card Documents
+        public const string MaintenanceTaskDocument = "dt_maintenance_task_document";
+        public const string MaintenanceBeforeImage = "dt_maintenance_before_image";
+        public const string MaintenanceAfterImage = "dt_maintenance_after_image";
 
     }
 }

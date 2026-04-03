@@ -1,0 +1,172 @@
+@model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Property Facilities Maintenance Reviews";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .cards tbody tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+</style>
+
+<div id="PropertyFacilitiesMaintenanceReviewSessionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Facilities Maintenance Review</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <strong>@Html.Raw(ViewBag.PropertyFacilitiesMaintenanceReviewSession)</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <h4>Property Facilities - Maintenance Job Card Reviews</h4>
+                    <p>Review and approve/reject completed maintenance job cards</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="facilitiesReviewCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            <table id="FacilitiesReviewTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>@Html.DisplayNameFor(model => model.ApplicationReferenceNumber)</th>
+                        <th>Application Created Date</th>
+                        <th>Current Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <label>Applicant Name:</label>
+                                @Html.DisplayFor(modelItem => item.CreatedBySystemUser.FirstName) @Html.DisplayFor(modelItem => item.CreatedBySystemUser.LastName)
+                            </td>
+                            <td>
+                                <label>Application Type:</label>
+                                @Html.DisplayFor(modelItem => item.PurchaserType.Name)
+                            </td>
+                            <td>
+                                <label>Reference Number:</label>
+                                @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                            </td>
+                            <td>
+                                <label>Created Date:</label>
+                                @Html.DisplayFor(modelItem => item.CreatedDateTime.Value)
+                            </td>
+                            <td>
+                                <label>Status:</label>
+                                <span class="badge badge-info">@Html.DisplayFor(modelItem => item.Status.Name)</span>
+                            </td>
+                            <td>
+                                <label>Action:</label>
+                                @Html.ActionLink("Review Maintenance", "PropertyFacilitiesManagerReview", 
+                                    new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, 
+                                    new { @class = "btn btn-warning btn-sm" })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ('@ViewBag.PropertyFacilitiesMaintenanceReviewSession' !== null && '@ViewBag.PropertyFacilitiesMaintenanceReviewSession' !== '') {
+            $('#PropertyFacilitiesMaintenanceReviewSessionModal').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+        }
+    });
+</script>
+
+<script>
+    $(function () {
+        $('#FacilitiesReviewTable').DataTable({
+            "order": [[3, "desc"]], // Order by created date descending
+            "pageLength": 25,
+            "responsive": true
+        });
+    });
+</script>

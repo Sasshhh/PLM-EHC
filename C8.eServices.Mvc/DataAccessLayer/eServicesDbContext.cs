@@ -162,6 +162,8 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<AllocatedUnitHistory> AllocatedUnitHistory { get; set; }
         public DbSet<ApplicationAllocatedProperty> ApplicationAllocatedProperty { get; set; }
         public DbSet<AllocatedUnitMaintenanceEHC> allocatedUnitMaintenanceEHCs { get; set; }
+        public DbSet<MaintenanceJobCardTask> MaintenanceJobCardTasks { get; set; }
+        public DbSet<MaintenanceJobCardSignature> MaintenanceJobCardSignatures { get; set; }
 
         public DbSet<LeaseReviewComment> LeaseReviewComments { get; set; }
 
@@ -177,6 +179,14 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<ExaminationQuestionAudit> ExaminationQuestionAudits { get; set; }
         public DbSet<TenantExamAnswerAudit> TenantExamAnswerAudits { get; set; }
 
+        // Complaints Module Tables
+        public DbSet<TenantComplaint> TenantComplaints { get; set; }
+        public DbSet<ComplaintCategory> ComplaintCategories { get; set; }
+        public DbSet<ComplaintType> ComplaintTypes { get; set; }
+        public DbSet<ComplaintEvidence> ComplaintEvidences { get; set; }
+        public DbSet<ComplaintInvestigation> ComplaintInvestigations { get; set; }
+        public DbSet<ComplaintExternalReferral> ComplaintExternalReferrals { get; set; }
+        public DbSet<ComplaintInvestigationDocument> ComplaintInvestigationDocuments { get; set; }
 
         // Entity Collections.
         public DbSet<Account> Accounts { get; set; }
@@ -1115,6 +1125,32 @@ namespace C8.eServices.Mvc.DataAccessLayer
                 .HasOptional(f => f.ModifiedBySystemUser)
                 .WithMany()
                 .HasForeignKey(f => f.ModifiedBySystemUserId);
+
+            // Configure decimal properties for MaintenanceJobCardTask
+            modelBuilder.Entity<MaintenanceJobCardTask>()
+                .Property(p => p.QuantityUsed)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<MaintenanceJobCardTask>()
+                .Property(p => p.TotalCosts)
+                .HasPrecision(18, 2);
+
+            // Configure decimal properties for PropertyLeaseAgreementMaster enhancements
+            modelBuilder.Entity<PropertyLeaseAgreementMaster>()
+                .Property(p => p.AccessCardDeposit)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PropertyLeaseAgreementMaster>()
+                .Property(p => p.KeyDeposit)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PropertyLeaseAgreementMaster>()
+                .Property(p => p.DSTVActivationFee)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PropertyLeaseAgreementMaster>()
+                .Property(p => p.DSTVMonthlyLevy)
+                .HasPrecision(18, 2);
         }
 
         

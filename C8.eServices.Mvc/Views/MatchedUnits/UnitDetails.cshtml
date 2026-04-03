@@ -179,15 +179,15 @@
                                                         </ol>
                                                         <div class="carousel-inner">
                                                             <div class="item active">
-                                                                <img class="slide-image" src="~/Content/Images/image_ehc2.jpg" />
+                                                                <img class="slide-image" src="@Url.Content("~/Content/Images/image_ehc2.jpg")" alt="Unit Image" />
                                                                 @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
                                                             </div>
                                                             <div class="item">
-                                                                <img class="slide-image" src="~/Content/Images/image_ehc2.jpg" />
+                                                                <img class="slide-image" src="@Url.Content("~/Content/Images/image_ehc2.jpg")" alt="Unit Image" />
                                                                 @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
                                                             </div>
                                                             <!--<div class="item">
-                                                                <img class="slide-image" src="~/Content/Images/house3.jpg" />-->
+                                                                <img class="slide-image" src="@Url.Content("~/Content/Images/house3.jpg")" alt="Unit Image" />-->
                                                             @*<img class="slide-image" src="https://cache-graphicslib.viator.com/graphicslib/destination/rhine-river-133772.jpg" alt="">*@
                                                             <!--</div>-->
                                                         </div>
@@ -336,6 +336,125 @@
     </div>
 </div>
 
+<!-- Unit Acceptance Success Modal with Banking Details -->
+<div id="unitAcceptanceModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #28a745; color: white; padding: 15px; margin: 0;">
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">&times;</button>
+                <h4 class="modal-title" style="margin: 0;"><i class="fa fa-check-circle"></i> Unit Offer Accepted Successfully!</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p style="font-size: 16px; margin-bottom: 20px;">
+                            <strong>Congratulations!</strong> You have successfully accepted the unit offer.
+                        </p>
+
+                        <div class="alert alert-warning" style="margin-bottom: 20px;">
+                            <h5 style="margin-top: 0;"><i class="fa fa-money"></i> <strong>Deposit Payment Required</strong></h5>
+                            <p style="font-size: 18px; margin: 10px 0;">
+                                <strong>Amount to Pay: R @String.Format("{0:N2}", Model.AllocatedUnit.RequiedDepositAmount)</strong>
+                            </p>
+                        </div>
+
+                        <h5 style="margin-top: 20px; margin-bottom: 15px;"><strong>Next Steps:</strong></h5>
+                        <p>Please make payment for the deposit using the banking details below:</p>
+
+                        <div class="panel panel-info" style="margin-top: 15px;">
+                            <div class="panel-heading">
+                                <h5 class="panel-title"><i class="fa fa-bank"></i> <strong>Banking Details</strong></h5>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Bank Name:</strong></p>
+                                        <p style="margin-left: 20px;">Standard Bank</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Account Name:</strong></p>
+                                        <p style="margin-left: 20px;">Ekurhuleni Metropolitan Municipality</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Account Number:</strong></p>
+                                        <p style="margin-left: 20px;">001844075</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Branch Code:</strong></p>
+                                        <p style="margin-left: 20px;">011545</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p><strong>Reference:</strong></p>
+                                        <p style="margin-left: 20px;">Your Application Reference Number</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" style="margin-top: 20px;">
+                            <p style="margin: 0;"><i class="fa fa-info-circle"></i> <strong>Important:</strong> After making payment, please upload your proof of payment on the system.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-lg" onclick="redirectToInbox()">
+                    <i class="fa fa-check"></i> OK, I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unit Rejection Success Modal -->
+<div id="unitRejectionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" style="color: orange;"><i class="fa fa-info-circle"></i> Unit Offer Rejected</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <p><strong>You have rejected the unit offer.</strong></p>
+                    <br/>
+                    <p>The system will attempt to find another suitable unit for you.</p>
+                    <p>You will be notified once a new unit becomes available.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="redirectToInbox()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="unitActionErrorModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h4 class="modal-title" style="color: red;"><i class="fa fa-exclamation-circle"></i> Error</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <p><strong>An error occurred while processing your request.</strong></p>
+                    <p>Please try again or contact support if the problem persists.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="~/Scripts/jquery-2.2.0.min.js"></script>
 <script>
@@ -344,7 +463,6 @@
         jQuery.noConflict();
         $.getJSON("../MatchedUnits/ValidateWaitingListSorting",
             function (result) {
-                debugger;
                 if (result == true) {
                     $("#waitinglist_busy").modal('show');
                     $('#waitinglist_busy').modal({
@@ -355,17 +473,26 @@
                 } else {
                     $.getJSON("../MatchedUnits/AcceptMatchedUnit?id=" +@Model.MatchedUnitId ,
                         function (result) {
-                            window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+                            if (result == "Success") {
+                                // Show success modal with banking details
+                                $("#unitAcceptanceModal").modal('show');
+                                $('#unitAcceptanceModal').modal({
+                                    backdrop: 'static',
+                                    keyboard: false,
+                                    show: true
+                                });
+                            } else {
+                                // Show error modal
+                                $("#unitActionErrorModal").modal('show');
+                            }
                         });
                 }
             });
     }
 
     function RejectPropertyListing() {
-
         $.getJSON("../MatchedUnits/ValidateWaitingListSorting",
             function (result) {
-                debugger;
                 if (result == true) {
                     jQuery.noConflict();
                     $("#waitinglist_busy").modal('show');
@@ -377,15 +504,25 @@
                 } else {
                     $.getJSON("../MatchedUnits/RejectMatchedUnit?id=" +@Model.MatchedUnitId ,
                         function (result) {
-
-                            window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+                            if (result == "Success") {
+                                // Show rejection success modal
+                                $("#unitRejectionModal").modal('show');
+                                $('#unitRejectionModal').modal({
+                                    backdrop: 'static',
+                                    keyboard: false,
+                                    show: true
+                                });
+                            } else {
+                                // Show error modal
+                                $("#unitActionErrorModal").modal('show');
+                            }
                         });
                 }
             });
     }
 
-    function redirect() {
-         window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
+    function redirectToInbox() {
+        window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";
     }
 </script>
 

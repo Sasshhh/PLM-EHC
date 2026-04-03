@@ -375,5 +375,57 @@ namespace C8.eServices.Mvc.Models
 
         [Column(Order = 110)]
         public DateTime? Witness1SignatureDate { get; set; }
+
+        // LEASE AGREEMENT ENHANCEMENTS
+        [Column(Order = 111)]
+        [Display(Name = "Access Card Deposit")]
+        public decimal AccessCardDeposit { get; set; }
+
+        [Column(Order = 112)]
+        [Display(Name = "Key Deposit")]
+        public decimal KeyDeposit { get; set; }
+
+        [Column(Order = 113)]
+        [Display(Name = "DSTV Activation Fee")]
+        public decimal DSTVActivationFee { get; set; }
+
+        [Column(Order = 114)]
+        [Display(Name = "DSTV Monthly Levy")]
+        public decimal DSTVMonthlyLevy { get; set; }
+
+        [Column(Order = 115)]
+        [Display(Name = "Has DSTV")]
+        public bool? HasDSTV { get; set; }
+
+        [Column(Order = 116)]
+        [Display(Name = "Commencement Day")]
+        [StringLength(2)]
+        public string CommencementDay { get; set; }
+
+        // Banking Details for Debit Order (Added for banking details integration)
+        [Column(Order = 117)]
+        [Display(Name = "Bank Name")]
+        [StringLength(100)]
+        public string TenantBankName { get; set; }
+
+        [Column(Order = 118)]
+        [Display(Name = "Account Number")]
+        [StringLength(20)]
+        public string TenantAccountNumber { get; set; }
+
+        [Column(Order = 119)]
+        [Display(Name = "Account Holder Name")]
+        [StringLength(200)]
+        public string TenantAccountHolderName { get; set; }
+
+        [Column(Order = 120)]
+        [Display(Name = "Account Type")]
+        [StringLength(50)]
+        public string TenantAccountType { get; set; }
+
+        [Column(Order = 121)]
+        [Display(Name = "Branch Code")]
+        [StringLength(10)]
+        public string TenantBranchCode { get; set; }
     }
 }

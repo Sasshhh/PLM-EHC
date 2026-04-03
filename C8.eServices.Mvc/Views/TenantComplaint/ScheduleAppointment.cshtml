@@ -1,0 +1,165 @@
+@model C8.eServices.Mvc.Models.ComplaintInvestigation
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Schedule Investigation Appointment";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var complaint = ViewBag.Complaint as C8.eServices.Mvc.Models.TenantComplaint;
+}
+
+<style>
+    .section-header {
+        background-color: #f5f5f5;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #337ab7;
+        font-weight: bold;
+    }
+    .form-section {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .info-box {
+        background-color: #e3f2fd;
+        border: 1px solid #90caf9;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .info-box i {
+        color: #1976d2;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-ios-calendar"></i> Schedule Investigation Appointment
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            @if (complaint != null)
+            {
+                <div class="info-box">
+                    <i class="ion ion-information-circled"></i>
+                    <strong>Case Reference:</strong> @complaint.CaseReferenceNumber<br />
+                    <strong>Category:</strong> @(complaint.ComplaintCategory != null ? complaint.ComplaintCategory.Name : "N/A") - @(complaint.ComplaintType != null ? complaint.ComplaintType.Name : "N/A")<br />
+                    <strong>Respondent:</strong> @complaint.RespondentFirstName @complaint.RespondentSurname 
+                    (Block @complaint.RespondentBlockNumber, Unit @complaint.RespondentUnitNumber)
+                </div>
+            }
+
+            @using (Html.BeginForm("ScheduleAppointment", "TenantComplaint", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.TenantComplaintId)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-ios-calendar-outline"></i> Appointment Details
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Appointment Date <span class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input type="date" id="AppointmentDate" name="AppointmentDate" class="form-control" 
+                                           required min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                           value="@(Model.AppointmentDate.HasValue ? Model.AppointmentDate.Value.ToString("yyyy-MM-dd") : "")" />
+                                    @Html.ValidationMessageFor(model => model.AppointmentDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Appointment Time <span class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    @{
+                                        var currentTime = Model.AppointmentTime.HasValue ? Model.AppointmentTime.Value.ToString(@"hh\:mm") : "";
+                                    }
+                                    <select id="AppointmentTime" name="AppointmentTime" class="form-control" required>
+                                        <option value="">-- Select Time --</option>
+                                        <option value="08:00" @(currentTime == "08:00" ? "selected" : "")>08:00 AM</option>
+                                        <option value="08:30" @(currentTime == "08:30" ? "selected" : "")>08:30 AM</option>
+                                        <option value="09:00" @(currentTime == "09:00" ? "selected" : "")>09:00 AM</option>
+                                        <option value="09:30" @(currentTime == "09:30" ? "selected" : "")>09:30 AM</option>
+                                        <option value="10:00" @(currentTime == "10:00" ? "selected" : "")>10:00 AM</option>
+                                        <option value="10:30" @(currentTime == "10:30" ? "selected" : "")>10:30 AM</option>
+                                        <option value="11:00" @(currentTime == "11:00" ? "selected" : "")>11:00 AM</option>
+                                        <option value="11:30" @(currentTime == "11:30" ? "selected" : "")>11:30 AM</option>
+                                        <option value="12:00" @(currentTime == "12:00" ? "selected" : "")>12:00 PM</option>
+                                        <option value="12:30" @(currentTime == "12:30" ? "selected" : "")>12:30 PM</option>
+                                        <option value="13:00" @(currentTime == "13:00" ? "selected" : "")>01:00 PM</option>
+                                        <option value="13:30" @(currentTime == "13:30" ? "selected" : "")>01:30 PM</option>
+                                        <option value="14:00" @(Model.AppointmentTime == "14:00" ? "selected" : "")>02:00 PM</option>
+                                        <option value="14:30" @(Model.AppointmentTime == "14:30" ? "selected" : "")>02:30 PM</option>
+                                        <option value="15:00" @(Model.AppointmentTime == "15:00" ? "selected" : "")>03:00 PM</option>
+                                        <option value="15:30" @(Model.AppointmentTime == "15:30" ? "selected" : "")>03:30 PM</option>
+                                        <option value="16:00" @(Model.AppointmentTime == "16:00" ? "selected" : "")>04:00 PM</option>
+                                        <option value="16:30" @(Model.AppointmentTime == "16:30" ? "selected" : "")>04:30 PM</option>
+                                    </select>
+                                    @Html.ValidationMessageFor(model => model.AppointmentTime, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-2">Notes (Optional)</label>
+                                <div class="col-md-10">
+                                    <textarea name="Notes" class="form-control" rows="3" 
+                                              placeholder="Any additional notes for the appointment...">@Model.Notes</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="ion ion-checkmark-circled"></i> Schedule Appointment
+                            </button>
+                            @if (complaint != null)
+                            {
+                                <a href="@Url.Action("Details", "TenantComplaint", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
+                                   class="btn btn-default btn-lg">
+                                    <i class="ion ion-close-circled"></i> Cancel
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                    <i class="ion ion-close-circled"></i> Cancel
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            // Ensure past dates cannot be selected
+            var today = new Date().toISOString().split('T')[0];
+            $('#AppointmentDate').attr('min', today);
+        });
+    </script>
+}

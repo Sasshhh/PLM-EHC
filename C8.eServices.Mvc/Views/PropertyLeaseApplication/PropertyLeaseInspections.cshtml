@@ -189,6 +189,11 @@
                                     @Html.ActionLink("Maintenance Job Sheet", "MaintenanceJobSheet", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
 
+                                @if (item.Status.Key == StatusKeys.AwaitingTenantUpdateDetails)
+                                {
+                                    @Html.ActionLink("Maintenance Job Sheet", "MaintenanceJobSheet", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                }
+
                                 @if (item.Status.Key == StatusKeys.AwaitingRiskAssessment)
                                 {
                                     @Html.ActionLink("Risk Assessment Outcome", "ConductAssessment", "RiskAssessmentOutcomes", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })

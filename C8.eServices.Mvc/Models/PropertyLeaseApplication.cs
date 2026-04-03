@@ -533,6 +533,28 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Car Registration")]
         [Column(Order = 138)]
         public string CarRegistration { get; set; }
+
+        // DSTV and Additional Deposit Fields
+        [Display(Name = "Enable DSTV Service")]
+        [Column(Order = 139)]
+        public bool? HasDSTV { get; set; }
+
+        [Display(Name = "DSTV Activation Fee")]
+        [Column(Order = 140)]
+        public decimal? DSTVActivationFee { get; set; }
+
+        [Display(Name = "DSTV Monthly Levy")]
+        [Column(Order = 141)]
+        public decimal? DSTVMonthlyLevy { get; set; }
+
+        [Display(Name = "Access Card Deposit")]
+        [Column(Order = 142)]
+        public decimal? AccessCardDeposit { get; set; }
+
+        [Display(Name = "Key Deposit")]
+        [Column(Order = 143)]
+        public decimal? KeyDeposit { get; set; }
+
         public bool IsFullyMigrated { get; set; }
 
         [NotMapped]

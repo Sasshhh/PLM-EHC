@@ -1,0 +1,188 @@
+@model C8.eServices.Mvc.Models.ComplaintInvestigation
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Confirm Investigation Appointment";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var complaint = ViewBag.Complaint as C8.eServices.Mvc.Models.TenantComplaint;
+}
+
+<style>
+    .appointment-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .appointment-card .date {
+        font-size: 48px;
+        font-weight: bold;
+    }
+    .appointment-card .month-year {
+        font-size: 24px;
+    }
+    .appointment-card .time {
+        font-size: 32px;
+        margin-top: 10px;
+        padding: 10px 30px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 20px;
+        display: inline-block;
+    }
+    .info-section {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .section-title {
+        background-color: #f5f5f5;
+        padding: 10px 15px;
+        margin: -20px -20px 15px -20px;
+        border-bottom: 1px solid #ddd;
+        border-left: 4px solid #337ab7;
+        font-weight: bold;
+    }
+    .detail-row {
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        font-weight: bold;
+        color: #666;
+    }
+    .warning-box {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .warning-box i {
+        color: #856404;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-ios-checkmark-outline"></i> Confirm Investigation Appointment
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <!-- Appointment Visual -->
+                    @if (Model.AppointmentDate.HasValue)
+                    {
+                        <div class="appointment-card">
+                            <div class="date">@Model.AppointmentDate.Value.Day</div>
+                            <div class="month-year">@Model.AppointmentDate.Value.ToString("MMMM yyyy")</div>
+                            <div class="time">
+                                <i class="ion ion-ios-time"></i> @Model.AppointmentTime
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Warning -->
+                    <div class="warning-box">
+                        <i class="ion ion-alert-circled"></i>
+                        <strong>Important:</strong> By confirming this appointment, you agree to be present at the specified date and time for the investigation meeting. Failure to attend may result in a decision being made in your absence.
+                    </div>
+
+                    <!-- Case Information -->
+                    @if (complaint != null)
+                    {
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="ion ion-document-text"></i> Case Information
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Case Reference:</span>
+                                <strong>@complaint.CaseReferenceNumber</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Category:</span>
+                                @(complaint.ComplaintCategory != null ? complaint.ComplaintCategory.Name : "N/A")
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Type:</span>
+                                @(complaint.ComplaintType != null ? complaint.ComplaintType.Name : "N/A")
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Description:</span>
+                                <p style="margin-top: 5px; white-space: pre-wrap;">@complaint.DetailedDescription</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Confirmation Form -->
+                    @using (Html.BeginForm("ConfirmAppointment", "TenantComplaint", FormMethod.Post, new { @class = "form-horizontal" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.Id)
+
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="ion ion-checkmark"></i> Confirmation
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" id="confirmCheckbox" required />
+                                            I confirm that I have read and understood the details of this complaint and will attend the scheduled investigation appointment.
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-success btn-lg" id="confirmBtn" disabled>
+                                        <i class="ion ion-checkmark-circled"></i> Confirm Appointment
+                                    </button>
+                                    @if (complaint != null)
+                                    {
+                                        <a href="@Url.Action("Details", "TenantComplaint", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
+                                           class="btn btn-default btn-lg">
+                                            <i class="ion ion-arrow-left-c"></i> Back to Details
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                            <i class="ion ion-arrow-left-c"></i> Back to List
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            // Enable confirm button only when checkbox is checked
+            $('#confirmCheckbox').change(function () {
+                $('#confirmBtn').prop('disabled', !this.checked);
+            });
+        });
+    </script>
+}

@@ -114,7 +114,19 @@
 
         <div class="panel-heading">Conduct Unit Inspection Template</div>
         <div style="width: 90%;margin: 0 auto;">
-            @Html.Partial("_DocumentsPartialDisplayPLMTemplates", Model.DocumentsViewModelTemplate)
+            <div class="form-group">
+                <div class="col-md-12">
+                    <br />
+                    <p><strong>Download the pre-inspection form template to fill out during the unit inspection:</strong></p>
+                    <a href="@Url.Action("DownloadPreInspectionTemplate", "PropertyLeaseApplication")" 
+                       class="btn btn-primary" 
+                       target="_blank">
+                        <i class="glyphicon glyphicon-download-alt"></i> Download Pre-Inspection Form Template
+                    </a>
+                    <br /><br />
+                    <p class="text-muted"><small>This template will open in a new tab. Fill it out during your unit inspection.</small></p>
+                </div>
+            </div>
         </div>
         <br />
 

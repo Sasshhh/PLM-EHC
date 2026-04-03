@@ -82,6 +82,7 @@ namespace C8.eServices.Mvc.Keys
         public const string AtUnitMatchApplication = "plm_at_matched_to_unit";
         public const string DepositPaymentApprove = "plm_deposite_approve";
         public const string DepositPaymentReject = "plm_deposite_reject";
+        public const string UnitAcceptedDepositPaymentDetails = "plm_unit_accepted_deposit_payment_details";
 
         public const string WaitingListReEntery = "plm_waiting_list_reentry";
         public const string RequestTimeSlots = "plm_request_slots";

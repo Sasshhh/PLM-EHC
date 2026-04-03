@@ -1,0 +1,336 @@
+@model C8.eServices.Mvc.Models.TenantComplaint
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Submit Complaint/Transgression";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .section-header {
+        background-color: #f5f5f5;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #337ab7;
+        font-weight: bold;
+    }
+    .form-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+    .file-upload-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        background-color: #fafafa;
+        border-radius: 4px;
+    }
+    .file-list {
+        margin-top: 10px;
+        list-style: none;
+        padding: 0;
+    }
+    .file-list li {
+        padding: 5px 10px;
+        background: #e9ecef;
+        margin-bottom: 5px;
+        border-radius: 3px;
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-ios-compose-outline"></i> Submit Complaint / Transgression
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            @using (Html.BeginForm("Create", "TenantComplaint", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <!-- Complainant Details Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-person"></i> Complainant Details (Your Information)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Complex/Area</label>
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.ComplainantComplexId, 
+                                        ViewBag.ComplexList as SelectList, 
+                                        "-- Select Complex --", 
+                                        new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ComplainantComplexId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Official Number</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.OfficialNumber, new { @class = "form-control", placeholder = "Optional - Reference Number" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">First Name</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantFirstName, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ComplainantFirstName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Surname</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantSurname, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ComplainantSurname, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Email</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantEmail, new { @class = "form-control", type = "email", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ComplainantEmail, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Cellphone</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantCellphone, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ComplainantCellphone, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Block Number</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantBlockNumber, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Unit Number</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.ComplainantUnitNumber, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Respondent Details Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-person-stalker"></i> Respondent Details (Person Complained Against)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Complex/Area</label>
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.RespondentComplexId, 
+                                        ViewBag.ComplexList as SelectList, 
+                                        "-- Select Complex --", 
+                                        new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.RespondentComplexId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Block Number</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.RespondentBlockNumber, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.RespondentBlockNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Unit Number</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.RespondentUnitNumber, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.RespondentUnitNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">First Name</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.RespondentFirstName, new { @class = "form-control", placeholder = "If known" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Surname</label>
+                                <div class="col-md-8">
+                                    @Html.TextBoxFor(model => model.RespondentSurname, new { @class = "form-control", placeholder = "If known" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complaint Details Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-ios-paper-outline"></i> Complaint Details
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 required-field">Category</label>
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.ComplaintCategoryId, 
+                                        ViewBag.ComplaintCategoryId as SelectList, 
+                                        "-- Select Category --", 
+                                        new { @class = "form-control", required = "required", id = "CategoryDropdown" })
+                                    @Html.ValidationMessageFor(model => model.ComplaintCategoryId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Type</label>
+                                <div class="col-md-8">
+                                    <select id="TypeDropdown" name="ComplaintTypeId" class="form-control">
+                                        <option value="">-- Select Type --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-2 required-field">Detailed Description</label>
+                                <div class="col-md-10">
+                                    @Html.TextAreaFor(model => model.DetailedDescription, 
+                                        new { @class = "form-control", rows = 5, required = "required", 
+                                              placeholder = "Please provide a detailed description of the complaint or transgression..." })
+                                    @Html.ValidationMessageFor(model => model.DetailedDescription, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evidence Upload Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-ios-cloud-upload-outline"></i> Supporting Evidence (Optional)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="file-upload-area">
+                                <p><i class="ion ion-ios-cloud-upload" style="font-size: 48px; color: #337ab7;"></i></p>
+                                <p>Upload photos, documents, or other evidence supporting your complaint</p>
+                                <input type="file" name="EvidenceFiles" id="EvidenceFiles" multiple 
+                                       accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx" class="form-control" 
+                                       style="display: inline-block; width: auto;" />
+                                <p class="text-muted small">Accepted formats: JPG, PNG, GIF, PDF, DOC, DOCX (Max 10MB each)</p>
+                            </div>
+                            <ul id="fileList" class="file-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="ion ion-checkmark-circled"></i> Submit Complaint
+                            </button>
+                            <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                <i class="ion ion-close-circled"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            // Cascading dropdown for complaint types
+            $('#CategoryDropdown').change(function () {
+                var categoryId = $(this).val();
+                var typeDropdown = $('#TypeDropdown');
+                
+                typeDropdown.empty().append('<option value="">-- Loading... --</option>');
+                
+                if (categoryId) {
+                    $.ajax({
+                        url: '@Url.Action("GetComplaintTypes", "TenantComplaint")',
+                        type: 'GET',
+                        data: { categoryId: categoryId },
+                        success: function (data) {
+                            typeDropdown.empty().append('<option value="">-- Select Type --</option>');
+                            $.each(data, function (i, item) {
+                                typeDropdown.append($('<option>', {
+                                    value: item.Id,
+                                    text: item.Name
+                                }));
+                            });
+                        },
+                        error: function () {
+                            typeDropdown.empty().append('<option value="">-- Error loading types --</option>');
+                        }
+                    });
+                } else {
+                    typeDropdown.empty().append('<option value="">-- Select Type --</option>');
+                }
+            });
+
+            // File list display
+            $('#EvidenceFiles').change(function () {
+                var fileList = $('#fileList');
+                fileList.empty();
+                var files = this.files;
+                for (var i = 0; i < files.length; i++) {
+                    var fileSize = (files[i].size / 1024 / 1024).toFixed(2);
+                    fileList.append('<li><i class="ion ion-document"></i> ' + files[i].name + ' (' + fileSize + ' MB)</li>');
+                }
+            });
+        });
+    </script>
+}

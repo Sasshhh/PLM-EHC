@@ -967,6 +967,83 @@
                                                             </div>
                                                         </div>
                                                         <br />
+
+                                                        <!-- DSTV Section -->
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#dstvCollapse">
+                                                                            DSTV Services
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="dstvCollapse" class="panel-collapse collapse in">
+                                                            <div class="panel-body">
+                                                                <div class="form-group">
+                                                                    @Html.LabelFor(model => model.PropertyLeaseApplication.HasDSTV, "Enable DSTV Service", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                    <div class="col-md-2">
+                                                                        @Html.CheckBoxFor(model => model.PropertyLeaseApplication.HasDSTV, new { @id = "HasDSTV", @onchange = "toggleDSTVFields()" })
+                                                                        <span class="help-block">Every unit has a DSTV access point. Check this if tenant wants DSTV service activated.</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="dstvFields" style="display:none;">
+                                                                    <div class="form-group">
+                                                                        @Html.LabelFor(model => model.PropertyLeaseApplication.DSTVActivationFee, "DSTV Activation Fee (Once-off)", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                        <div class="col-md-2">
+                                                                            @Html.EditorFor(model => model.PropertyLeaseApplication.DSTVActivationFee, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @step = "0.01" } })
+                                                                            @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.DSTVActivationFee, "", new { @class = "text-danger" })
+                                                                            <span class="help-block">One-time setup fee for DSTV activation</span>
+                                                                        </div>
+
+                                                                        @Html.LabelFor(model => model.PropertyLeaseApplication.DSTVMonthlyLevy, "DSTV Monthly Levy", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                        <div class="col-md-2">
+                                                                            @Html.EditorFor(model => model.PropertyLeaseApplication.DSTVMonthlyLevy, new { htmlAttributes = new { @class = "form-control", @onkeyup = "GetTotalMonhlyFees()", @id = "DSTVMonthlyLevy", @onkeypress = "return isNumber(event)", @step = "0.01" } })
+                                                                            @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.DSTVMonthlyLevy, "", new { @class = "text-danger" })
+                                                                            <span class="help-block">Monthly maintenance fee for DSTV service</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <br />
+
+                                                        <!-- Additional Deposits Section -->
+                                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-heading">
+                                                                    <h4 class="panel-title" align="center">
+                                                                        <a data-toggle="collapse" data-parent="#accordion" href="#depositsCollapse">
+                                                                            Additional Security Deposits
+                                                                        </a>
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="depositsCollapse" class="panel-collapse collapse in">
+                                                            <div class="panel-body">
+                                                                <div class="form-group">
+                                                                    @Html.LabelFor(model => model.PropertyLeaseApplication.AccessCardDeposit, "Access Card Deposit", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                    <div class="col-md-2">
+                                                                        @Html.EditorFor(model => model.PropertyLeaseApplication.AccessCardDeposit, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @step = "0.01" } })
+                                                                        @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.AccessCardDeposit, "", new { @class = "text-danger" })
+                                                                        <span class="help-block">Security deposit for building access card</span>
+                                                                    </div>
+
+                                                                    @Html.LabelFor(model => model.PropertyLeaseApplication.KeyDeposit, "Key Deposit", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                    <div class="col-md-2">
+                                                                        @Html.EditorFor(model => model.PropertyLeaseApplication.KeyDeposit, new { htmlAttributes = new { @class = "form-control", @onkeypress = "return isNumber(event)", @step = "0.01" } })
+                                                                        @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.KeyDeposit, "", new { @class = "text-danger" })
+                                                                        <span class="help-block">Security deposit for unit keys</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <br />
+
                                                         <div class="form-group">
 
 
@@ -1146,6 +1223,128 @@
                             </div>
                             <br />
                             <br />
+                        </div>
+
+                        <div class="step-tab-panel" id="step5">
+                            <fieldset>
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-group" style="margin-bottom: -1px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title" align="center">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="#bankingCollapse">
+                                                            Banking Details for Debit Order
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="bankingCollapse" class="panel-collapse collapse in">
+                                            <div class="panel-body">
+                                                <div class="form-horizontal">
+                                                    <div class="row">
+                                                        <!-- Document Viewer Section -->
+                                                        <div class="col-md-6">
+                                                            <h5>Uploaded Banking Document</h5>
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-body" style="min-height: 300px; background-color: #f9f9f9;">
+                                                                    <div id="bankingDocumentViewer">
+                                                                        <p class="text-center" style="padding: 50px;">
+                                                                            <i class="fa fa-file-text-o fa-3x text-muted"></i><br><br>
+                                                                            Banking document will be displayed here once uploaded.<br>
+                                                                            <small class="text-muted">Document type: Proof of Banking Details</small>
+                                                                        </p>
+                                                                        <!-- Document will be loaded here via JavaScript -->
+                                                                    </div>
+                                                                </div>
+                                                                <div class="panel-footer">
+                                                                    <button type="button" class="btn btn-primary btn-sm" onclick="refreshBankingDocument()">
+                                                                        <i class="fa fa-refresh"></i> Refresh Document
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-info btn-sm" onclick="openBankingDocumentFullScreen()">
+                                                                        <i class="fa fa-expand"></i> Full Screen
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Banking Details Capture Section -->
+                                                        <div class="col-md-6">
+                                                            <h5>Capture Banking Details</h5>
+                                                            <div class="form-group">
+                                                                @Html.Label("TenantBankName", "Bank Name", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                                <div class="col-md-8">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseAgreementMaster.TenantBankName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter bank name from document" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseAgreementMaster.TenantBankName, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.Label("TenantAccountHolderName", "Account Holder Name", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                                <div class="col-md-8">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseAgreementMaster.TenantAccountHolderName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter account holder name" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseAgreementMaster.TenantAccountHolderName, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.Label("TenantAccountNumber", "Account Number", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                                <div class="col-md-8">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseAgreementMaster.TenantAccountNumber, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter account number from document" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseAgreementMaster.TenantAccountNumber, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.Label("TenantAccountType", "Account Type", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                                <div class="col-md-8">
+                                                                    @Html.DropDownListFor(model => model.PropertyLeaseAgreementMaster.TenantAccountType, 
+                                                                        new SelectList(new List<SelectListItem>() {
+                                                                            new SelectListItem() { Text = "Select Account Type", Value = "" },
+                                                                            new SelectListItem() { Text = "Current Account", Value = "Current" },
+                                                                            new SelectListItem() { Text = "Savings Account", Value = "Savings" },
+                                                                            new SelectListItem() { Text = "Cheque Account", Value = "Cheque" },
+                                                                            new SelectListItem() { Text = "Transmission Account", Value = "Transmission" }
+                                                                        }, "Value", "Text"), 
+                                                                        new { @class = "form-control" })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseAgreementMaster.TenantAccountType, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.Label("TenantBranchCode", "Branch Code", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                                <div class="col-md-8">
+                                                                    @Html.EditorFor(model => model.PropertyLeaseAgreementMaster.TenantBranchCode, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter branch code" } })
+                                                                    @Html.ValidationMessageFor(model => model.PropertyLeaseAgreementMaster.TenantBranchCode, "", new { @class = "text-danger" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <div class="col-md-offset-4 col-md-8">
+                                                                    <button type="button" class="btn btn-success" onclick="validateBankingDetails()">
+                                                                        <i class="fa fa-check"></i> Validate Details
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-warning" onclick="clearBankingDetails()">
+                                                                        <i class="fa fa-eraser"></i> Clear Fields
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="alert alert-info">
+                                                                <i class="fa fa-info-circle"></i>
+                                                                <strong>Note:</strong> Please carefully enter the banking details from the uploaded document. 
+                                                                These details will be used for the debit order and lease agreement.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
 
@@ -2958,6 +3157,165 @@
                 //alert("Please enter a valid email");
                 swal("Error!", "Please enter a valid email.", "warning");
                 document.getElementById(email).value = "";
+            }
+        }
+
+        function toggleDSTVFields() {
+            var hasDSTV = document.getElementById('HasDSTV').checked;
+            var dstvFields = document.getElementById('dstvFields');
+
+            if (hasDSTV) {
+                dstvFields.style.display = 'block';
+                // Make DSTV fields required when enabled
+                document.getElementById('PropertyLeaseApplication_DSTVActivationFee').required = true;
+                document.getElementById('PropertyLeaseApplication_DSTVMonthlyLevy').required = true;
+            } else {
+                dstvFields.style.display = 'none';
+                // Remove required validation when disabled
+                document.getElementById('PropertyLeaseApplication_DSTVActivationFee').required = false;
+                document.getElementById('PropertyLeaseApplication_DSTVMonthlyLevy').required = false;
+                // Clear values when disabled
+                document.getElementById('PropertyLeaseApplication_DSTVActivationFee').value = '';
+                document.getElementById('PropertyLeaseApplication_DSTVMonthlyLevy').value = '';
+            }
+
+            // Recalculate total monthly fees when DSTV is toggled
+            GetTotalMonhlyFees();
+        }
+
+        function GetTotalMonhlyFees() {
+            try {
+                var rental = parseFloat(document.getElementById('RentalAmount').value) || 0;
+                var water = parseFloat(document.getElementById('Water').value) || 0;
+                var refuse = parseFloat(document.getElementById('Refuse').value) || 0;
+                var sewer = parseFloat(document.getElementById('Sewerage').value) || 0;
+                var adminFee = parseFloat(document.getElementById('LeaseAdministrationFee').value) || 0;
+                var prepFee = parseFloat(document.getElementById('PreparationFee').value) || 0;
+                var creditFee = parseFloat(document.getElementById('CreditCheckFee').value) || 0;
+                var calculated = parseFloat(document.getElementById('CalculatedAsFolllows').value) || 0;
+                var depositContrib = parseFloat(document.getElementById('DepositTenantContribution').value) || 0;
+                var initialDeposit = parseFloat(document.getElementById('InitialDepositPremises').value) || 0;
+                var storeRooms = parseFloat(document.getElementById('StoreRooms').value) || 0;
+                var shadePort = parseFloat(document.getElementById('ShadePortParking').value) || 0;
+                var openParking = parseFloat(document.getElementById('OpenParking').value) || 0;
+                var security = parseFloat(document.getElementById('SecurityFee').value) || 0;
+                var electricity = parseFloat(document.getElementById('Electricity').value) || 0;
+
+                // Add DSTV monthly levy if enabled
+                var dstvLevy = 0;
+                var hasDSTV = document.getElementById('HasDSTV') && document.getElementById('HasDSTV').checked;
+                if (hasDSTV) {
+                    dstvLevy = parseFloat(document.getElementById('DSTVMonthlyLevy').value) || 0;
+                }
+
+                var total = rental + water + refuse + sewer + adminFee + prepFee + creditFee + calculated + 
+                           depositContrib + initialDeposit + storeRooms + shadePort + openParking + security + 
+                           electricity + dstvLevy;
+
+                document.getElementById('TotalMonthlyCharges').value = total.toFixed(2);
+            } catch (e) {
+                console.log('Error calculating total monthly fees:', e);
+            }
+        }
+
+        // Initialize DSTV fields visibility on page load
+        $(document).ready(function() {
+            toggleDSTVFields();
+            loadBankingDocument();
+        });
+
+        // Banking Details Functions
+        function loadBankingDocument() {
+            var applicationId = $('#PropertyLeaseApplication_Id').val();
+            if (applicationId) {
+                $.ajax({
+                    url: '@Url.Action("GetBankingDocument", "PropertyLeaseApplication")',
+                    type: 'GET',
+                    data: { applicationId: applicationId },
+                    success: function(result) {
+                        if (result.success && result.documentUrl) {
+                            $('#bankingDocumentViewer').html(
+                                '<iframe src="' + result.documentUrl + '" style="width: 100%; height: 300px; border: none;"></iframe>'
+                            );
+                        } else {
+                            $('#bankingDocumentViewer').html(
+                                '<div class="text-center" style="padding: 50px;">' +
+                                '<i class="fa fa-exclamation-triangle fa-2x text-warning"></i><br><br>' +
+                                '<strong>No banking document found</strong><br>' +
+                                '<small class="text-muted">Please upload a proof of banking details document first.</small>' +
+                                '</div>'
+                            );
+                        }
+                    },
+                    error: function() {
+                        $('#bankingDocumentViewer').html(
+                            '<div class="text-center text-danger" style="padding: 50px;">' +
+                            '<i class="fa fa-exclamation-circle fa-2x"></i><br><br>' +
+                            'Error loading document' +
+                            '</div>'
+                        );
+                    }
+                });
+            }
+        }
+
+        function refreshBankingDocument() {
+            loadBankingDocument();
+        }
+
+        function openBankingDocumentFullScreen() {
+            var iframe = $('#bankingDocumentViewer iframe');
+            if (iframe.length > 0) {
+                var src = iframe.attr('src');
+                window.open(src, '_blank');
+            } else {
+                swal("No Document", "No banking document to display in full screen.", "info");
+            }
+        }
+
+        function validateBankingDetails() {
+            var bankName = $('#PropertyLeaseAgreementMaster_TenantBankName').val();
+            var accountHolder = $('#PropertyLeaseAgreementMaster_TenantAccountHolderName').val();
+            var accountNumber = $('#PropertyLeaseAgreementMaster_TenantAccountNumber').val();
+            var accountType = $('#PropertyLeaseAgreementMaster_TenantAccountType').val();
+            var branchCode = $('#PropertyLeaseAgreementMaster_TenantBranchCode').val();
+
+            var errors = [];
+
+            if (!bankName || bankName.trim().length === 0) {
+                errors.push("Bank Name is required");
+            }
+            if (!accountHolder || accountHolder.trim().length === 0) {
+                errors.push("Account Holder Name is required");
+            }
+            if (!accountNumber || accountNumber.trim().length === 0) {
+                errors.push("Account Number is required");
+            } else if (!/^\d+$/.test(accountNumber)) {
+                errors.push("Account Number should contain only numbers");
+            }
+            if (!accountType) {
+                errors.push("Account Type is required");
+            }
+            if (!branchCode || branchCode.trim().length === 0) {
+                errors.push("Branch Code is required");
+            } else if (!/^\d{6}$/.test(branchCode)) {
+                errors.push("Branch Code should be exactly 6 digits");
+            }
+
+            if (errors.length > 0) {
+                swal("Validation Errors", errors.join("\n"), "error");
+            } else {
+                swal("Validation Success", "All banking details are valid!", "success");
+            }
+        }
+
+        function clearBankingDetails() {
+            if (confirm("Are you sure you want to clear all banking details?")) {
+                $('#PropertyLeaseAgreementMaster_TenantBankName').val('');
+                $('#PropertyLeaseAgreementMaster_TenantAccountHolderName').val('');
+                $('#PropertyLeaseAgreementMaster_TenantAccountNumber').val('');
+                $('#PropertyLeaseAgreementMaster_TenantAccountType').val('');
+                $('#PropertyLeaseAgreementMaster_TenantBranchCode').val('');
             }
         }
     </script>

@@ -921,7 +921,7 @@
                             </ul>
                         </li>
                     }
-                    @if (Request.IsAuthenticated && User.IsInRole("Housing Supervisor"))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Housing Supervisor")) || (User.IsInRole("Client Services Officer")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -978,6 +978,42 @@
                                     <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Terminations</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    @if (Request.IsAuthenticated && User.IsInRole("Maintenance Manager"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-wrench"></i>
+                                <span class="text">Maintenance</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/PropertyLeaseInspections">
+                                        <i class="ion ion-hammer" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Maintenance Job Sheets</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    @if (Request.IsAuthenticated && User.IsInRole("Property & Facilities Manager"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-gear"></i>
+                                <span class="text">Facilities Management</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/PropertyFacilitiesMaintenanceReviews">
+                                        <i class="ion ion-ios-checkmark-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Maintenance Reviews</span>
                                     </a>
                                 </li>
                             </ul>
@@ -1263,6 +1299,21 @@
                                 </li>
                             </ul>
                         </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-stats-bars"></i>
+                                <span class="text">Maintenance Oversight</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/PropertyMaintenanceOverview">
+                                        <i class="ion ion-clipboard" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Maintenance Overview</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     }
                     @if (Request.IsAuthenticated && User.IsInRole("Revenue Manager"))
                     {
@@ -1372,6 +1423,21 @@
                                     <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Terminations</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-flag"></i>
+                                <span class="text">Complaints</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/TenantComplaint/Index">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">All Complaints</span>
                                     </a>
                                 </li>
                             </ul>
@@ -2084,6 +2150,27 @@
                             </li>
                             <li>
                                 <a href="javascript:;">
+                                    <i class="ion ion-ios-flag"></i>
+                                    <span class="text">My Complaints</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
+                                    <li>
+                                        <a href="~/TenantComplaint/Index">
+                                            <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">View Complaints</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/TenantComplaint/Create">
+                                            <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Submit Complaint</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="javascript:;">
                                     <i class="ion ion-ios-paper-outline"></i>
                                     <span class="text">Notice</span>
                                     <i class="arrow ion-chevron-left"></i>
@@ -2234,6 +2321,25 @@
                                         <a href="@Url.Action("PropertyLeaseInspections", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ViewName=" + ViewCodeKeys.ScheduleInspectionSlots) })">
                                             <i class="ion ion-android-exit" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                             <span class="text">Inspection Schedules</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="ion ion-wrench"></i>
+                                    <span class="text">Maintenance</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/PropertyFacilitiesMaintenanceReviews">
+                                            <i class="ion ion-hammer" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Facilities Review</span>
+                                        </a>
+                                        <a href="~/PropertyLeaseApplication/PropertyMaintenanceOverview">
+                                            <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Maintenance Overview</span>
                                         </a>
                                     </li>
                                 </ul>

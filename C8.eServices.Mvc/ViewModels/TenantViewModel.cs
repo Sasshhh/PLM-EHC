@@ -17,6 +17,7 @@ namespace C8.eServices.Mvc.ViewModels
         public HumanSettlementLeaseMaster HumanSettlementLeaseMaster { get; set; }
         public HumanSettlementLeaseDetails HumanSettlementLeaseDetails { get; set; }
         public PropertyLeaseApplication PropertyLeaseApplication { get; set; }
+        public PropertyLeaseAgreementMaster PropertyLeaseAgreementMaster { get; set; }
         public LeaseDetails Lease { get; set; }
         public LeaseCaptureSheet LeaseCaptureSheet { get; set; }
         public LeaseCaptureAddressContact LeaseCaptureAddressContact { get; set; }

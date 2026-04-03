@@ -1,0 +1,75 @@
+@model IEnumerable<C8.eServices.Mvc.Models.TenantComplaint>
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Complaints";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-submitted { background-color: #5bc0de; color: white; }
+        .status-awaiting { background-color: #f0ad4e; color: white; }
+        .status-resolved { background-color: #5cb85c; color: white; }
+        .status-referred { background-color: #337ab7; color: white; }
+        .status-unresolved { background-color: #d9534f; color: white; }
+    </style>
+</head>
+<div class="panel panel-default">
+    <div class="panel-heading">Complaints List</div>
+    <div style="width: 95%; margin: 0 auto;">
+        <br />
+        <table id="ComplaintsTable" class="table table-bordered table-hover table-striped display">
+            <thead>
+                <tr>
+                    <th>Case Number</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Complex</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var statusKey = item.Status != null ? item.Status.Key : "";
+                    var statusName = item.Status != null ? item.Status.Name : "Unknown";
+                    var categoryName = item.Category != null ? item.Category.Name : "N/A";
+                    var typeName = item.ComplaintType != null ? item.ComplaintType.Name : "N/A";
+                    var complexName = item.Complex != null ? item.Complex.Name : "N/A";
+                    var submittedDate = item.DateSubmitted.HasValue ? item.DateSubmitted.Value.ToString("dd MMM yyyy") : "N/A";
+                    var statusClass = statusKey == ComplaintStatusKeys.Resolved ? "status-resolved" : (statusKey == ComplaintStatusKeys.Referred ? "status-referred" : (statusKey == ComplaintStatusKeys.Unresolved ? "status-unresolved" : (statusKey == ComplaintStatusKeys.AwaitingAppointment || statusKey == ComplaintStatusKeys.AwaitingInvestigation ? "status-awaiting" : "status-submitted")));
+                    <tr>
+                        <td>@item.CaseNumber</td>
+                        <td>@categoryName</td>
+                        <td>@typeName</td>
+                        <td>@complexName</td>
+                        <td>@submittedDate</td>
+                        <td><span class="status-badge @statusClass">@statusName</span></td>
+                        <td>
+                            @Html.ActionLink("View", "Details", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" })
+                            @if (User.IsInRole("CSO") && statusKey == ComplaintStatusKeys.Submitted)
+                            {
+                                @Html.ActionLink("Schedule", "ScheduleAppointment", new { id = item.Id }, new { @class = "btn btn-info btn-sm" })
+                            }
+                            @if (User.IsInRole("CSO") && statusKey == ComplaintStatusKeys.AwaitingInvestigation)
+                            {
+                                @Html.ActionLink("Outcome", "CaptureOutcome", new { id = item.Id }, new { @class = "btn btn-success btn-sm" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#ComplaintsTable').DataTable({ "order": [[4, "desc"]], "pageLength": 25 });
+        });
+    </script>
+}

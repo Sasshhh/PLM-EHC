@@ -109,16 +109,232 @@
 
         <br />
 
-        <div class="panel-heading">Maintenance Job Sheet</div>
-        <div style="width: 90%;margin: 0 auto;">
-            <div style="width: 90%;margin: 0 auto;">
-                @Html.Partial("_DocumentsPartialDisplayPLMTemplates", Model.DocumentsViewModelTemplate)
-            </div>
+        <div class="panel-heading">
+            Maintenance Job Sheet Template
+            <a href="@Url.Action("DownloadPreInspectionForm", "PropertyLeaseApplication")" class="btn btn-sm btn-info pull-right" style="margin-top: -5px;">
+                <i class="fa fa-download"></i> Download Template
+            </a>
+        </div>
+        <div style="width: 90%;margin: 0 auto; padding: 15px; background-color: #f0f8ff; border: 1px solid #d1ecf1;">
+            <p style="margin: 0; color: #004085;">
+                <i class="fa fa-info-circle"></i> 
+                <strong>Note:</strong> Download the Maintenance Job Sheet Template to complete offline, then upload the completed form below.
+            </p>
         </div>
         <br />
 
         <div class="panel-heading">Upload Completed Maintenance Job Sheet </div>
         @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
+
+        <br />
+
+        <!-- Task Capture Section -->
+        <div class="panel-heading">Task Capture - Step 9 (Capture Maintenance Tasks)</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <div id="taskCaptureForm" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; background-color: #f9f9f9;">
+                <div class="form-group">
+                    <label class="control-label col-md-2">Start Date *</label>
+                    <div class="col-md-4">
+                        <input type="date" id="taskStartDate" class="form-control" required />
+                    </div>
+                    <label class="control-label col-md-2">End Date *</label>
+                    <div class="col-md-4">
+                        <input type="date" id="taskEndDate" class="form-control" required />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Activity *</label>
+                    <div class="col-md-10">
+                        <input type="text" id="taskActivity" class="form-control" maxlength="500" required placeholder="Enter activity description" />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Material Used</label>
+                    <div class="col-md-4">
+                        <input type="text" id="taskMaterialUsed" class="form-control" maxlength="200" />
+                    </div>
+                    <label class="control-label col-md-2">Quantity Used</label>
+                    <div class="col-md-4">
+                        <input type="number" id="taskQuantityUsed" class="form-control" step="0.01" />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Labour Used</label>
+                    <div class="col-md-4">
+                        <input type="text" id="taskLabourUsed" class="form-control" maxlength="200" />
+                    </div>
+                    <label class="control-label col-md-2">Total Costs</label>
+                    <div class="col-md-4">
+                        <input type="number" id="taskTotalCosts" class="form-control" step="0.01" />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Task Comments</label>
+                    <div class="col-md-10">
+                        <textarea id="taskComments" class="form-control" rows="3" maxlength="1000"></textarea>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Supporting Document</label>
+                    <div class="col-md-6">
+                        <input type="file" id="taskSupportingDoc" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary" onclick="addTask()">
+                            <i class="fa fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <div id="tasksListContainer">
+                <h4>Captured Tasks</h4>
+                <table id="tasksTable" class="table table-bordered table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Activity</th>
+                            <th>Material</th>
+                            <th>Quantity</th>
+                            <th>Labour</th>
+                            <th>Total Cost</th>
+                            <th>Comments</th>
+                            <th>Document</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody">
+                        <!-- Tasks will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br />
+
+        <!-- Job Card Documents Section -->
+        <div class="panel-heading">Job Card Documents - Upload Before & After Images</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Before Image</label>
+                        <input type="file" id="beforeImage" class="form-control" accept="image/*" />
+                        <button type="button" class="btn btn-primary" style="margin-top: 10px;" onclick="uploadBeforeImage()">
+                            <i class="fa fa-upload"></i> Upload Before Image
+                        </button>
+                        <div id="beforeImageStatus" style="margin-top: 10px;"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">After Image</label>
+                        <input type="file" id="afterImage" class="form-control" accept="image/*" />
+                        <button type="button" class="btn btn-primary" style="margin-top: 10px;" onclick="uploadAfterImage()">
+                            <i class="fa fa-upload"></i> Upload After Image
+                        </button>
+                        <div id="afterImageStatus" style="margin-top: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="text-center">
+                <button type="button" class="btn btn-success btn-lg" onclick="submitJobCardForSignOff()" id="btnSubmitJobCard">
+                    <i class="fa fa-check"></i> Submit Job Card for Sign-Off
+                </button>
+            </div>
+            <br />
+        </div>
+        <br />
+
+        <!-- Signature Section -->
+        <div id="signatureSection" style="display: none;">
+            <div class="panel-heading">Signature Section - Maintenance Manager Sign-Off</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <div class="alert alert-info">
+                    <strong>Instructions:</strong> Enter your official number and authorize, then capture your signature below.
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Official Number *</label>
+                    <div class="col-md-4">
+                        <input type="text" id="officialNumber" class="form-control" maxlength="50" required />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-warning" onclick="authorizeSignature()">
+                            <i class="fa fa-key"></i> Authorize
+                        </button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <br />
+
+                <div id="signatureFormSection" style="display: none;">
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Approval Action *</label>
+                        <div class="col-md-4">
+                            <select id="approvalAction" class="form-control" required>
+                                <option value="">-- Select --</option>
+                                <option value="Approve">Approve</option>
+                                <option value="Reject">Reject</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <br />
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Reason (Mandatory) *</label>
+                        <div class="col-md-10">
+                            <textarea id="signatureReason" class="form-control" rows="3" maxlength="1000" required></textarea>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <br />
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Capture Signature *</label>
+                        <div class="col-md-10">
+                            <div style="border: 2px solid #000; width: 600px; height: 150px;">
+                                <canvas id="signaturePad" width="600" height="150"></canvas>
+                            </div>
+                            <button type="button" class="btn btn-default" style="margin-top: 10px;" onclick="clearSignature()">
+                                <i class="fa fa-eraser"></i> Clear Signature
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <br />
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-success btn-lg" onclick="submitSignature()">
+                            <i class="fa fa-check"></i> Submit Signature
+                        </button>
+                    </div>
+                </div>
+                <br />
+            </div>
+        </div>
+        <br />
 
 
         @*<div class="panel-heading">CoE Financial System - Payment History</div>
@@ -281,58 +497,484 @@
             </div>
 
         }*@
-        <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm())
-            {
-                @Html.AntiForgeryToken()
-
-                <br />
-
-                if (ViewBag.ApprovalStatus != null)
-                {
-                    <div class="form-group">
-                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-2">
-                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
-                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                }
-
-                <br />
-
-                <div id="divComment" style="display:none">
-                    <div class="form-group">
-                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-4">
-                            @Html.TextArea("Comment", new { @class = "form-control" })
-                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <br />
-                    <br />
-                    <br />
-                </div>
-                <br />
-                <br />
-
-                <div id="divbtn" style="display:block">
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
-                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
-                    <br />
-                    <br />
-                    <br />
-                </div>
-            }
-        </div>
+        @* Legacy bottom approval form removed - UC012 uses signature capture only *@
     </div>
 </div>
 @section Scripts{
 
     <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
     <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
     <script type="text/javascript">
+        var maintenanceId = @Html.Raw(ViewBag.MaintenanceId ?? "0");
+        var signaturePad;
+
+        $(document).ready(function () {
+            console.log('MaintenanceJobSheet page loaded');
+            console.log('Maintenance ID: ' + maintenanceId);
+            loadTasks();
+            checkSignatureStatus();
+            initializeSignaturePad();
+        });
+
+        function initializeSignaturePad() {
+            var canvas = document.getElementById('signaturePad');
+            if (canvas) {
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)'
+                });
+            }
+        }
+
+        function clearSignature() {
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        }
+
+        function addTask() {
+            console.log('=== addTask() called ===');
+            var startDate = $('#taskStartDate').val();
+            var endDate = $('#taskEndDate').val();
+            var activity = $('#taskActivity').val();
+            var materialUsed = $('#taskMaterialUsed').val();
+            var quantityUsed = $('#taskQuantityUsed').val();
+            var labourUsed = $('#taskLabourUsed').val();
+            var totalCosts = $('#taskTotalCosts').val();
+            var taskComments = $('#taskComments').val();
+
+            console.log('Form values:', { startDate, endDate, activity, materialUsed, quantityUsed, labourUsed, totalCosts, taskComments });
+
+            if (!startDate || !endDate || !activity) {
+                swal("Error", "Please fill in all required fields (Start Date, End Date, Activity)", "error");
+                return;
+            }
+
+            console.log('Sending AddMaintenanceTask AJAX request...');
+            $.ajax({
+                url: '@Url.Action("AddMaintenanceTask", "PropertyLeaseApplication")',
+                type: 'POST',
+                data: {
+                    maintenanceId: maintenanceId,
+                    startDate: startDate,
+                    endDate: endDate,
+                    activity: activity,
+                    materialUsed: materialUsed,
+                    quantityUsed: quantityUsed,
+                    labourUsed: labourUsed,
+                    totalCosts: totalCosts,
+                    taskComments: taskComments
+                },
+                success: function (response) {
+                    console.log('AddMaintenanceTask response:', response);
+                    if (response.success) {
+                        var taskId = response.taskId;
+                        console.log('Task added successfully with ID:', taskId);
+
+                        // Check if there's a supporting document to upload
+                        var fileInput = document.getElementById('taskSupportingDoc');
+                        if (fileInput && fileInput.files.length > 0) {
+                            console.log('File detected, uploading supporting document...');
+                            console.log('File name:', fileInput.files[0].name);
+                            console.log('File size:', fileInput.files[0].size);
+                            uploadTaskDocument(taskId, fileInput.files[0]);
+                        } else {
+                            console.log('No file to upload, showing success message');
+                            swal("Success", "Task added successfully", "success").then(function() {
+                                clearTaskForm();
+                                console.log('Refreshing tasks table after user dismissed alert...');
+                                loadTasks();
+                            });
+                        }
+                    } else {
+                        console.error('AddMaintenanceTask failed:', response.message);
+                        swal("Error", response.message, "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AddMaintenanceTask AJAX error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    swal("Error", "Failed to add task: " + error, "error");
+                }
+            });
+        }
+
+        function uploadTaskDocument(taskId, file) {
+            console.log('=== uploadTaskDocument() called ===');
+            console.log('TaskId:', taskId);
+            console.log('File:', file);
+
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('taskId', taskId);
+
+            console.log('FormData prepared, sending AJAX request to UploadTaskDocument...');
+
+            $.ajax({
+                url: '@Url.Action("UploadTaskDocument", "PropertyLeaseApplication")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log('UploadTaskDocument response:', response);
+                    if (response.success) {
+                        console.log('Document uploaded successfully!');
+                        swal("Success", "Task and document added successfully", "success").then(function() {
+                            clearTaskForm();
+                            loadTasks();
+                        });
+                    } else {
+                        console.error('UploadTaskDocument failed:', response.message);
+                        swal("Error", response.message || "Failed to upload document", "error").then(function() {
+                            // Still refresh the table because task was saved
+                            loadTasks();
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('UploadTaskDocument AJAX error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    console.error('Status Code:', xhr.status);
+                    swal("Error", "Failed to upload document: " + xhr.status + " " + error + ". Task was saved but document failed.", "error").then(function() {
+                        // Still refresh the table because task was saved
+                        clearTaskForm();
+                        loadTasks();
+                    });
+                }
+            });
+        }
+
+        function clearTaskForm() {
+            $('#taskStartDate').val('');
+            $('#taskEndDate').val('');
+            $('#taskActivity').val('');
+            $('#taskMaterialUsed').val('');
+            $('#taskQuantityUsed').val('');
+            $('#taskLabourUsed').val('');
+            $('#taskTotalCosts').val('');
+            $('#taskComments').val('');
+            $('#taskSupportingDoc').val('');
+        }
+
+        function loadTasks() {
+            console.log('Loading tasks for maintenanceId: ' + maintenanceId);
+            $.ajax({
+                url: '@Url.Action("GetMaintenanceTasks", "PropertyLeaseApplication")',
+                type: 'GET',
+                data: { maintenanceId: maintenanceId },
+                success: function (response) {
+                    console.log('GetMaintenanceTasks response:', response);
+                    if (response.success) {
+                        var tbody = $('#tasksTableBody');
+                        tbody.empty();
+
+                        if (response.tasks.length === 0) {
+                            tbody.append('<tr><td colspan="10" class="text-center">No tasks captured yet</td></tr>');
+                        } else {
+                            console.log('Found ' + response.tasks.length + ' tasks');
+                            $.each(response.tasks, function (index, task) {
+                                var deleteBtn = '<button type="button" class="btn btn-danger btn-xs" onclick="deleteTask(' + task.Id + ')" title="Delete Task">' +
+                                    '<i class="fa fa-trash"></i> Delete' +
+                                    '</button>';
+
+                                var uploadDocBtn = '';
+                                if (!task.HasDocument) {
+                                    uploadDocBtn = '<button type="button" class="btn btn-info btn-xs" onclick="uploadTaskDocumentFromTable(' + task.Id + ')" title="Upload Document" style="margin-right: 5px;">' +
+                                        '<i class="fa fa-upload"></i> Upload' +
+                                        '</button>';
+                                }
+
+                                var row = '<tr>' +
+                                    '<td>' + task.StartDate + '</td>' +
+                                    '<td>' + task.EndDate + '</td>' +
+                                    '<td>' + task.Activity + '</td>' +
+                                    '<td>' + (task.MaterialUsed || '-') + '</td>' +
+                                    '<td>' + (task.QuantityUsed || '-') + '</td>' +
+                                    '<td>' + (task.LabourUsed || '-') + '</td>' +
+                                    '<td>' + (task.TotalCosts || '-') + '</td>' +
+                                    '<td>' + (task.TaskComments || '-') + '</td>' +
+                                    '<td>' + (task.HasDocument ? '<i class="fa fa-check text-success"></i> Uploaded' : '<i class="fa fa-times text-danger"></i> No Document') + '</td>' +
+                                    '<td>' + uploadDocBtn + deleteBtn + '</td>' +
+                                    '</tr>';
+                                tbody.append(row);
+                            });
+                        }
+                    } else {
+                        console.error('GetMaintenanceTasks failed:', response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load tasks:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+                }
+            });
+        }
+
+        function deleteTask(taskId) {
+            console.log('deleteTask called with taskId:', taskId);
+
+            swal({
+                title: "Are you sure?",
+                text: "Do you want to delete this task? This action cannot be undone.",
+                icon: "warning",
+                buttons: {
+                    cancel: "Cancel",
+                    confirm: {
+                        text: "Yes, delete it!",
+                        value: true,
+                        className: "btn-danger"
+                    }
+                },
+                dangerMode: true
+            }).then(function (willDelete) {
+                console.log('SweetAlert willDelete:', willDelete);
+
+                if (willDelete) {
+                    console.log('User confirmed delete, sending AJAX request...');
+
+                    $.ajax({
+                        url: '@Url.Action("DeleteMaintenanceTask", "PropertyLeaseApplication")',
+                        type: 'POST',
+                        data: { taskId: taskId },
+                        success: function (response) {
+                            console.log('Delete response:', response);
+                            if (response.success) {
+                                swal("Deleted!", "Task has been deleted successfully.", "success").then(function() {
+                                    loadTasks(); // Refresh after user dismisses alert
+                                });
+                            } else {
+                                swal("Error", response.message || "Failed to delete task", "error");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Delete AJAX error:', error);
+                            console.error('Status:', status);
+                            console.error('Response:', xhr.responseText);
+                            console.error('Status Code:', xhr.status);
+                            swal("Error", "Failed to delete task: " + xhr.status + " " + error, "error");
+                        }
+                    });
+                }
+            });
+        }
+
+        function uploadTaskDocumentFromTable(taskId) {
+            console.log('=== uploadTaskDocumentFromTable() called (dynamic picker) ===');
+            console.log('TaskId:', taskId);
+
+            // Create a file input dynamically
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            fileInput.onchange = function () {
+                if (fileInput.files.length > 0) {
+                    var formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('taskId', taskId);
+
+                    $.ajax({
+                        url: '@Url.Action("UploadTaskDocument", "PropertyLeaseApplication")',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.success) {
+                                swal("Success", "Document uploaded successfully!", "success").then(function() {
+                                    loadTasks(); // Refresh after user dismisses alert
+                                });
+                            } else {
+                                swal("Error", response.message || "Failed to upload document", "error");
+                            }
+                        },
+                        error: function () {
+                            swal("Error", "Failed to upload document", "error");
+                        }
+                    });
+                }
+                document.body.removeChild(fileInput);
+            };
+
+            fileInput.click();
+        }
+
+        function uploadBeforeImage() {
+            var fileInput = document.getElementById('beforeImage');
+            if (fileInput.files.length === 0) {
+                swal("Error", "Please select an image file", "error");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('maintenanceId', maintenanceId);
+
+            $.ajax({
+                url: '@Url.Action("UploadBeforeImage", "PropertyLeaseApplication")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        $('#beforeImageStatus').html('<span class="text-success"><i class="fa fa-check"></i> Image uploaded successfully</span>');
+                        swal("Success", "Before image uploaded successfully", "success");
+                    } else {
+                        $('#beforeImageStatus').html('<span class="text-danger"><i class="fa fa-times"></i> Upload failed</span>');
+                        swal("Error", response.message, "error");
+                    }
+                },
+                error: function () {
+                    $('#beforeImageStatus').html('<span class="text-danger"><i class="fa fa-times"></i> Upload failed</span>');
+                    swal("Error", "Failed to upload image", "error");
+                }
+            });
+        }
+
+        function uploadAfterImage() {
+            var fileInput = document.getElementById('afterImage');
+            if (fileInput.files.length === 0) {
+                swal("Error", "Please select an image file", "error");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('maintenanceId', maintenanceId);
+
+            $.ajax({
+                url: '@Url.Action("UploadAfterImage", "PropertyLeaseApplication")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        $('#afterImageStatus').html('<span class="text-success"><i class="fa fa-check"></i> Image uploaded successfully</span>');
+                        swal("Success", "After image uploaded successfully", "success");
+                    } else {
+                        $('#afterImageStatus').html('<span class="text-danger"><i class="fa fa-times"></i> Upload failed</span>');
+                        swal("Error", response.message, "error");
+                    }
+                },
+                error: function () {
+                    $('#afterImageStatus').html('<span class="text-danger"><i class="fa fa-times"></i> Upload failed</span>');
+                    swal("Error", "Failed to upload image", "error");
+                }
+            });
+        }
+
+        function submitJobCardForSignOff() {
+            swal({
+                icon: "info",
+                title: "Are you sure you want to submit the Maintenance Job Card for sign-off?",
+                buttons: [
+                    'No!',
+                    'Yes, I am sure!'
+                ]
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    // Show signature section
+                    $('#signatureSection').show();
+                    $('#btnSubmitJobCard').prop('disabled', true);
+                    swal("Success", "Job card submitted. Please complete the signature section below.", "success");
+                }
+            });
+        }
+
+        function authorizeSignature() {
+            var officialNumber = $('#officialNumber').val();
+            if (!officialNumber) {
+                swal("Error", "Please enter your official number", "error");
+                return;
+            }
+
+            swal("Authorized", "You may now capture your approval and signature", "success");
+            $('#signatureFormSection').show();
+        }
+
+        function submitSignature() {
+            var officialNumber = $('#officialNumber').val();
+            var approvalAction = $('#approvalAction').val();
+            var reason = $('#signatureReason').val();
+
+            if (!officialNumber || !approvalAction || !reason) {
+                swal("Error", "Please fill in all required fields", "error");
+                return;
+            }
+
+            if (signaturePad.isEmpty()) {
+                swal("Error", "Please provide a signature", "error");
+                return;
+            }
+
+            var signatureData = signaturePad.toDataURL();
+
+            swal({
+                icon: "warning",
+                title: "Are you sure you want to submit the following approval?",
+                buttons: [
+                    'No!',
+                    'Yes, I am Sure!'
+                ]
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: '@Url.Action("SaveMaintenanceSignature", "PropertyLeaseApplication")',
+                        type: 'POST',
+                        data: {
+                            maintenanceId: maintenanceId,
+                            officialNumber: officialNumber,
+                            approvalAction: approvalAction,
+                            reason: reason,
+                            signatureData: signatureData
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                swal("Success", "✅ Job Card Completed & Signed Successfully!\n\nNo further action required.", "success")
+                                    .then(function () {
+                                        window.location.reload();
+                                    });
+                            } else {
+                                swal("Error", response.message, "error");
+                            }
+                        },
+                        error: function () {
+                            swal("Error", "Failed to save signature", "error");
+                        }
+                    });
+                }
+            });
+        }
+
+        function checkSignatureStatus() {
+            $.ajax({
+                url: '@Url.Action("CheckMaintenanceSignatureStatus", "PropertyLeaseApplication")',
+                type: 'GET',
+                data: { maintenanceId: maintenanceId },
+                success: function (response) {
+                    if (response.success && response.signed) {
+                        // Show signature status message
+                        $('#signatureSection').show();
+                        $('#signatureSection').html('<div class="alert alert-success"><strong>✅ Job Card Completed & Signed</strong><br/>Official Number: ' + response.officialNumber + '<br/>Action: ' + response.approvalAction + '<br/>Date: ' + response.approvalDate + '</div>');
+
+                        // Hide the submit job card button
+                        $('#btnSubmitJobCard').hide();
+
+                        console.log('Job card already signed');
+                    }
+                }
+            });
+        }
 
         function loadAccounts() {
             //debugger;

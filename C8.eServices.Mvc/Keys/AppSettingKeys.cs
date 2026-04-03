@@ -275,6 +275,8 @@ namespace C8.eServices.Mvc.Keys
         public const string ClientServicesOfficer = "u_client_services_officer";
         public const string HousingSupervisor = "u_housing_super_visor";
         public const string LettingOfficer = "u_letting_officer";
+        public const string MaintenanceManager = "u_maintenance_manager";
+        public const string PropertyFacilitiesManager = "u_property_facilities_manager";
 
 
         public const string WaitingListSorting = "waiting_list_sorting_";

@@ -49,6 +49,37 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Type of Inspection")]
         public string InspectionType { get; set; }
 
+        [Column(Order = 9)]
+        [Display(Name = "Before Image")]
+        public int? BeforeImageId { get; set; }
+        [ForeignKey("BeforeImageId")]
+        public virtual Document BeforeImage { get; set; }
+
+        [Column(Order = 10)]
+        [Display(Name = "After Image")]
+        public int? AfterImageId { get; set; }
+        [ForeignKey("AfterImageId")]
+        public virtual Document AfterImage { get; set; }
+
+        [Column(Order = 11)]
+        [Display(Name = "Job Card Submitted")]
+        public bool? JobCardSubmitted { get; set; }
+
+        [Column(Order = 12)]
+        [Display(Name = "Job Card Submitted Date")]
+        public DateTime? JobCardSubmittedDate { get; set; }
+
+        [Column(Order = 13)]
+        [Display(Name = "Inspection")]
+        public bool? Inspection { get; set; }
+
+        // Navigation properties
+        [ScriptIgnore]
+        public virtual ICollection<MaintenanceJobCardTask> JobCardTasks { get; set; }
+
+        [ScriptIgnore]
+        public virtual ICollection<MaintenanceJobCardSignature> JobCardSignatures { get; set; }
+
 
     }
 

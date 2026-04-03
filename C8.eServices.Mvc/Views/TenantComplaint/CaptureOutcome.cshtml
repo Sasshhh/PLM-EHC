@@ -1,0 +1,338 @@
+@model C8.eServices.Mvc.Models.ComplaintInvestigation
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Capture Investigation Outcome";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var complaint = ViewBag.Complaint as C8.eServices.Mvc.Models.TenantComplaint;
+}
+
+<style>
+    .section-header {
+        background-color: #f5f5f5;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #337ab7;
+        font-weight: bold;
+    }
+    .form-section {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .info-box {
+        background-color: #e3f2fd;
+        border: 1px solid #90caf9;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .info-box i {
+        color: #1976d2;
+        margin-right: 10px;
+    }
+    .outcome-card {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+    }
+    .outcome-card:hover {
+        border-color: #337ab7;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .outcome-card.selected {
+        border-color: #337ab7;
+        background-color: #e3f2fd;
+    }
+    .outcome-card i {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    .outcome-resolved { color: #28a745; }
+    .outcome-referral { color: #6f42c1; }
+    .outcome-unresolved { color: #dc3545; }
+    .conditional-section {
+        display: none;
+        padding: 20px;
+        background: #f9f9f9;
+        border: 1px dashed #ccc;
+        border-radius: 4px;
+        margin-top: 15px;
+    }
+    .file-upload-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        background-color: #fafafa;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <i class="ion ion-checkmark-circled"></i> Capture Investigation Outcome
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            @if (complaint != null)
+            {
+                <div class="info-box">
+                    <i class="ion ion-information-circled"></i>
+                    <strong>Case Reference:</strong> @complaint.CaseReferenceNumber<br />
+                    <strong>Category:</strong> @(complaint.ComplaintCategory != null ? complaint.ComplaintCategory.Name : "N/A") - @(complaint.ComplaintType != null ? complaint.ComplaintType.Name : "N/A")<br />
+                    <strong>Respondent:</strong> @complaint.RespondentFirstName @complaint.RespondentSurname 
+                    (Block @complaint.RespondentBlockNumber, Unit @complaint.RespondentUnitNumber)<br />
+                    @if (Model.AppointmentDate.HasValue)
+                    {
+                        <strong>Investigation Date:</strong> @Model.AppointmentDate.Value.ToString("dd MMMM yyyy") @Model.AppointmentTime
+                    }
+                </div>
+            }
+
+            @using (Html.BeginForm("CaptureOutcome", "TenantComplaint", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.TenantComplaintId)
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <!-- Outcome Selection -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-android-done-all"></i> Select Outcome
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="outcome-card" data-outcome="@ComplaintOutcomeKeys.Resolved" onclick="selectOutcome(this)">
+                                <i class="ion ion-checkmark-circled outcome-resolved"></i>
+                                <h4>Resolved</h4>
+                                <p class="text-muted">Issue has been addressed and resolved satisfactorily</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="outcome-card" data-outcome="@ComplaintOutcomeKeys.Referral" onclick="selectOutcome(this)">
+                                <i class="ion ion-android-share-alt outcome-referral"></i>
+                                <h4>Referral</h4>
+                                <p class="text-muted">Case requires referral to an external agency</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="outcome-card" data-outcome="@ComplaintOutcomeKeys.Unresolved" onclick="selectOutcome(this)">
+                                <i class="ion ion-close-circled outcome-unresolved"></i>
+                                <h4>Unresolved</h4>
+                                <p class="text-muted">Issue could not be resolved at this time</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="Outcome" name="Outcome" required />
+                </div>
+
+                <!-- Outcome Details -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-ios-paper-outline"></i> Outcome Details
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Details <span class="text-danger">*</span></label>
+                        <div class="col-md-10">
+                            @Html.TextAreaFor(model => model.OutcomeDetails, new { @class = "form-control", rows = 5, required = "required", 
+                                placeholder = "Provide a detailed description of the investigation findings and outcome..." })
+                            @Html.ValidationMessageFor(model => model.OutcomeDetails, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Outcome Date</label>
+                        <div class="col-md-4">
+                            <input type="date" id="OutcomeDate" name="OutcomeDate" class="form-control" 
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Section (Conditional) -->
+                <div id="referralSection" class="conditional-section">
+                    <div class="section-header" style="margin: -20px -20px 15px -20px;">
+                        <i class="ion ion-android-share-alt"></i> External Referral Details
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Agency Name <span class="text-danger">*</span></label>
+                                <div class="col-md-8">
+                                    <input type="text" id="AgencyName" name="AgencyName" class="form-control" 
+                                           placeholder="Name of external agency" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Contact Person</label>
+                                <div class="col-md-8">
+                                    <input type="text" id="ContactPerson" name="ContactPerson" class="form-control" 
+                                           placeholder="Contact person at agency" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Contact Number</label>
+                                <div class="col-md-8">
+                                    <input type="text" id="ContactNumber" name="ContactNumber" class="form-control" 
+                                           placeholder="Agency phone number" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label col-md-4">Contact Email</label>
+                                <div class="col-md-8">
+                                    <input type="email" id="ContactEmail" name="ContactEmail" class="form-control" 
+                                           placeholder="Agency email address" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-2">Agency Address</label>
+                                <div class="col-md-10">
+                                    <textarea id="AgencyAddress" name="AgencyAddress" class="form-control" rows="2" 
+                                              placeholder="Physical address of the agency"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-2">Referral Reason</label>
+                                <div class="col-md-10">
+                                    <textarea id="ReferralDescription" name="ReferralDescription" class="form-control" rows="3" 
+                                              placeholder="Brief description of why this case is being referred..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unresolved Section (Conditional) -->
+                <div id="unresolvedSection" class="conditional-section">
+                    <div class="section-header" style="margin: -20px -20px 15px -20px;">
+                        <i class="ion ion-close-circled"></i> Unresolved Case Details
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="ion ion-alert"></i>
+                        <strong>Note:</strong> Unresolved cases may be linked to lease termination proceedings if the tenant continues to violate lease terms.
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2">Reason Unresolved <span class="text-danger">*</span></label>
+                        <div class="col-md-10">
+                            <textarea id="UnresolvedReason" name="UnresolvedReason" class="form-control" rows="3" 
+                                      placeholder="Explain why the complaint could not be resolved..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supporting Documents -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="ion ion-ios-cloud-upload-outline"></i> Supporting Documents (Optional)
+                    </div>
+                    <div class="file-upload-area">
+                        <p><i class="ion ion-ios-cloud-upload" style="font-size: 48px; color: #337ab7;"></i></p>
+                        <p>Upload any supporting documents for the investigation outcome</p>
+                        <input type="file" name="InvestigationDocuments" id="InvestigationDocuments" multiple 
+                               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx" class="form-control" 
+                               style="display: inline-block; width: auto;" />
+                        <p class="text-muted small">Accepted formats: JPG, PNG, GIF, PDF, DOC, DOCX (Max 10MB each)</p>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                                <i class="ion ion-checkmark-circled"></i> Submit Outcome
+                            </button>
+                            @if (complaint != null)
+                            {
+                                <a href="@Url.Action("Details", "TenantComplaint", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
+                                   class="btn btn-default btn-lg">
+                                    <i class="ion ion-close-circled"></i> Cancel
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                    <i class="ion ion-close-circled"></i> Cancel
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function selectOutcome(element) {
+            // Remove selected class from all cards
+            $('.outcome-card').removeClass('selected');
+            
+            // Add selected class to clicked card
+            $(element).addClass('selected');
+            
+            // Set hidden input value
+            var outcome = $(element).data('outcome');
+            $('#Outcome').val(outcome);
+            
+            // Enable submit button
+            $('#submitBtn').prop('disabled', false);
+            
+            // Show/hide conditional sections
+            if (outcome === '@ComplaintOutcomeKeys.Referral') {
+                $('#referralSection').slideDown();
+                $('#unresolvedSection').slideUp();
+                $('#AgencyName').attr('required', true);
+            } else if (outcome === '@ComplaintOutcomeKeys.Unresolved') {
+                $('#referralSection').slideUp();
+                $('#unresolvedSection').slideDown();
+                $('#AgencyName').removeAttr('required');
+                $('#UnresolvedReason').attr('required', true);
+            } else {
+                $('#referralSection').slideUp();
+                $('#unresolvedSection').slideUp();
+                $('#AgencyName').removeAttr('required');
+                $('#UnresolvedReason').removeAttr('required');
+            }
+        }
+
+        $(function () {
+            // Initialize - hide conditional sections
+            $('#referralSection, #unresolvedSection').hide();
+        });
+    </script>
+}

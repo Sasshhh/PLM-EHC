@@ -297,7 +297,75 @@ namespace C8.eServices.Mvc.Controllers
             if (master.OPP == true) total += master.OpenParking;
             if (master.STR == true) total += master.StoreRooms;
 
+            // DSTV monthly levy if DSTV is enabled
+            if (master.HasDSTV == true) total += (double)master.DSTVMonthlyLevy;
+
             return total;
+        }
+
+        /// <summary>
+        /// Gets complete unit address including street name and township from ApplicationAllocatedProperties
+        /// </summary>
+        private string GetCompleteUnitAddress(int applicationId)
+        {
+            var matchedUnit = db.MatchedUnits
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == applicationId && x.IsActive && !x.IsDeleted);
+
+            if (matchedUnit?.ApplicationAllocatedPropertyId.HasValue == true)
+            {
+                var unit = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId.Value);
+                if (unit != null)
+                {
+                    var addressParts = new List<string>();
+
+                    // Add street name if available
+                    if (!string.IsNullOrEmpty(unit.StreetName))
+                        addressParts.Add(unit.StreetName);
+
+                    // Add township if available
+                    if (!string.IsNullOrEmpty(unit.Township))
+                        addressParts.Add(unit.Township);
+
+                    return string.Join(", ", addressParts);
+                }
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Gets unit block information if available from Units table
+        /// </summary>
+        private string GetUnitBlock(int applicationId)
+        {
+            var matchedUnit = db.MatchedUnits
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == applicationId && x.IsActive && !x.IsDeleted);
+
+            if (matchedUnit?.ApplicationAllocatedPropertyId.HasValue == true)
+            {
+                // First try to get block info from ApplicationAllocatedProperties
+                var allocatedProperty = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId.Value);
+
+                // For now, return empty since we don't have a dedicated Block field
+                // You could potentially derive this from BuildingName or other fields
+                return "";
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Gets unit number from ApplicationAllocatedProperties.SpaceUnitNumber
+        /// </summary>
+        private string GetUnitNumber(int applicationId)
+        {
+            var matchedUnit = db.MatchedUnits
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == applicationId && x.IsActive && !x.IsDeleted);
+
+            if (matchedUnit?.ApplicationAllocatedPropertyId.HasValue == true)
+            {
+                var unit = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId.Value);
+                return unit?.SpaceUnitNumber ?? "";
+            }
+            return "";
         }
 
         /// <summary>
@@ -384,8 +452,8 @@ namespace C8.eServices.Mvc.Controllers
                 SetFieldWithFontSize(pdfFormFields, "AgentName", master.RepresentedBy ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "FullNames", master.ApplicantFullName ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "IdentityNumber", master.ApplicantIdentityNumber ?? application.IDNo ?? "", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "UnitNumber", master.UnitNumber ?? "", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "UnitBlock", master.BlockNumber ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitNumber", GetUnitNumber(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitBlock", GetUnitBlock(application.Id), 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Rent", master.MonthlyUnitRental.ToString("F2"), 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Deposit", master.InitialDepositPremises.ToString("F2"), 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "CreditCheckFee", master.CreditCheckFee == 0 ? "N/A" : master.CreditCheckFee.ToString("F2"), 9.0f);
@@ -396,7 +464,10 @@ namespace C8.eServices.Mvc.Controllers
                 SetFieldWithFontSize(pdfFormFields, "AmountSewerage", master._sewerage.ToString("F2"), 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "ParkingBay", master.CarportParkingBayNumber ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Storeroom", master.STR == true ? master.StoreRooms.ToString("F2") : "N/A", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "CommencementDate", master.CommencementDate ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CommencementDate", 
+                    !string.IsNullOrEmpty(master.CommencementDay) && !string.IsNullOrEmpty(master.CommencementDate) 
+                        ? $"{master.CommencementDay} {master.CommencementDate}" 
+                        : master.CommencementDate ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "SignedDay", master.TenantSignDay ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "SignedMonth", master.TenantSignDate ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "SignedDay2", master.ManagersSignDay ?? "", 9.0f);
@@ -412,7 +483,7 @@ namespace C8.eServices.Mvc.Controllers
                 SetFieldWithFontSize(pdfFormFields, "Salary", application.GrossIncome?.ToString("F2") ?? "0.00", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "TenantFullName", $"{application.FirstName} {application.LastName}", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "BuildingName", GetBuildingName(application.Id), 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "UnitAddress", lease.LeaAddress ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitAddress", GetCompleteUnitAddress(application.Id), 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "AmountTOTAL", CalculateTotalMonthlyCharges(master).ToString("F2"), 9.0f);
 
                 string signedLocation = GetSignedAtLocation(application);
@@ -420,30 +491,40 @@ namespace C8.eServices.Mvc.Controllers
                 SetFieldWithFontSize(pdfFormFields, "SignedAt2", signedLocation, 9.0f);
 
                 // ========================================================================
-                // SUBSIDIES: Set to 0 (9 fields)
+                // SUBSIDIES: Set to "No" (7 fields) and populate new deposits
                 // ========================================================================
-                SetFieldWithFontSize(pdfFormFields, "RentSubsidy", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "DepositSubsidy", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "keySubsidy", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "AccessSubsidy", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationSubsidy", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "KeyDeposit", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "AccessCard", "N/A", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "RentSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DepositSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "keySubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "KeyDeposit", master.KeyDeposit.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessCard", master.AccessCardDeposit > 0 ? master.AccessCardDeposit.ToString("F2") : "N/A", 9.0f);
 
                 // ========================================================================
-                // DSTV: Set to 0/NO (5 fields)
+                // DSTV: Use actual data from master (5 fields)
                 // ========================================================================
-                SetFieldWithFontSize(pdfFormFields, "DSTV", "NO", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "DSTVFee", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "AmountDSTV", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "DstvMonthlyFee", "0.00", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "DSTVActivationFee", "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTV", master.HasDSTV == true ? "YES" : "NO", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVFee", master.DSTVActivationFee.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountDSTV", master.HasDSTV == true ? master.DSTVMonthlyLevy.ToString("F2") : "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DstvMonthlyFee", master.HasDSTV == true ? master.DSTVMonthlyLevy.ToString("F2") : "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVActivationFee", master.DSTVActivationFee.ToString("F2"), 9.0f);
 
                 // ========================================================================
-                // EMPLOYER & BANKING: Placeholder (2 fields)
+                // EMPLOYER & BANKING: Use actual data from application (2 fields)
                 // ========================================================================
-                SetFieldWithFontSize(pdfFormFields, "Employer", "To Be Captured", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "BankingDetails", "To Be Provided", 9.0f);
+                string employerInfo = !string.IsNullOrEmpty(application.PresentEmployer) 
+                    ? $"{application.PresentEmployer} - {application.PresentEmployerOccupation}" 
+                    : "To Be Captured";
+                SetFieldWithFontSize(pdfFormFields, "Employer", employerInfo, 9.0f);
+
+                // Banking Details for Debit Order
+                string bankingDetails = "To Be Provided";
+                if (!string.IsNullOrEmpty(master.TenantBankName) && !string.IsNullOrEmpty(master.TenantAccountNumber))
+                {
+                    bankingDetails = $"{master.TenantBankName}\nAcc: {master.TenantAccountNumber}\nHolder: {master.TenantAccountHolderName ?? "N/A"}\nType: {master.TenantAccountType ?? "N/A"}\nBranch: {master.TenantBranchCode ?? "N/A"}";
+                }
+                SetFieldWithFontSize(pdfFormFields, "BankingDetails", bankingDetails, 8.0f);
 
                 // ========================================================================
                 // OCCUPANTS: 3 occupants with expanded details (15 fields)
@@ -480,8 +561,9 @@ namespace C8.eServices.Mvc.Controllers
                 }
 
                 // ========================================================================
-                // WITNESSES: Witness1 rendered as signature image below, others left blank
+                // WITNESSES: Witness1 rendered as name text, others left blank
                 // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Witness1", master.Witness1Name ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Witness2", "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Witness3", "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "Witness4", "", 9.0f);
@@ -577,31 +659,8 @@ namespace C8.eServices.Mvc.Controllers
                     }
                 }
 
-                // Witness 1 Signature
-                if (!string.IsNullOrEmpty(master.Witness1Signature) && master.Witness1Signature.Contains(","))
-                {
-                    try
-                    {
-                        string base64Data = master.Witness1Signature.Substring(master.Witness1Signature.IndexOf(',') + 1);
-                        byte[] sigBytes = Convert.FromBase64String(base64Data);
-                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
-
-                        var positions = pdfFormFields.GetFieldPositions("Witness1");
-                        if (positions != null && positions.Count > 0)
-                        {
-                            var sigPos = positions[0];
-                            iTextSharp.text.Rectangle rect = sigPos.position;
-                            sigImage.ScaleToFit(rect.Width, rect.Height);
-                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
-                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
-                            cb.AddImage(sigImage);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to render witness 1 signature: {ex.Message}");
-                    }
-                }
+                // Witness 1 Signature - REMOVED: Now displays name as text instead
+                // Note: Witness signature is still captured and stored, but not displayed on PDF
             }
 
             // Flatten the form (make it non-editable)
@@ -1134,11 +1193,41 @@ namespace C8.eServices.Mvc.Controllers
             };
 
             return View(vm);
-        }
+            }
 
+            /// <summary>
+            /// Downloads the Pre-inspection Form v2.pdf template directly from static files.
+            /// This action serves the static PDF file instantly without database queries,
+            /// fixing the 4-minute download issue caused by database retrieval.
+            /// Works with dynamic URLs (localhost, production, etc.) using Server.MapPath.
+            /// </summary>
+            [HttpGet]
+            public ActionResult DownloadPreInspectionTemplate()
+            {
+                try
+                {
+                    // Use Server.MapPath for dynamic URL support (localhost, production, etc.)
+                    string filePath = Server.MapPath("~/Content/Pre-inspection Form v2.pdf");
 
-        [DecryptParameter]
-        public ActionResult ConductUnitInspection(int? id)
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        TempData["ErrorMessage"] = "Pre-inspection Form template not found. Please contact support.";
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    // Serve file with correct MIME type and filename for instant download
+                    return File(filePath, "application/pdf", "Pre-inspection Form v2.pdf");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    TempData["ErrorMessage"] = "Error downloading template: " + ex.Message;
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
+            [DecryptParameter]
+            public ActionResult ConductUnitInspection(int? id)
         {
             eServicesDbContext context = new eServicesDbContext();
             Initialise();
@@ -2043,7 +2132,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 var ratesRebateProperty = new RatesRebateProperty();
                 var incentivePolicyProperty = new IncentivePolicyProperty();
-                
+
                 if (application.Key == ApplicationKeys.RatesRebate)
                 {
                     ViewBag.RatesRebateStatus = ratesRebateProperty.RatesRebate.Status.Key;
@@ -2063,6 +2152,9 @@ namespace C8.eServices.Mvc.Controllers
 
                     ViewBag.NavigationParameters = nav;
                 }
+
+                // Pass maintenance ID to view for task management
+                ViewBag.MaintenanceId = UM.Id;
 
                 vm.DocumentsViewModel = dvm;
                 return View(vm);
@@ -2103,8 +2195,8 @@ namespace C8.eServices.Mvc.Controllers
                     db.Entry(findItem).State = EntityState.Modified;
                     db.SaveChanges();
 
-                    var User = GetBackOfficeId(db, rcsApps.Id, false);
-                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                    var User = GetMaintenanceManagerId(db, rcsApps.Id);
+                    var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.MaintenanceManager).FirstOrDefault().Value);
                     var UserId = User.Id != 0 ? User.Id : activeDirectoryOn;
 
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
@@ -2117,22 +2209,57 @@ namespace C8.eServices.Mvc.Controllers
 
                     if (UM.RCSActionType.Key == RCSActionTypeKeys.NotHabitable)
                     {
-                        MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (Int32)id);
-                        MatchingHelper.RoundRobinMarkJobAsFinished(db, (Int32)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
-                        EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+                        // Major defects - route to Property & Facilities Manager for review
+                        MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (Int32)id);
 
-                        //customer email here
+                        // Create Property & Facilities Manager work queue item
+                        var facilitiesManagerUser = GetPropertyFacilitiesManagerId(db, rcsApps.Id);
+                        var facilitiesManagerId = facilitiesManagerUser.Id != 0 ? facilitiesManagerUser.Id : Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyFacilitiesManager).FirstOrDefault().Value);
+
+                        var facilitiesResponsibilityType = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).FirstOrDefault();
+                        var statusSubmitted = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+
+                        var roundRobinQueue = new RoundRobinQueue
+                        {
+                            PropertyLeaseApplicationId = rcsApps.Id,
+                            ResponsibilityTypeId = facilitiesResponsibilityType.Id,
+                            CurrentTaskDateTime = DateTime.Now,
+                            ClerkId = facilitiesManagerId,
+                            StatusId = statusSubmitted
+                        };
+                        db.RoundRobinQueues.Add(roundRobinQueue);
+                        db.SaveChanges();
+                        BackOfficeNotification(rcsApps.Id, facilitiesManagerId, facilitiesResponsibilityType.Name);
+
                         var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UnitInspectionApproved).Description.ToString();
                         MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
-                        //MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, (int)id);
 
-                        //EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to schedule inspection dates");
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber}. Major defects require Property & Facilities Manager review before re-inspection.");
 
                     }
                     else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
                     {
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
+                        // Minor defects - application continues, but ALSO create Facilities Manager review queue
+                        // Create Property & Facilities Manager work queue item for job sheet review
+                        var facilitiesManagerUser = GetPropertyFacilitiesManagerId(db, rcsApps.Id);
+                        var facilitiesManagerId = facilitiesManagerUser.Id != 0 ? facilitiesManagerUser.Id : Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyFacilitiesManager).FirstOrDefault().Value);
+
+                        var facilitiesResponsibilityType = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).FirstOrDefault();
+                        var statusSubmitted = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+
+                        var roundRobinQueue = new RoundRobinQueue
+                        {
+                            PropertyLeaseApplicationId = rcsApps.Id,
+                            ResponsibilityTypeId = facilitiesResponsibilityType.Id,
+                            CurrentTaskDateTime = DateTime.Now,
+                            ClerkId = facilitiesManagerId,
+                            StatusId = statusSubmitted
+                        };
+                        db.RoundRobinQueues.Add(roundRobinQueue);
+                        db.SaveChanges();
+                        BackOfficeNotification(rcsApps.Id, facilitiesManagerId, facilitiesResponsibilityType.Name);
+
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber}. Minor defects - application continues flow while Property & Facilities Manager reviews completed work.");
 
                     }
 
@@ -2195,6 +2322,176 @@ namespace C8.eServices.Mvc.Controllers
             return RedirectToAction("PropertyLeaseInspections");
         }
 
+
+
+        [DecryptParameter]
+        public ActionResult PropertyFacilitiesManagerReview(int? id)
+        {
+            eServicesDbContext context = new eServicesDbContext();
+            Initialise();
+            var userID = Customer.Id;
+
+            var Message = TempData["FacilitiesReviewTitle"];
+            var Title = TempData["FacilitiesReviewBody"];
+            if (Message != null && Title != null)
+            {
+                ViewBag.MessageTitle = TempData["FacilitiesReviewTitle"].ToString();
+                ViewBag.Message = TempData["FacilitiesReviewBody"].ToString();
+            }
+
+            PropertyLeaseApplication rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false)
+                .Include(r => r.CreatedBySystemUser)
+                .Include(r => r.Customer)
+                .Include(r => r.ModifiedBySystemUser)
+                .Include(r => r.HumanEHCOptions)
+                .Include(r => r.Status)
+                .Include(x => x.PurchaserType)
+                .FirstOrDefault();
+
+            var leaseDetails = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .Where(x => x.IsDeleted == false && x.IsNew)
+                .Include(r => r.CreatedBySystemUser)
+                .Include(r => r.PurchaserType)
+                .Include(r => r.ModifiedBySystemUser)
+                .Include(r => r.Status)
+                .Where(x => x.PropertyLeaseApplicationId == rcsApps.Id)
+                .FirstOrDefault();
+
+            var maintenanceRecord = db.allocatedUnitMaintenanceEHCs
+                .Include(x => x.RCSActionType)
+                .Include(x => x.ModifiedBySystemUser)
+                .Include(x => x.BeforeImage)
+                .Include(x => x.AfterImage)
+                .Include(x => x.JobCardTasks)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.InspectionType == StatusKeys.PreUnitInspection);
+
+            var maintenanceSignature = maintenanceRecord != null
+                ? db.MaintenanceJobCardSignatures
+                    .Include(x => x.SignedByCustomer)
+                    .FirstOrDefault(x => x.AllocatedUnitMaintenanceEHCId == maintenanceRecord.Id && x.IsDeleted == false)
+                : null;
+
+            ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+
+            try
+            {
+                var customer = context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
+                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+                if (customer == null) throw new Exception("Invalid Customer");
+
+                var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+                if (application == null) throw new Exception(string.Format("Invalid/ missing application key {0}", ApplicationKeys.RatesClearanceSystem));
+
+                var documentReferenceType = context.ReferenceTypes.SingleOrDefault(r => r.Key == ReferenceTypeKeys.RCSUpload);
+                if (documentReferenceType == null)
+                    throw new Exception(string.Format("Invalid/ missing reference type key {0}", ReferenceTypeKeys.RCSUpload));
+
+                var referenceType = db.ReferenceTypes.FirstOrDefault(a => a.Key.Equals(ReferenceTypeKeys.RCSUpload));
+                if (referenceType == null) throw new Exception("Invalid reference type.");
+
+                DocumentsViewModel dvm = new DocumentsViewModel();
+                bool IsUpload = false; // Read-only for review
+                var returnUrl = "";
+
+                MatchingHelper.DocumentConductMaintanaceJobSheet(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, returnUrl, rcsApps.Id, IsUpload);
+
+                DocumentsViewModel dvmTemplate = new DocumentsViewModel();
+                MatchingHelper.DocumentGetConductMaintananceJobSheetTemplate(dvmTemplate, db, 2, 2, (int)referenceType.Id, (int)application.Id, "", 100000, false);
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    Customer = customer,
+                    PropertyLeaseApplications = rcsApps,
+                    LeaseDetails = leaseDetails,
+                    DocumentsViewModel = dvm,
+                    DocumentsViewModelTemplate = dvmTemplate
+                };
+
+                ViewBag.ReferenceTypeId = documentReferenceType.Id;
+                ViewBag.ApplicationId = application.Id;
+                ViewBag.MaintenanceRecord = maintenanceRecord;
+                ViewBag.MaintenanceId = maintenanceRecord?.Id ?? 0;
+                ViewBag.MaintenanceSignature = maintenanceSignature;
+
+                var obj = new
+                {
+                    IdentificationNumber = vm.Customer.IdentificationNumber,
+                    FullName = vm.Customer.FullName,
+                    EmailAddress = vm.Customer.SystemUser == null ? vm.Customer.EmailAddress : vm.Customer.SystemUser.EmailAddress,
+                    SystemUserId = vm.Customer.SystemUser == null ? 0 : vm.Customer.SystemUserId,
+                    CustomerId = vm.Customer.Id
+                };
+
+                ViewBag.CustomerModel = obj;
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult PropertyFacilitiesManagerReview(int? id, string ApprovalStatusddl, string ReviewComment)
+        {
+            Initialise();
+            var rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).FirstOrDefault();
+
+            var facilitiesUser = GetPropertyFacilitiesManagerId(db, rcsApps.Id);
+            var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyFacilitiesManager).FirstOrDefault().Value);
+            var UserId = facilitiesUser.Id != 0 ? facilitiesUser.Id : activeDirectoryOn;
+
+            var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).FirstOrDefault();
+
+            var maintenanceRecord = db.allocatedUnitMaintenanceEHCs
+                .Include(x => x.RCSActionType)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == id);
+
+            var isMinorDefect = maintenanceRecord?.RCSActionType?.Key == RCSActionTypeKeys.HabitableMinorDefects;
+
+            if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+            {
+                MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
+
+                if (isMinorDefect)
+                {
+                    // Habitable minor defects - no status change, close queue and notify customer
+                    BackOfficeNotification(rcsApps.Id, rcsApps.Customer.Id, ResponsibilityTypeId.Name);
+
+                    var ActivityTrackerMessage = $"Property & Facilities Manager approved maintenance completion (minor defects). No re-inspection required. Comment: {ReviewComment}";
+                    MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
+
+                    Session["PropertyFacilitiesManagerReviewSession"] = $"Maintenance review approved for application reference {rcsApps.ApplicationReferenceNumber}. Minor defects resolved - no re-inspection required.";
+                }
+                else
+                {
+                    // Non-habitable major defects - set status and route back for re-inspection
+                    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id, (int)id);
+
+                    EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+
+                    var ActivityTrackerMessage = $"Property & Facilities Manager approved maintenance completion (major defects). Application returned for re-inspection. Comment: {ReviewComment}";
+                    MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
+
+                    Session["PropertyFacilitiesManagerReviewSession"] = $"Maintenance review approved for application reference {rcsApps.ApplicationReferenceNumber}. Major defects - application sent back for re-inspection.";
+                }
+            }
+            else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+            {
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
+                MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
+
+                var ActivityTrackerMessage = $"Property & Facilities Manager rejected maintenance completion. Reason: {ReviewComment}";
+                MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
+
+                Session["PropertyFacilitiesManagerReviewSession"] = $"Maintenance review rejected for application reference {rcsApps.ApplicationReferenceNumber}. Additional work required.";
+            }
+
+            return RedirectToAction("PropertyLeaseInspections");
+        }
 
 
 
@@ -5359,13 +5656,14 @@ namespace C8.eServices.Mvc.Controllers
                     int RatesRebateAdditionalPropertyOwnersPending = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.RatesRebateAdditionalPropertyOwnersPending).Id;
                     int AwaitingInspectionScheduleSlots = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id;
                     int EvictionGranted = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.EvictionGranted).Id;
+                    int AwaitingTenantUpdateDetails = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id;
 
 
 
                     //var UM = db.allocatedUnitMaintenanceEHCs.Include(x=>x.Status).Where(x=>x.Status.Key == StatusKeys.Submitted).ToList();
                     //var UMList = UM.Select(x => x.PropertyLeaseApplicationId);
                     //.Select(x => x.PropertyLeaseApplicationId). ||UMList.Contains(x.Id)
-                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted) ) )
+                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted || x.StatusId == AwaitingTenantUpdateDetails) ) )
                     .Include(r => r.CreatedBySystemUser)
                     .Include(r => r.Customer)
                     .Include(r => r.PurchaserType)
@@ -5383,12 +5681,12 @@ namespace C8.eServices.Mvc.Controllers
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
-                
+
                     foreach (var item in rCSApplicationStatus)
                     {
                        item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
                     }
-                    
+
                     if (Session["UnitInspectionScheduledSession"] != null)
                     {
                         var value = Session["UnitInspectionScheduledSession"].ToString();
@@ -5414,6 +5712,140 @@ namespace C8.eServices.Mvc.Controllers
                     Session["MaintenanceJobSheetSession"] = null;
 
                     return View(rCSApplicationStatus);
+                }
+                catch (Exception io)
+                {
+                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
+
+                return RedirectToAction("Login", "Account");
+            }
+        }
+
+        /// <summary>
+        /// Facilities Manager Maintenance Reviews - Shows all maintenance job cards awaiting facilities manager approval
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult PropertyFacilitiesMaintenanceReviews()
+        {
+            using (var cxt = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+
+                    // Get current user ID
+                    var UserId = getLoggedInUser();
+                    UserId = Customer.Id;
+                    var PropertyFacilitiesManagerReviewId = cxt.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).Id;
+
+                    // Get all applications where current user has an active (not deleted) PropertyFacilitiesManagerReview RRQ
+                    var applicationIds = cxt.RoundRobinQueues
+                        .Where(x => x.ClerkId == UserId &&
+                               x.IsActive == true &&
+                               x.IsDeleted == false &&
+                               x.ResponsibilityTypeId == PropertyFacilitiesManagerReviewId &&
+                               x.PropertyLeaseApplicationId.HasValue)
+                        .Select(x => x.PropertyLeaseApplicationId.Value)
+                        .ToList();
+
+                    // Get the applications with all necessary includes
+                    var rCSApplicationStatus = db.PropertyLeaseApplications
+                        .Where(x => x.IsDeleted == false && applicationIds.Contains(x.Id))
+                        .Include(r => r.CreatedBySystemUser)
+                        .Include(r => r.Customer)
+                        .Include(r => r.PurchaserType)
+                        .Include(r => r.ModifiedBySystemUser)
+                        .Include(r => r.HumanEHCOptions)
+                        .Include(r => r.Status)
+                        .ToList();
+
+                    var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
+                    var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+
+                    foreach (var item in rCSApplicationStatus)
+                    {
+                       item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
+                    }
+
+                    if (Session["PropertyFacilitiesMaintenanceReviewSession"] != null)
+                    {
+                        var value = Session["PropertyFacilitiesMaintenanceReviewSession"].ToString();
+                        Session["PropertyFacilitiesMaintenanceReviewSession"] = null;
+                        ViewBag.PropertyFacilitiesMaintenanceReviewSession = value;
+                    }
+                    Session["PropertyFacilitiesMaintenanceReviewSession"] = null;
+
+                    return View(rCSApplicationStatus);
+                }
+                catch (Exception io)
+                {
+                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
+
+                return RedirectToAction("Login", "Account");
+            }
+        }
+
+        /// <summary>
+        /// CEO Overview of Maintenance Management - Shows both awaiting approval and approved maintenance
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult PropertyMaintenanceOverview()
+        {
+            using (var cxt = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+
+                    var PropertyFacilitiesManagerReviewId = cxt.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).Id;
+                    var SubmittedId = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+
+                    // Get all applications that have PropertyFacilitiesManagerReview RRQs (both active and processed)
+                    var applicationIds = cxt.RoundRobinQueues
+                        .Where(x => x.ResponsibilityTypeId == PropertyFacilitiesManagerReviewId &&
+                               x.PropertyLeaseApplicationId.HasValue)
+                        .Select(x => x.PropertyLeaseApplicationId.Value)
+                        .Distinct()
+                        .ToList();
+
+                    // Get the applications with maintenance information
+                    var applications = db.PropertyLeaseApplications
+                        .Where(x => x.IsDeleted == false && applicationIds.Contains(x.Id))
+                        .Include(r => r.CreatedBySystemUser)
+                        .Include(r => r.Customer)
+                        .Include(r => r.PurchaserType)
+                        .Include(r => r.ModifiedBySystemUser)
+                        .Include(r => r.HumanEHCOptions)
+                        .Include(r => r.Status)
+                        .ToList();
+
+                    // Get RRQ status information for each application
+                    var rrqStatusInfo = cxt.RoundRobinQueues
+                        .Include(x => x.ResponsibilityType)
+                        .Include(x => x.Status)
+                        .Include(x => x.Clerk)
+                        .Where(x => applicationIds.Contains(x.PropertyLeaseApplicationId.Value) && 
+                               x.ResponsibilityTypeId == PropertyFacilitiesManagerReviewId)
+                        .Select(x => new { 
+                            ApplicationId = x.PropertyLeaseApplicationId.Value, 
+                            RRQStatus = x.Status.Name,
+                            AssignedTo = x.Clerk.FirstName + " " + x.Clerk.LastName,
+                            ModifiedDate = x.ModifiedDateTime
+                        })
+                        .ToList();
+
+                    ViewBag.RRQStatusInfo = rrqStatusInfo.ToDictionary(x => x.ApplicationId, x => x);
+
+                    foreach (var item in applications)
+                    {
+                       item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
+                    }
+
+                    return View(applications);
                 }
                 catch (Exception io)
                 {
@@ -7024,6 +7456,52 @@ ApplicationFeeValidation(int? id)
             return Json(true, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public JsonResult GetBankingDocument(int applicationId)
+        {
+            try
+            {
+                Initialise();
+
+                // Look for banking document by checking document types
+                var bankingDocument = db.Documents
+                    .Where(d => d.ReferenceId == applicationId &&
+                               d.DocumentCheckList.DocumentType.Key == DocumentTypeKeys.BankConfirmationLetter)
+                    .OrderByDescending(d => d.Id)
+                    .FirstOrDefault();
+
+                if (bankingDocument != null)
+                {
+                    // Generate URL to view the document
+                    var documentUrl = Url.Action("GetDocument", "File", new { q = bankingDocument.File.Data });
+
+                    return Json(new
+                    {
+                        success = true,
+                        documentUrl = documentUrl,
+                        documentName = bankingDocument.DocumentName,
+                        message = "Banking document found"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "No banking document found. Please upload bank confirmation letter first."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error retrieving banking document: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         [HttpPost]
         public JsonResult SaveTenantSignatureImage()
         {
@@ -7299,6 +7777,57 @@ ApplicationFeeValidation(int? id)
             }
             return UserId;
         }
+
+        public static Customer GetHousingSupervisorId(eServicesDbContext core, int Id)
+        {
+            Customer UserId = new Customer();
+            ApplicantUnit AppUnit = core.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == Id);
+            if (AppUnit != null)
+            {
+                MatchedUnits Match = AppUnit != null ? core.MatchedUnits.FirstOrDefault(x => x.Id == AppUnit.MatchedID) : null;
+                if (Match != null)
+                {
+                    ApplicationAllocatedProperty allocatedUnit = core.ApplicationAllocatedProperty.FirstOrDefault(a => a.Id == Match.ApplicationAllocatedPropertyId);
+                    PreferredComplexArea preferredComplexArea = allocatedUnit != null ? core.PreferredComplexAreas.FirstOrDefault(x => x.Id == allocatedUnit.OfferedComplexId) : null;
+
+                    if (preferredComplexArea != null && preferredComplexArea.HousingSuperId != null)
+                        UserId = core.Customers.FirstOrDefault(x => x.Id == preferredComplexArea.HousingSuperId);
+                }
+            }
+            return UserId;
+        }
+
+        public static Customer GetMaintenanceManagerId(eServicesDbContext core, int Id)
+        {
+            Customer UserId = new Customer();
+            ApplicantUnit AppUnit = core.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == Id);
+            if (AppUnit != null)
+            {
+                MatchedUnits Match = AppUnit != null ? core.MatchedUnits.FirstOrDefault(x => x.Id == AppUnit.MatchedID) : null;
+                if (Match != null)
+                {
+                    ApplicationAllocatedProperty allocatedUnit = core.ApplicationAllocatedProperty.FirstOrDefault(a => a.Id == Match.ApplicationAllocatedPropertyId);
+                    PreferredComplexArea preferredComplexArea = allocatedUnit != null ? core.PreferredComplexAreas.FirstOrDefault(x => x.Id == allocatedUnit.OfferedComplexId) : null;
+
+                    if (preferredComplexArea != null && preferredComplexArea.MaintenanceManagerId != null)
+                        UserId = core.Customers.FirstOrDefault(x => x.Id == preferredComplexArea.MaintenanceManagerId);
+                }
+            }
+            return UserId;
+        }
+
+        public static Customer GetPropertyFacilitiesManagerId(eServicesDbContext core, int Id)
+        {
+            // Property & Facilities Manager is system-wide (AppSettings), not per-complex
+            Customer UserId = new Customer();
+            var StoredUser = Convert.ToInt16(core.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyFacilitiesManager).FirstOrDefault().Value);
+            if (StoredUser != 0)
+            {
+                UserId = core.Customers.FirstOrDefault(x => x.Id == StoredUser);
+            }
+            return UserId;
+        }
+
         public static List< Customer > ToAllocateBackOffice(eServicesDbContext core, PropertyLeaseApplication application)
         {
             Customer backOffice = new Customer();
@@ -7500,8 +8029,8 @@ ApplicationFeeValidation(int? id)
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
-                var UserId = GetBackOfficeId(db, RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                var UserId = GetHousingSupervisorId(db, RCSAppID);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.ScheduleInspectionSlots).FirstOrDefault();
@@ -7556,8 +8085,8 @@ ApplicationFeeValidation(int? id)
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
-                var UserId =  GetBackOfficeId(db,  RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                var UserId = GetHousingSupervisorId(db, RCSAppID);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.HousingSupervisor).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Inspections).FirstOrDefault();
@@ -7610,8 +8139,8 @@ ApplicationFeeValidation(int? id)
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
 
-                var UserId = GetBackOfficeId(db,  RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                var UserId = GetMaintenanceManagerId(db, RCSAppID);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.MaintenanceManager).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet).FirstOrDefault();
@@ -8317,8 +8846,8 @@ ApplicationFeeValidation(int? id)
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var appu = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
                 var unit = db.Units.FirstOrDefault(x => x.Id == appu.Matched.UnitsId);
-                var UserId =GetBackOfficeId(db, RCSAppID, false);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                var UserId = GetMaintenanceManagerId(db, RCSAppID);
+                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.MaintenanceManager).FirstOrDefault().Value);
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.UnitMaintenanance).FirstOrDefault();
@@ -16632,5 +17161,618 @@ ApplicationFeeValidation(int? id)
             }
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+
+        #region Maintenance Job Card Task Management
+
+        [HttpPost]
+        public JsonResult AddMaintenanceTask(
+            int maintenanceId,
+            string startDate,
+            string endDate,
+            string activity,
+            string materialUsed,
+            decimal? quantityUsed,
+            string labourUsed,
+            decimal? totalCosts,
+            string taskComments)
+        {
+            try
+            {
+                Initialise();
+
+                var maintenance = db.allocatedUnitMaintenanceEHCs.FirstOrDefault(x => x.Id == maintenanceId);
+                if (maintenance == null)
+                {
+                    return Json(new { success = false, message = "Maintenance record not found" });
+                }
+
+                var task = new MaintenanceJobCardTask
+                {
+                    AllocatedUnitMaintenanceEHCId = maintenanceId,
+                    StartDate = DateTime.Parse(startDate),
+                    EndDate = DateTime.Parse(endDate),
+                    Activity = activity,
+                    MaterialUsed = materialUsed,
+                    QuantityUsed = quantityUsed,
+                    LabourUsed = labourUsed,
+                    TotalCosts = totalCosts,
+                    TaskComments = taskComments,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedBySystemUserId = SystemUser.Id,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedBySystemUserId = SystemUser.Id,
+                    ModifiedDateTime = DateTime.Now
+                };
+
+                db.MaintenanceJobCardTasks.Add(task);
+                db.SaveChanges();
+
+                return Json(new { success = true, taskId = task.Id, message = "Task added successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UploadTaskDocument(int taskId)
+        {
+            try
+            {
+                Initialise();
+
+                // Validate initialization
+                if (SystemUser == null)
+                {
+                    return Json(new { success = false, message = "User session not initialized" });
+                }
+
+                if (Customer == null)
+                {
+                    return Json(new { success = false, message = "Customer session not initialized" });
+                }
+
+                var task = db.MaintenanceJobCardTasks.FirstOrDefault(x => x.Id == taskId);
+                if (task == null)
+                {
+                    return Json(new { success = false, message = "Task not found" });
+                }
+
+                var file = Request.Files[0];
+                if (file == null || file.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No file uploaded" });
+                }
+
+                // Get required lookup values with null checks
+                var referenceType = db.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.RCSUpload);
+                if (referenceType == null)
+                {
+                    return Json(new { success = false, message = "RCS Upload reference type not found" });
+                }
+
+                var documentCheckList = db.DocumentCheckLists.FirstOrDefault(dt => dt.DocumentType.Key == DocumentTypeKeys.MaintenanceTaskDocument);
+                if (documentCheckList == null)
+                {
+                    return Json(new { success = false, message = "Maintenance Task Document type not found" });
+                }
+
+                var statusSubmitted = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted);
+                if (statusSubmitted == null)
+                {
+                    return Json(new { success = false, message = "Submitted status not found" });
+                }
+
+                // Save file
+                var fileModel = new Models.File
+                {
+                    FileName = file.FileName,
+                    FileSize = file.ContentLength,
+                    ContentType = file.ContentType,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                byte[] fileBytes;
+                using (var binaryReader = new System.IO.BinaryReader(file.InputStream))
+                {
+                    fileBytes = binaryReader.ReadBytes(file.ContentLength);
+                }
+
+                fileModel.Content = fileBytes;
+                db.Files.Add(fileModel);
+                db.SaveChanges();
+
+                // Create document
+                var document = new Document
+                {
+                    FileId = fileModel.Id,
+                    CustomerId = Customer.Id,
+                    ReferenceTypeId = referenceType.Id,
+                    DocumentCheckListId = documentCheckList.Id,
+                    StatusId = statusSubmitted.Id,
+                    LocationTypeId = 3, // Database location type
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                db.Documents.Add(document);
+                db.SaveChanges();
+
+                // Link to task
+                task.SupportingDocumentId = document.Id;
+                task.ModifiedDateTime = DateTime.Now;
+                task.ModifiedBySystemUserId = SystemUser.Id;
+                db.Entry(task).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return Json(new { success = true, documentId = document.Id, message = "Document uploaded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetMaintenanceTasks(int maintenanceId)
+        {
+            try
+            {
+                var tasks = db.MaintenanceJobCardTasks
+                    .Where(x => x.AllocatedUnitMaintenanceEHCId == maintenanceId && !x.IsDeleted)
+                    .ToList() // Execute query first, then format in memory
+                    .Select(t => new
+                    {
+                        t.Id,
+                        StartDate = t.StartDate.ToString("yyyy-MM-dd"),
+                        EndDate = t.EndDate.ToString("yyyy-MM-dd"),
+                        t.Activity,
+                        t.MaterialUsed,
+                        t.QuantityUsed,
+                        t.LabourUsed,
+                        t.TotalCosts,
+                        t.TaskComments,
+                        HasDocument = t.SupportingDocumentId.HasValue
+                    })
+                    .ToList();
+
+                return Json(new { success = true, tasks = tasks }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteMaintenanceTask(int taskId)
+        {
+            try
+            {
+                Initialise();
+
+                var task = db.MaintenanceJobCardTasks.FirstOrDefault(x => x.Id == taskId && !x.IsDeleted);
+                if (task == null)
+                {
+                    return Json(new { success = false, message = "Task not found" });
+                }
+
+                // Soft delete the task
+                task.IsDeleted = true;
+                task.ModifiedDateTime = DateTime.Now;
+                task.ModifiedBySystemUserId = SystemUser.Id;
+
+                db.Entry(task).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Task deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Maintenance Job Card Image Upload
+
+        [HttpPost]
+        public JsonResult UploadBeforeImage(int maintenanceId)
+        {
+            try
+            {
+                Initialise();
+
+                var maintenance = db.allocatedUnitMaintenanceEHCs.FirstOrDefault(x => x.Id == maintenanceId);
+                if (maintenance == null)
+                {
+                    return Json(new { success = false, message = "Maintenance record not found" });
+                }
+
+                var file = Request.Files[0];
+                if (file == null || file.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No file uploaded" });
+                }
+
+                // Validate image
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var extension = System.IO.Path.GetExtension(file.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return Json(new { success = false, message = "Only image files are allowed" });
+                }
+
+                // Save file
+                var fileModel = new Models.File
+                {
+                    FileName = file.FileName,
+                    FileSize = file.ContentLength,
+                    ContentType = file.ContentType,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                byte[] fileBytes;
+                using (var binaryReader = new System.IO.BinaryReader(file.InputStream))
+                {
+                    fileBytes = binaryReader.ReadBytes(file.ContentLength);
+                }
+
+                fileModel.Content = fileBytes;
+                db.Files.Add(fileModel);
+                db.SaveChanges();
+
+                // Create document
+                var document = new Document
+                {
+                    FileId = fileModel.Id,
+                    CustomerId = Customer.Id,
+                    ReferenceTypeId = db.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.RCSUpload).Id,
+                    DocumentCheckListId = db.DocumentCheckLists.FirstOrDefault(dt => dt.DocumentType.Key == DocumentTypeKeys.MaintenanceBeforeImage).Id,
+                    StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted).Id,
+                    LocationTypeId = 3, // Database location type
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                db.Documents.Add(document);
+                db.SaveChanges();
+
+                // Update maintenance record
+                maintenance.BeforeImageId = document.Id;
+                maintenance.ModifiedDateTime = DateTime.Now;
+                db.Entry(maintenance).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return Json(new { success = true, imageId = document.Id, message = "Before image uploaded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UploadAfterImage(int maintenanceId)
+        {
+            try
+            {
+                Initialise();
+
+                var maintenance = db.allocatedUnitMaintenanceEHCs.FirstOrDefault(x => x.Id == maintenanceId);
+                if (maintenance == null)
+                {
+                    return Json(new { success = false, message = "Maintenance record not found" });
+                }
+
+                var file = Request.Files[0];
+                if (file == null || file.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No file uploaded" });
+                }
+
+                // Validate image
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var extension = System.IO.Path.GetExtension(file.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return Json(new { success = false, message = "Only image files are allowed" });
+                }
+
+                // Save file
+                var fileModel = new Models.File
+                {
+                    FileName = file.FileName,
+                    FileSize = file.ContentLength,
+                    ContentType = file.ContentType,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                byte[] fileBytes;
+                using (var binaryReader = new System.IO.BinaryReader(file.InputStream))
+                {
+                    fileBytes = binaryReader.ReadBytes(file.ContentLength);
+                }
+
+                fileModel.Content = fileBytes;
+                db.Files.Add(fileModel);
+                db.SaveChanges();
+
+                // Create document
+                var document = new Document
+                {
+                    FileId = fileModel.Id,
+                    CustomerId = Customer.Id,
+                    ReferenceTypeId = db.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.RCSUpload).Id,
+                    DocumentCheckListId = db.DocumentCheckLists.FirstOrDefault(dt => dt.DocumentType.Key == DocumentTypeKeys.MaintenanceAfterImage).Id,
+                    StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted).Id,
+                    LocationTypeId = 3, // Database location type
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now,
+                    CreatedBySystemUserId = SystemUser.Id
+                };
+
+                db.Documents.Add(document);
+                db.SaveChanges();
+
+                // Update maintenance record
+                maintenance.AfterImageId = document.Id;
+                maintenance.ModifiedDateTime = DateTime.Now;
+                db.Entry(maintenance).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return Json(new { success = true, imageId = document.Id, message = "After image uploaded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Maintenance Job Card Signature
+
+        [HttpPost]
+        public JsonResult SaveMaintenanceSignature(
+            int maintenanceId,
+            string officialNumber,
+            string approvalAction,
+            string reason,
+            string signatureData)
+        {
+            try
+            {
+                Initialise();
+
+                var maintenance = db.allocatedUnitMaintenanceEHCs
+                    .Include(x => x.PropertyLeaseApplication)
+                    .FirstOrDefault(x => x.Id == maintenanceId);
+
+                if (maintenance == null)
+                {
+                    return Json(new { success = false, message = "Maintenance record not found" });
+                }
+
+                // Check if signature already exists
+                var existingSignature = db.MaintenanceJobCardSignatures
+                    .FirstOrDefault(x => x.AllocatedUnitMaintenanceEHCId == maintenanceId && !x.IsDeleted);
+
+                if (existingSignature != null)
+                {
+                    return Json(new { success = false, message = "Signature already captured for this job card" });
+                }
+
+                // Create signature record
+                var signature = new MaintenanceJobCardSignature
+                {
+                    AllocatedUnitMaintenanceEHCId = maintenanceId,
+                    OfficialNumber = officialNumber,
+                    ApprovalAction = approvalAction,
+                    Reason = reason,
+                    SignatureData = signatureData,
+                    ApprovalDate = DateTime.Now,
+                    SignedByCustomerId = Customer.Id,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedBySystemUserId = SystemUser.Id,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now
+                };
+
+                db.MaintenanceJobCardSignatures.Add(signature);
+
+                // Update maintenance record
+                maintenance.JobCardSubmitted = true;
+                maintenance.JobCardSubmittedDate = DateTime.Now;
+                maintenance.UnitMaintenanceCompleted = true;
+                maintenance.ModifiedDateTime = DateTime.Now;
+                db.Entry(maintenance).State = EntityState.Modified;
+
+                db.SaveChanges();
+
+                // Route ALL maintenance (both minor and major defects) to Property & Facilities Manager (UC013)
+                if (maintenance.RCSActionTypeId.HasValue)
+                {
+                    var actionType = db.RCSActionTypes.FirstOrDefault(x => x.Id == maintenance.RCSActionTypeId.Value);
+
+                    // Get Property & Facilities Manager for this application
+                    var facilitiesManager = GetPropertyFacilitiesManagerId(db, maintenance.PropertyLeaseApplicationId);
+                    var facilitiesManagerId = facilitiesManager?.Id ?? 0;
+
+                    // Fallback to AppSettings if no specific manager assigned
+                    if (facilitiesManagerId == 0)
+                    {
+                        var appSetting = db.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.PropertyFacilitiesManager);
+                        if (appSetting != null)
+                        {
+                            facilitiesManagerId = Convert.ToInt32(appSetting.Value);
+                        }
+                    }
+
+                    var responsibilityType = db.ResponsibilityTypes
+                        .FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview);
+
+                    if (responsibilityType != null && facilitiesManagerId > 0)
+                    {
+                        // Create work queue for Property & Facilities Manager review (UC013)
+                        var rrQueue = new RoundRobinQueue
+                        {
+                            PropertyLeaseApplicationId = maintenance.PropertyLeaseApplicationId,
+                            ResponsibilityTypeId = responsibilityType.Id,
+                            ClerkId = facilitiesManagerId,
+                            StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted).Id,
+                            CurrentTaskDateTime = DateTime.Now,
+                            IsActive = true,
+                            IsDeleted = false,
+                            CreatedDateTime = DateTime.Now,
+                            ModifiedDateTime = DateTime.Now,
+                            CreatedBySystemUserId = SystemUser.Id
+                        };
+
+                        db.RoundRobinQueues.Add(rrQueue);
+                        db.SaveChanges();
+
+                        // Send notification to Facilities Manager
+                        BackOfficeNotification(maintenance.PropertyLeaseApplicationId, facilitiesManagerId, responsibilityType.Name);
+                    }
+
+                    // Major defects: Block application until Facilities Manager approves
+                    if (actionType != null && actionType.Key == RCSActionTypeKeys.NotHabitable)
+                    {
+                        // Update application status to CustomerQueryPending (blocks progression)
+                        var application = maintenance.PropertyLeaseApplication;
+                        application.StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.CustomerQueryPending).Id;
+                        db.Entry(application).State = EntityState.Modified;
+                        db.SaveChanges();
+
+                        // Activity tracker for major defects
+                        ActivityTrackerAudit(
+                            maintenance.PropertyLeaseApplicationId,
+                            "Maintenance job card signed off. Major defects - application blocked pending Property & Facilities Manager approval.",
+                            Customer.Id
+                        );
+                    }
+                    else if (actionType != null && actionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
+                    {
+                        // Minor defects: Application continues, but Facilities Manager still reviews job card
+                        // DO NOT change application status - let it continue normal workflow
+                        ActivityTrackerAudit(
+                            maintenance.PropertyLeaseApplicationId,
+                            "Maintenance job card signed off. Minor defects - application continues while Property & Facilities Manager reviews completed work.",
+                            Customer.Id
+                        );
+                    }
+                    else
+                    {
+                        // Fallback for other action types
+                        ActivityTrackerAudit(
+                            maintenance.PropertyLeaseApplicationId,
+                            "Maintenance job card signed off and routed to Property & Facilities Manager for review.",
+                            Customer.Id
+                        );
+                    }
+                }
+
+                // Mark current Maintenance Job Sheet RoundRobinQueue as finished
+                var maintenanceJobSheetResponsibility = db.ResponsibilityTypes
+                    .FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.MaintananceJobSheet);
+                if (maintenanceJobSheetResponsibility != null)
+                {
+                    MatchingHelper.RoundRobinMarkJobAsFinished(
+                        db, 
+                        maintenance.PropertyLeaseApplicationId, 
+                        null, 
+                        maintenanceJobSheetResponsibility.Id, 
+                        Customer.Id
+                    );
+                }
+
+                return Json(new { success = true, signatureId = signature.Id, message = "Signature saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult CheckMaintenanceSignatureStatus(int maintenanceId)
+        {
+            try
+            {
+                var signature = db.MaintenanceJobCardSignatures
+                    .FirstOrDefault(x => x.AllocatedUnitMaintenanceEHCId == maintenanceId && !x.IsDeleted);
+
+                if (signature != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        signed = true,
+                        officialNumber = signature.OfficialNumber,
+                        approvalAction = signature.ApprovalAction,
+                        approvalDate = signature.ApprovalDate.ToString("yyyy-MM-dd HH:mm")
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { success = true, signed = false }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #endregion
+
+        #region Download Inspection Form
+
+        [HttpGet]
+        public ActionResult DownloadPreInspectionForm()
+        {
+            try
+            {
+                var filePath = Server.MapPath("~/Content/Pre-inspection Form v2.pdf");
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return HttpNotFound("Pre-inspection form not found");
+                }
+
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                return File(fileBytes, "application/pdf", "Pre-inspection Form v2.pdf");
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                return new HttpStatusCodeResult(500, "Error downloading form");
+            }
+        }
+
+        #endregion
     }
 }

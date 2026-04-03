@@ -1,0 +1,179 @@
+@model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Property Maintenance Overview";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var rrqStatusInfo = ViewBag.RRQStatusInfo as Dictionary<int, dynamic>;
+}
+
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .cards tbody tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+
+    .status-awaiting { color: #f39c12; font-weight: bold; }
+    .status-approved { color: #27ae60; font-weight: bold; }
+    .status-rejected { color: #e74c3c; font-weight: bold; }
+</style>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    <h4>Property Maintenance Management Overview (CEO)</h4>
+                    <p>Comprehensive view of all maintenance job cards - awaiting approval and completed</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="maintenanceOverviewCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <strong>Legend:</strong>
+                        <span class="status-awaiting">● Awaiting Approval</span> |
+                        <span class="status-approved">● Approved</span> |
+                        <span class="status-rejected">● Rejected</span>
+                    </div>
+                </div>
+            </div>
+
+            <table id="MaintenanceOverviewTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Application Type</th>
+                        <th>@Html.DisplayNameFor(model => model.ApplicationReferenceNumber)</th>
+                        <th>Application Status</th>
+                        <th>Maintenance Review Status</th>
+                        <th>Assigned To</th>
+                        <th>Last Modified</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <label>Applicant Name:</label>
+                                @Html.DisplayFor(modelItem => item.CreatedBySystemUser.FirstName) @Html.DisplayFor(modelItem => item.CreatedBySystemUser.LastName)
+                            </td>
+                            <td>
+                                <label>Application Type:</label>
+                                @Html.DisplayFor(modelItem => item.PurchaserType.Name)
+                            </td>
+                            <td>
+                                <label>Reference Number:</label>
+                                @Html.DisplayFor(modelItem => item.ApplicationReferenceNumber)
+                            </td>
+                            <td>
+                                <label>Application Status:</label>
+                                <span class="badge badge-primary">@Html.DisplayFor(modelItem => item.Status.Name)</span>
+                            </td>
+                            <td>
+                                <label>Review Status:</label>
+                                <span class="status-awaiting">Maintenance Review</span>
+                            </td>
+                            <td>
+                                <label>Assigned To:</label>
+                                Facilities Manager
+                            </td>
+                            <td>
+                                <label>Last Modified:</label>
+                                @Html.DisplayFor(modelItem => item.ModifiedDateTime)
+                            </td>
+                            <td>
+                                <label>Action:</label>
+                                @Html.ActionLink("View Details", "PropertyFacilitiesManagerReview", 
+                                    new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, 
+                                    new { @class = "btn btn-info btn-sm", title = "View maintenance details and approval information" })
+
+                                <br /><small class="text-info">📋 Maintenance oversight view</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#MaintenanceOverviewTable').DataTable({
+            "order": [[6, "desc"]], // Order by last modified date descending
+            "pageLength": 25,
+            "responsive": true,
+            "columnDefs": [
+                { "width": "15%", "targets": 0 },
+                { "width": "10%", "targets": 1 },
+                { "width": "15%", "targets": 2 },
+                { "width": "12%", "targets": 3 },
+                { "width": "12%", "targets": 4 },
+                { "width": "15%", "targets": 5 },
+                { "width": "12%", "targets": 6 },
+                { "width": "10%", "targets": 7 }
+            ]
+        });
+    });
+</script>
