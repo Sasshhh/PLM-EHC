@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -1204,7 +1204,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     Initialise();
                     List<LeaseDetails> rCSApplicationStatus = null;
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
 
                     var Keys = db.Status;
@@ -1214,13 +1214,14 @@ namespace C8.eServices.Mvc.Controllers
                     if (User.IsInRole("Revenue Manager"))
                     {
                         var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalRevenue).FirstOrDefault().Id;
-                        var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.RevenueManager).FirstOrDefault().Value);
+                        var activeDirectoryOn = Convert.ToInt32(db.AppSettings.Where(x => x.Key == AppSettingKeys.RevenueManager).FirstOrDefault().Value);
                         int InAwaitingRevenueManagersReview = db.Status.FirstOrDefault(r => r.Key == StatusKeys.InAwaitingRevenueManagersReview).Id;
 
                         rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
-                        var list = rrq.Select(x => x.LeaseDetailsId).ToList();
+                        var list = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId.Value).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && x.StatusId == InAwaitingRevenueManagersReview)
+                        int AwaitingRenewalReviewOutcome = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalReviewOutcome).Id;
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == InAwaitingRevenueManagersReview || x.StatusId == AwaitingRenewalReviewOutcome))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -1228,15 +1229,22 @@ namespace C8.eServices.Mvc.Controllers
                     }
                     else if (User.IsInRole("Property Manager"))
                     {
-                        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.SecondLeaseRenewal).FirstOrDefault().Id;
-                        var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
+                        var activeDirectoryOn = Convert.ToInt32(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
+
+                        var respSecond = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.SecondLeaseRenewal).FirstOrDefault().Id;
                         int InAwaitingPropertyManagersReview = db.Status.FirstOrDefault(r => r.Key == StatusKeys.InAwaitingPropertyManagersReview).Id;
                         int LeaseTerminatedDueToComplaints = db.Status.FirstOrDefault(r => r.Key == StatusKeys.LeaseTerminatedDueToComplaints).Id;
+                        var rrqSecond = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == respSecond && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
 
-                        rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
-                        var list = rrq.Select(x => x.LeaseDetailsId).ToList();
+                        var respCEO = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalCEOApproval).FirstOrDefault().Id;
+                        int AwaitingRenewalOutcome = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalOutcome).Id;
+                        var rrqCEO = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == respCEO && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == InAwaitingPropertyManagersReview || x.StatusId == LeaseTerminatedDueToComplaints))
+                        rrq = rrqSecond.Concat(rrqCEO).ToList();
+                        var allLeaseIds = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId.Value).ToList();
+
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && allLeaseIds.Contains(x.Id)
+                            && (x.StatusId == InAwaitingPropertyManagersReview || x.StatusId == LeaseTerminatedDueToComplaints || x.StatusId == AwaitingRenewalOutcome))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -1248,10 +1256,11 @@ namespace C8.eServices.Mvc.Controllers
                         var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals).FirstOrDefault().Id;
 
                         int ApplicationUpForRenewalAtThreeMonths = db.Status.FirstOrDefault(r => r.Key == StatusKeys.ApplicationUpForRenewalAtThreeMonths).Id;
-                        rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == UserId && x.StatusId == SubmittedId).ToList();
-                        var list = rrq.Select(x => x.LeaseDetailsId).ToList();
+                        int AwaitingLeaseRenewalAgreementConclusion = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingLeaseRenewalAgreementConclusion).Id;
+                        rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == CustomerId && x.StatusId == SubmittedId).ToList();
+                        var list = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId.Value).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && x.StatusId == ApplicationUpForRenewalAtThreeMonths)
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == ApplicationUpForRenewalAtThreeMonths || x.StatusId == AwaitingLeaseRenewalAgreementConclusion))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -1377,7 +1386,7 @@ namespace C8.eServices.Mvc.Controllers
                 try
                 {
                     Initialise();                    
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
 
                     var property= db.PropertyLeaseApplications.Where(x=>x.CustomerId==CustomerId).ToList();
 
@@ -1418,7 +1427,7 @@ namespace C8.eServices.Mvc.Controllers
                 try
                 {
                     Initialise();
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
                     var Keys = cxt.Status;
                     int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
                     int UserId = Customer.Id;
@@ -1706,7 +1715,575 @@ namespace C8.eServices.Mvc.Controllers
                     throw;
                 }
             }
-            
+
+        }
+
+        // ─── Phase 4 – CSO recommends for renewal (new multi-step flow) ──────────
+
+        [DecryptParameter]
+        public ActionResult RecommendForRenewal(int? id)
+        {
+            eServicesDbContext context = new eServicesDbContext();
+            Initialise();
+            var userID = Customer;
+
+            var Message = TempData["AssessmentFeeRedistributionTitle"];
+            var Title = TempData["AssessmentFeeRedistribution"];
+            if (Message != null && Title != null)
+            {
+                ViewBag.MessageTitle = TempData["AssessmentFeeRedistributionTitle"].ToString();
+                ViewBag.Message = TempData["AssessmentFeeRedistribution"].ToString();
+            }
+
+            var Message2 = TempData["AssessmentFeeTitle"];
+            var Title2 = TempData["AssessmentFeeBody"];
+            if (Message2 != null && Title2 != null)
+            {
+                ViewBag.MessageTitle2 = TempData["AssessmentFeeTitle"].ToString();
+                ViewBag.Message2 = TempData["AssessmentFeeBody"].ToString();
+            }
+
+            PropertyLeaseApplication rcsApps = null;
+            LeaseDetails lease = null;
+
+            lease = db.LeaseDetails.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+              .Include(r => r.ModifiedBySystemUser)
+              .Include(r => r.Status)
+              .Include(r => r.PurchaserType)
+              .Where(x => x.Id == id).FirstOrDefault();
+
+            rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+              .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
+              .Include(r => r.HumanEHCOptions).Include(r => r.Status)
+              .Where(x => x.Id == lease.PropertyLeaseApplicationId).FirstOrDefault();
+
+            var AccountBal = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsActive && !x.IsDeleted);
+            var matched = db.MatchedUnits.FirstOrDefault(x => x.Id == AccountBal.MatchedID && x.IsAccepted && !x.IsDeleted) ?? null;
+            var unit = db.Units.FirstOrDefault(x => x.Id == matched.UnitsId && !x.IsDeleted && x.IsTaken && x.IsActive) ?? null;
+            ViewBag.AmountDue = AccountBal.OutstandingDepopsitAmount;
+
+            if (lease.PeriodInMonths >= 24)
+            {
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approve24Months || x.Key == RCSActionTypeKeys.Approve12Months || x.Key == RCSActionTypeKeys.NotRenew).OrderBy(x => x.Name), "Key", "Name");
+            }
+            else
+            {
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approve12Months || x.Key == RCSActionTypeKeys.NotRenew).OrderBy(x => x.Name), "Key", "Name");
+            }
+
+            try
+            {
+                var customer = context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
+                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+                if (customer == null) throw new Exception("Invalid Customer");
+
+                var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+                if (application == null) throw new Exception(string.Format("Invalid/ missing application key {0}", ApplicationKeys.RatesClearanceSystem));
+
+                var documentReferenceType = context.ReferenceTypes.SingleOrDefault(r => r.Key == ReferenceTypeKeys.RCSUpload);
+                if (documentReferenceType == null)
+                    throw new Exception(string.Format("Invalid/ missing reference type key {0}",
+                        ReferenceTypeKeys.RCSUpload));
+
+                var documentCheckLists = new List<DocumentCheckList>();
+
+                var ProofOfPayment = context.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.AssessmentProofOfPayment);
+
+                documentCheckLists.Add(context.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ProofOfPayment.Id && dcl.ReferenceTypeId == documentReferenceType.Id));
+
+                var ApplicationStage = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.SubmitFigures).FirstOrDefault().Id;
+   
+
+                var documents = context.Documents.Where(d => d.CustomerId == customer.Id && d.PropertyLeaseApplicationId == id).ToList();
+                var notes = context.Notes.Where(n => n.ReferenceId == customer.Id).ToList();
+                var customerDocuments = context.Documents.Include(d => d.File).Include(d => d.Status)
+                                                .Where(d => d.CustomerId == customer.Id && d.ReferenceType.Id == documentReferenceType.Id
+                            && d.IsActive
+                            && d.IsDeleted == false && d.PropertyLeaseApplicationId == id).ToList();
+
+                foreach (var doc in customerDocuments)
+                {
+                    doc.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", doc.FileId));
+                    doc.Data = HttpUtility.UrlEncode(SecureActionLinkExtension.Encrypt(string.Format("documentId={0}", doc.Id)));
+
+                }
+
+                var docdets = db.DocumentTypes.FirstOrDefault(x => x.Key == DocumentTypeKeys.RefundMeterReading);
+                var attachments = docdets != null 
+                    ? db.Attachments.Where(x => x.PropertyLeaseApplicationId == id && x.DocumentTypeId == docdets.Id).ToList()
+                    : new List<Attachments>();
+
+                var referenceType = context.ReferenceTypes.FirstOrDefault(a => a.Key.Equals(ReferenceTypeKeys.RCSUpload));
+                DocumentsViewModel dvm = new DocumentsViewModel
+                {
+                    Documents = new List<Document>(),
+                    DocumentCheckLists = new List<DocumentCheckList>()
+                };
+
+                if (referenceType != null && application != null)
+                {
+                    try
+                    {
+                        MatchingHelper.DocumentRenewalLetter(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, true);
+                    }
+                    catch (Exception dvmEx)
+                    {
+                        EventLogHelper.LogSystemError(dvmEx.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    }
+                }
+
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    LeaseDetails = lease,
+                    Attachments = attachments,
+                    PropertyLeaseApplications = rcsApps,
+                    DocName = docdets?.Name,
+                    DocDesc = docdets?.Description,
+                    DocumentsViewModel = dvm
+                };
+
+                vm.Customer = customer;
+                vm.PropertyLeaseApplications = rcsApps;
+                ViewBag.RejectComment = "";
+                ViewBag.LeaseId = lease.Id;
+                ViewBag.ReferenceTypeId = documentReferenceType.Id;
+                ViewBag.ApplicationId = application.Id;
+                ViewBag.PurchaserTypes = db.PurchaserType;
+
+                var obj = new
+                {
+                    IdentificationNumber = vm.Customer.IdentificationNumber,
+                    FullName = vm.Customer.FullName,
+                    EmailAddress = vm.Customer.SystemUser == null ? vm.Customer.EmailAddress : vm.Customer.SystemUser.EmailAddress,
+                    SystemUserId = vm.Customer.SystemUser == null ? 0 : vm.Customer.SystemUserId,
+                    CustomerId = vm.Customer.Id
+                };
+
+                ViewBag.CustomerModel = obj;
+                ViewBag.CustomerTypeId = new SelectList(context.Status.Include(x => x.StatusType).Where(x => x.StatusType.Key == StatusTypeKeys.DocumentUpload).ToList(), "Key", "Name");
+                ViewBag.MigratedAppRenewalAllowed = ((rcsApps.IsMigrated && !rcsApps.IsFullyMigrated) ? "Application cannot do renewal because migrated record not completed, please complete migration process to start renewal" : null);
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                throw;
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult RecommendForRenewal(int? id, string ApprovalStatusddl, string RejectComment)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id);
+
+                    PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+                    {
+                        PropertyLeaseApplicationId = lease.PropertyLeaseApplicationId,
+                        RejectReason = RejectComment,
+                        LeaseRenewalValidation = true,
+                        CreatedDateTime = DateTime.Now,
+                        ClerkId = Customer.Id
+                    };
+                    _conx.propertyLeaseActionComments.Add(comments);
+                    _conx.SaveChanges();
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.NotRenew)
+                    {
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalRejected).Id, (int)lease.Id);
+                        var atMsg = string.Format("Lease renewal not recommended by CSO: {0}", lease.LeaseReferenceNo);
+                        MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+                        Session["LeaseRenewalSession"] = string.Format("Lease renewal declined for {0}.", lease.LeaseReferenceNo);
+                        return RedirectToAction("Renewals");
+                    }
+
+                    if (!MatchingHelper.IsEligibleForRenewal_72MonthCap(_conx, (int)lease.PropertyLeaseApplicationId))
+                    {
+                        Session["LeaseRenewalSession"] = string.Format("Renewal not permitted — lease has exceeded the 72-month cap for {0}.", lease.LeaseReferenceNo);
+                        return RedirectToAction("Renewals");
+                    }
+
+                    if (!MatchingHelper.IsEligibleForRenewal_PaymentCompliance(_conx, (int)lease.PropertyLeaseApplicationId))
+                    {
+                        Session["LeaseRenewalSession"] = string.Format("Renewal not permitted — active payment transgressions or complaints exist for {0}.", lease.LeaseReferenceNo);
+                        return RedirectToAction("Renewals");
+                    }
+
+                    int months = ApprovalStatusddl == RCSActionTypeKeys.Approve24Months ? 24 : 12;
+                    MatchingHelper.ChangeLeaseEndDate(_conx, months, (int)lease.Id);
+
+                    var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
+                    MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
+
+                    MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRenewalReviewOutcome).Id, (int)lease.Id);
+
+                    var atMessage = string.Format("Lease renewal recommended for Revenue Manager review ({0} months): {1}", months, lease.LeaseReferenceNo);
+                    MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMessage, Customer.Id);
+
+                    MatchingHelper.RoundRobinRenewal(_conx, (int)lease.PropertyLeaseApplicationId, ResponsibilityTypeKeys.LeaseRenewalRevenue, (int)lease.Id, AppSettingKeys.RevenueManager);
+
+                    Session["LeaseRenewalSession"] = string.Format("Renewal recommendation submitted for Revenue Manager review: {0}.", lease.LeaseReferenceNo);
+                    return RedirectToAction("Renewals");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+        }
+
+        // ─── Phase 6 – Revenue Manager review ────────────────────────────────────
+
+        [DecryptParameter]
+        public ActionResult RevenueManagerRenewalReview(int? id)
+        {
+            try
+            {
+                eServicesDbContext context = new eServicesDbContext();
+                Initialise();
+                PropertyLeaseApplication rcsApps = null;
+                LeaseDetails lease = null;
+
+                lease = db.LeaseDetails.OrderByDescending(x=>x.Id).Where(x => x.IsDeleted == false && x.IsNew).Include(r => r.CreatedBySystemUser)
+                  .Include(r => r.ModifiedBySystemUser)
+                  .Include(r => r.Status)
+                  .Include(r => r.PurchaserType)
+                  .Where(x => x.Id == id).FirstOrDefault();
+
+                rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+                  .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
+                  .Include(r => r.HumanEHCOptions).Include(r => r.Status)
+                  .Where(x => x.Id == lease.PropertyLeaseApplicationId).FirstOrDefault();
+                var customer = context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
+                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+                if (customer == null) throw new Exception("Invalid Customer");
+
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+
+                var referenceType = context.ReferenceTypes.FirstOrDefault(a => a.Key.Equals(ReferenceTypeKeys.RCSUpload));
+                var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+
+                DocumentsViewModel dvm = new DocumentsViewModel
+                {
+                    Documents = new List<Document>(),
+                    DocumentCheckLists = new List<DocumentCheckList>()
+                };
+
+                if (referenceType != null && application != null)
+                {
+                    try
+                    {
+                        MatchingHelper.DocumentRenewalLetter(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
+                    }
+                    catch (Exception dvmEx)
+                    {
+                        EventLogHelper.LogSystemError(dvmEx.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    }
+                }
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    LeaseDetails = lease,
+                    PropertyLeaseApplications = rcsApps,
+                    DocumentsViewModel = dvm
+                };
+                var Actions = context.RCSActionTypes.ToList();
+
+                var p = context.propertyLeaseActionComments.Include(r => r.CreatedBySystemUser).Include(r => r.Clerk).Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.LeaseRenewalValidation).FirstOrDefault();
+                var q = context.PropertyLeaseRenewalOffers.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id).FirstOrDefault()??null;
+                var f = "";
+                if (q != null)
+                {
+                    f = (q.MonthsOffer == 12) ? Actions.FirstOrDefault(x => x.Key == RCSActionTypeKeys.Approve12Months).Name : Actions.FirstOrDefault(x => x.Key == RCSActionTypeKeys.Approve24Months).Name;
+                }
+                ViewBag.OfficerName = p != null && p.Clerk != null ? p.Clerk.FirstName + " " + p.Clerk.LastName : "Unknown Officer";
+                ViewBag.ActionComment = q == null ? Actions.FirstOrDefault(x=>x.Key==RCSActionTypeKeys.NotRenew).Name+ ": " + (p != null ? p.RejectReason : "") : f + ": " + (p != null ? p.RejectReason : "");
+                ViewBag.DateCaptured = p != null ? p.CreatedDateTime : DateTime.Now;
+
+                ViewBag.RejectComment = "";
+                ViewBag.PropertyComment = "";
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                throw;
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult RevenueManagerRenewalReview(int? id, string ApprovalStatusddl, string RejectComment)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id);
+                    var revResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalRevenue);
+
+                    PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+                    {
+                        PropertyLeaseApplicationId = lease.PropertyLeaseApplicationId,
+                        RejectReason = RejectComment,
+                        RevenueReviewValidation = true,
+                        CreatedDateTime = DateTime.Now,
+                        ClerkId = Customer.Id
+                    };
+                    _conx.propertyLeaseActionComments.Add(comments);
+                    _conx.SaveChanges();
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    {
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRenewalOutcome).Id, (int)lease.Id);
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, revResp.Id, Customer.Id);
+
+                        var atMsg = string.Format("Lease renewal approved by Revenue Manager, pending Director decision: {0}", lease.LeaseReferenceNo);
+                        MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+
+                        MatchingHelper.RoundRobinRenewal(_conx, (int)lease.PropertyLeaseApplicationId, ResponsibilityTypeKeys.LeaseRenewalCEOApproval, (int)lease.Id, AppSettingKeys.PropertyManager);
+
+                        Session["LeaseRenewalSession"] = string.Format("Renewal approved and submitted for Property Manager decision: {0}.", lease.LeaseReferenceNo);
+                    }
+                    else
+                    {
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalRejected).Id, (int)lease.Id);
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, revResp.Id, Customer.Id);
+
+                        var atMsg = string.Format("Lease renewal rejected by Revenue Manager: {0}. Reason: {1}", lease.LeaseReferenceNo, RejectComment);
+                        MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+
+                        int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InActionGenerateLeaseAgreement).Id;
+                        EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboodyId);
+
+                        Session["LeaseRenewalSession"] = string.Format("Renewal rejected for {0}.", lease.LeaseReferenceNo);
+                    }
+
+                    return RedirectToAction("Renewals");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+        }
+
+        // ─── Phase 7 – Director/CEO decision ──────────────────────────────────────
+
+        [DecryptParameter]
+        public ActionResult CEORenewalDecision(int? id)
+        {
+            try
+            {
+                eServicesDbContext context = new eServicesDbContext();
+                Initialise();
+                PropertyLeaseApplication rcsApps = null;
+                LeaseDetails lease = null;
+                PropertyManager propertyManager = new PropertyManager();
+                
+                lease = db.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.IsDeleted == false && x.IsNew).Include(r => r.CreatedBySystemUser)
+                  .Include(r => r.ModifiedBySystemUser)
+                  .Include(r => r.Status)
+                  .Include(r => r.PurchaserType)
+                  .Where(x => x.Id == id).FirstOrDefault();
+
+                rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+                  .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
+                  .Include(r => r.HumanEHCOptions).Include(r => r.Status)
+                  .Where(x => x.Id == lease.PropertyLeaseApplicationId).FirstOrDefault();
+                var customer = context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
+                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+                if (customer == null) throw new Exception("Invalid Customer");
+
+                var revComment = context.propertyLeaseActionComments.Include(r => r.CreatedBySystemUser).Include(r => r.Clerk).Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.RevenueReviewValidation).FirstOrDefault();
+                if (revComment != null)
+                {
+                    propertyManager.PropertyComments = revComment.RejectReason;
+                    propertyManager.Approved = true;
+                }
+                else
+                {
+                    propertyManager.PropertyComments = "No Comment";
+                }
+
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+
+                var referenceType = context.ReferenceTypes.FirstOrDefault(a => a.Key.Equals(ReferenceTypeKeys.RCSUpload));
+                var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+
+                DocumentsViewModel dvm = new DocumentsViewModel
+                {
+                    Documents = new List<Document>(),
+                    DocumentCheckLists = new List<DocumentCheckList>()
+                };
+
+                if (referenceType != null && application != null)
+                {
+                    try
+                    {
+                        MatchingHelper.DocumentRenewalLetter(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
+                    }
+                    catch (Exception dvmEx)
+                    {
+                        EventLogHelper.LogSystemError(dvmEx.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    }
+                }
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    LeaseDetails = lease,
+                    PropertyLeaseApplications = rcsApps,
+                    PropertyManager = propertyManager,
+                    DocumentsViewModel = dvm
+                };
+
+                ViewBag.Approved = "Recomendation Seconded By Revenue Manager";
+
+                var Actions = context.RCSActionTypes.ToList();
+
+                var p = context.propertyLeaseActionComments.Include(r => r.CreatedBySystemUser).Include(r => r.Clerk).Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.LeaseRenewalValidation).FirstOrDefault();
+                var q = context.PropertyLeaseRenewalOffers.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id).FirstOrDefault() ?? null;
+                var f = "";
+                if (q != null)
+                {
+                    f = (q.MonthsOffer == 12) ? Actions.FirstOrDefault(x => x.Key == RCSActionTypeKeys.Approve12Months).Name : Actions.FirstOrDefault(x => x.Key == RCSActionTypeKeys.Approve24Months).Name;
+                }
+                
+                ViewBag.OfficerName = p != null && p.Clerk != null ? p.Clerk.FirstName + " " + p.Clerk.LastName : "Unknown Officer";
+                ViewBag.ActionComment = q == null ? Actions.FirstOrDefault(x => x.Key == RCSActionTypeKeys.NotRenew).Name + ": " + (p != null ? p.RejectReason : "") : f + ": " + (p != null ? p.RejectReason : "");
+                ViewBag.DateCaptured = p != null ? p.CreatedDateTime : DateTime.Now;
+
+                ViewBag.RejectComment = "";
+                ViewBag.PropertyComment = "";
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                throw;
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult CEORenewalDecision(int? id, string ApprovalStatusddl, string RejectComment)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id);
+                    var ceoResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalCEOApproval);
+
+                    PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+                    {
+                        PropertyLeaseApplicationId = lease.PropertyLeaseApplicationId,
+                        RejectReason = RejectComment,
+                        PropertyReviewValidation = true,
+                        CreatedDateTime = DateTime.Now,
+                        ClerkId = Customer.Id
+                    };
+                    _conx.propertyLeaseActionComments.Add(comments);
+                    _conx.SaveChanges();
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    {
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalApproved).Id, (int)lease.Id);
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingLeaseRenewalAgreementConclusion).Id, (int)lease.Id);
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, ceoResp.Id, Customer.Id);
+
+                        var atMsg = string.Format("Lease renewal approved by Director — awaiting agreement conclusion: {0}", lease.LeaseReferenceNo);
+                        MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+
+                        MatchingHelper.RoundRobinRenewal(_conx, (int)lease.PropertyLeaseApplicationId, ResponsibilityTypeKeys.LeaseRenewals, (int)lease.Id);
+
+                        int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationUpForRenewal).Id;
+                        EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboodyId);
+
+                        Session["LeaseRenewalSession"] = string.Format("Renewal approved — returned to CSO for agreement conclusion: {0}.", lease.LeaseReferenceNo);
+                    }
+                    else
+                    {
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalRejected).Id, (int)lease.Id);
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, ceoResp.Id, Customer.Id);
+
+                        var atMsg = string.Format("Lease renewal rejected by Director: {0}. Reason: {1}", lease.LeaseReferenceNo, RejectComment);
+                        MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+
+                        int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InActionGenerateLeaseAgreement).Id;
+                        EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboodyId);
+
+                        Session["LeaseRenewalSession"] = string.Format("Renewal rejected by Director for {0}.", lease.LeaseReferenceNo);
+                    }
+
+                    return RedirectToAction("Renewals");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+        }
+
+        // ─── Phase 8 – CSO concludes renewal agreement ────────────────────────────
+
+        [DecryptParameter]
+        public ActionResult ConcludeRenewalAgreement(int? id)
+        {
+            eServicesDbContext context = new eServicesDbContext();
+            Initialise();
+
+            var lease = db.LeaseDetails.Include(r => r.Status).Include(r => r.PurchaserType)
+                .FirstOrDefault(x => x.Id == id);
+            var rcsApps = db.PropertyLeaseApplications.Include(r => r.Customer).Include(r => r.Status)
+                .FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+
+            ViewBag.LeaseId = lease.Id;
+            var vm = new DepartmentsApprovalViewModel { LeaseDetails = lease, PropertyLeaseApplications = rcsApps };
+            vm.Customer = context.Customers.Include(s => s.SystemUser).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+            return View(vm);
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult ConcludeRenewalAgreement(int? id, string confirm)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id);
+
+                    MatchingHelper.AddMonthsToDates(_conx, (int)lease.Id);
+
+                    MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalAgreementConcluded).Id, (int)lease.Id);
+
+                    var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
+                    MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
+
+                    var atMsg = string.Format("Lease renewal agreement concluded by CSO: {0}", lease.LeaseReferenceNo);
+                    MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
+
+                    int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationUpForRenewal).Id;
+                    EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboodyId);
+
+                    Session["LeaseRenewalSession"] = string.Format("Renewal agreement concluded for {0}.", lease.LeaseReferenceNo);
+                    return RedirectToAction("Renewals");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
         }
 
         [DecryptParameter]

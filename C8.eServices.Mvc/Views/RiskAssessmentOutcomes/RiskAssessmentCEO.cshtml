@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@model C8.eServices.Mvc.ViewModels.CaptureViewModel
 @{
     ViewBag.Title = "Risk Assessment CEO";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
@@ -136,7 +136,9 @@
                         <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.CreatedDateTime) </td>
                         <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.Status.Name) </td>
                         <td>
-                            @* Action buttons *@
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication",
+                            new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + ViewBag.ConductPrpertyId.ToString()), target = "_blank" },
+                            new { @class = "btn btn-primary btn-sm", @target = "_blank" })
                         </td>
                     </tr>
                 </tbody>
@@ -172,44 +174,53 @@
                     </div>
                     <div class="panel-body" style="background-color: #f9f9f9;">
 
-                        @* CSO *@
-                        <div class="row"><div class="col-md-12"><label style="text-decoration:underline;">Client Services Officer (Step 1)</label></div></div>
-                        <div class="form-group">
-                            <label class="control-label col-md-2">Name/No</label>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.FirstName (@Model.RiskAssessmentOutcome.OfficialNumber)" disabled />
-                            </div>
-                            <label class="control-label col-md-2">Outcome</label>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.Outcome" disabled style="font-weight:bold;" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-2">Reason</label>
-                            <div class="col-md-8">
-                                <textarea class="form-control" disabled rows="2">@Model.RiskAssessmentOutcome.Reason</textarea>
-                            </div>
-                        </div>
-                        <hr />
-
-                        @* RM *@
-                        <div class="row"><div class="col-md-12"><label style="text-decoration:underline;">Revenue Manager (Step 2)</label></div></div>
-                        <div class="form-group">
-                            <label class="control-label col-md-2">Official No</label>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.RM_OfficialNumber" disabled />
-                            </div>
-                            <label class="control-label col-md-2">Outcome</label>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" value="@Model.RiskAssessmentOutcome.RM_Outcome" disabled style="font-weight:bold; color: #286090;" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-2">Reason</label>
-                            <div class="col-md-8">
-                                <textarea class="form-control" disabled rows="2">@Model.RiskAssessmentOutcome.RM_Reason</textarea>
-                            </div>
-                        </div>
+                        @if(ViewBag.RiskAssessmentHistory != null && ((List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory).Count > 0)
+                        {
+                            int round = 1;
+                            foreach(var item in (List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory)
+                            {
+                                <div class="row"><div class="col-md-12"><label style="text-decoration:underline; font-size:16px;">Round @round</label></div></div>
+                                @* CSO *@
+                                <div class="form-group">
+                                    <label class="control-label col-md-2">CSO Name/No</label>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" value="@item.FirstName (@item.OfficialNumber)" disabled />
+                                    </div>
+                                    <label class="control-label col-md-2">Outcome</label>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" value="@item.Outcome" disabled style="font-weight:bold;" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-md-2">CSO Reason</label>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" disabled rows="2">@item.Reason</textarea>
+                                    </div>
+                                </div>
+                                
+                                @* RM *@
+                                if(!string.IsNullOrEmpty(item.RM_Outcome)) {
+                                <div class="form-group">
+                                    <label class="control-label col-md-2">RM Official No</label>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" value="@item.RM_OfficialNumber" disabled />
+                                    </div>
+                                    <label class="control-label col-md-2">RM Outcome</label>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" value="@item.RM_Outcome" disabled style="font-weight:bold; color: #286090;" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-md-2">RM Reason</label>
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" disabled rows="2">@item.RM_Reason</textarea>
+                                    </div>
+                                </div>
+                                }
+                                <hr style="border-top: 1px solid #1E8449;" />
+                                round++;
+                            }
+                        }
                     </div>
                 </div>
                 <br />

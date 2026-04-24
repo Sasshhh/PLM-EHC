@@ -1,0 +1,126 @@
+@model C8.eServices.Mvc.Models.PaymentTransgression
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Generate Letter";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading" align="center">
+        <i class="ion ion-document-text"></i> Generate Warning Letter — @Model.CaseReferenceNumber
+    </div>
+    <div class="panel-body">
+
+        <!-- Case Summary -->
+        <div class="panel panel-info">
+            <div class="panel-heading">Case Summary</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Tenant:</strong> @Model.TenantName @Model.TenantSurname<br />
+                        <strong>Official #:</strong> @Model.OfficialNumber<br />
+                        <strong>Tenancy Ref:</strong> @Model.TenancyReferenceNumber
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Property:</strong> @(Model.Complex != null ? Model.Complex.Name : "—") — Block @Model.BlockNumber, Unit @Model.UnitNumber<br />
+                        <strong>Account:</strong> @Model.AccountNumber
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Category:</strong> @(Model.Category != null ? Model.Category.Name : "—")<br />
+                        <strong>Severity:</strong> @(Model.Severity != null ? Model.Severity.Name : "—")<br />
+                        <strong class="text-danger">Total Due: R @Model.TotalAmountDue.ToString("N2")</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous letter notice -->
+        @if (!string.IsNullOrEmpty(Model.LetterType))
+        {
+            <div class="alert alert-warning">
+                <i class="ion ion-alert-circled"></i>
+                A <strong>@Model.LetterType</strong> was previously generated on @(Model.LetterGeneratedDate.HasValue ? Model.LetterGeneratedDate.Value.ToString("dd MMMM yyyy") : "").
+                Generating a new letter will replace the existing one.
+            </div>
+        }
+
+        @using (Html.BeginForm("GenerateLetter", "PaymentTransgressions", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) }, FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-section" style="padding:20px; border:1px solid #ddd; border-radius:4px;">
+                <div class="form-group">
+                    <label class="control-label col-md-3"><strong>Select Letter Type</strong></label>
+                    <div class="col-md-6">
+                        @Html.DropDownList("letterType", ViewBag.LetterTypes as IEnumerable<SelectListItem>,
+                            string.IsNullOrEmpty(Model.LetterType) ? "-- Select Letter Type --" : null,
+                            new { @class = "form-control", required = "required", id = "letterType" })
+                    </div>
+                </div>
+
+                <!-- Letter type descriptions -->
+                <div class="col-md-offset-3 col-md-9" id="letterDesc" style="margin-bottom:15px;"></div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-danger" id="btnGenerate">
+                            <i class="ion ion-document-text"></i> Generate &amp; Send Letter
+                        </button>
+                        <a href="@Url.Action("Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) })"
+                           class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Letter type guidance -->
+        <div class="panel panel-default" style="margin-top:20px;">
+            <div class="panel-heading">Letter Type Guide</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="panel panel-info">
+                            <div class="panel-heading"><strong>Payment Transgression Notice</strong></div>
+                            <div class="panel-body" style="font-size:0.9em;">
+                                First contact. Informs the tenant of the outstanding amount and requires action within 7 working days.
+                                Suitable for first-time or minor transgressions.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-warning">
+                            <div class="panel-heading"><strong>Written Warning Letter</strong></div>
+                            <div class="panel-body" style="font-size:0.9em;">
+                                Formal warning placed on the tenant's record. Issued when the tenant has not addressed a prior notice
+                                or has a pattern of non-compliance.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-danger">
+                            <div class="panel-heading"><strong>Final Written Warning Letter</strong></div>
+                            <div class="panel-body" style="font-size:0.9em;">
+                                Final warning before lease termination proceedings. Issued when 3+ transgressions have been recorded.
+                                Triggers automatic lease termination check.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        var descriptions = {
+            '@PaymentTransgressionLetterTypes.PaymentTransgressionNotice':   '<div class="alert alert-info">First notice — informs tenant of outstanding balance. Action required within 7 working days.</div>',
+            '@PaymentTransgressionLetterTypes.WrittenWarningLetter':         '<div class="alert alert-warning"><strong>Warning:</strong> This letter will be placed on the tenant\'s official record.</div>',
+            '@PaymentTransgressionLetterTypes.FinalWrittenWarningLetter':    '<div class="alert alert-danger"><strong>Final Warning:</strong> This will trigger a lease termination check if 3+ transgressions are recorded.</div>'
+        };
+        $('#letterType').change(function () {
+            $('#letterDesc').html(descriptions[$(this).val()] || '');
+        }).trigger('change');
+    </script>
+}

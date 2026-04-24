@@ -1,0 +1,94 @@
+@model IEnumerable<C8.eServices.Mvc.Models.ServiceRequest>
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Service Requests";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .status-open { background-color: #5bc0de; color: white; }
+    .status-inprogress { background-color: #f0ad4e; color: white; }
+    .status-resolved { background-color: #5cb85c; color: white; }
+    .status-closed { background-color: #777; color: white; }
+    .status-deleted { background-color: #d9534f; color: white; }
+    .priority-high { color: #d9534f; font-weight: bold; }
+</style>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-6">
+                <i class="ion ion-ios-list-outline"></i> Service Requests
+            </div>
+            <div class="col-md-6 text-right">
+                <a href="@Url.Action("Create")" class="btn btn-success btn-sm">
+                    <i class="ion ion-plus"></i> New Request
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table id="ServiceRequestsTable" class="table table-bordered table-hover table-striped display">
+            <thead>
+                <tr>
+                    <th>Ticket #</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Complex</th>
+                    <th>Status</th>
+                    <th>SLA Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var statusKey = item.Status?.Key ?? "";
+                    var statusName = item.Status?.Name ?? "Unknown";
+                    var statusClass = statusKey == ServiceRequestStatusKeys.Open ? "status-open" :
+                                     statusKey == ServiceRequestStatusKeys.InProgress ? "status-inprogress" :
+                                     statusKey == ServiceRequestStatusKeys.Resolved ? "status-resolved" :
+                                     statusKey == ServiceRequestStatusKeys.Closed ? "status-closed" :
+                                     statusKey == ServiceRequestStatusKeys.Deleted ? "status-deleted" : "";
+                    
+                    var priorityName = item.ServiceRequestPriority?.Name ?? "N/A";
+                    var priorityClass = priorityName.Contains("High") || priorityName.Contains("Urgent") ? "priority-high" : "";
+                    
+                    <tr>
+                        <td>@item.RequestReferenceNumber</td>
+                        <td>@item.DateSubmitted.ToString("dd MMM yyyy HH:mm")</td>
+                        <td>@(item.ServiceRequestCategory?.Name ?? "N/A")</td>
+                        <td><span class="@priorityClass">@priorityName</span></td>
+                        <td>@(item.Complex?.Name ?? "N/A")</td>
+                        <td><span class="status-badge @statusClass">@statusName</span></td>
+                        <td>
+                            @if (item.EscalationTriggered)
+                            {
+                                <span class="text-danger"><i class="ion ion-alert"></i> Escalated</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">On Track</span>
+                            }
+                        </td>
+                        <td>
+                            @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#ServiceRequestsTable').DataTable({ "order": [[1, "desc"]] });
+        });
+    </script>
+}

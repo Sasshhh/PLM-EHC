@@ -1,0 +1,281 @@
+@model C8.eServices.Mvc.Models.PaymentTransgression
+@{
+    ViewBag.Title = "New Payment Transgression";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<style>
+    .section-header   { background-color: #f5f5f5; padding: 10px 15px; margin-bottom: 15px; border-left: 4px solid #d9534f; font-weight: bold; }
+    .form-section     { margin-bottom: 30px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
+    .required-field::after { content: " *"; color: red; }
+    .auto-filled      { background-color: #f0fff0 !important; }
+</style>
+
+<div class="panel panel-default">
+    <div class="panel-heading" align="center">
+        <i class="ion ion-cash"></i> New Payment Transgression
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("Create", "PaymentTransgressions", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <!-- Tenant Lookup -->
+            <div class="form-section">
+                <div class="section-header"><i class="ion ion-search"></i> Tenant Lookup</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Official Number</label>
+                            <div class="col-md-6">
+                                @Html.TextBoxFor(m => m.OfficialNumber, new { @class = "form-control", id = "OfficialNumber", placeholder = "Enter ID / Official Number" })
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="btnLookup" class="btn btn-info">Lookup</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="lookupStatus"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tenant Details -->
+            <div class="form-section">
+                <div class="section-header"><i class="ion ion-person"></i> Tenant Details</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4">Tenancy Ref</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.TenancyReferenceNumber, new { @class = "form-control auto-filled", id = "TenancyReferenceNumber", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4">Account Number</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.AccountNumber, new { @class = "form-control auto-filled", id = "AccountNumber", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">First Name</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.TenantName, new { @class = "form-control", id = "TenantName", required = "required" })
+                                @Html.ValidationMessageFor(m => m.TenantName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Surname</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.TenantSurname, new { @class = "form-control", id = "TenantSurname", required = "required" })
+                                @Html.ValidationMessageFor(m => m.TenantSurname, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4">Email</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.TenantEmail, new { @class = "form-control", id = "TenantEmail", type = "email" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4">Cellphone</label>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(m => m.TenantCellphone, new { @class = "form-control", id = "TenantCellphone" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Complex</label>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(m => m.ComplexId, ViewBag.Complexes as SelectList, "-- Select Complex --", new { @class = "form-control", required = "required", id = "ComplexId" })
+                                @Html.ValidationMessageFor(m => m.ComplexId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-md-5">Block</label>
+                            <div class="col-md-7">
+                                @Html.TextBoxFor(m => m.BlockNumber, new { @class = "form-control", id = "BlockNumber" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-md-5">Unit</label>
+                            <div class="col-md-7">
+                                @Html.TextBoxFor(m => m.UnitNumber, new { @class = "form-control", id = "UnitNumber" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Information -->
+            <div class="form-section">
+                <div class="section-header"><i class="ion ion-stats-bars"></i> Financial Information</div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-5">Last Payment (R)</label>
+                            <div class="col-md-7">
+                                @Html.TextBoxFor(m => m.LastPaymentAmount, new { @class = "form-control", id = "LastPaymentAmount", type = "number", step = "0.01" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-5">Last Payment Date</label>
+                            <div class="col-md-7">
+                                @Html.TextBoxFor(m => m.LastPaymentDate, "{0:yyyy-MM-dd}", new { @class = "form-control", id = "LastPaymentDate", type = "date" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-5 required-field">Total Due (R)</label>
+                            <div class="col-md-7">
+                                @Html.TextBoxFor(m => m.TotalAmountDue, new { @class = "form-control", required = "required", type = "number", step = "0.01", min = "0" })
+                                @Html.ValidationMessageFor(m => m.TotalAmountDue, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transgression Details -->
+            <div class="form-section">
+                <div class="section-header"><i class="ion ion-alert-circled"></i> Transgression Details</div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Category</label>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(m => m.PaymentTransgressionCategoryId, ViewBag.Categories as SelectList, "-- Select --", new { @class = "form-control", required = "required", id = "PaymentTransgressionCategoryId" })
+                                @Html.ValidationMessageFor(m => m.PaymentTransgressionCategoryId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Type</label>
+                            <div class="col-md-8">
+                                <select id="PaymentTransgressionTypeId" name="PaymentTransgressionTypeId" class="form-control" required>
+                                    <option value="">-- Select Category First --</option>
+                                </select>
+                                @Html.ValidationMessageFor(m => m.PaymentTransgressionTypeId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label col-md-4 required-field">Severity</label>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(m => m.PaymentTransgressionSeverityId, ViewBag.Severities as SelectList, "-- Select --", new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(m => m.PaymentTransgressionSeverityId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label col-md-2 required-field">Description</label>
+                            <div class="col-md-10">
+                                @Html.TextAreaFor(m => m.DetailedDescription, new { @class = "form-control", rows = "4", required = "required", placeholder = "Provide a detailed description of the payment transgression..." })
+                                @Html.ValidationMessageFor(m => m.DetailedDescription, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supporting Documents -->
+            <div class="form-section">
+                <div class="section-header"><i class="ion ion-document"></i> Supporting Documents (Optional)</div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <input type="file" name="documents" multiple class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
+                        <small class="text-muted">Accepted: PDF, Word, JPG, PNG. Max 10MB per file.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-danger"><i class="ion ion-checkmark"></i> Submit & Generate Letter</button>
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-default" })
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        // Tenant auto-populate
+        $('#btnLookup').click(function () {
+            var officialNumber = $('#OfficialNumber').val().trim();
+            if (!officialNumber) {
+                $('#lookupStatus').html('<span class="text-warning">Please enter an Official Number.</span>');
+                return;
+            }
+            $('#lookupStatus').html('<span class="text-muted"><i class="ion ion-load-a"></i> Looking up tenant...</span>');
+            $.get('@Url.Action("GetTenantDetails", "PaymentTransgressions")', { officialNumber: officialNumber }, function (res) {
+                if (res.success) {
+                    var d = res.data;
+                    $('#TenancyReferenceNumber').val(d.tenancyReferenceNumber);
+                    $('#TenantName').val(d.tenantName);
+                    $('#TenantSurname').val(d.tenantSurname);
+                    $('#TenantEmail').val(d.tenantEmail);
+                    $('#TenantCellphone').val(d.tenantCellphone);
+                    $('#AccountNumber').val(d.accountNumber);
+                    $('#BlockNumber').val(d.blockNumber);
+                    $('#UnitNumber').val(d.unitNumber);
+                    if (d.lastPaymentAmount) $('#LastPaymentAmount').val(d.lastPaymentAmount);
+                    if (d.lastPaymentDate)   $('#LastPaymentDate').val(d.lastPaymentDate);
+                    if (d.totalAmountDue)    $('[name="TotalAmountDue"]').val(d.totalAmountDue);
+                    if (d.complexId > 0)     $('#ComplexId').val(d.complexId);
+                    $('#lookupStatus').html('<span class="text-success"><i class="ion ion-checkmark-circled"></i> Tenant found.</span>');
+                } else {
+                    $('#lookupStatus').html('<span class="text-danger"><i class="ion ion-close-circled"></i> ' + res.message + '</span>');
+                }
+            });
+        });
+
+        // Cascading Category → Type dropdown
+        $('#PaymentTransgressionCategoryId').change(function () {
+            var catId = $(this).val();
+            var typeSelect = $('#PaymentTransgressionTypeId');
+            typeSelect.html('<option value="">-- Loading... --</option>');
+            if (!catId) {
+                typeSelect.html('<option value="">-- Select Category First --</option>');
+                return;
+            }
+            $.get('@Url.Action("GetTypesByCategory", "PaymentTransgressions")', { categoryId: catId }, function (types) {
+                typeSelect.html('<option value="">-- Select Type --</option>');
+                $.each(types, function (i, t) {
+                    typeSelect.append('<option value="' + t.Id + '">' + t.Name + '</option>');
+                });
+            });
+        });
+    </script>
+}

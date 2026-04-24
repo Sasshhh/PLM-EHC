@@ -41,28 +41,44 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Date Confirmed")]
         public DateTime? DateConfirmed { get; set; }
 
-        // Investigation Outcome
         [Column(Order = 17)]
+        [Display(Name = "Alternative Date Proposed")]
+        public DateTime? ProposedAlternativeDate { get; set; }
+
+        [Column(Order = 18)]
+        [Display(Name = "Alternative Time Proposed")]
+        public TimeSpan? ProposedAlternativeTime { get; set; }
+
+        [Column(Order = 19)]
+        [Display(Name = "Alternative Date Reason")]
+        public string AlternativeDateReason { get; set; }
+
+        [Column(Order = 20)]
+        [Display(Name = "Alternative Approved")]
+        public bool? AlternativeApproved { get; set; }
+
+        // Investigation Outcome
+        [Column(Order = 21)]
         [StringLength(50)]
         [Display(Name = "Outcome")]
         public string Outcome { get; set; } // Resolved, Referral, Unresolved
 
-        [Column(Order = 18)]
+        [Column(Order = 22)]
         [Display(Name = "Outcome Details")]
         public string OutcomeDetails { get; set; }
 
-        [Column(Order = 19)]
+        [Column(Order = 23)]
         [Display(Name = "Outcome Date")]
         public DateTime? OutcomeDate { get; set; }
 
-        [Column(Order = 20)]
+        [Column(Order = 24)]
         [Display(Name = "Investigated By")]
         public int? InvestigatedById { get; set; }
         [ForeignKey("InvestigatedById")]
         public Customer InvestigatedBy { get; set; }
 
         // Referral Details (if applicable)
-        [Column(Order = 21)]
+        [Column(Order = 25)]
         [Display(Name = "External Agency")]
         public int? ExternalReferralId { get; set; }
         [ForeignKey("ExternalReferralId")]

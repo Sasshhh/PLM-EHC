@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Helpers.UnitEngine.Abstract;
 using C8.eServices.Mvc.Helpers.UnitEngine.Concrete;
@@ -194,6 +194,7 @@ namespace C8.eServices.Mvc.Controllers
                 Customer customer = context.Customers.FirstOrDefault(x => x.Id == PLA.CustomerId);
                 RiskAssessmentOutcome rao = context.RiskAssessmentOutcomes.OrderByDescending(a => a.Id).FirstOrDefault(a => a.PropertyLeaseApplicationId == rcsAppId);
                 if (rao == null) rao = new RiskAssessmentOutcome();
+                ViewBag.RiskAssessmentHistory = context.RiskAssessmentOutcomes.Where(a => a.PropertyLeaseApplicationId == rcsAppId).OrderBy(a => a.Id).ToList();
                 rao.FirstName = SystemUser.FirstName;
                 rao.LastName = SystemUser.LastName;
 
@@ -343,6 +344,7 @@ namespace C8.eServices.Mvc.Controllers
                     .FirstOrDefault(a => a.PropertyLeaseApplicationId == rcsAppId);
 
                 if (rao == null) rao = new RiskAssessmentOutcome();
+                ViewBag.RiskAssessmentHistory = context.RiskAssessmentOutcomes.Where(a => a.PropertyLeaseApplicationId == rcsAppId).OrderBy(a => a.Id).ToList();
 
                 // --- 3. LOAD DOCUMENTS (READ-ONLY) ---
                 // We fetch the configuration keys first
@@ -525,6 +527,7 @@ namespace C8.eServices.Mvc.Controllers
                     .FirstOrDefault(a => a.PropertyLeaseApplicationId == rcsAppId);
 
                 if (rao == null) rao = new RiskAssessmentOutcome();
+                ViewBag.RiskAssessmentHistory = context.RiskAssessmentOutcomes.Where(a => a.PropertyLeaseApplicationId == rcsAppId).OrderBy(a => a.Id).ToList();
 
                 // 3. LOAD DOCUMENTS (Fixes Null Reference)
                 var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
@@ -576,7 +579,7 @@ namespace C8.eServices.Mvc.Controllers
                 // -----------------------------------------------------------
                 // 1. SAVE THE CEO DECISION & SIGNATURE
                 // -----------------------------------------------------------
-                var rao = context.RiskAssessmentOutcomes.FirstOrDefault(r => r.PropertyLeaseApplicationId == rcsAppId);
+                var rao = context.RiskAssessmentOutcomes.OrderByDescending(a => a.Id).FirstOrDefault(r => r.PropertyLeaseApplicationId == rcsAppId);
                 if (rao != null)
                 {
                     rao.CEO_OfficialNumber = capture.RiskAssessmentOutcome.CEO_OfficialNumber;
@@ -641,17 +644,26 @@ namespace C8.eServices.Mvc.Controllers
                 }
                 else
                 {
-                    // REJECTED
-                    SetApplicationStatus(context, rcsAppId, "s_credit_score_rejected");
+                    // REJECTED - RETURN TO CSO
+                    SetApplicationStatus(context, rcsAppId, "s_awaiting_risk_assessment");
 
-                    // Notify User
-                    var emailContent = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected);
-                    if (emailContent != null)
+                    // Notify CSO instead of Customer
+                    var app = context.PropertyLeaseApplications.Include(a => a.PreferredComplexArea).FirstOrDefault(a => a.Id == rcsAppId);
+                    int csoCustomerId = app?.PreferredComplexArea?.LettingOfficerId ?? 0;
+                    if (csoCustomerId > 0)
                     {
-                        EmailHelper.CustomerEmailNotification(context, rcsAppId, emailContent.Id);
+                        var raRole = context.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.RiskAssessment);
+                        RoundRobinQueue roundRobinQueue = new RoundRobinQueue();
+                        roundRobinQueue.PropertyLeaseApplicationId = rcsAppId;
+                        roundRobinQueue.ResponsibilityTypeId = raRole.Id;
+                        roundRobinQueue.CurrentTaskDateTime = DateTime.Now;
+                        roundRobinQueue.StatusId = context.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+                        roundRobinQueue.ClerkId = csoCustomerId;
+                        context.RoundRobinQueues.Add(roundRobinQueue);
+                        context.SaveChanges();
                     }
 
-                    Session["ConductRiskAssessmentSession"] = "Application Rejected by CEO.";
+                    Session["ConductRiskAssessmentSession"] = "Application Returned to CSO.";
                 }
 
                 // -----------------------------------------------------------
@@ -932,6 +944,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 // 1. Load Existing Record
                 var rao = context.RiskAssessmentOutcomes
+                                 .OrderByDescending(a => a.Id)
                                  .FirstOrDefault(r => r.PropertyLeaseApplicationId == rcsAppId);
 
                 if (rao != null)
@@ -962,15 +975,27 @@ namespace C8.eServices.Mvc.Controllers
                 }
                 else
                 {
-                    // Reject
-                    var status = context.Status.FirstOrDefault(x => x.Key == StatusKeys.CreditScoreRejected);
+                    // Reject - RETURN TO CSO
+                    var status = context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRiskAssessment);
                     MatchingHelper.ChangeApplicationStatus(context, status.Id, rcsAppId);
 
-                    // Send Rejection Email
-                    int emailId = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected).Id;
-                    EmailHelper.CustomerEmailNotification(context, rcsAppId, emailId);
+                    // Route back to original CSO
+                    var app = context.PropertyLeaseApplications.Include(a => a.PreferredComplexArea).FirstOrDefault(a => a.Id == rcsAppId);
+                    int csoCustomerId = app?.PreferredComplexArea?.LettingOfficerId ?? 0;
+                    if (csoCustomerId > 0)
+                    {
+                        var raRole = context.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.RiskAssessment);
+                        RoundRobinQueue roundRobinQueue = new RoundRobinQueue();
+                        roundRobinQueue.PropertyLeaseApplicationId = rcsAppId;
+                        roundRobinQueue.ResponsibilityTypeId = raRole.Id;
+                        roundRobinQueue.CurrentTaskDateTime = DateTime.Now;
+                        roundRobinQueue.StatusId = context.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+                        roundRobinQueue.ClerkId = csoCustomerId;
+                        context.RoundRobinQueues.Add(roundRobinQueue);
+                        context.SaveChanges();
+                    }
 
-                    Session["ConductRiskAssessmentSession"] = "Application Rejected by Revenue Manager.";
+                    Session["ConductRiskAssessmentSession"] = "Application Returned to CSO.";
                 }
 
                 // Mark RM Task as Done
@@ -1005,7 +1030,7 @@ namespace C8.eServices.Mvc.Controllers
                 RiskAssessmentOutcome rao = dbContext.RiskAssessmentOutcomes
                                              .OrderByDescending(r => r.Id)
                                              .FirstOrDefault(r => r.PropertyLeaseApplicationId == rcsAppId);
-                if (rao == null)
+                if (rao == null || !string.IsNullOrEmpty(rao.RM_Outcome) || !string.IsNullOrEmpty(rao.CEO_Outcome))
                 {
                     rao = new RiskAssessmentOutcome();
                     rao.PropertyLeaseApplicationId = rcsAppId;
@@ -1040,6 +1065,34 @@ namespace C8.eServices.Mvc.Controllers
                         // Save these changes to the PropertyLeaseApplication Table
                         dbContext.Entry(property).State = EntityState.Modified;
                         dbContext.SaveChanges();
+
+                        // ADD TO WAITING LIST QUEUE (FIFO per complex/typology)
+                        // This ensures the applicant slots in at the BACK of the queue for their
+                        // preferred complex — they never jump over people already waiting.
+                        // RunAutoAllocation will pick them up when it's their turn (ordered by DateAdded).
+                        bool alreadyQueued = dbContext.PropertyLeaseWaitingLists
+                            .Any(w => w.PropertyLeaseApplicationId == rcsAppId && w.IsActive && !w.IsDeleted);
+
+                        if (!alreadyQueued)
+                        {
+                            var waitingListEntry = new PropertyLeaseWaitingList
+                            {
+                                PropertyLeaseApplicationId = rcsAppId,
+                                PreferredComplexId        = property.PreferredComplexAreaId ?? 0,
+                                PreferredTypologyId       = property.HumanEHCOptionsId ?? 0,
+                                DateAdded                 = DateTime.Now,   // FIFO key — back of queue
+                                QueueStatus               = "Waiting",
+                                IsActive                  = true,
+                                IsDeleted                 = false,
+                                IsLocked                  = false,
+                                CreatedBySystemUserId     = SystemUser.Id,
+                                CreatedDateTime           = DateTime.Now,
+                                ModifiedBySystemUserId    = SystemUser.Id,
+                                ModifiedDateTime          = DateTime.Now
+                            };
+                            dbContext.PropertyLeaseWaitingLists.Add(waitingListEntry);
+                            dbContext.SaveChanges();
+                        }
 
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.IncentivePolicyPropertyVerified)?.Id, rcsAppId);
                         ActivityTrackerMessage = dbContext.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UnitOfferToApplicant).Description.ToString();
@@ -1103,7 +1156,7 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.StatusId = Status.Id;
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
-                        roundrobin.BackOfficeNotification(rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
+                        C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
                         Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
                         break;
                 }
@@ -1278,7 +1331,7 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.StatusId = Status.Id;
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
-                        roundrobin.BackOfficeNotification(rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
+                        C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
                         Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
                         break;
                 }

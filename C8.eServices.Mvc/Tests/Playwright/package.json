@@ -1,0 +1,13 @@
+{
+  "name": "plm-playwright-tests",
+  "version": "1.0.0",
+  "description": "E2E Testing Suite for Property Lease Management System",
+  "main": "index.js",
+  "dependencies": {
+    "@playwright/test": "^1.43.0"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  }
+}

@@ -633,22 +633,21 @@ These conditions are governed by the laws of the Republic of South Africa.</text
                 var Mobilenumber = document.getElementById('ConfirmMobileNumber').value;
                 var Email = document.getElementById('ConfirmEmailAddress').value;
                 var Error = true;
-                $.getJSON("../Capture/AddElectricity4?ElectricityMeterInformation_ElectricityMeterNo=" + Username
-                    + '&ElectricityMeterInformation_ElectricityMeterReading=' + Mobilenumber
-                    + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + Email,
+                console.log('[Register] Submit clicked - Username:', Username, '| Mobile:', Mobilenumber, '| Email:', Email);
+                $.getJSON('@Url.Action("AddElectricity4", "Capture")' + '?ElectricityMeterInformation_ElectricityMeterNo=' + encodeURIComponent(Username)
+                    + '&ElectricityMeterInformation_ElectricityMeterReading=' + encodeURIComponent(Mobilenumber)
+                    + '&ElectricityMeterInformation_ElectricityMeterReadingDateTaken=' + encodeURIComponent(Email),
 
                     function (result) {
+                        console.log('[Register] AddElectricity4 response:', JSON.stringify(result));
                         if (result != "Error") {
                             try {
-                                //alert("Added successfully !");
-                                //swal("Success!", "Added successfully.", "success");
-                                //jQuery('#divElectricitytbl').css("display", "block")
-
+                                console.log('[Register] result.length:', result.length);
                                 if (result.length == 1) {
-
+                                    console.log('[Register] result[0].LogEntry:', result[0].LogEntry);
                                     if (result[0].LogEntry == "Success") {
-                                        //alert("Success");
                                         Error = false;
+                                        console.log('[Register] Validation passed - opening T&C modal');
                                         $('#TCModalLong').modal({
                                             backdrop: 'static',
                                             keyboard: false,
@@ -656,15 +655,12 @@ These conditions are governed by the laws of the Republic of South Africa.</text
                                         });
                                     }
                                     else {
+                                        console.warn('[Register] Validation error:', result[0].LogEntry);
                                         $("#ValidationMessages").html("");
                                         for (var i = 0; i < result.length; i++) {
-
-                                            //alert("LogEntry " + result[i].LogEntry);
                                             Error = true;
-                                            //alert(result[i].LogEntry);
                                             $("#ValidationMessages").append('<li><a class="validation-summary-errors">' + result[i].LogEntry + '</a></li>');
                                             var $elem = $('#instructions');
-
                                             $('html, body').animate({
                                                 scrollTop: $elem.offset().top
                                             }, 1000);
@@ -673,37 +669,30 @@ These conditions are governed by the laws of the Republic of South Africa.</text
 
                                 }
                                 else {
+                                    console.warn('[Register] Multiple validation errors (' + result.length + '):', JSON.stringify(result));
                                     $("#ValidationMessages").html("");
                                     for (var i = 0; i < result.length; i++) {
-
-                                        //alert("LogEntry " + result[i].LogEntry);
                                         Error = true;
-
                                         $("#ValidationMessages").append('<li><a class="validation-summary-errors">' + result[i].LogEntry + '</a></li>');
                                         var $elem = $('#instructions');
-
                                         $('html, body').animate({
                                             scrollTop: $elem.offset().top
                                         }, 1000);
                                     }
                                 }
-
-
-                                //    //var electricityt = $('#Electricitytbl').DataTable();
-
-                                //    //electricityt.row.add([ElectricityMeterInformation_ElectricityMeterNo, ElectricityMeterInformation_ElectricityMeterReading, ElectricityMeterInformation_ElectricityMeterReadingDateTaken, "Unprocessed"]).draw(false);
-
-                                //    //clearElectricity();
-                                //    ////$('#Electricitytbl').DataTable();
                             }
                             catch (cat) {
+                                console.error('[Register] CATCH in result handler:', cat);
                                 swal("Error!", "Problem with validation catch!", "error");
                             }
                         }
                         else {
-
+                            console.error('[Register] AddElectricity4 returned "Error" string - server threw an exception');
                             swal("Error!", "Problem with validation out!", "error");
                         }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error('[Register] AJAX FAILED - HTTP status:', jqXHR.status, '| statusText:', jqXHR.statusText, '| error:', errorThrown, '| response:', jqXHR.responseText);
+                        swal("Error!", "Request failed (" + jqXHR.status + " " + textStatus + ")", "error");
                     })
 
 

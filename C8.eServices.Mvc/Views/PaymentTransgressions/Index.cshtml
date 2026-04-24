@@ -1,0 +1,92 @@
+@model IEnumerable<C8.eServices.Mvc.Models.PaymentTransgression>
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Payment Transgressions";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-submitted  { background-color: #5bc0de; color: white; }
+        .status-generated  { background-color: #f0ad4e; color: white; }
+        .status-sent       { background-color: #337ab7; color: white; }
+        .status-closed     { background-color: #5cb85c; color: white; }
+    </style>
+</head>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Payment Transgressions
+        <a href="@Url.Action("Create")" class="btn btn-success btn-sm pull-right">
+            <i class="ion ion-plus"></i> New Transgression
+        </a>
+    </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" style="margin:10px;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible" style="margin:10px;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    <div style="width: 95%; margin: 0 auto;">
+        <br />
+        <table id="TransgressionsTable" class="table table-bordered table-hover table-striped display">
+            <thead>
+                <tr>
+                    <th>Case Reference</th>
+                    <th>Tenant</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th>Amount Due</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var statusKey  = item.Status != null ? item.Status.Key : "";
+                    var statusName = item.Status != null ? item.Status.Name : "Unknown";
+                    var catName    = item.Category != null ? item.Category.Name : "N/A";
+                    var sevName    = item.Severity != null ? item.Severity.Name : "N/A";
+                    var statusClass = statusKey == PaymentTransgressionStatusKeys.Closed            ? "status-closed"    :
+                                      statusKey == PaymentTransgressionStatusKeys.LetterSent        ? "status-sent"      :
+                                      statusKey == PaymentTransgressionStatusKeys.LetterGenerated   ? "status-generated" :
+                                                                                                      "status-submitted";
+                    <tr>
+                        <td>@item.CaseReferenceNumber</td>
+                        <td>@item.TenantName @item.TenantSurname</td>
+                        <td>@catName</td>
+                        <td>@sevName</td>
+                        <td>R @item.TotalAmountDue.ToString("N2")</td>
+                        <td>@item.DateSubmitted.ToString("dd MMM yyyy")</td>
+                        <td><span class="status-badge @statusClass">@statusName</span></td>
+                        <td>
+                            @Html.ActionLink("View", "Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary btn-sm" })
+                            @if (statusKey == PaymentTransgressionStatusKeys.Submitted)
+                            {
+                                @Html.ActionLink("Letter", "GenerateLetter", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning btn-sm" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#TransgressionsTable').DataTable({ "order": [[5, "desc"]], "pageLength": 25 });
+        });
+    </script>
+}

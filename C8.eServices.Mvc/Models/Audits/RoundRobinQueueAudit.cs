@@ -77,7 +77,9 @@ namespace C8.eServices.Mvc.Models.Audits
         [ForeignKey("HumanSettlementApplicationId")]
         public HumanSettlementApplication HumanSettlementApplication { get; set; }
 
-
+        [Column(Order = 21)]
+        [Display(Name = "Tenant Complaint Id")]
+        public int? TenantComplaintId { get; set; }
 
     }
 }

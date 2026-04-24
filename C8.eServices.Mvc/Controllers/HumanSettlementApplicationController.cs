@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.ViewModels;
@@ -5125,7 +5125,7 @@ namespace C8.eServices.Mvc.Controllers
 
                     MatchingHelper.WaitingListNotificationAtOneYear(core);
                     MatchingHelper.MatchUnitParallelProcessor(core);
-                    MatchingHelper.RenewalNotificationAtEndOfTime(core);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(core);
 
                     var p = core.PropertyLeaseApplications.Where(x => x.CustomerId == Customer.Id).ToList();
                     var rrq = p.Select(x => x.Id).ToList();
@@ -5757,7 +5757,7 @@ namespace C8.eServices.Mvc.Controllers
                         .Include(r => r.CreatedBySystemUser).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.HumanEHCOptions).Include(r => r.Status).ToList();
 
                     MatchingHelper.WaitingListNotificationAtOneYear(cxt);
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
@@ -5791,7 +5791,7 @@ namespace C8.eServices.Mvc.Controllers
                         .Include(r => r.CreatedBySystemUser).Include(r => r.PurchaserType).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.Status).ToList();
 
                     MatchingHelper.WaitingListNotificationAtOneYear(cxt);
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
@@ -5840,7 +5840,7 @@ namespace C8.eServices.Mvc.Controllers
                                                 .Include(r => r.HumanEHCOptions).Include(r => r.Status).ToList();
 
                     MatchingHelper.WaitingListNotificationAtOneYear(cxt);
-                    MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));

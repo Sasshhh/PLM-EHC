@@ -1,4 +1,4 @@
-﻿
+
 @model C8.eServices.Mvc.ViewModels.CaptureViewModel
 @{
     ViewBag.Title = "Create";
@@ -444,6 +444,51 @@
                                         @*<div class="panel-heading">Upload Risk Assessment Document/s</div>*@
                                         @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
                                     </div>
+                                    
+                                    @* HISTORY TABLE *@
+                                    @if(ViewBag.RiskAssessmentHistory != null && ((List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory).Count > 0)
+                                    {
+                                        <div class="panel-group" style="margin-top: 20px;">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading"><h4 class="panel-title" align="center">Previous Assessment History</h4></div>
+                                                <div class="panel-body">
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead>
+                                                            <tr style="background-color:#1E8449; color:white;">
+                                                                <th>Round</th>
+                                                                <th>CSO Decision</th>
+                                                                <th>RM Decision</th>
+                                                                <th>CEO Decision</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @{ int round = 1; }
+                                                            @foreach(var item in (List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory)
+                                                            {
+                                                                <tr>
+                                                                    <td>@round</td>
+                                                                    <td>
+                                                                        @if(!string.IsNullOrEmpty(item.Outcome)) { <strong>@item.Outcome</strong><br/> }
+                                                                        @item.Reason
+                                                                    </td>
+                                                                    <td>
+                                                                        @if(!string.IsNullOrEmpty(item.RM_Outcome)) { <strong>@item.RM_Outcome</strong><br/> }
+                                                                        @item.RM_Reason
+                                                                    </td>
+                                                                    <td>
+                                                                        @if(!string.IsNullOrEmpty(item.CEO_Outcome)) { <strong>@item.CEO_Outcome</strong><br/> }
+                                                                        @item.CEO_Reason
+                                                                    </td>
+                                                                </tr>
+                                                                round++;
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
                                 </div>
                                 <div class="step-footer" align="left">
                                     @Html.EncodedActionLink("Cancel", "Index", "RCSApplication", new { id = 0 }, new { @class = "btn btn-outline-primary", @style = "display:none", @id = "Cancelbtn" })

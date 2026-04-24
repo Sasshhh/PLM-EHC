@@ -1,0 +1,98 @@
+@model C8.eServices.Mvc.Models.ServiceRequest
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Service Request Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .detail-label { font-weight: bold; color: #555; }
+    .status-section { border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+    .history-item { padding: 10px; border-left: 3px solid #ddd; margin-bottom: 10px; background: #f9f9f9; }
+</style>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-6">
+                Service Request: @Model.RequestReferenceNumber
+            </div>
+            <div class="col-md-6 text-right">
+                @if (ViewBag.CanEditOrDelete == true)
+                {
+                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning btn-sm">Edit</a>
+                }
+                <a href="@Url.Action("Index")" class="btn btn-default btn-sm">Back to List</a>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row status-section">
+            <div class="col-md-4">
+                <span class="detail-label">Status:</span> @(Model.Status?.Name ?? "N/A")
+            </div>
+            <div class="col-md-4">
+                <span class="detail-label">Priority:</span> @(Model.ServiceRequestPriority?.Name ?? "N/A")
+            </div>
+            <div class="col-md-4">
+                <span class="detail-label">SLA Status:</span> @ViewBag.SlaStatus
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <span class="detail-label">Reported By:</span> @Model.ReportedByName @Model.ReportedBySurname
+                </div>
+                <div class="form-group">
+                    <span class="detail-label">Email:</span> @Model.EmailAddress
+                </div>
+                <div class="form-group">
+                    <span class="detail-label">Contact:</span> @Model.ContactNumber
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <span class="detail-label">Complex:</span> @(Model.Complex?.Name ?? "N/A")
+                </div>
+                <div class="form-group">
+                    <span class="detail-label">Block/Unit:</span> @Model.BlockNumber / @Model.UnitNumber
+                </div>
+                <div class="form-group">
+                    <span class="detail-label">Date Submitted:</span> @Model.DateSubmitted.ToString("F")
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <span class="detail-label">Detailed Description:</span>
+                <p class="well">@Model.DetailedDescription</p>
+            </div>
+        </div>
+
+        @if (User.IsInRole("Client Services Officer"))
+        {
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>CSO Actions</h4>
+                    @using (Html.BeginForm("UpdateStatus", "ServiceRequests", new { id = Model.Id }, FormMethod.Post, new { @class = "form-inline" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-group">
+                            <select name="newStatusKey" class="form-control">
+                                <option value="">-- Change Status --</option>
+                                <option value="@ServiceRequestStatusKeys.InProgress">In Progress</option>
+                                <option value="@ServiceRequestStatusKeys.Resolved">Resolved</option>
+                                <option value="@ServiceRequestStatusKeys.Closed">Closed</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

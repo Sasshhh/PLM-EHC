@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.CaptureViewModel
+@model C8.eServices.Mvc.ViewModels.CaptureViewModel
 @{
     ViewBag.Title = "Revenue Manager Assessment";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
@@ -207,9 +207,9 @@
                         <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.CreatedDateTime) </td>
                         <td> @Html.DisplayFor(Model => Model.PropertyLeaseApplication.Status.Name) </td>
                         <td>
-                            @*@Html.ActionLink("View Application", "Details", "PropertyLeaseApplication",
-                            new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplication.Id.ToString()), target = "_blank" },
-                            new { @class = "btn btn-success btn-sm", @target = "_blank" })*@
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication",
+                            new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + ViewBag.ConductPrpertyId.ToString()), target = "_blank" },
+                            new { @class = "btn btn-primary btn-sm", @target = "_blank" })
                         </td>
                     </tr>
                 </tbody>
@@ -283,6 +283,49 @@
                     </div>
                 </div>
                 <br />
+
+                @* HISTORY TABLE *@
+                @if(ViewBag.RiskAssessmentHistory != null && ((List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory).Count > 0)
+                {
+                    <div class="panel panel-green">
+                        <div class="panel-heading"><h4 class="panel-title" align="center" style="color:white;">Previous Assessment History</h4></div>
+                        <div class="panel-body" style="background-color: #f9f9f9;">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Round</th>
+                                        <th>CSO Decision</th>
+                                        <th>RM Decision</th>
+                                        <th>CEO Decision</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ int round = 1; }
+                                    @foreach(var item in (List<C8.eServices.Mvc.Models.RiskAssessmentOutcome>)ViewBag.RiskAssessmentHistory)
+                                    {
+                                        <tr>
+                                            <td>@round</td>
+                                            <td>
+                                                @if(!string.IsNullOrEmpty(item.Outcome)) { <strong>@item.Outcome</strong><br/> }
+                                                @item.Reason
+                                            </td>
+                                            <td>
+                                                @if(!string.IsNullOrEmpty(item.RM_Outcome)) { <strong>@item.RM_Outcome</strong><br/> }
+                                                @item.RM_Reason
+                                            </td>
+                                            <td>
+                                                @if(!string.IsNullOrEmpty(item.CEO_Outcome)) { <strong>@item.CEO_Outcome</strong><br/> }
+                                                @item.CEO_Reason
+                                            </td>
+                                        </tr>
+                                        round++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                }
 
                 @* --- SECTION 2: DOCUMENTS (ADDED HERE) --- *@
                 <div class="panel panel-green">

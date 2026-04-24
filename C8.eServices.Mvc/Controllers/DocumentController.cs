@@ -677,7 +677,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -728,8 +728,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -841,7 +844,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RefundApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RefundApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -864,8 +867,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1047,7 +1053,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -1098,8 +1104,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1187,7 +1196,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             switch (referenceType.Key)
@@ -1220,8 +1229,11 @@ namespace C8.eServices.Mvc.Controllers
             foreach (var customerDocument in dvm.Documents)
             {
                
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1357,7 +1369,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == refundappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == refundappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -1408,8 +1420,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1555,7 +1570,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -1606,8 +1621,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1754,7 +1772,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -1805,8 +1823,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -1944,7 +1965,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Include(o => o.Status).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.RCSApplicationStatusId == rcsappId && o.IsActive && !o.IsDeleted).ToList()
             };
 
             // Checks the reference type of the documents needed.
@@ -1995,8 +2016,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)
@@ -2087,7 +2111,7 @@ namespace C8.eServices.Mvc.Controllers
                 ReferenceType = referenceType,
                 ReferenceId = (int)referenceId,
                 IsUploadView = true,
-                Documents = _context.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.IsActive && !o.IsDeleted).ToList()
+                Documents = _context.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.IsActive && !o.IsDeleted).ToList()
             };
           
             // Checks the reference type of the documents needed.
@@ -2137,8 +2161,11 @@ namespace C8.eServices.Mvc.Controllers
                 //    SecurityHelper.LogError(new Exception("Malicious Activity"), null);
                 //    return RedirectToAction("Index", "Error");
                 //}
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      _context.DocumentCheckLists.Include(d => d.DocumentType)

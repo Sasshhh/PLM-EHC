@@ -187,6 +187,22 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<ComplaintInvestigation> ComplaintInvestigations { get; set; }
         public DbSet<ComplaintExternalReferral> ComplaintExternalReferrals { get; set; }
         public DbSet<ComplaintInvestigationDocument> ComplaintInvestigationDocuments { get; set; }
+        public DbSet<ComplaintAuditLog> ComplaintAuditLogs { get; set; }
+
+        // Payment Transgressions Module Tables (UC17C)
+        public DbSet<PaymentTransgression> PaymentTransgressions { get; set; }
+        public DbSet<PaymentTransgressionCategory> PaymentTransgressionCategories { get; set; }
+        public DbSet<PaymentTransgressionType> PaymentTransgressionTypes { get; set; }
+        public DbSet<PaymentTransgressionSeverity> PaymentTransgressionSeverities { get; set; }
+        public DbSet<PaymentTransgressionDocument> PaymentTransgressionDocuments { get; set; }
+        public DbSet<PaymentTransgressionAuditLog> PaymentTransgressionAuditLogs { get; set; }
+
+        // Service Requests Module Tables (UC17D/UC17E)
+        public DbSet<ServiceRequest> ServiceRequests { get; set; }
+        public DbSet<ServiceRequestCategory> ServiceRequestCategories { get; set; }
+        public DbSet<ServiceRequestPriority> ServiceRequestPriorities { get; set; }
+        public DbSet<ServiceRequestDocument> ServiceRequestDocuments { get; set; }
+        public DbSet<ServiceRequestAuditLog> ServiceRequestAuditLogs { get; set; }
 
         // Entity Collections.
         public DbSet<Account> Accounts { get; set; }
@@ -678,7 +694,9 @@ namespace C8.eServices.Mvc.DataAccessLayer
                                     {
                                         try
                                         {
-                                            audit.GetType().GetProperty(prop.Name).SetValue(audit, prop.GetValue(entry.Entity));
+                                            var auditProp = audit.GetType().GetProperty(prop.Name);
+                                            if (auditProp != null)
+                                                auditProp.SetValue(audit, prop.GetValue(entry.Entity));
                                         }
                                         catch (Exception)
                                         {

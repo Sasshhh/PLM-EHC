@@ -31,6 +31,9 @@ namespace C8.eServices.Mvc.Models
         [Required]
         public string SignatureData { get; set; } // Base64 signature image
 
+        [StringLength(50)]
+        public string SignatureRole { get; set; } // "MaintenanceManager" or "FacilitiesManager"
+
         public DateTime ApprovalDate { get; set; }
 
         public int SignedByCustomerId { get; set; }

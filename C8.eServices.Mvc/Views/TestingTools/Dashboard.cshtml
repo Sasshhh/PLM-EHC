@@ -1,0 +1,183 @@
+@{
+    ViewBag.Title = "Test Execution Dashboard";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-blue: #00d2ff;
+        --secondary-teal: #3a7bd5;
+        --dark-bg: #1a1a2e;
+        --card-bg: #16213e;
+        --success: #00f2fe;
+    }
+
+    .dashboard-container {
+        background-color: var(--dark-bg);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 20px;
+    }
+
+    .status-card {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-blue);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .status-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .progress-timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -31px;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: rgba(255,255,255,0.1);
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-blue);
+        box-shadow: 0 0 10px var(--primary-blue);
+    }
+
+    .log-container {
+        background: #0f3460;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: 'Consolas', monospace;
+        font-size: 13px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .badge-live {
+        background: red;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        text-transform: uppercase;
+        animation: blink 1.5s infinite;
+    }
+
+    @@keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <div>
+            <h1 style="margin:0; font-size: 24px; color: var(--primary-blue);">PLM World-Class Test Suite</h1>
+            <p class="text-muted">Real-time System Integrity Verification</p>
+        </div>
+        <div>
+            <span class="badge-live">Live Tracking</span>
+            <button id="refreshBtn" class="btn btn-info btn-sm">Manual Refresh</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="status-card">
+                <h3>Execution Timeline</h3>
+                <div class="progress-timeline" id="timeline">
+                    <!-- Timeline items will be injected here -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h4>Awaiting Test Start...</h4>
+                        <p class="text-muted">Launch Playwright to begin workflow verification.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="status-card">
+                <h3>System State</h3>
+                <div id="state-details">
+                    <p>Reference: <span id="ref-val" class="text-info">-</span></p>
+                    <p>Last Action: <span id="action-val" class="text-success">-</span></p>
+                </div>
+            </div>
+            <div class="status-card">
+                <h3>Logs</h3>
+                <div class="log-container" id="log-window">
+                    [SYSTEM] Dashboard initialized...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateDashboard() {
+            $.get('@Url.Action("GetTestState", "TestingTools")', function (data) {
+                const state = JSON.parse(data);
+                if (state.lastUpdate) {
+                    $('#ref-val').text(state.occupantReference || 'N/A');
+                    $('#action-val').text(state.lastAction || 'N/A');
+                    
+                    // Update Timeline
+                    if (state.history) {
+                        let html = '';
+                        state.history.forEach(item => {
+                            html += `
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <h4>${item.title}</h4>
+                                    <p class="text-muted">${item.time} - ${item.details}</p>
+                                </div>
+                            `;
+                        });
+                        $('#timeline').html(html);
+                    }
+
+                    // Append to Log
+                    const log = `[${new Date().toLocaleTimeString()}] Updated system state: ${state.lastAction}\n`;
+                    $('#log-window').append(log);
+                }
+            });
+        }
+
+        $(function () {
+            setInterval(updateDashboard, 3000);
+            $('#refreshBtn').click(updateDashboard);
+        });
+    </script>
+}

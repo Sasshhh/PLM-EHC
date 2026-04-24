@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.ViewModels;
@@ -89,7 +89,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -101,8 +101,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -154,14 +157,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -211,14 +217,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -289,7 +298,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(o => o.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -301,8 +310,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -425,7 +437,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(o => o.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -437,8 +449,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -594,7 +609,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(o => o.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -606,8 +621,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -658,13 +676,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -716,13 +737,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -773,13 +797,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -831,13 +858,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -889,13 +919,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -945,13 +978,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1001,13 +1037,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1057,13 +1096,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1113,13 +1155,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1169,13 +1214,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1225,13 +1273,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1281,13 +1332,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1335,13 +1389,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1389,13 +1446,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1443,13 +1503,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1506,13 +1569,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)1256;
             dvm.IsUploadView = true;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1560,13 +1626,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1614,13 +1683,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)1256;
             dvm.IsUploadView = false;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1669,13 +1741,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)1256;
             dvm.IsUploadView = false;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1724,13 +1799,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)1256;
             dvm.IsUploadView = false;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1778,14 +1856,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1834,7 +1915,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             //if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -1846,8 +1927,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1895,13 +1979,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == plmappsId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == plmappsId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -1960,7 +2047,7 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             var addDoc = core.DocumentCheckLists.Include(o => o.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == addDocumentType.Id && dcl.ReferenceTypeId == referenceType.Id);
             if (documentCheckLists.All(chk => chk.Id != addDoc.Id))
@@ -1972,8 +2059,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -2025,13 +2115,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -2082,13 +2175,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.HumanSettlementApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -2137,13 +2233,16 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)1256;
             dvm.IsUploadView = false;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == 1256 && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == 1 && o.IsActive && !o.IsDeleted).ToList();
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -2513,6 +2612,9 @@ namespace C8.eServices.Mvc.Helpers
             findQueueItem.IsActive = false;
             core.SaveChanges();
         }
+
+
+
         public static void RenewalNotificationAtEndOfTime(eServicesDbContext core)
         {
             try
@@ -2534,7 +2636,7 @@ namespace C8.eServices.Mvc.Helpers
                     ChangeLeaseStatusII(core, core.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicationUpForRenewalAtThreeMonths).Id, (int)Item.Id);
                     int result = cc.EHCRoundRobin(Item.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, 1, false, false, 1);
                     int emailboodyId = core.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationUpForRenewal).Id;
-                    //CustomerEmailNotification(core, Item.PropertyLeaseApplicationId, emailboodyId);
+                    EmailHelper.CustomerEmailNotification(core, Item.PropertyLeaseApplicationId, emailboodyId);
                     Item.IsRenewed = true;
                     core.SaveChanges();
                 }
@@ -2566,6 +2668,81 @@ namespace C8.eServices.Mvc.Helpers
             //{
 
             //}
+        }
+
+        public static void RoundRobinRenewal(eServicesDbContext core, int propertyLeaseApplicationId, string responsibilityTypeKey, int? leaseDetailsId = null, string clerkAppSettingKey = null)
+        {
+            var responsibilityType = core.ResponsibilityTypes.FirstOrDefault(r => r.Key == responsibilityTypeKey);
+            if (responsibilityType == null) return;
+
+            var application = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == propertyLeaseApplicationId);
+            if (application == null) return;
+
+            int clerkId;
+            if (!string.IsNullOrEmpty(clerkAppSettingKey))
+            {
+                clerkId = Convert.ToInt16(core.AppSettings.FirstOrDefault(x => x.Key == clerkAppSettingKey)?.Value ?? "0");
+            }
+            else
+            {
+                var complex = core.PreferredComplexAreas.FirstOrDefault(x => x.Id == application.PreferredComplexAreaId);
+                var storedCsoId = Convert.ToInt16(core.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.LettingOfficer)?.Value ?? "0");
+                clerkId = (complex != null && complex.LettingOfficerId.HasValue)
+                    ? complex.LettingOfficerId.Value
+                    : storedCsoId;
+            }
+
+            if (clerkId == 0) return;
+
+            var statusId = core.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted)?.Id ?? 1;
+
+            var queue = new RoundRobinQueue
+            {
+                PropertyLeaseApplicationId = propertyLeaseApplicationId,
+                LeaseDetailsId = leaseDetailsId,
+                ResponsibilityTypeId = responsibilityType.Id,
+                CurrentTaskDateTime = DateTime.Now,
+                ClerkId = clerkId,
+                StatusId = statusId
+            };
+            core.RoundRobinQueues.Add(queue);
+            core.SaveChanges();
+        }
+
+        public static bool IsEligibleForRenewal_72MonthCap(eServicesDbContext core, int propertyLeaseApplicationId)
+        {
+            var firstLease = core.LeaseDetails
+                .Where(x => x.PropertyLeaseApplicationId == propertyLeaseApplicationId && x.IsActive && !x.IsDeleted)
+                .OrderBy(x => x.Id)
+                .FirstOrDefault();
+
+            if (firstLease == null) return false;
+
+            var originalStart = Convert.ToDateTime(firstLease.StartDate);
+            var totalMonths = ((DateTime.Now.Year - originalStart.Year) * 12) + (DateTime.Now.Month - originalStart.Month);
+
+            return totalMonths < 72;
+        }
+
+        public static bool IsEligibleForRenewal_PaymentCompliance(eServicesDbContext core, int propertyLeaseApplicationId)
+        {
+            var application = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == propertyLeaseApplicationId);
+            if (application == null) return false;
+
+            var closedStatusKey = PaymentTransgressionStatusKeys.Closed;
+            var hasActiveTransgressions = core.PaymentTransgressions
+                .Any(p => p.TenancyReferenceNumber == application.ApplicationReferenceNumber
+                          && p.Status.Key != closedStatusKey);
+
+            if (hasActiveTransgressions) return false;
+
+            var hasActiveComplaints = core.TenantComplaints
+                .Any(c => c.OfficialNumber == application.ApplicationReferenceNumber
+                          && c.IsActive && !c.IsDeleted);
+
+            if (hasActiveComplaints) return false;
+
+            return true;
         }
 
         public static void HumanRenewalNotification(eServicesDbContext core)
@@ -2615,17 +2792,37 @@ namespace C8.eServices.Mvc.Helpers
         }
         public static void WaitingListNotificationAtOneYear(eServicesDbContext core)
         {
-            var minutes = Convert.ToInt32(core.AppSettings.FirstOrDefault(r => r.Key == AppSettingKeys.waiting_list_notification_in_munites).Value);
-            DateTime notification = DateTime.Now.AddMinutes(-minutes);
-            var findQueueItem = core.waitingListQues.OrderBy(x => x.Position).Include(r => r.PropertyLeaseApplication).Where(x => x.IsDeleted != true && x.IsActive && !x.IsMatched && notification >= x.QueueDate && x.IsReListed == false && x.Position != null).ToList();
-            //foreach (var item in findQueueItem)
-            //{
-            //    ChangeApplicationStatus(core, core.Status.FirstOrDefault(x => x.Key == StatusKeys.InAwaitingWaitingListReEntry).Id, (int)item.PropertyLeaseApplicationId);
-            //    EmailHelper.CustomerEmailNotification(core, (int)item.PropertyLeaseApplicationId, core.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.WaitingListReEntery).Id);
-            //    item.IsReListed = true;
-            //    core.Entry(item).State = EntityState.Modified;
-            //}
-            //core.SaveChanges();
+            // BR07: Flag applications on the waiting list for >= 5 months without a match.
+            // After flagging, the tenant sees a "Unit Still Required?" prompt in their Inbox.
+            // If they confirm Yes, QueueDate resets (timer restarts). If No, application is discarded.
+            const int thresholdDays = 150; // 5 months
+
+            var findQueueItem = core.waitingListQues
+                .OrderBy(x => x.Position)
+                .Include(r => r.PropertyLeaseApplication)
+                .Where(x => x.IsDeleted != true && x.IsActive && !x.IsMatched && x.IsReListed == false && x.Position != null)
+                .ToList();
+
+            var statusId = core.Status.FirstOrDefault(x => x.Key == StatusKeys.InAwaitingWaitingListReEntry)?.Id;
+            var emailContent = core.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.WaitingListReEntery);
+
+            if (statusId == null || emailContent == null) return;
+
+            foreach (var item in findQueueItem)
+            {
+                if (item.QueueDate == null || item.PropertyLeaseApplicationId == null) continue;
+
+                var daysOnList = (DateTime.Now - Convert.ToDateTime(item.QueueDate)).Days;
+                if (daysOnList >= thresholdDays)
+                {
+                    ChangeApplicationStatus(core, (int)statusId, (int)item.PropertyLeaseApplicationId);
+                    EmailHelper.CustomerEmailNotification(core, (int)item.PropertyLeaseApplicationId, emailContent.Id);
+                    item.IsReListed = true;
+                    item.ReListDate = DateTime.Now;
+                    core.Entry(item).State = EntityState.Modified;
+                    core.SaveChanges();
+                }
+            }
         }
         public static void WaitingListNotificationAtOneYear2(eServicesDbContext core)
         {
@@ -4134,8 +4331,7 @@ namespace C8.eServices.Mvc.Helpers
                 core.RoundRobinQueues.Add(Queue);
                 core.SaveChanges();
 
-                PropertyLeaseApplicationController cc = new PropertyLeaseApplicationController();
-                cc.BackOfficeNotification((int)queue.PropertyLeaseApplicationId, ClerkId, queue.ResponsibilityType.Name);
+                EHCWorkflowEngine.BackOfficeNotification(core, (int)queue.PropertyLeaseApplicationId, ClerkId, queue.ResponsibilityType.Name);
                 return true;
             }
             catch (Exception IO)
@@ -4319,14 +4515,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4374,14 +4573,17 @@ namespace C8.eServices.Mvc.Helpers
 
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4438,14 +4640,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4492,14 +4697,17 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceType = referenceType;
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4545,14 +4753,17 @@ namespace C8.eServices.Mvc.Helpers
 
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4609,12 +4820,12 @@ namespace C8.eServices.Mvc.Helpers
 
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
 
             //Warning Letter - Contravention letter
             var warningLetterCheckList = core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == WarningLetter.Id && dcl.ReferenceTypeId == referenceType.Id);
             documentCheckLists.Add(warningLetterCheckList);
-            var warningLetterDoc = core.Documents.Include(o => o.File).Where(o => o.DocumentCheckListId == warningLetterCheckList.Id && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).FirstOrDefault();
+            var warningLetterDoc = core.Documents.Where(o => o.DocumentCheckListId == warningLetterCheckList.Id && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).FirstOrDefault();
             if (warningLetterDoc != null) 
             {
                  dvm.Documents.Add(warningLetterDoc);
@@ -4623,8 +4834,11 @@ namespace C8.eServices.Mvc.Helpers
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)
@@ -4675,14 +4889,17 @@ namespace C8.eServices.Mvc.Helpers
 
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Include(o => o.File).Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p => p.CreatedDateTime).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p => p.CreatedDateTime).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
             {
-                if (customerDocument.File != null)
+                if (customerDocument.FileId != null)
+                {
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                }
 
                 var docCheckList =
                      core.DocumentCheckLists.Include(c => c.DocumentType)

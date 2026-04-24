@@ -10,15 +10,20 @@ namespace C8.eServices.Mvc.Helpers
             var success = false;
             try
             {
-                using (var webClient = new WebClient())
+                var validateString = string.Format(
+                    "https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}",
+                    "6Le0Pw8cAAAAAI5AZSdKo9gH0Ur5Im7JUU1GpoSP",
+                    response);
+
+                var request = (HttpWebRequest)WebRequest.Create(validateString);
+                request.Timeout = 5000;
+                request.ReadWriteTimeout = 5000;
+
+                using (var webResponse = (HttpWebResponse)request.GetResponse())
+                using (var stream = webResponse.GetResponseStream())
+                using (var reader = new System.IO.StreamReader(stream))
                 {
-                    var validateString = string.Format(
-                        "https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}",
-                       "6Le0Pw8cAAAAAI5AZSdKo9gH0Ur5Im7JUU1GpoSP",
-                       response);
-
-                    var recaptchaResult = webClient.DownloadString(validateString);
-
+                    var recaptchaResult = reader.ReadToEnd();
                     if (recaptchaResult.ToLower().Contains("true"))
                     {
                         success = true;

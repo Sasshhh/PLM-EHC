@@ -162,55 +162,75 @@
             <!-- Maintenance Manager Signature - View Only -->
             <div class="panel-heading">Maintenance Manager Signature <span class="view-only-badge">View Only</span></div>
             <div style="width: 90%;margin: 0 auto;">
+                <!-- Job Card Signatures -->
+                <div class="panel-heading">Job Card Sign-Offs <span class="view-only-badge">View Only</span></div>
                 <br />
-                @if (maintenanceSignature != null)
+                @{
+                    var signatures = (List<C8.eServices.Mvc.Models.MaintenanceJobCardSignature>)ViewBag.MaintenanceSignatures;
+                    var facSignature = signatures.FirstOrDefault(x => x.SignatureRole == "FacilitiesManager");
+                }
+
+                @if (signatures != null && signatures.Any())
                 {
-                    <div class="alert alert-success">
-                        <strong><i class="fa fa-check-circle"></i> Job Card Signed by Maintenance Manager</strong>
-                    </div>
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th style="width:200px;">Official Number</th>
-                                <td>@maintenanceSignature.OfficialNumber</td>
-                            </tr>
-                            <tr>
-                                <th>Approval Action</th>
-                                <td>
-                                    <span class="label @(maintenanceSignature.ApprovalAction == "Approve" ? "label-success" : "label-danger")">
-                                        @maintenanceSignature.ApprovalAction
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Reason</th>
-                                <td>@maintenanceSignature.Reason</td>
-                            </tr>
-                            <tr>
-                                <th>Signed By</th>
-                                <td>@(maintenanceSignature.SignedByCustomer != null ? maintenanceSignature.SignedByCustomer.FullName : "-")</td>
-                            </tr>
-                            <tr>
-                                <th>Approval Date</th>
-                                <td>@maintenanceSignature.ApprovalDate.ToString("dd MMMM yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture)</td>
-                            </tr>
-                            <tr>
-                                <th>Signature</th>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(maintenanceSignature.SignatureData))
-                                    {
-                                        <img src="@maintenanceSignature.SignatureData" alt="Signature" style="border: 1px solid #ccc; max-width: 400px;" />
-                                    }
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    foreach (var sig in signatures.OrderBy(x => x.ApprovalDate))
+                    {
+                        var roleTitle = sig.SignatureRole == "FacilitiesManager" ? "Property & Facilities Manager" : "Maintenance Manager";
+                        <div class="alert @(sig.SignatureRole == "FacilitiesManager" ? "alert-info" : "alert-success")" style="margin-bottom: 0;">
+                            <strong><i class="fa fa-check-circle"></i> Job Card Signed by @roleTitle</strong>
+                        </div>
+                        <table class="table table-bordered" style="margin-bottom: 20px;">
+                            <tbody>
+                                <tr>
+                                    <th style="width:200px;">Official Number</th>
+                                    <td>@sig.OfficialNumber</td>
+                                </tr>
+                                <tr>
+                                    <th>Approval Action</th>
+                                    <td>
+                                        <span class="label @(sig.ApprovalAction == "Approved" || sig.ApprovalAction == "Approve" ? "label-success" : "label-danger")">
+                                            @sig.ApprovalAction
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Reason</th>
+                                    <td>@sig.Reason</td>
+                                </tr>
+                                <tr>
+                                    <th>Signed By</th>
+                                    <td>@(sig.SignedByCustomer != null ? sig.SignedByCustomer.FullName : "-")</td>
+                                </tr>
+                                <tr>
+                                    <th>Approval Date</th>
+                                    <td>@sig.ApprovalDate.ToString("dd MMMM yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                </tr>
+                                <tr>
+                                    <th>Signature</th>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(sig.SignatureData))
+                                        {
+                                            <img src="@sig.SignatureData" alt="Signature" style="border: 1px solid #ccc; max-width: 400px;" />
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    }
                 }
                 else
                 {
                     <div class="alert alert-warning">
-                        <i class="fa fa-exclamation-triangle"></i> No signature captured yet.
+                        <i class="fa fa-exclamation-triangle"></i> No signatures captured yet.
                     </div>
+                }
+
+                @if (facSignature != null)
+                {
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $('#facilitiesSignatureSection').hide();
+                        });
+                    </script>
                 }
                 <br />
             </div>
@@ -221,42 +241,82 @@
         @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
         <br />
 
-        <!-- Facilities Manager Decision -->
-        <div class="panel-heading">Property &amp; Facilities Manager Decision</div>
-        <div class="panel-body" style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm())
-            {
-                @Html.AntiForgeryToken()
+        <!-- Facilities Manager Decision (Signature Section) -->
+        <div id="facilitiesSignatureSection">
+            <div class="panel-heading">Property &amp; Facilities Manager Review &amp; Sign-Off</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <div class="alert alert-info">
+                    <strong>Instructions:</strong>
+                    <ul>
+                        <li>Enter your official number and click <strong>Authorize</strong>.</li>
+                        <li>Select your <strong>Approval Action</strong> and enter a <strong>Reason</strong>.</li>
+                        <li>Capture your signature and click <strong>Submit Signature</strong> to complete the review.</li>
+                    </ul>
+                </div>
+
                 <div class="form-horizontal">
-                    <div class="alert alert-info">
-                        <strong>Review Instructions:</strong>
-                        <ul>
-                            <li><strong>Approve:</strong> Maintenance work is complete. Application will proceed to next step.</li>
-                            <li><strong>Reject:</strong> Additional maintenance work is required. Application will remain pending for further action.</li>
-                        </ul>
-                    </div>
                     <div class="form-group">
-                        <label class="control-label col-md-2">Decision</label>
-                        <div class="col-md-10">
-                            @Html.DropDownList("ApprovalStatusddl", (SelectList)ViewBag.ApprovalStatus, "-- Select --", new { @class = "form-control", required = "required" })
-                            <span class="text-danger">*</span>
+                        <label class="control-label col-md-2">Official Number *</label>
+                        <div class="col-md-4">
+                            <input type="text" id="facOfficialNumber" class="form-control" maxlength="50" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-warning" onclick="authorizeFacilitiesSignature()">
+                                <i class="fa fa-key"></i> Authorize
+                            </button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-2">Review Comment</label>
-                        <div class="col-md-10">
-                            @Html.TextArea("ReviewComment", null, new { @class = "form-control", rows = 4, placeholder = "Enter your review comment or reason for decision...", required = "required" })
-                            <span class="text-danger">*</span>
+                    <div class="clearfix"></div>
+                    <br />
+
+                    <div id="facSignatureFormSection" style="display: none;">
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Approval Action *</label>
+                            <div class="col-md-4">
+                                <select id="facApprovalAction" class="form-control" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Rcs_Approval">Approve (Maintenance Complete)</option>
+                                    <option value="Rcs_Rejected">Reject (Further Action Required)</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <input type="submit" value="Submit Decision" class="btn btn-primary" />
-                            @Html.ActionLink("Back to List", "PropertyFacilitiesMaintenanceReviews", null, new { @class = "btn btn-default" })
+                        <div class="clearfix"></div>
+                        <br />
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Review Comment *</label>
+                            <div class="col-md-10">
+                                <textarea id="facSignatureReason" class="form-control" rows="3" maxlength="1000" placeholder="Enter your review comment or reason for decision..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <br />
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Capture Signature *</label>
+                            <div class="col-md-10">
+                                <div style="border: 2px solid #000; width: 600px; height: 150px; background-color: #fff;">
+                                    <canvas id="facSignaturePad" width="600" height="150"></canvas>
+                                </div>
+                                <button type="button" class="btn btn-default" style="margin-top: 10px;" onclick="clearFacilitiesSignature()">
+                                    <i class="fa fa-eraser"></i> Clear Signature
+                                </button>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <br />
+
+                        <div class="text-center">
+                            <button type="button" class="btn btn-success btn-lg" onclick="submitFacilitiesSignature()">
+                                <i class="fa fa-check"></i> Submit Review &amp; Signature
+                            </button>
+                            @Html.ActionLink("Back to List", "PropertyFacilitiesMaintenanceReviews", null, new { @class = "btn btn-default btn-lg", style="margin-left: 10px;" })
                         </div>
                     </div>
                 </div>
-            }
+                <br />
+            </div>
         </div>
         <br />
 
@@ -265,8 +325,10 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script type="text/javascript">
         var maintenanceId = @Html.Raw(maintenanceId);
+        var signaturePad;
 
         $(document).ready(function () {
             @if (ViewBag.MessageTitle != null && ViewBag.Message != null)
@@ -283,8 +345,98 @@
 
             if (maintenanceId > 0) {
                 loadTasksViewOnly();
+                initializeSignaturePad();
             }
         });
+
+        function initializeSignaturePad() {
+            var canvas = document.getElementById('facSignaturePad');
+            if (canvas) {
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)'
+                });
+            }
+        }
+
+        function authorizeFacilitiesSignature() {
+            var officialNumber = $('#facOfficialNumber').val();
+            if (!officialNumber) {
+                swal("Warning", "Please enter your official number to authorize", "warning");
+                return;
+            }
+
+            swal("Authorized", "You may now select your decision and capture your signature", "success");
+            $('#facSignatureFormSection').show();
+            
+            // Resize canvas once shown
+            var canvas = document.getElementById('facSignaturePad');
+            if (canvas) {
+                var ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear();
+            }
+        }
+
+        function clearFacilitiesSignature() {
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        }
+
+        function submitFacilitiesSignature() {
+            var officialNumber = $('#facOfficialNumber').val();
+            var approvalAction = $('#facApprovalAction').val();
+            var reason = $('#facSignatureReason').val();
+
+            if (!officialNumber || !approvalAction || !reason) {
+                swal("Error", "Please fill in all required fields", "error");
+                return;
+            }
+
+            if (signaturePad.isEmpty()) {
+                swal("Error", "Please provide a signature", "error");
+                return;
+            }
+
+            var signatureData = signaturePad.toDataURL();
+
+            swal({
+                icon: "warning",
+                title: "Are you sure you want to submit this review?",
+                text: "Once submitted, you will not be able to change your decision.",
+                buttons: ['No, cancel', 'Yes, submit signature']
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: '@Url.Action("SaveFacilitiesManagerSignature", "PropertyLeaseApplication")',
+                        type: 'POST',
+                        data: {
+                            maintenanceId: maintenanceId,
+                            officialNumber: officialNumber,
+                            approvalAction: approvalAction,
+                            reason: reason,
+                            signatureData: signatureData
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                swal("Success", "Review and signature submitted successfully!", "success")
+                                    .then(function () {
+                                        window.location.href = '@Url.Action("PropertyFacilitiesMaintenanceReviews", "PropertyLeaseApplication")';
+                                    });
+                            } else {
+                                swal("Error", response.message, "error");
+                            }
+                        },
+                        error: function () {
+                            swal("Error", "Failed to submit signature. Please try again.", "error");
+                        }
+                    });
+                }
+            });
+        }
 
         function loadTasksViewOnly() {
             $.ajax({

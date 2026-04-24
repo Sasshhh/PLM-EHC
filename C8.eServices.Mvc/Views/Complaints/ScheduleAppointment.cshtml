@@ -56,7 +56,7 @@
                 </div>
             }
 
-            @using (Html.BeginForm("ScheduleAppointment", "TenantComplaint", FormMethod.Post, new { @class = "form-horizontal" }))
+            @using (Html.BeginForm("ScheduleAppointment", "Complaints", FormMethod.Post, new { @class = "form-horizontal" }))
             {
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(model => model.Id)
@@ -101,12 +101,12 @@
                                         <option value="12:30" @(currentTime == "12:30" ? "selected" : "")>12:30 PM</option>
                                         <option value="13:00" @(currentTime == "13:00" ? "selected" : "")>01:00 PM</option>
                                         <option value="13:30" @(currentTime == "13:30" ? "selected" : "")>01:30 PM</option>
-                                        <option value="14:00" @(Model.AppointmentTime == "14:00" ? "selected" : "")>02:00 PM</option>
-                                        <option value="14:30" @(Model.AppointmentTime == "14:30" ? "selected" : "")>02:30 PM</option>
-                                        <option value="15:00" @(Model.AppointmentTime == "15:00" ? "selected" : "")>03:00 PM</option>
-                                        <option value="15:30" @(Model.AppointmentTime == "15:30" ? "selected" : "")>03:30 PM</option>
-                                        <option value="16:00" @(Model.AppointmentTime == "16:00" ? "selected" : "")>04:00 PM</option>
-                                        <option value="16:30" @(Model.AppointmentTime == "16:30" ? "selected" : "")>04:30 PM</option>
+                                        <option value="14:00" @(currentTime == "14:00" ? "selected" : "")>02:00 PM</option>
+                                        <option value="14:30" @(currentTime == "14:30" ? "selected" : "")>02:30 PM</option>
+                                        <option value="15:00" @(currentTime == "15:00" ? "selected" : "")>03:00 PM</option>
+                                        <option value="15:30" @(currentTime == "15:30" ? "selected" : "")>03:30 PM</option>
+                                        <option value="16:00" @(currentTime == "16:00" ? "selected" : "")>04:00 PM</option>
+                                        <option value="16:30" @(currentTime == "16:30" ? "selected" : "")>04:30 PM</option>
                                     </select>
                                     @Html.ValidationMessageFor(model => model.AppointmentTime, "", new { @class = "text-danger" })
                                 </div>
@@ -120,7 +120,7 @@
                                 <label class="control-label col-md-2">Notes (Optional)</label>
                                 <div class="col-md-10">
                                     <textarea name="Notes" class="form-control" rows="3" 
-                                              placeholder="Any additional notes for the appointment...">@Model.Notes</textarea>
+                                              placeholder="Any additional notes for the appointment..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -135,14 +135,14 @@
                             </button>
                             @if (complaint != null)
                             {
-                                <a href="@Url.Action("Details", "TenantComplaint", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
+                                <a href="@Url.Action("Details", "Complaints", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
                                    class="btn btn-default btn-lg">
                                     <i class="ion ion-close-circled"></i> Cancel
                                 </a>
                             }
                             else
                             {
-                                <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                <a href="@Url.Action("Index", "Complaints")" class="btn btn-default btn-lg">
                                     <i class="ion ion-close-circled"></i> Cancel
                                 </a>
                             }

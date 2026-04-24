@@ -1,0 +1,261 @@
+UC018 Recommend for Lease Renewal
+Use Case Name	Recommend Lease Renewal  
+Use Case Number	UC018
+Use Descriptions:	This use case enables the user to identify tenants whose leases are nearing expiry and recommend whether their lease should be renewed. The recommendation is based on predefined business rules and data such as payment history, occupancy duration, tenant behavior, etc.
+Primary Actor	Client Services Officer, Tenant
+Secondary Actor(s)	Property Lease Management System 
+Pre-condition(s)	The lease must be due to lapse in the next three months
+User logged in on the system
+Trigger	Lease reaches a predefined threshold before expiry (3 months before lease end date)
+Success End Condition	Recommendation successfully sent for review 
+Failed End Condition	Unable to send recommendation
+Screen References	
+
+mSCOA ID	N/A
+Integration	IR04 Billing and Revenue Management (Not Ready to be Tested)
+	IR06 Credit Control Management (Not Ready to be Tested)
+Business Requirements	Requirement ID	Requirement Description
+	FR10.1	System generated notification for back-office staff that provides a list of tenants due for lease renewal (3 months before Expiry Date)
+	FR10.2	The Official must be able to recommend for renewal
+	FR10.4	Tenant must have an option to indicate whether they intend to continue with the lease or terminate
+Business Rules	Rule ID 	Rule Description
+	BR20	The tenants must be informed of their lease expiry date three (3) months in advance and must be given an opportunity to renew or not
+	BR21	Lease renewals must not exceed 72 months period. i.e. lease can only be renewed up to 3 times
+	BR39	Tenant must have ≥ 95% on-time payments and there are no active legal disputes
+Main Success Scenario [The steps of the scenario from trigger to goal delivery, as well as any clean-up]
+Ref	Actor Action	Ref	System Response
+Step 1	Select Agreements from the main menu > Click on Lease Agreements > Select Renewals	Step 2	Displays list of applications with status = Flagged for Lease Renewal
+
+Step 3	Select Lease Agreement of interest	Step 4	Accepts user selection
+If there is a notification from Tenant to not renew, proceed to Lease Termination process
+Step 5	Click Lease Review	Step 6	Displays Evaluating Application Screen with:
++	Tenant and Occupant(s) Details
++	Lease Duration (start & end date)
++	Payment History
++	Rental Arrears or Disputes
++	Complaints Against Tenant
++	Maintenance Issues
++	Tenant Compliance Records (e.g. ITC/TPN checks)
+Step 7	View the necessary details and Click Outcome	Step 8	Displays options to select from:
+-	Recommended for Renewal
+-	Not Recommended for Renewal
+-	Review Required
+Step 9	Select the appropriate option	Step 10	Accepts user selection and prompts to upload supporting documents
+Step 11	Upload supporting documents and Click Submit	Step 12	Displays pop-up confirmation message
+Step 13	Click on “Yes, I am sure”	Step 14	Success message displayed and notification sent to Tenant and Revenue Manager
+Lease Agreement status = Awaiting Renewal Review Outcome
+Alternative Flow: Alternative at Step 13
+Step 13	Click Cancel	Step 14	Transaction is cancelled
+Main Success Scenario 2: Tenant
+Step 1	Select Inbox	Step 2	Displays items in Inbox
+Step 3	Select the lease expiry notification	Step 4	Accepts user selection
+Step 5	Select Renew Lease option	Step 6	Accepts user selection
+Step 7	Click on Submit	Step 8	Displays pop-up confirmation message
+Step 9	Click on “Yes, I am sure”	Step 10	Success message displayed and notification sent to Client Services Officer
+Alternate Flow 2: Alternative at Step 5
+Step 5	Select Do Not Renew Lease option	Step 6	Accepts user selection
+Step 7	Click on Submit	Step 8	Displays pop-up confirmation message
+Step 9	Click on “Yes, I am sure”	Step 10	Success message displayed and notification sent to Client Services Officer
+Client Services Officer initiates Lease Termination process
+Note:
+The same process should be repeated for the 2nd and 3rd Lease Renewal Recommendation
+
+UC019 Review Lease Renewal Recommendation
+Use Case Name	Review Lease Renewal Recommendation  
+Use Case Number	UC019
+Use Descriptions:	The process of reviewing lease renewal recommendation
+Primary Actor	Revenue Manager
+Secondary Actor(s)	Property Lease Management System 
+Pre-condition(s)	Lease renewal recommendation submitted
+User logged in on the system
+Trigger	Lease renewal recommendation requires review
+Success End Condition	Recommendation successfully sent for review 
+Failed End Condition	Unable to send recommendation
+Screen References	
+
+mSCOA ID	N/A
+Integration	IR04 Billing and Revenue Management (Not Ready to be Tested)
+	IR06 Credit Control Management (Not Ready to be Tested)
+Business Requirements	Requirement ID	Requirement Description
+	FR10.2	The Official must be able to recommend for renewal
+	FR10.3	Review and approval by the relevant officials 
+Business Rules	Rule ID 	Rule Description
+	BR21	Lease renewals must not exceed 72 months period. i.e. lease can only be renewed up to 3 times
+	BR39	Tenant must have ≥ 95% on-time payments and there are no active legal disputes
+Main Success Scenario [The steps of the scenario from trigger to goal delivery, as well as any clean-up]
+Ref	Actor Action	Ref	System Response
+Step 1	Select Agreements from the main menu > Click on Lease Agreements > Select Renewals	Step 2	Displays list of Lease Agreements with status = Awaiting Renewal Review Outcome
+Step 3	Select Lease Agreement of interest 	Step 4	Accepts user selection
+Step 5	Click on View	Step 6	Displays details
+Step 7	Enter Official number, Click on Authorize > Select Supported > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click Submit	Step 10	System presents a notification “Are you sure you want to submit for approval?”
+Step 11	Click on “Yes, I am sure”	Step 12	Success message displayed
+Lease Agreement status = Awaiting Renewal Outcome
+Alternative Flow 1: Alternative at Step 11
+Step 11	Click Cancel	Step 12	Transaction is cancelled
+Alternative Flow 2: Alternative at Step 7
+Step 7	Enter Official number, Click on Authorize > Select Not Supported > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click on Submit	Step 10	Message presented “Are you sure you want to submit the following response?”
+Step 11	Click on the “Yes, I am sure” button	Step 12	Notify Client Services Officer and CEO of the Lease Renewal Outcome based on reasons submitted on the Captured Reason
+Lease Agreement status = Awaiting Renewal Outcome
+Note:
+The same process should be repeated for the 2nd and 3rd Lease Renewal Recommendation Review
+
+UC020 Approve Lease Renewal Recommendation
+Use Case Name	Approve Lease Renewal Recommendation  
+Use Case Number	UC020
+Use Descriptions:	The process of approving lease renewal recommendation
+Primary Actor	CEO
+Secondary Actor(s)	Property Lease Management System 
+Pre-condition(s)	Lease renewal recommendation submitted
+User logged in on the system
+Trigger	Lease renewal recommendation requires review
+Success End Condition	Notifies the Tenant of the renewal outcome   
+Failed End Condition	Unable to notify the Tenant of the renewal outcome
+Screen References	
+
+mSCOA ID	N/A
+Integration	
+	
+Business Requirements	Requirement ID	Requirement Description
+	FR10.3	Review and approval by the relevant officials 
+Business Rules	Rule ID 	Rule Description
+	BR05	Reason field is mandatory for any capture reason step
+	BR21	Lease renewals must not exceed 72 months period. i.e. lease can only be renewed up to 3 times
+	BR39	Tenant must have ≥ 95% on-time payments and there are no active legal disputes
+Main Success Scenario [The steps of the scenario from trigger to goal delivery, as well as any clean-up]
+Ref	Actor Action	Ref	System Response
+Step 1	Select Agreements from the main menu > Click on Lease Agreements > Select Renewals	Step 2	Displays list of Lease Agreements with status = Awaiting Renewal Review Outcome
+Step 3	Select Lease Agreement of interest 	Step 4	Accepts user selection
+Step 5	Click on View	Step 6	Displays details
+Step 7	Enter Official number, Click on Authorize > Click Approve > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click Submit	Step 10	System presents a notification “Are you sure you want to submit for approval?”
+Step 11	Click on “Yes, I am sure”	Step 12	Success message displayed
+Lease Agreement status = Lease Renewal Approved
+Alternative Flow 1: Alternative at Step 11
+Step 11	Click Cancel	Step 12	Transaction is cancelled
+Alternative Flow 2: Alternative at Step 7
+Step 7	Enter Official number, Click on Authorize > Select Rejected > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click on Submit	Step 10	Message presented “Are you sure you want to submit the following response?”
+Step 11	Click on the “Yes, I am sure” button	Step 12	Notify Tenant, Client Services Officer and Revenue Manager of the Lease Renewal Outcome based on reasons submitted on the Captured Reason
+Lease Agreement status = Lease Renewal Rejected
+Client Services Officer initiate Lease Termination process
+Note:
+The same process should be repeated for the 2nd and 3rd Lease Renewal Recommendation Review
+
+UC021 Generate Lease Renewal Agreement
+Use Case Name	Generate Lease Renewal Agreement  
+Use Case Number	UC021
+Use Case Descriptions:	The process of generating a lease renewal agreement    
+Primary Actor	Client Services Office
+Secondary Actor(s)	Property Lease Management System
+Pre-condition(s)	Must be successfully logged in into the system
+Lease renewal has been approved 
+Trigger	Need to sign lease renewal agreement
+Success End Condition	Lease renewal agreement successfully generated
+Failed End Condition	Unable to generate lease renewal agreement
+Screen References	 
+
+mSCOA ID	
+Integration	
+Business Requirements	Requirement ID	Requirement Description
+
+	FR6.17	Functionality to generate Lease Agreement and send to Tenant.
+	FR6.18	Tenant must be able to validate and sign the Lease Agreement.
+	FR6.21	Capture lease details 
+Business Rules	Rule ID	Rule Description
+	BR17	Lease is valid for 24 months unless notified in writing to terminate
+	BR20	The tenants must be informed of their lease expiry date three (3) months in advance and must be given an opportunity to renew or not
+Main Success Scenario:
+Ref	Actor Action	Ref	System Response
+Step 1	Selects Leases from the main menu 	Step 2	Displays list of leases with status = Lease Renewal Approved 
+Step 3	Select Lease Agreement of interest	Step 4	Accepts user selection
+Step 5	Click Capture Lease Renewal Details	Step 6	Displays the tenant information
+Step 7	Click on Lease Information  	Step 8	Displays lease information page 
+Step 9	Capture (where applicable):
+•	Original Lease Agreement Details
+•	Lease Renewal Term
+•	Monthly Rental Fee
+•	Refundable Deposit
+•	Modifications to Original Lease	Step 10	Displays information
+Step 11	Capture Lease Renewal Commencement Date	Step 12	Accepts user action and auto calculates and displays Lease Expiry Date (24 months lease period), Lease Renewal Notice Date (3 months before expiry date), Lease Termination Notice Date (1 month before expiry date)
+Step 13	Click on Save	Step 14	System accepts user action
+Step 15	Click the Generate Lease Renewal Agreement button 	Step 16	Generates Lease Renewal Agreement and give user the option to view/ download
+A notification is sent to the Tenant that “the Lease Renewal Agreement has been generated for your review and signature. You must sign the Lease Renewal Agreement within 30 days”
+Application status = Awaiting Lease Renewal Agreement Conclusion 
+Alternative Flow: Alternate at Step 13
+Step 13	User clicks cancel button 	Step 14	Clears user entries.
+
+UC022 Sign Lease Renewal Agreement
+Use Case Name	Sign Lease Renewal Agreement  
+Use Case Number	UC022
+Use Case Descriptions:	The process of signing a lease renewal agreement    
+Primary Actor	Applicant/Tenant, Client Services Office, Revenue Manager, CEO
+Secondary Actor(s)	Property Lease Management System
+Pre-condition(s)	Must be successfully logged in into the system
+Lease Renewal Agreement has been generated
+Trigger	Need to sign lease renewal agreement
+Success End Condition	Lease renewal agreement successfully signed
+Failed End Condition	Unable to sign lease renewal agreement
+Screen References	
+mSCOA ID	
+Integration	
+Business Requirements	Requirement ID	Requirement Description
+	FR6.18	Tenant must be able to validate and sign the Lease Agreement.
+	FR6.19	Verification Workflow
+	FR6.20	Functionality for the CEO to sign Lease Agreement
+	FR6.23	Update lease details functionality
+	FR16.1	Workflow functionality which is flexible, and user-configurable
+	FR16.2	Workflow to manage specific activities for review, comments and approval by relevant individuals and committees based on pre and user defined rules 
+Business Rules	Rule ID	Rule Description
+	BR18	All lease agreements must be signed by the tenant and CEO
+	BR19	Disregard the applicant’s application if the lease is not signed off within 30 days without prior arrangement
+Main Success Scenario 1: Tenant
+Step 1	Selects Agreements from the main menu > Click on Lease Agreements	Step 2	Displays list of applications with status = Awaiting Lease Renewal Agreement Conclusion
+Step 3	Click View/Download  	Step 4	If View is selected, Lease Renewal Agreement is displayed
+If Download is selected, Downloads Lease Renewal Agreement to the user’s device (user can sign lease agreement together with a 1st Witness)
+Step 5	Enter Signature on signature block	Step 6	Accepts user action and records date and time (default to current system’s date)
+Step 7	Click on Submit	Step 8	System presents a notification “Are you sure you want to submit the following document for approval?”
+Step 9	Click on “Yes I am sure”	Step 10	System closes notification
+Application status = Awaiting Lease Renewal Agreement Conclusion Outcome
+Alternative Flow 1: Alternate at Step 9
+Step 9	User clicks cancel button 	Step 10	Cancels transaction
+Main Success Scenario 2: Revenue Manager Verification
+Step 1	Selects Agreements from the main menu > Click on Lease Agreements	Step 2	Displays list of leases with status = Awaiting Lease Renewal Agreement Conclusion
+Step 3	Select Lease Agreement of interest	Step 4	Accepts user selection
+Step 5	Click on View	Step 6	Displays lease renewal agreement details. User verifies if all signatures are present
+Step 7	Enter Official number, Click on Authorize > Select Supported > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Enter Signature on signature block	Step 10	Accepts user action and records date and time (default to current system’s date)
+Step 11	Click on Submit	Step 12	System presents a notification “Are you sure you want to submit the following document for approval?”
+Step 13	Click on “Yes I am sure”	Step 14	System closes notification
+Application status = Awaiting Lease Renewal Agreement Conclusion Outcome
+Alternative Flow 2: Alternative at Step 7
+Step 7	Enter Official number, Click on Authorize > Select Not Supported > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click on Submit	Step 10	Message presented “Are you sure you want to submit the following response?”
+Step 11	Click on “Yes, I am Sure” button	Step 12	Notify Applicant and Client Services Officer of the Lease Renewal Agreement Conclusion Outcome to review their application based on reasons submitted on the Captured Reason
+Main Success Scenario 3: CEO Authorisation
+Step 1	Selects Agreements from the main menu > Click on Lease Agreements	Step 2	Displays list of applications with status = Awaiting Lease Renewal Agreement Conclusion
+Step 3	Select Lease Agreement of interest	Step 4	Accepts user selection
+Step 5	Click on View	Step 6	Displays lease renewal agreement details. User verifies if all signatures are present
+Step 7	Enter Official number, Click on Authorize > Select Approve > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Enter Signature on signature block	Step 10	Accepts user action and records date and time (default to current system’s date)
+Step 11	Click on Submit	Step 12	System presents a notification “Are you sure you want to submit the following document for approval?”
+Step 13	Click on “Yes I am sure”	Step 14	System closes notification
+Lease status = Lease Renewal Agreement Concluded
+Notification sent to Tenant about outcome
+Alternative Flow 3: Alternative at Step 7
+Step 7	Enter Official number, Click on Authorize > Select Rejected > Capture Reason (Mandatory)	Step 8	Official number, authorization action, comments accepted
+
+Step 9	Click on Submit	Step 10	Message presented “Are you sure you want to submit the following response?”
+Step 11	Click on “Yes, I am Sure” button	Step 12	Notify Applicant, Client Services Officer and Revenue Manager of the Lease Renewal Agreement Conclusion Outcome to review the details based on reasons submitted on the Captured Reason
+
+
+
+

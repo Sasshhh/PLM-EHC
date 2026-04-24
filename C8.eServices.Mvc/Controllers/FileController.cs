@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
@@ -1646,9 +1646,10 @@ namespace C8.eServices.Mvc.Controllers
                                     _context.PLMApplicationHistortyLogs.Add(RCSHistoryLog);
                                     _context.SaveChanges();
 
-                                    Session["DepositPaidDocSession"] = string.Format($"Application fee proof of payment uploaded successfully for application reference ,{RcsApplication.ApplicationReferenceNumber}");
+                                    Session["DepositPaidDocSession"] = string.Format($"Application fee proof of payment is being validated by back office for application reference: {RcsApplication.ApplicationReferenceNumber}");
                                 }
                             }
+
 
 
                             //var RcsApplication = _context.RCSApplicationStatus.Include(x=>x.Status).Include(x=>x.CCC).FirstOrDefault(x => x.Id == rcsappid);

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -1246,6 +1246,50 @@
                         </li>
                     }
 
+                    @if (Request.IsAuthenticated && User.IsInRole("Client Services Officer"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-flag"></i>
+                                <span class="text">Complaints</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/Complaints/Index">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">All Complaints</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (Request.IsAuthenticated && User.IsInRole("Client Services Officer"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-cash"></i>
+                                <span class="text">Payment Transgressions</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PaymentTransgressions/Index">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">All Transgressions</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/PaymentTransgressions/Create">
+                                        <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">New Transgression</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
                     @if (Request.IsAuthenticated && User.IsInRole("Property Manager"))
                     {
                         <li>
@@ -1435,7 +1479,7 @@
                             </a>
                             <ul class="inner-drop list-unstyled">
                                 <li>
-                                    <a href="~/TenantComplaint/Index">
+                                    <a href="~/Complaints/Index">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">All Complaints</span>
                                     </a>
@@ -2156,13 +2200,13 @@
                                 </a>
                                 <ul class="inner-drop list-unstyled">
                                     <li>
-                                        <a href="~/TenantComplaint/Index">
+                                        <a href="~/Complaints/Index">
                                             <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                             <span class="text">View Complaints</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="~/TenantComplaint/Create">
+                                        <a href="~/Complaints/Create">
                                             <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                             <span class="text">Submit Complaint</span>
                                         </a>
@@ -2660,6 +2704,26 @@
 
             </li>*@
                     }
+
+                    @if (Request.IsAuthenticated && User.IsInRole("Back Office System Administrator"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-hammer"></i>
+                                <span class="text">Tools</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/TestingTools/WaitingListBackdate">
+                                        <i class="ion ion-clock" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Backdate Waiting List</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
                 </ul> <!-- #end navigation -->
             </nav>
 

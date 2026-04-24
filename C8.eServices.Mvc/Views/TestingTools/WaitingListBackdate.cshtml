@@ -1,0 +1,158 @@
+@model List<C8.eServices.Mvc.Models.WaitingListQue>
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Waiting List Backdater";
+}
+
+<style>
+    .tool-badge-ready   { background: #d1e7dd; color: #0f5132; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-waiting { background: #e2e3e5; color: #41464b; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-listed  { background: #cfe2ff; color: #084298; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .btn-backdate { background: #e63946; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-backdate:hover { background: #c1121f; color: white; }
+    .btn-remind   { background: #0077b6; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-remind:hover   { background: #023e8a; color: white; }
+    .btn-run-checker    { background: #1a472a; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .btn-run-checker:hover { background: #2d6a4f; color: white; }
+    .tool-alert-warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px 18px; margin-bottom: 15px; }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background:#1a472a; color:white; padding:14px 18px;">
+                <h4 style="margin:0; font-size:16px;">
+                    <i class="ion ion-clock"></i>&nbsp; Waiting List Backdater &nbsp;
+                    <small style="font-size:12px; opacity:0.8;">Testing tool — backdate QueueDate to simulate 5-month waiting period</small>
+                </h4>
+            </div>
+
+            <div class="panel-body">
+
+                @* ── Alerts ── *@
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Success!</strong> @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Error:</strong> @TempData["Error"]
+                    </div>
+                }
+
+                @* ── Collapsible How It Works ── *@
+                <div class="panel panel-default" style="margin-bottom:15px;">
+                    <div class="panel-heading" style="cursor:pointer; padding:8px 15px;" data-toggle="collapse" data-target="#howItWorks">
+                        <strong><i class="ion ion-information-circled"></i> How This Tool Works</strong>
+                        <span class="pull-right"><i class="ion ion-chevron-down"></i></span>
+                    </div>
+                    <div id="howItWorks" class="collapse">
+                        <div class="panel-body" style="font-size:13px; color:#444;">
+                            <ol style="margin-bottom:8px;">
+                                <li><strong>Backdate 5m</strong> — Sets <code>WaitingListQues.QueueDate</code> to 155 days ago and resets <code>IsReListed = false</code>.</li>
+                                <li><strong>Run 5-Month Re-Entry Checker</strong> — Triggers all entries waiting &gt;= 150 days: changes status, sends customer email, marks <code>IsReListed = true</code>.</li>
+                                <li><strong>Send &amp; Activate</strong> — Manually sends the re-entry email and activates the "Unit Still Required?" button in the customer inbox immediately.</li>
+                            </ol>
+                            <p style="margin:0;" class="text-muted"><strong>[ELIGIBLE]</strong> = waiting &gt;= 150 days, will trigger on next checker run.</p>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── Run Checker Action Bar ── *@
+                <div class="tool-alert-warning" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong><i class="ion ion-refresh"></i> Run All Checks</strong><br />
+                        <small style="color:#664d03;">Runs the 5-month checker against all waiting list entries. Sends emails and activates customer inbox buttons.</small>
+                    </div>
+                    @using (Html.BeginForm("RunReEntryChecker", "TestingTools", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-run-checker" onclick="return confirm('Run the 5-month re-entry checker for ALL eligible applications?')">
+                            <i class="ion ion-refresh"></i> Run 5-Month Re-Entry Checker
+                        </button>
+                    }
+                </div>
+
+                @* ── DataTable ── *@
+                <table id="tblWaitingList" class="table table-bordered table-hover table-striped" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>App Reference</th>
+                            <th>Applicant</th>
+                            <th>Queue Date</th>
+                            <th>Days Waiting</th>
+                            <th>Re-Listed?</th>
+                            <th>Re-List Date</th>
+                            <th style="min-width:200px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            double days = (DateTime.Now - item.QueueDate).TotalDays;
+                            string bClass = days >= 150 ? "tool-badge-ready" : "tool-badge-waiting";
+                            string bLabel = days >= 150 ? ("[ELIGIBLE] " + (int)days + "d") : ((int)days + "d");
+                            string appRef = item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.ApplicationReferenceNumber : "N/A";
+                            string fullName = item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.FullName : "N/A";
+
+                            <tr>
+                                <td><strong>@appRef</strong></td>
+                                <td>@fullName</td>
+                                <td>@item.QueueDate.ToString("yyyy-MM-dd")</td>
+                                <td><span class="@bClass">@bLabel</span></td>
+                                <td>
+                                    @if (item.IsReListed)
+                                    {
+                                        <span class="tool-badge-listed">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="tool-badge-waiting">No</span>
+                                    }
+                                </td>
+                                <td>@(item.ReListDate.HasValue ? item.ReListDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td>
+                                    @using (Html.BeginForm("BackdateApplication", "TestingTools", FormMethod.Post, new { style = "display:inline-block; margin-bottom:4px;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="waitingListQueId" value="@item.Id" />
+                                        <button type="submit" class="btn-backdate" onclick="return confirm('Backdate this application to 155 days ago?')">
+                                            <i class="ion ion-clock"></i> Backdate 5m
+                                        </button>
+                                    }
+                                    @using (Html.BeginForm("SendReEntryReminder", "TestingTools", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="propertyLeaseApplicationId" value="@item.PropertyLeaseApplicationId" />
+                                        <button type="submit" class="btn-remind" onclick="return confirm('Send re-entry reminder and activate inbox button?')">
+                                            <i class="ion ion-email"></i> Send &amp; Activate
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#tblWaitingList').DataTable({
+            responsive: true,
+            pageLength: 25,
+            order: [[3, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [6] }
+            ]
+        });
+    });
+</script>

@@ -60,7 +60,12 @@
         
         @if (!string.IsNullOrEmpty(Model.CurrentSlide.ImagePath))
         {
-            <img id="slideImage" src="@Url.Content(Model.CurrentSlide.ImagePath)" alt="@Model.CurrentSlide.Title" class="slide-image" />
+            var initialImagePath = Model.CurrentSlide.ImagePath;
+            if (!initialImagePath.StartsWith("~/") && initialImagePath.StartsWith("/"))
+            {
+                initialImagePath = "~" + initialImagePath;
+            }
+            <img id="slideImage" src="@Url.Content(initialImagePath)" alt="@Model.CurrentSlide.Title" class="slide-image" />
         }
         
         <div id="slideContent" class="slide-content">
@@ -98,11 +103,24 @@
             var currentIndex = parseInt($('#currentIndex').val());
             var totalSlides = parseInt($('#totalSlides').val());
 
+            var appRoot = '@Url.Content("~/")';
+
             function updateSlide(slideData) {
                 $('#slideTitle').text(slideData.title);
                 
                 if (slideData.imagePath) {
-                    $('#slideImage').attr('src', slideData.imagePath).attr('alt', slideData.title).show();
+                    var fullPath = slideData.imagePath;
+                    
+                    // If the path starts with ~/, resolve it
+                    if (fullPath.indexOf('~/') === 0) {
+                        fullPath = appRoot + fullPath.substring(2);
+                    } 
+                    // If it starts with / but not with the appRoot, it might be a domain-root path that needs the appRoot
+                    else if (fullPath.indexOf('/') === 0 && appRoot !== '/' && fullPath.indexOf(appRoot) !== 0) {
+                        fullPath = appRoot + fullPath.substring(1);
+                    }
+                    
+                    $('#slideImage').attr('src', fullPath).attr('alt', slideData.title).show();
                 } else {
                     $('#slideImage').hide();
                 }

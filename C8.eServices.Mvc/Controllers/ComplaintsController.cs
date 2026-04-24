@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.Engines;
 using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
@@ -14,18 +15,24 @@ using Microsoft.AspNet.Identity;
 namespace C8.eServices.Mvc.Controllers
 {
     [Authorize]
-    public class TenantComplaintController : Controller
+    public class ComplaintsController : Controller
     {
         private eServicesDbContext db = new eServicesDbContext();
         private static Random random = new Random();
         private IdentityManager identityManager;
+        private NotificationEngine notificationEngine;
+        private ComplaintWorkflowEngine workflowEngine;
+        private ComplaintSLAEngine slaEngine;
 
-        public TenantComplaintController()
+        public ComplaintsController()
         {
             identityManager = new IdentityManager(db);
+            notificationEngine = new NotificationEngine(db);
+            workflowEngine = new ComplaintWorkflowEngine(db);
+            slaEngine = new ComplaintSLAEngine(db);
         }
 
-        // GET: TenantComplaint/Index
+        // GET: Complaints/Index
         [Authorize(Roles = "Client Services Officer,Customers")]
         public ActionResult Index()
         {
@@ -41,7 +48,6 @@ namespace C8.eServices.Mvc.Controllers
 
             if (User.IsInRole("Client Services Officer"))
             {
-                // CSO sees all complaints
                 complaints = db.TenantComplaints
                     .Include(t => t.ComplainantComplex)
                     .Include(t => t.RespondentComplex)
@@ -53,30 +59,58 @@ namespace C8.eServices.Mvc.Controllers
             }
             else
             {
-                // Customers see only their complaints
+                // Get tenant's allocated units in memory (anonymous type - fine here)
+                var tenantUnits = db.MatchedUnits
+                    .Where(mu => mu.CustomerId == customer.Id && mu.ApplicationAllocatedPropertyId != null)
+                    .Select(mu => mu.ApplicationAllocatedProperty)
+                    .Where(aap => aap != null)
+                    .Select(aap => new { ComplexId = aap.OfferedComplexId, UnitNumber = aap.SpaceUnitNumber, BlockNumber = aap.BuildingName })
+                    .ToList();
+
+                // Build respondent complaint IDs using primitive values per unit (EF6-compatible)
+                var respondentComplaintIds = new List<int>();
+                foreach (var unit in tenantUnits)
+                {
+                    var ids = db.TenantComplaints
+                        .Where(t => t.IsActive && !t.IsDeleted &&
+                                    t.RespondentComplexId == unit.ComplexId &&
+                                    t.RespondentUnitNumber == unit.UnitNumber &&
+                                    (t.RespondentBlockNumber == null ||
+                                     t.RespondentBlockNumber == unit.BlockNumber ||
+                                     unit.BlockNumber == null ||
+                                     unit.BlockNumber == ""))
+                        .Select(t => t.Id)
+                        .ToList();
+                    respondentComplaintIds.AddRange(ids);
+                }
+                respondentComplaintIds = respondentComplaintIds.Distinct().ToList();
+
                 complaints = db.TenantComplaints
                     .Include(t => t.ComplainantComplex)
                     .Include(t => t.RespondentComplex)
                     .Include(t => t.ComplaintCategory)
                     .Include(t => t.ComplaintType)
                     .Include(t => t.Status)
-                    .Where(t => t.IsActive && !t.IsDeleted && t.SubmittedByCustomerId == customer.Id)
+                    .Where(t => t.IsActive && !t.IsDeleted &&
+                               (t.SubmittedByCustomerId == customer.Id ||
+                                respondentComplaintIds.Contains(t.Id)))
                     .OrderByDescending(t => t.DateSubmitted);
             }
 
+            ViewBag.SLAStats = slaEngine.GetSLAStatistics();
             return View(complaints.ToList());
         }
 
-        // GET: TenantComplaint/Create
+        // GET: Complaints/Create
         [Authorize(Roles = "Client Services Officer,Customers")]
         public ActionResult Create()
         {
             ViewBag.ComplaintCategoryId = new SelectList(db.ComplaintCategories.Where(x => x.IsActive), "Id", "Name");
-            ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.Where(x => x.IsActive), "Id", "ComplexName");
+            ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.OrderBy(a => a.Name).Where(a => !a.Key.Equals("ekurhuleni_complex") && a.IsActive), "Id", "Name");
             return View();
         }
 
-        // POST: TenantComplaint/Create
+        // POST: Complaints/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Client Services Officer,Customers")]
@@ -94,48 +128,41 @@ namespace C8.eServices.Mvc.Controllers
                         customer = db.Customers.FirstOrDefault(c => c.SystemUserId == systemUserId);
                     }
 
-                    // Generate Case Reference Number
                     complaint.CaseReferenceNumber = GenerateCaseReferenceNumber();
-
-                    // Set submission details
                     complaint.SubmittedByCustomerId = customer?.Id;
                     complaint.SubmittedByUserId = systemUser?.Id;
                     complaint.DateSubmitted = DateTime.Now;
 
-                    // Set initial status to Submitted
                     var submittedStatus = db.Status.FirstOrDefault(s => s.Key == ComplaintStatusKeys.Submitted);
                     complaint.StatusId = submittedStatus?.Id ?? 1;
 
-                    // Set base model fields
                     complaint.IsActive = true;
                     complaint.IsDeleted = false;
                     complaint.CreatedDateTime = DateTime.Now;
                     complaint.DepartmentId = customer?.DepartmentId ?? 1;
+                    complaint.WarningLetterCount = 0;
 
                     db.TenantComplaints.Add(complaint);
                     db.SaveChanges();
 
-                    // Handle evidence file uploads
                     if (evidenceFiles != null && evidenceFiles.Length > 0)
                     {
                         SaveEvidenceFiles(complaint.Id, evidenceFiles, customer?.Id);
                     }
 
-                    // Send acknowledgement notification to complainant
-                    SendAcknowledgementNotification(complaint);
-
-                    // Assign to Client Services Officer via Round Robin
-                    AssignComplaintToCSO(complaint.Id);
+                    notificationEngine.SendComplaintAcknowledgement(complaint);
+                    workflowEngine.RoundRobinComplaints(complaint.Id, ResponsibilityTypeKeys.ComplaintInvestigation);
+                    workflowEngine.LogAuditTrail(complaint.Id, "Complaint Submitted",
+                        $"Complaint {complaint.CaseReferenceNumber} submitted", customer?.Id);
 
                     ViewBag.MessageTitle = "Success";
                     ViewBag.MessageBody = $"Complaint submitted successfully. Your Case Reference Number is: <strong>{complaint.CaseReferenceNumber}</strong>";
-                    ViewBag.Message = ViewBag.MessageBody;
 
                     return RedirectToAction("Index");
                 }
 
                 ViewBag.ComplaintCategoryId = new SelectList(db.ComplaintCategories.Where(x => x.IsActive), "Id", "Name", complaint.ComplaintCategoryId);
-                ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.Where(x => x.IsActive), "Id", "ComplexName");
+                ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.OrderBy(a => a.Name).Where(a => !a.Key.Equals("ekurhuleni_complex") && a.IsActive), "Id", "Name");
                 return View(complaint);
             }
             catch (Exception ex)
@@ -143,13 +170,13 @@ namespace C8.eServices.Mvc.Controllers
                 ViewBag.MessageTitle = "Error";
                 ViewBag.MessageBody = "An error occurred while submitting the complaint. Please try again.";
                 ViewBag.ComplaintCategoryId = new SelectList(db.ComplaintCategories.Where(x => x.IsActive), "Id", "Name", complaint.ComplaintCategoryId);
-                ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.Where(x => x.IsActive), "Id", "ComplexName");
+                ViewBag.ComplexList = new SelectList(db.PreferredComplexAreas.OrderBy(a => a.Name).Where(a => !a.Key.Equals("ekurhuleni_complex") && a.IsActive), "Id", "Name");
                 return View(complaint);
             }
         }
 
-        // GET: TenantComplaint/Details/5
-        [EncryptedActionParameter]
+        // GET: Complaints/Details/5
+        [DecryptParameter]
         [Authorize(Roles = "Client Services Officer,Customers")]
         public ActionResult Details(int id)
         {
@@ -161,6 +188,7 @@ namespace C8.eServices.Mvc.Controllers
                 .Include(t => t.Status)
                 .Include(t => t.Evidence)
                 .Include(t => t.Investigations)
+                .Include(t => t.AuditLogs)
                 .FirstOrDefault(t => t.Id == id);
 
             if (complaint == null)
@@ -168,7 +196,6 @@ namespace C8.eServices.Mvc.Controllers
                 return HttpNotFound();
             }
 
-            // Check if user has permission to view this complaint
             var systemUser = identityManager.CurrentUser(User);
             Customer customer = null;
             if (systemUser != null)
@@ -177,16 +204,40 @@ namespace C8.eServices.Mvc.Controllers
                 customer = db.Customers.FirstOrDefault(c => c.SystemUserId == systemUserId);
             }
 
-            if (!User.IsInRole("Client Services Officer") && complaint.SubmittedByCustomerId != customer?.Id)
+            if (!User.IsInRole("Client Services Officer"))
             {
-                return new HttpUnauthorizedResult();
+                var tenantUnits = db.MatchedUnits
+                    .Where(mu => mu.CustomerId == customer.Id && mu.ApplicationAllocatedPropertyId != null)
+                    .Select(mu => mu.ApplicationAllocatedProperty)
+                    .Where(aap => aap != null)
+                    .Select(aap => new { ComplexId = aap.OfferedComplexId, UnitNumber = aap.SpaceUnitNumber, BlockNumber = aap.BuildingName })
+                    .ToList();
+
+                bool isRespondent = false;
+                foreach (var unit in tenantUnits)
+                {
+                    if (unit.ComplexId == complaint.RespondentComplexId &&
+                        unit.UnitNumber == complaint.RespondentUnitNumber &&
+                        (string.IsNullOrEmpty(unit.BlockNumber) || unit.BlockNumber == complaint.RespondentBlockNumber))
+                    {
+                        isRespondent = true;
+                        break;
+                    }
+                }
+
+                if (complaint.SubmittedByCustomerId != customer?.Id && !isRespondent)
+                {
+                    return new HttpUnauthorizedResult();
+                }
             }
 
+            ViewBag.SLAStatus = slaEngine.GetSLAStatus(complaint);
+            ViewBag.DaysOpen = slaEngine.GetDaysOpen(complaint);
             return View(complaint);
         }
 
-        // GET: TenantComplaint/ScheduleAppointment/5
-        [EncryptedActionParameter]
+        // GET: Complaints/ScheduleAppointment/5
+        [DecryptParameter]
         [Authorize(Roles = "Client Services Officer")]
         public ActionResult ScheduleAppointment(int id)
         {
@@ -205,10 +256,11 @@ namespace C8.eServices.Mvc.Controllers
             };
 
             ViewBag.ComplaintCaseNumber = complaint.CaseReferenceNumber;
+            ViewBag.Complaint = complaint;
             return View(investigation);
         }
 
-        // POST: TenantComplaint/ScheduleAppointment
+        // POST: Complaints/ScheduleAppointment
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Client Services Officer")]
@@ -247,20 +299,20 @@ namespace C8.eServices.Mvc.Controllers
                     existingInvestigation.ModifiedDateTime = DateTime.Now;
                 }
 
-                // Update complaint status
                 var complaint = db.TenantComplaints.Find(investigation.TenantComplaintId);
                 var awaitingStatus = db.Status.FirstOrDefault(s => s.Key == ComplaintStatusKeys.AwaitingInvestigation);
                 complaint.StatusId = awaitingStatus?.Id ?? complaint.StatusId;
 
                 db.SaveChanges();
 
-                // Send notification to respondent
-                SendAppointmentNotification(complaint, investigation);
+                notificationEngine.SendAppointmentNotification(complaint, existingInvestigation ?? investigation);
+                workflowEngine.LogAuditTrail(complaint.Id, "Appointment Scheduled", 
+                    $"Investigation appointment scheduled for {investigation.AppointmentDate?.ToString("dd MMM yyyy")}", customer?.Id);
 
                 ViewBag.MessageTitle = "Success";
                 ViewBag.MessageBody = "Investigation appointment scheduled successfully.";
 
-                return RedirectToAction("Details", new { id = investigation.TenantComplaintId });
+                return RedirectToAction("Details", new { q = new AesCrypto().Encrypt("id=" + investigation.TenantComplaintId) });
             }
             catch (Exception ex)
             {
@@ -270,8 +322,8 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        // GET: TenantComplaint/ConfirmAppointment/5
-        [EncryptedActionParameter]
+        // GET: Complaints/ConfirmAppointment/5
+        [DecryptParameter]
         [Authorize(Roles = "Customers")]
         public ActionResult ConfirmAppointment(int id)
         {
@@ -294,14 +346,22 @@ namespace C8.eServices.Mvc.Controllers
             return View(investigation);
         }
 
-        // POST: TenantComplaint/ConfirmAppointment
+        // POST: Complaints/ConfirmAppointment
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Customers")]
-        public ActionResult ConfirmAppointment(int id, string action)
+        public ActionResult ConfirmAppointment(int id, string action, DateTime? alternativeDate, TimeSpan? alternativeTime, string alternativeReason)
         {
             try
             {
+                var systemUser = identityManager.CurrentUser(User);
+                Customer customer = null;
+                if (systemUser != null)
+                {
+                    var systemUserId = systemUser.Id;
+                    customer = db.Customers.FirstOrDefault(c => c.SystemUserId == systemUserId);
+                }
+
                 var investigation = db.ComplaintInvestigations.Find(id);
                 if (investigation == null)
                 {
@@ -313,33 +373,100 @@ namespace C8.eServices.Mvc.Controllers
                     investigation.RespondentConfirmed = true;
                     investigation.DateConfirmed = DateTime.Now;
                     investigation.ModifiedDateTime = DateTime.Now;
+                    investigation.AlternativeApproved = null;
 
                     db.SaveChanges();
 
-                    // Send confirmation notification to CSO
-                    SendConfirmationNotificationToCSO(investigation);
+                    notificationEngine.SendAppointmentConfirmationToCSO(investigation);
+                    workflowEngine.LogAuditTrail(investigation.TenantComplaintId, "Appointment Confirmed", 
+                        $"Respondent confirmed appointment for {investigation.AppointmentDate?.ToString("dd MMM yyyy")}", customer?.Id);
 
                     ViewBag.MessageTitle = "Success";
                     ViewBag.MessageBody = "Appointment confirmed successfully.";
                 }
+                else if (action == "propose_alternative")
+                {
+                    investigation.ProposedAlternativeDate = alternativeDate;
+                    investigation.ProposedAlternativeTime = alternativeTime;
+                    investigation.AlternativeDateReason = alternativeReason;
+                    investigation.AlternativeApproved = null;
+                    investigation.ModifiedDateTime = DateTime.Now;
 
-                return RedirectToAction("Details", new { id = investigation.TenantComplaintId });
+                    db.SaveChanges();
+
+                    notificationEngine.SendAppointmentConfirmationToCSO(investigation);
+                    workflowEngine.LogAuditTrail(investigation.TenantComplaintId, "Alternative Date Proposed", 
+                        $"Respondent proposed alternative date: {alternativeDate?.ToString("dd MMM yyyy")}", customer?.Id);
+
+                    ViewBag.MessageTitle = "Success";
+                    ViewBag.MessageBody = "Alternative appointment date proposed successfully. The Client Services Officer will review your request.";
+                }
+
+                return RedirectToAction("Details", new { q = new AesCrypto().Encrypt("id=" + investigation.TenantComplaintId) });
             }
             catch (Exception ex)
             {
                 ViewBag.MessageTitle = "Error";
                 ViewBag.MessageBody = "An error occurred while confirming the appointment.";
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", new { q = new AesCrypto().Encrypt("id=" + id) });
             }
         }
 
-        // GET: TenantComplaint/CaptureOutcome/5
-        [EncryptedActionParameter]
+        // POST: Complaints/ApproveAlternativeDate
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Client Services Officer")]
+        public ActionResult ApproveAlternativeDate(int id, bool approve)
+        {
+            try
+            {
+                var systemUser = identityManager.CurrentUser(User);
+                Customer customer = null;
+                if (systemUser != null)
+                {
+                    var systemUserId = systemUser.Id;
+                    customer = db.Customers.FirstOrDefault(c => c.SystemUserId == systemUserId);
+                }
+
+                var investigation = db.ComplaintInvestigations.Find(id);
+                if (investigation == null)
+                {
+                    return HttpNotFound();
+                }
+
+                investigation.AlternativeApproved = approve;
+
+                if (approve && investigation.ProposedAlternativeDate.HasValue)
+                {
+                    investigation.AppointmentDate = investigation.ProposedAlternativeDate;
+                    investigation.AppointmentTime = investigation.ProposedAlternativeTime;
+                    investigation.RespondentConfirmed = true;
+                    investigation.DateConfirmed = DateTime.Now;
+                }
+
+                investigation.ModifiedDateTime = DateTime.Now;
+                db.SaveChanges();
+
+                workflowEngine.LogAuditTrail(investigation.TenantComplaintId, 
+                    approve ? "Alternative Date Approved" : "Alternative Date Rejected",
+                    $"CSO {(approve ? "approved" : "rejected")} alternative appointment date", customer?.Id);
+
+                return Json(new { success = true, message = approve ? "Alternative date approved" : "Alternative date rejected" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred" });
+            }
+        }
+
+        // GET: Complaints/CaptureOutcome/5
+        [DecryptParameter]
         [Authorize(Roles = "Client Services Officer")]
         public ActionResult CaptureOutcome(int id)
         {
             var complaint = db.TenantComplaints
                 .Include(t => t.Investigations)
+                .Include(t => t.ComplaintType)
                 .FirstOrDefault(t => t.Id == id);
 
             if (complaint == null)
@@ -354,6 +481,8 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             ViewBag.ComplaintCaseNumber = complaint.CaseReferenceNumber;
+            ViewBag.WarningLetterCount = complaint.WarningLetterCount;
+            ViewBag.IsSubLetting = workflowEngine.IsSubLettingComplaint(complaint);
             ViewBag.OutcomeOptions = new SelectList(new[]
             {
                 new { Value = ComplaintOutcomeKeys.Resolved, Text = "Resolved" },
@@ -364,12 +493,13 @@ namespace C8.eServices.Mvc.Controllers
             return View(investigation);
         }
 
-        // POST: TenantComplaint/CaptureOutcome
+        // POST: Complaints/CaptureOutcome
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Client Services Officer")]
         public ActionResult CaptureOutcome(ComplaintInvestigation investigation, HttpPostedFileBase[] outcomeDocuments, 
-            string agencyName, string agencyAddress, string agencyContact, string agencyEmail, string agencyDescription)
+            string agencyName, string agencyAddress, string agencyContact, string agencyEmail, string agencyDescription,
+            bool sendWarningLetter = false)
         {
             try
             {
@@ -393,7 +523,10 @@ namespace C8.eServices.Mvc.Controllers
                 existingInvestigation.InvestigatedById = customer?.Id;
                 existingInvestigation.ModifiedDateTime = DateTime.Now;
 
-                // Handle Referral outcome
+                var complaint = db.TenantComplaints
+                    .Include(c => c.ComplaintType)
+                    .FirstOrDefault(c => c.Id == existingInvestigation.TenantComplaintId);
+
                 if (investigation.Outcome == ComplaintOutcomeKeys.Referral)
                 {
                     var referral = new ComplaintExternalReferral
@@ -417,20 +550,50 @@ namespace C8.eServices.Mvc.Controllers
                     existingInvestigation.ExternalReferralId = referral.Id;
                 }
 
-                // Update complaint status based on outcome
-                var complaint = db.TenantComplaints.Find(existingInvestigation.TenantComplaintId);
                 Status outcomeStatus = null;
 
                 switch (investigation.Outcome)
                 {
                     case ComplaintOutcomeKeys.Resolved:
                         outcomeStatus = db.Status.FirstOrDefault(s => s.Key == ComplaintStatusKeys.Resolved);
+
+                        if (sendWarningLetter && complaint != null)
+                        {
+                            complaint.WarningLetterCount++;
+                            complaint.LastWarningDate = DateTime.Now;
+                            notificationEngine.SendWarningLetter(complaint, complaint.WarningLetterCount);
+
+                            if (complaint.WarningLetterCount >= 3)
+                            {
+                                workflowEngine.LogAuditTrail(complaint.Id, "Third Warning Sent", 
+                                    "Third warning letter sent - escalation required", customer?.Id);
+                            }
+                        }
+
+                        if (workflowEngine.IsSubLettingComplaint(complaint))
+                        {
+                            workflowEngine.TriggerLeaseTermination(complaint);
+                            complaint.LeaseTerminationTriggered = true;
+                            complaint.LeaseTerminationDate = DateTime.Now;
+
+                            workflowEngine.LogAuditTrail(complaint.Id, "Lease Termination Triggered", 
+                                "Sub-letting confirmed - lease termination process initiated", customer?.Id);
+                        }
                         break;
+
                     case ComplaintOutcomeKeys.Referral:
                         outcomeStatus = db.Status.FirstOrDefault(s => s.Key == ComplaintStatusKeys.Referred);
                         break;
+
                     case ComplaintOutcomeKeys.Unresolved:
                         outcomeStatus = db.Status.FirstOrDefault(s => s.Key == ComplaintStatusKeys.Unresolved);
+
+                        workflowEngine.TriggerLeaseTermination(complaint);
+                        complaint.LeaseTerminationTriggered = true;
+                        complaint.LeaseTerminationDate = DateTime.Now;
+
+                        workflowEngine.LogAuditTrail(complaint.Id, "Lease Termination Triggered", 
+                            "Complaint unresolved - lease termination process initiated", customer?.Id);
                         break;
                 }
 
@@ -439,7 +602,6 @@ namespace C8.eServices.Mvc.Controllers
                     complaint.StatusId = outcomeStatus.Id;
                 }
 
-                // Handle document uploads
                 if (outcomeDocuments != null && outcomeDocuments.Length > 0)
                 {
                     SaveInvestigationDocuments(existingInvestigation.Id, outcomeDocuments, customer?.Id);
@@ -447,13 +609,19 @@ namespace C8.eServices.Mvc.Controllers
 
                 db.SaveChanges();
 
-                // Send outcome notification to complainant
-                SendOutcomeNotification(complaint, existingInvestigation);
+                notificationEngine.SendOutcomeNotification(complaint, existingInvestigation);
+                workflowEngine.LogAuditTrail(complaint.Id, "Outcome Captured", 
+                    $"Investigation outcome: {investigation.Outcome}", customer?.Id);
+
+                if (customer != null)
+                {
+                    workflowEngine.RoundRobinMarkFinished(customer.Id, ResponsibilityTypeKeys.ComplaintInvestigation);
+                }
 
                 ViewBag.MessageTitle = "Success";
                 ViewBag.MessageBody = "Investigation outcome captured successfully.";
 
-                return RedirectToAction("Details", new { id = existingInvestigation.TenantComplaintId });
+                return RedirectToAction("Details", new { q = new AesCrypto().Encrypt("id=" + existingInvestigation.TenantComplaintId) });
             }
             catch (Exception ex)
             {
@@ -483,9 +651,16 @@ namespace C8.eServices.Mvc.Controllers
 
         private string GenerateCaseReferenceNumber()
         {
-            var year = DateTime.Now.Year;
-            var randomNumber = random.Next(100000, 999999);
-            return $"COMP{year}{randomNumber}";
+            string caseRef;
+            do
+            {
+                var year = DateTime.Now.Year;
+                var randomNumber = random.Next(100000, 999999);
+                caseRef = $"COMP{year}{randomNumber}";
+            }
+            while (db.TenantComplaints.Any(tc => tc.CaseReferenceNumber == caseRef));
+
+            return caseRef;
         }
 
         private void SaveEvidenceFiles(int complaintId, HttpPostedFileBase[] files, int? uploadedById)
@@ -498,6 +673,15 @@ namespace C8.eServices.Mvc.Controllers
 
             foreach (var file in files.Where(f => f != null && f.ContentLength > 0))
             {
+                var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".mp4", ".avi" };
+                var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                    continue;
+
+                if (file.ContentLength > 10 * 1024 * 1024)
+                    continue;
+
                 var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
                 var filePath = Path.Combine(uploadPath, fileName);
                 file.SaveAs(filePath);
@@ -533,6 +717,15 @@ namespace C8.eServices.Mvc.Controllers
 
             foreach (var file in files.Where(f => f != null && f.ContentLength > 0))
             {
+                var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" };
+                var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                    continue;
+
+                if (file.ContentLength > 10 * 1024 * 1024)
+                    continue;
+
                 var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
                 var filePath = Path.Combine(uploadPath, fileName);
                 file.SaveAs(filePath);
@@ -556,62 +749,6 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             db.SaveChanges();
-        }
-
-        private void AssignComplaintToCSO(int complaintId)
-        {
-            // Get Client Services Officers
-            var csoRole = db.Roles.FirstOrDefault(r => r.Name == "Client Services Officer");
-            if (csoRole == null) return;
-
-            var csoUsers = db.Users.Where(u => u.Roles.Any(r => r.RoleId == csoRole.Id)).ToList();
-            if (!csoUsers.Any()) return;
-
-            // Simple round-robin assignment (you can enhance this logic)
-            var assignedUser = csoUsers.OrderBy(u => Guid.NewGuid()).FirstOrDefault();
-            if (assignedUser == null) return;
-
-            // Find SystemUser using assignedUser.SystemUserId from AspNetUsers table
-            var systemUser = db.SystemUsers.FirstOrDefault(su => su.Id == assignedUser.SystemUserId);
-            if (systemUser == null) return;
-
-            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == systemUser.Id);
-            if (customer == null) return;
-
-            var complaint = db.TenantComplaints.Find(complaintId);
-            complaint.AssignedToId = customer.Id;
-            complaint.DateAssigned = DateTime.Now;
-
-            db.SaveChanges();
-
-            // Send notification to assigned CSO
-            SendAssignmentNotificationToCSO(complaint, customer);
-        }
-
-        private void SendAcknowledgementNotification(TenantComplaint complaint)
-        {
-            // TODO: Implement email/SMS notification
-            // Use existing EmailHelper or create notification
-        }
-
-        private void SendAppointmentNotification(TenantComplaint complaint, ComplaintInvestigation investigation)
-        {
-            // TODO: Implement email/SMS notification to respondent
-        }
-
-        private void SendConfirmationNotificationToCSO(ComplaintInvestigation investigation)
-        {
-            // TODO: Implement email/SMS notification to CSO
-        }
-
-        private void SendAssignmentNotificationToCSO(TenantComplaint complaint, Customer cso)
-        {
-            // TODO: Implement email/SMS notification
-        }
-
-        private void SendOutcomeNotification(TenantComplaint complaint, ComplaintInvestigation investigation)
-        {
-            // TODO: Implement email/SMS notification to complainant
         }
 
         #endregion

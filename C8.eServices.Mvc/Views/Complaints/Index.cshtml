@@ -35,27 +35,27 @@
                 {
                     var statusKey = item.Status != null ? item.Status.Key : "";
                     var statusName = item.Status != null ? item.Status.Name : "Unknown";
-                    var categoryName = item.Category != null ? item.Category.Name : "N/A";
+                    var categoryName = item.ComplaintCategory != null ? item.ComplaintCategory.Name : "N/A";
                     var typeName = item.ComplaintType != null ? item.ComplaintType.Name : "N/A";
-                    var complexName = item.Complex != null ? item.Complex.Name : "N/A";
+                    var complexName = item.ComplainantComplex != null ? item.ComplainantComplex.Name : "N/A";
                     var submittedDate = item.DateSubmitted.HasValue ? item.DateSubmitted.Value.ToString("dd MMM yyyy") : "N/A";
                     var statusClass = statusKey == ComplaintStatusKeys.Resolved ? "status-resolved" : (statusKey == ComplaintStatusKeys.Referred ? "status-referred" : (statusKey == ComplaintStatusKeys.Unresolved ? "status-unresolved" : (statusKey == ComplaintStatusKeys.AwaitingAppointment || statusKey == ComplaintStatusKeys.AwaitingInvestigation ? "status-awaiting" : "status-submitted")));
                     <tr>
-                        <td>@item.CaseNumber</td>
+                        <td>@item.CaseReferenceNumber</td>
                         <td>@categoryName</td>
                         <td>@typeName</td>
                         <td>@complexName</td>
                         <td>@submittedDate</td>
                         <td><span class="status-badge @statusClass">@statusName</span></td>
                         <td>
-                            @Html.ActionLink("View", "Details", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" })
-                            @if (User.IsInRole("CSO") && statusKey == ComplaintStatusKeys.Submitted)
+                            @Html.ActionLink("View", "Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary btn-sm" })
+                            @if (User.IsInRole("Client Services Officer") && statusKey == ComplaintStatusKeys.Submitted)
                             {
-                                @Html.ActionLink("Schedule", "ScheduleAppointment", new { id = item.Id }, new { @class = "btn btn-info btn-sm" })
+                                @Html.ActionLink("Schedule", "ScheduleAppointment", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info btn-sm" })
                             }
-                            @if (User.IsInRole("CSO") && statusKey == ComplaintStatusKeys.AwaitingInvestigation)
+                            @if (User.IsInRole("Client Services Officer") && statusKey == ComplaintStatusKeys.AwaitingInvestigation)
                             {
-                                @Html.ActionLink("Outcome", "CaptureOutcome", new { id = item.Id }, new { @class = "btn btn-success btn-sm" })
+                                @Html.ActionLink("Outcome", "CaptureOutcome", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success btn-sm" })
                             }
                         </td>
                     </tr>

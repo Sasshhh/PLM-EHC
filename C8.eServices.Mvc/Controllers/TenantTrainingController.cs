@@ -340,13 +340,19 @@ namespace C8.eServices.Mvc.Controllers
 
                 var currentSlide = allSlides[newIndex];
 
+                var imagePath = currentSlide.ImagePath;
+                if (!string.IsNullOrEmpty(imagePath) && !imagePath.StartsWith("~/") && imagePath.StartsWith("/"))
+                {
+                    imagePath = "~" + imagePath;
+                }
+
                 return Json(new
                 {
                     success = true,
                     slideNumber = currentSlide.SlideNumber,
                     title = currentSlide.Title,
                     content = currentSlide.Content,
-                    imagePath = Url.Content(currentSlide.ImagePath),
+                    imagePath = Url.Content(imagePath),
                     currentIndex = newIndex,
                     totalSlides = allSlides.Count,
                     isLastSlide = newIndex == allSlides.Count - 1

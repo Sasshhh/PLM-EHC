@@ -55,7 +55,7 @@
         </div>
 
         <div class="panel-body">
-            @using (Html.BeginForm("Create", "TenantComplaint", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+            @using (Html.BeginForm("Create", "Complaints", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
             {
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -277,7 +277,7 @@
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="ion ion-checkmark-circled"></i> Submit Complaint
                             </button>
-                            <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                            <a href="@Url.Action("Index", "Complaints")" class="btn btn-default btn-lg">
                                 <i class="ion ion-close-circled"></i> Cancel
                             </a>
                         </div>
@@ -300,7 +300,7 @@
                 
                 if (categoryId) {
                     $.ajax({
-                        url: '@Url.Action("GetComplaintTypes", "TenantComplaint")',
+                        url: '@Url.Action("GetComplaintTypes", "Complaints")',
                         type: 'GET',
                         data: { categoryId: categoryId },
                         success: function (data) {

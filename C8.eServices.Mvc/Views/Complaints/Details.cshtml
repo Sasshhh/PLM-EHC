@@ -28,13 +28,13 @@
             <tr><td><strong>Description:</strong></td><td>@Model.DetailedDescription</td></tr>
         </table>
         <a href="@Url.Action("Index")" class="btn btn-default">Back</a>
-        @if (User.IsInRole("CSO") && (statusKey == ComplaintStatusKeys.Submitted || statusKey == ComplaintStatusKeys.AwaitingAppointment))
+        @if (User.IsInRole("Client Services Officer") && (statusKey == ComplaintStatusKeys.Submitted || statusKey == ComplaintStatusKeys.AwaitingAppointment))
         {
-            <a href="@Url.Action("ScheduleAppointment", new { id = Model.Id })" class="btn btn-info">Schedule</a>
+            <a href="@Url.Action("ScheduleAppointment", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) })" class="btn btn-info">Schedule</a>
         }
-        @if (User.IsInRole("CSO") && statusKey == ComplaintStatusKeys.AwaitingInvestigation)
+        @if (User.IsInRole("Client Services Officer") && statusKey == ComplaintStatusKeys.AwaitingInvestigation)
         {
-            <a href="@Url.Action("CaptureOutcome", new { id = Model.Id })" class="btn btn-success">Outcome</a>
+            <a href="@Url.Action("CaptureOutcome", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) })" class="btn btn-success">Outcome</a>
         }
     </div>
 </div>

@@ -127,7 +127,7 @@
                     }
 
                     <!-- Confirmation Form -->
-                    @using (Html.BeginForm("ConfirmAppointment", "TenantComplaint", FormMethod.Post, new { @class = "form-horizontal" }))
+                    @using (Html.BeginForm("ConfirmAppointment", "Complaints", FormMethod.Post, new { @class = "form-horizontal" }))
                     {
                         @Html.AntiForgeryToken()
                         @Html.HiddenFor(model => model.Id)
@@ -155,14 +155,14 @@
                                     </button>
                                     @if (complaint != null)
                                     {
-                                        <a href="@Url.Action("Details", "TenantComplaint", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
+                                        <a href="@Url.Action("Details", "Complaints", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
                                            class="btn btn-default btn-lg">
                                             <i class="ion ion-arrow-left-c"></i> Back to Details
                                         </a>
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("Index", "TenantComplaint")" class="btn btn-default btn-lg">
+                                        <a href="@Url.Action("Index", "Complaints")" class="btn btn-default btn-lg">
                                             <i class="ion ion-arrow-left-c"></i> Back to List
                                         </a>
                                     }

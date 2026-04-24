@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -195,7 +195,7 @@ namespace C8.eServices.Mvc.Controllers
 
             int rtype = Convert.ToInt32(vm.ResponsibilityType);
             var ResponsibilityType = db.ResponsibilityTypes.FirstOrDefault(x => x.Id == rtype);
-            cc.BackOfficeNotification(plmApps.Id, ClerkId.Id, ResponsibilityType.Name);
+            EHCWorkflowEngine.BackOfficeNotification(db, plmApps.Id, ClerkId.Id, ResponsibilityType.Name);
 
 
             var Title = vm.TitleName;

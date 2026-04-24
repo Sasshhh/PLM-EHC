@@ -219,6 +219,15 @@ namespace C8.eServices.Mvc.Keys
         public const string TerminateAtEndOfPeriod = "s_terminate_lease_at_end";
         public const string AwaitingRenewalDocuments = "s_awaiting_renewal_docs";
 
+        // Lease Renewal — UC018–UC022 new statuses
+        public const string AwaitingRenewalReviewOutcome = "s_awaiting_renewal_review_outcome";
+        public const string AwaitingRenewalOutcome = "s_awaiting_renewal_outcome";
+        public const string LeaseRenewalApproved = "s_lease_renewal_approved";
+        public const string LeaseRenewalRejected = "s_lease_renewal_rejected";
+        public const string AwaitingLeaseRenewalAgreementConclusion = "s_awaiting_renewal_agreement_conclusion";
+        public const string AwaitingLeaseRenewalAgreementConclusionOutcome = "s_awaiting_renewal_agreement_conclusion_outcome";
+        public const string LeaseRenewalAgreementConcluded = "s_lease_renewal_agreement_concluded";
+
 
         //Lease Termination
         public const string TerminationLeaseByTenant = "s_termination_review";

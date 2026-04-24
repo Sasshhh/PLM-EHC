@@ -1,0 +1,34 @@
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using C8.eServices.Mvc.Keys
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Conclude Renewal Agreement";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading"><strong>Conclude Lease Renewal Agreement</strong></div>
+    <div class="panel-body">
+
+        <table class="table table-bordered table-striped">
+            <tr><th>Lease Reference</th><td>@Model.LeaseDetails.LeaseReferenceNo</td></tr>
+            <tr><th>Tenant</th><td>@Model.LeaseDetails.FirstNames @Model.LeaseDetails.LastName</td></tr>
+            <tr><th>Application Reference</th><td>@Model.PropertyLeaseApplications.ApplicationReferenceNumber</td></tr>
+            <tr><th>Current Status</th><td>@Model.LeaseDetails.Status.Name</td></tr>
+            <tr><th>Lease Period (Months)</th><td>@Model.LeaseDetails.PeriodInMonths</td></tr>
+            <tr><th>Months to Add</th><td>@Model.LeaseDetails.MonthsOffered</td></tr>
+            <tr><th>Current End Date</th><td>@Model.LeaseDetails.EndDate</td></tr>
+        </table>
+
+        <div class="alert alert-info">
+            Clicking <strong>Conclude Agreement</strong> will extend the lease dates by <strong>@Model.LeaseDetails.MonthsOffered months</strong> and mark the renewal as concluded.
+        </div>
+
+        @using (Html.BeginForm("ConcludeRenewalAgreement", "LeaseDetails", FormMethod.Post))
+        {
+            @Html.Hidden("id", (int)ViewBag.LeaseId)
+            @Html.Hidden("confirm", "yes")
+            <button type="submit" class="btn btn-success">Conclude Agreement</button>
+            @Html.ActionLink("Back", "Renewals", null, new { @class = "btn btn-default" })
+        }
+    </div>
+</div>

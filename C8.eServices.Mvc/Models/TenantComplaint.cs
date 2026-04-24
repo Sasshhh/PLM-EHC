@@ -8,7 +8,6 @@ namespace C8.eServices.Mvc.Models
     public class TenantComplaint : BaseModel
     {
         [Column(Order = 10)]
-        [Required]
         [StringLength(50)]
         [Display(Name = "Case Reference Number")]
         public string CaseReferenceNumber { get; set; }
@@ -136,8 +135,25 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Date Assigned")]
         public DateTime? DateAssigned { get; set; }
 
+        [Column(Order = 33)]
+        [Display(Name = "Warning Letters Sent")]
+        public int WarningLetterCount { get; set; }
+
+        [Column(Order = 34)]
+        [Display(Name = "Last Warning Date")]
+        public DateTime? LastWarningDate { get; set; }
+
+        [Column(Order = 35)]
+        [Display(Name = "Lease Termination Triggered")]
+        public bool LeaseTerminationTriggered { get; set; }
+
+        [Column(Order = 36)]
+        [Display(Name = "Lease Termination Date")]
+        public DateTime? LeaseTerminationDate { get; set; }
+
         // Navigation Properties
         public virtual ICollection<ComplaintEvidence> Evidence { get; set; }
         public virtual ICollection<ComplaintInvestigation> Investigations { get; set; }
+        public virtual ICollection<ComplaintAuditLog> AuditLogs { get; set; }
     }
 }

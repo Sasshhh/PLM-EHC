@@ -61,6 +61,7 @@ namespace C8.eServices.Mvc.Keys
         public const string AwaitingDocUploadingForMigratedApps = "r_awaiting_doc_upload_migrating_application";
         public const string PropertyFacilitiesManagerReview = "r_property_facilities_manager_review";
 
-
+        public const string ComplaintInvestigation = "r_complaint_investigation";
+        public const string LeaseRenewalCEOApproval = "r_lease_renewal_ceo_approval";
     }
 }

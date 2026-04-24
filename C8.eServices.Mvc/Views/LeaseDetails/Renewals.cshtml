@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.LeaseDetails>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -160,7 +160,20 @@
                                     }
                                     else if (item.Status.Key == StatusKeys.ApplicationUpForRenewalAtThreeMonths)
                                     {
-                                @Html.ActionLink("Review", "LeaseRenewalValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+
+                                @Html.ActionLink("Recommend", "RecommendForRenewal", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalReviewOutcome)
+                                    {
+                                @Html.ActionLink("Revenue Review", "RevenueManagerRenewalReview", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalOutcome)
+                                    {
+                                @Html.ActionLink("Director Decision", "CEORenewalDecision", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingLeaseRenewalAgreementConclusion)
+                                    {
+                                @Html.ActionLink("Conclude Agreement", "ConcludeRenewalAgreement", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
                                     }
                                     else if (item.Status.Key == StatusKeys.AwaitingREACApproval)
                                     {

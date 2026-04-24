@@ -1,0 +1,177 @@
+@model C8.eServices.Mvc.Models.PaymentTransgression
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Transgression Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var statusKey  = Model.Status != null ? Model.Status.Key  : "";
+    var statusName = Model.Status != null ? Model.Status.Name : "Unknown";
+    var statusClass = statusKey == PaymentTransgressionStatusKeys.Closed          ? "status-closed"    :
+                      statusKey == PaymentTransgressionStatusKeys.LetterSent      ? "status-sent"      :
+                      statusKey == PaymentTransgressionStatusKeys.LetterGenerated ? "status-generated" :
+                                                                                    "status-submitted";
+}
+<head>
+    <style>
+        .status-badge   { padding: 8px 15px; border-radius: 4px; font-weight: bold; }
+        .status-submitted  { background-color: #5bc0de; color: white; }
+        .status-generated  { background-color: #f0ad4e; color: white; }
+        .status-sent       { background-color: #337ab7; color: white; }
+        .status-closed     { background-color: #5cb85c; color: white; }
+        .detail-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .detail-section h5 { border-bottom: 2px solid #d9534f; padding-bottom: 5px; margin-bottom: 15px; color: #d9534f; }
+    </style>
+</head>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4><i class="ion ion-cash"></i> Payment Transgression — @Model.CaseReferenceNumber</h4>
+    </div>
+    <div class="panel-body">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <!-- Status Bar -->
+        <div class="detail-section">
+            <table class="table table-condensed" style="margin-bottom:0;">
+                <tr>
+                    <td width="200"><strong>Status</strong></td>
+                    <td><span class="status-badge @statusClass">@statusName</span></td>
+                    <td width="200"><strong>Date Submitted</strong></td>
+                    <td>@Model.DateSubmitted.ToString("dd MMMM yyyy")</td>
+                </tr>
+                <tr>
+                    <td><strong>Assigned To</strong></td>
+                    <td>@(Model.AssignedTo != null ? Model.AssignedTo.FirstName + " " + Model.AssignedTo.LastName : "—")</td>
+                    <td><strong>Letter Type</strong></td>
+                    <td>@(string.IsNullOrEmpty(Model.LetterType) ? "Not yet generated" : Model.LetterType)</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Tenant Details -->
+        <div class="detail-section">
+            <h5>Tenant Details</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-condensed">
+                        <tr><td width="160"><strong>Official Number</strong></td><td>@Model.OfficialNumber</td></tr>
+                        <tr><td><strong>Tenancy Ref</strong></td><td>@Model.TenancyReferenceNumber</td></tr>
+                        <tr><td><strong>Name</strong></td><td>@Model.TenantName @Model.TenantSurname</td></tr>
+                        <tr><td><strong>Email</strong></td><td>@Model.TenantEmail</td></tr>
+                        <tr><td><strong>Cellphone</strong></td><td>@Model.TenantCellphone</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-condensed">
+                        <tr><td width="160"><strong>Complex</strong></td><td>@(Model.Complex != null ? Model.Complex.Name : "—")</td></tr>
+                        <tr><td><strong>Block</strong></td><td>@Model.BlockNumber</td></tr>
+                        <tr><td><strong>Unit</strong></td><td>@Model.UnitNumber</td></tr>
+                        <tr><td><strong>Account Number</strong></td><td>@Model.AccountNumber</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Details -->
+        <div class="detail-section">
+            <h5>Financial Information</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Last Payment:</strong><br />
+                    R @(Model.LastPaymentAmount.HasValue ? Model.LastPaymentAmount.Value.ToString("N2") : "—") on @(Model.LastPaymentDate.HasValue ? Model.LastPaymentDate.Value.ToString("dd MMM yyyy") : "—")
+                </div>
+                <div class="col-md-4">
+                    <strong>Total Amount Due:</strong><br />
+                    <span class="text-danger" style="font-size:1.2em; font-weight:bold;">R @Model.TotalAmountDue.ToString("N2")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transgression Details -->
+        <div class="detail-section">
+            <h5>Transgression Details</h5>
+            <table class="table table-condensed">
+                <tr><td width="160"><strong>Category</strong></td><td>@(Model.Category != null ? Model.Category.Name : "—")</td></tr>
+                <tr><td><strong>Type</strong></td><td>@(Model.Type != null ? Model.Type.Name : "—")</td></tr>
+                <tr><td><strong>Severity</strong></td><td>@(Model.Severity != null ? Model.Severity.Name : "—")</td></tr>
+                <tr><td><strong>Description</strong></td><td>@Model.DetailedDescription</td></tr>
+            </table>
+        </div>
+
+        <!-- Letter Information (shown when generated) -->
+        @if (!string.IsNullOrEmpty(Model.LetterType))
+        {
+            <div class="detail-section">
+                <h5>Letter Information</h5>
+                <table class="table table-condensed">
+                    <tr><td width="160"><strong>Letter Type</strong></td><td>@Model.LetterType</td></tr>
+                    <tr><td><strong>Generated Date</strong></td><td>@(Model.LetterGeneratedDate.HasValue ? Model.LetterGeneratedDate.Value.ToString("dd MMMM yyyy HH:mm") : "—")</td></tr>
+                    <tr><td><strong>Sent Date</strong></td><td>@(Model.LetterSentDate.HasValue ? Model.LetterSentDate.Value.ToString("dd MMMM yyyy HH:mm") : "—")</td></tr>
+                </table>
+            </div>
+        }
+
+        <!-- Documents -->
+        @if (Model.Documents != null && Model.Documents.Any())
+        {
+            <div class="detail-section">
+                <h5>Supporting Documents</h5>
+                <ul class="list-group">
+                    @foreach (var doc in Model.Documents.Where(d => d.IsActive && !d.IsDeleted))
+                    {
+                        <li class="list-group-item"><i class="ion ion-document"></i> @doc.FileName <small class="text-muted">(@(doc.FileSize / 1024) KB)</small></li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- Audit Log -->
+        @if (Model.AuditLogs != null && Model.AuditLogs.Any())
+        {
+            <div class="detail-section">
+                <h5>Audit Trail</h5>
+                <table class="table table-condensed table-striped">
+                    <thead><tr><th>Date/Time</th><th>Action</th><th>Details</th><th>By</th></tr></thead>
+                    <tbody>
+                        @foreach (var log in Model.AuditLogs.OrderByDescending(l => l.PerformedAt))
+                        {
+                            <tr>
+                                <td>@log.PerformedAt.ToString("dd MMM yyyy HH:mm")</td>
+                                <td>@log.Action</td>
+                                <td>@log.Details</td>
+                                <td>@(log.PerformedBy != null ? log.PerformedBy.FirstName + " " + log.PerformedBy.LastName : "System")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <!-- Action Buttons -->
+        <div>
+            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default" })
+            @if (statusKey == PaymentTransgressionStatusKeys.Submitted ||
+                 statusKey == PaymentTransgressionStatusKeys.LetterGenerated)
+            {
+                <a href="@Url.Action("GenerateLetter", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) })"
+                   class="btn btn-warning">
+                    <i class="ion ion-document-text"></i>
+                    @(string.IsNullOrEmpty(Model.LetterType) ? "Generate Letter" : "Re-Generate Letter")
+                </a>
+            }
+        </div>
+    </div>
+</div>

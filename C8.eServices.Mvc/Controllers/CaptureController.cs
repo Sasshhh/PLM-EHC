@@ -458,27 +458,43 @@ namespace C8.eServices.Mvc.Controllers
 
         #endregion
         #region Add Electricity Info
+        [AllowAnonymous]
         public JsonResult AddElectricity4(string ElectricityMeterInformation_ElectricityMeterNo, string ElectricityMeterInformation_ElectricityMeterReading, string ElectricityMeterInformation_ElectricityMeterReadingDateTaken)
         {
             var result = "";
+            var currentStep = "init";
 
             try
             {
+                ElectricityMeterInformation_ElectricityMeterNo = ElectricityMeterInformation_ElectricityMeterNo ?? string.Empty;
+                ElectricityMeterInformation_ElectricityMeterReading = ElectricityMeterInformation_ElectricityMeterReading ?? string.Empty;
+                ElectricityMeterInformation_ElectricityMeterReadingDateTaken = ElectricityMeterInformation_ElectricityMeterReadingDateTaken ?? string.Empty;
+
+                WriteLog("AddElectricity4 START - username=" + ElectricityMeterInformation_ElectricityMeterNo
+                    + " | mobile=" + ElectricityMeterInformation_ElectricityMeterReading
+                    + " | email=" + ElectricityMeterInformation_ElectricityMeterReadingDateTaken);
+
                 RegistrationViewModel vm = new RegistrationViewModel();
                 List<RoundRobinLog> errorList = new List<RoundRobinLog>();
-
 
                 var usernameAssigned = false;
                 var emailAssigned = false;
                 var mobileAssigned = false;
 
-
+                currentStep = "username DB check";
                 usernameAssigned = db.SystemUsers.Any(u => u.UserName.ToLower() == ElectricityMeterInformation_ElectricityMeterNo.ToLower() && u.IsActive && u.IsDeleted == false);
+                WriteLog("AddElectricity4 [username DB check] done: usernameAssigned=" + usernameAssigned);
 
-                emailAssigned = db.SystemUsers.Any(u => u.EmailAddress.ToLower() == ElectricityMeterInformation_ElectricityMeterReadingDateTaken.ToLower() && u.IsActive && u.IsDeleted == false);
+                currentStep = "email DB check";
+                if (!string.IsNullOrEmpty(ElectricityMeterInformation_ElectricityMeterReadingDateTaken))
+                    emailAssigned = db.SystemUsers.Any(u => u.EmailAddress != null && u.EmailAddress.ToLower() == ElectricityMeterInformation_ElectricityMeterReadingDateTaken.ToLower() && u.IsActive && u.IsDeleted == false);
+                WriteLog("AddElectricity4 [email DB check] done: emailAssigned=" + emailAssigned);
 
+                currentStep = "mobile DB check";
                 mobileAssigned = db.SystemUsers.Any(u => u.MobileNumber == ElectricityMeterInformation_ElectricityMeterReading && u.IsActive && !u.IsDeleted);
+                WriteLog("AddElectricity4 [mobile DB check] done: mobileAssigned=" + mobileAssigned);
 
+                currentStep = "building errorList";
                 var response = "";
                 string Username = ElectricityMeterInformation_ElectricityMeterNo;
                 var count = ElectricityMeterInformation_ElectricityMeterNo.Length;
@@ -488,32 +504,26 @@ namespace C8.eServices.Mvc.Controllers
                     RoundRobinLog error = new RoundRobinLog();
                     error.LogEntry = "The username entered is already taken.";
                     errorList.Add(error);
-                    //response = "The username entered is already taken.";
                 }
-                if (count <6 || count>20)
+                if (count < 6 || count > 20)
                 {
                     RoundRobinLog error0 = new RoundRobinLog();
                     error0.LogEntry = "The Username field must be 6 to 20 characters long.";
                     errorList.Add(error0);
-                    //response = "The username entered is already taken.";
                 }
 
                 if (emailAssigned)
                 {
-
                     RoundRobinLog error2 = new RoundRobinLog();
                     error2.LogEntry = "The email address entered is already in use.";
                     errorList.Add(error2);
-
                 }
                 if (mobileAssigned)
                 {
                     RoundRobinLog error3 = new RoundRobinLog();
                     error3.LogEntry = "The mobile number entered is already in use.";
                     errorList.Add(error3);
-
                 }
-
 
                 if (usernameAssigned == false && emailAssigned == false && mobileAssigned == false)
                 {
@@ -522,11 +532,32 @@ namespace C8.eServices.Mvc.Controllers
                     errorList.Add(error4);
                 }
 
+                WriteLog("AddElectricity4 COMPLETE - errorList.Count=" + errorList.Count
+                    + " | first=" + (errorList.Count > 0 ? errorList[0].LogEntry : "none"));
                 return Json(errorList, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                var e = ex.Message;
+                var logMsg = "AddElectricity4 EXCEPTION at step [" + currentStep + "]: " + ex.ToString();
+                EventLogHelper.LogSystemError(ex.ToString(), LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                try
+                {
+                    using (var logDb = new eServicesDbContext())
+                    {
+                        logDb.Logs.Add(new Log
+                        {
+                            LogTypeId = 1,
+                            LogEntry = logMsg,
+                            ReferenceId = 0,
+                            ReferenceTypeId = 1,
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsLocked = false
+                        });
+                        logDb.SaveChanges();
+                    }
+                }
+                catch { }
                 result = "Error";
             }
             return Json(result, JsonRequestBehavior.AllowGet);
@@ -4568,6 +4599,28 @@ db.RCSApplicationHistoryLogs.Where(d => d.RCSApplicationStatusId == rcsapp.Id &&
                 return UserManager.Users.Where(o => o.Roles.Any(s => s.RoleId == roleId)).ToList();
             }
           #endregion
+
+        private void WriteLog(string message)
+        {
+            try
+            {
+                using (var logDb = new eServicesDbContext())
+                {
+                    logDb.Logs.Add(new Log
+                    {
+                        LogTypeId = 1,
+                        LogEntry = message,
+                        ReferenceId = 0,
+                        ReferenceTypeId = 1,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsLocked = false
+                    });
+                    logDb.SaveChanges();
+                }
+            }
+            catch { }
+        }
 
         #region PDF Generation
         public ActionResult PDFExample(int id)
