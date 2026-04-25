@@ -70,7 +70,7 @@ namespace C8.eServices.Mvc.Controllers
         {
            // var limsdata = LIMSv2.GetLimsIdenityLinkedProperties(string.Format("8307240099086").Trim());
             Initialise();
-            eServicesDbContext core = new eServicesDbContext();
+            eServicesDbContext core = this.db;
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             ViewBag.User = SystemUser.UserFullName;
             var rrrr = core.HumanSettlementApplications.ToList();
@@ -131,7 +131,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public bool pdfDenerateAgreementOfLease(int? ApplicationId)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var application = core.HumanSettlementApplications
                 .Include(r => r.CoTitleType)
                 .Include(r => r.Relationship)
@@ -585,7 +585,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult UnitMaintenance(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -870,7 +870,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult RequirementChange(int ApplicationId, string Data)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
                 var plmApps = core.HumanSettlementApplications
@@ -912,7 +912,7 @@ namespace C8.eServices.Mvc.Controllers
         [HttpPost]
         public ActionResult RequirementChange(int ApplicationId, string Data, string ApprovalStatusddl)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
                 _base.Initialise(core);
@@ -1336,7 +1336,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult AcceptanceLetter(int rcsAppId)
         {
-            eServicesDbContext cxt = new eServicesDbContext();
+            eServicesDbContext cxt = this.db;
             try
             {
                 Initialise();
@@ -2621,7 +2621,7 @@ namespace C8.eServices.Mvc.Controllers
         [HttpGet]
         public ActionResult HumanAgreementAgreementSignature(int ApplicationId, string Data)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
                 HumanSettlementApplication plmApps = null;
@@ -2691,7 +2691,7 @@ namespace C8.eServices.Mvc.Controllers
         [HttpPost]
         public ActionResult HumanAgreementAgreementSignature(int ApplicationId, string ApprovalAction, string ReasonForReject, string data2)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
 
@@ -2765,7 +2765,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult HumanAgreementRenewalAcceptance(int ApplicationId, string Data)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
                 HumanSettlementApplication plmApps = null;
@@ -2846,7 +2846,7 @@ namespace C8.eServices.Mvc.Controllers
         [AllowAnonymous]
         public ActionResult VerificatioCodeValidation2(int ApplicationId, string OTP, string ApprovalStatusddl)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var plmApps = core.HumanSettlementApplications.FirstOrDefault(r => r.Id == ApplicationId);
             var master = core.HumanSettlementLeaseMasters
                           .Include(r => r.CreatedBySystemUser)
@@ -2957,7 +2957,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult HumanAgreementRenewal(int ApplicationId, string Data)
         {
             Initialise();
-            var core = new eServicesDbContext();
+            var core = this.db;
             try
             {
 
@@ -3579,7 +3579,7 @@ namespace C8.eServices.Mvc.Controllers
         
         public ActionResult DocFinalAgreementValid(int HumanSettlementApplicationId)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var documentCheckLists = new List<int>();
             var Docs = 0;
             var HumanApplication = core.HumanSettlementApplications.Find(HumanSettlementApplicationId);
@@ -3621,7 +3621,7 @@ namespace C8.eServices.Mvc.Controllers
         [Authorize(Roles = "Housing liaison officer, Housing Liaison Officer, Super Administrators, Back Office System Administrator")]
         public ActionResult ValidateDocumentsUploaded(/*int  documentCheckListId, */int referenceTypeId, int referenceId, int customerId, int applicationId, int rcsappId)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var documentCheckLists = new List<int>();
             var Docs = 0;
 
@@ -3687,7 +3687,7 @@ namespace C8.eServices.Mvc.Controllers
         [Authorize(Roles = "Housing liaison officer, Customers, Housing Liaison Officer, Super Administrators, Back Office System Administrator")]
         public ActionResult VerificatioCodeValidation(int ApplicationId, string OTP, string ApprovalStatusddl)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             _base.Initialise(core);
             var plmApps = core.HumanSettlementApplications.FirstOrDefault(r => r.Id == ApplicationId);
             var master = core.HumanSettlementLeaseMasters
@@ -4174,7 +4174,7 @@ namespace C8.eServices.Mvc.Controllers
             try
             {
                 Initialise();
-                var cxt = new eServicesDbContext();
+                var cxt = this.db;
                 var Application = cxt.HumanSettlementApplications.Where(x => x.IsDeleted == false && x.Id == ApplicationId).Include(r => r.CreatedBySystemUser)
                   .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
                   .Include(r => r.PreferredComplexArea).Include(r => r.PreferredComplexArea2)
@@ -4602,7 +4602,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult HumanActivateResident(string Url, int Id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var qqq = core.HSUnitOccupants.FirstOrDefault(r => r.Id == Id);
             qqq.StatusId = core.Status.FirstOrDefault(r => r.Key == StatusKeys.ActiveOccupant).Id;
             core.Entry(qqq).State = EntityState.Modified;
@@ -4614,7 +4614,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult HumanDeactivateResident(string Url, int Id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var qqq = core.HSUnitOccupants.FirstOrDefault(r => r.Id == Id);
             qqq.StatusId = core.Status.FirstOrDefault(r => r.Key == StatusKeys.DeactiveOccupant).Id;
             core.Entry(qqq).State = EntityState.Modified;
@@ -4631,7 +4631,7 @@ namespace C8.eServices.Mvc.Controllers
                 ViewBag.Display = "success";
                 Session["ShowSuccess"] = null;
             }
-            var core = new eServicesDbContext();
+            var core = this.db;
             var UrlReturn = new AesCrypto().Encrypt("Aplication=" + Aplication + "&MasterId=" + MasterId + "&DetaisId=" + DetaisId + "&ViewName=" + ViewName + "&Data=" + Data);
             TenantViewModel vm = new TenantViewModel();
             vm.UrlReturn = UrlReturn;
@@ -4650,7 +4650,7 @@ namespace C8.eServices.Mvc.Controllers
         [HttpPost]
         public ActionResult HumanManageAgreementOccupants(TenantViewModel vm, string Url, int HumanSettlementApplicationId)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var plmApps = core.HumanSettlementApplications.FirstOrDefault(r => r.Id == HumanSettlementApplicationId);
             var qq = core.HumanSettlementLeaseMasters.FirstOrDefault(r => r.HumanSettlementApplicationId == HumanSettlementApplicationId);
             var rrq = core.HumanSettlementLeaseDetails.FirstOrDefault(r => r.HumanSettlementApplicationId == HumanSettlementApplicationId);
@@ -4825,7 +4825,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult HumanTransferAgreementOfLease(int Id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var vm = new DepartmentsApprovalViewModel();
             vm.HumanSettlementApplication = core.HumanSettlementApplications.Include(r => r.PurchaserType).Include(r => r.Status).Where(x => x.Id == Id).FirstOrDefault();
             vm.HumanSettlementLeaseMaster = core.HumanSettlementLeaseMasters.Include(r => r.HumanSettlementApplication).Include(r => r.PurchaserType).Include(r => r.Status).Where(x => x.HumanSettlementApplicationId == Id).FirstOrDefault();
@@ -5031,7 +5031,7 @@ namespace C8.eServices.Mvc.Controllers
         [Authorize(Roles = "Housing liaison officer, Senior Housing Specialist, Regional Manager, Customers, Housing Liaison Officer")]
         public ActionResult CheckContactInfoForReplacement(int Id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var find = core.HSUnitOccupants.FirstOrDefault(r => r.Id == Id);
             var result = string.Empty;
             if (string.IsNullOrEmpty(find.Email) && !string.IsNullOrEmpty(find.CellNo)) result = "email";
@@ -5254,7 +5254,7 @@ namespace C8.eServices.Mvc.Controllers
 
 
                 Initialise();
-                var core = new eServicesDbContext();
+                var core = this.db;
                 var user = UserManager.FindByName(SystemUser.UserName);
                 var userId = user.Id;
                 List<string> Roles = UserManager.GetRoles(userId).ToList();
@@ -5336,7 +5336,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 Initialise();
                 var success = "";
-                var core = new eServicesDbContext();
+                var core = this.db;
                 if (CommunicationType == "Individual")
                 {
                     if (User != null)
@@ -6187,7 +6187,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult
     AssessmentFeeValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6368,7 +6368,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult LeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6624,7 +6624,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult PropertyManagerLeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6796,7 +6796,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult RevenueManagerLeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6972,7 +6972,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult DebitOrderValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -10207,7 +10207,7 @@ namespace C8.eServices.Mvc.Controllers
             Initialise();
             if (Request.IsAuthenticated)
             {
-                var core = new eServicesDbContext();
+                var core = this.db;
                 var Application = db.HumanSettlementApplications.Where(x => x.IsDeleted == false && x.Id == ApplicationId).Include(r => r.CreatedBySystemUser)
                       .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
                       .Include(r => r.PreferredComplexArea).Include(r => r.PreferredComplexArea2)
@@ -10628,7 +10628,7 @@ namespace C8.eServices.Mvc.Controllers
         }
         public ActionResult CaptureUpdateDropOptions(int CategotyId)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var escalatetions = core.EscalationMaster.ToList();
             var rrq = escalatetions.Where(a => a.HSUnitCategoryId == CategotyId).Select(d => d.HSUnitTypologyId).ToList();
             var Typologies = core.HSUnitTypologies.Where(a => rrq.Contains(a.Id)).ToList();
@@ -11465,7 +11465,7 @@ namespace C8.eServices.Mvc.Controllers
         //    {
         //        Initialise();
         //        var vm = new DepartmentsApprovalViewModel();
-        //        var core = new eServicesDbContext();
+        //        var core = this.db;
         //        var plmApps = core.HumanSettlementApplications.FirstOrDefault(r => r.Id == Id);
 
         //        var master = core.HumanSettlementLeaseMasters
@@ -11576,7 +11576,7 @@ namespace C8.eServices.Mvc.Controllers
         }
         public JsonResult AcceptMatchedUnit(int id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var Keys = core.Status.ToList();
             var matchedUnit = core.MatchedUnits.FirstOrDefault(x => x.Id == id) ?? null;
             var unitInformation = core.UnitsHumanSettlement01s.FirstOrDefault(x => x.Id == matchedUnit.UnitsHumanSettlement01Id);
@@ -11594,7 +11594,7 @@ namespace C8.eServices.Mvc.Controllers
 
         public JsonResult RejectMatchedUnit(int id)
         {
-            var core = new eServicesDbContext();
+            var core = this.db;
             var matchedUnit = core.MatchedUnits.FirstOrDefault(x => x.HumanSettlementApplicationId == id) ?? null;
             var unitInformation = core.UnitsHumanSettlement01s.FirstOrDefault(x => x.Id == matchedUnit.UnitsHumanSettlement01Id);
             MatchingHelper.MarkMatchedUnitAsRejected(core, matchedUnit.Id);
@@ -12309,7 +12309,7 @@ namespace C8.eServices.Mvc.Controllers
             }
             else if (_render)
             {
-                var core = new eServicesDbContext();
+                var core = this.db;
                 ReferenceNumber = ReferenceNumber != null ? ReferenceNumber.ToUpper() : null;
                 var plmApps = core.HumanSettlementApplications.Include(d => d.Status).Where(r => r.ApplicationReferenceNumber == ReferenceNumber).FirstOrDefault() ?? null;
                 if (plmApps == null)
@@ -12434,7 +12434,7 @@ namespace C8.eServices.Mvc.Controllers
             }
             else if (_render)
             {
-                var core = new eServicesDbContext();
+                var core = this.db;
                 ReferenceNumber = ReferenceNumber != null ? ReferenceNumber.ToUpper() : null;
                 var plmApps = core.HumanSettlementApplications.Include(d => d.Status).Where(r => r.ApplicationReferenceNumber == ReferenceNumber).FirstOrDefault() ?? null;
 
@@ -12484,7 +12484,7 @@ namespace C8.eServices.Mvc.Controllers
             }
             else if (_review)
             {
-                var core = new eServicesDbContext();
+                var core = this.db;
                 var plmApps = core.HumanSettlementApplications.FirstOrDefault(r => r.Id == Id) ?? null;
 
                 var master = core.HumanSettlementLeaseMasters
@@ -13032,7 +13032,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 Initialise();
                 var vm = new DepartmentsApprovalViewModel();
-                var core = new eServicesDbContext();
+                var core = this.db;
                 var HumanApplication = new HumanSettlementApplication();
                 var customer = new Customer();
                 var application = new Application();
@@ -13208,7 +13208,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult EvictionCommitteeOutcome(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -13546,7 +13546,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult PropertyEvictionValidation(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -13774,7 +13774,7 @@ namespace C8.eServices.Mvc.Controllers
             try
             {
                 Initialise();
-                var core = new eServicesDbContext();
+                var core = this.db;
                 var vm = new DepartmentsApprovalViewModel();
                 var LeaseApplication = core.HumanSettlementApplications.FirstOrDefault(x => x.Id == ApplicatoinId && x.IsDeleted == false);
                 var master = core.HumanSettlementLeaseMasters
@@ -13807,7 +13807,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult viewpaymenthistory(int? refNo)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
 
             RCSApplicationStatus rcsApps = null;
@@ -13871,7 +13871,7 @@ namespace C8.eServices.Mvc.Controllers
         #region Insert For a Specific Department
         public void departmentsApprovals(IEnumerable<DepartmentsApproval> depList)
         {
-            var cxt = new eServicesDbContext();
+            var cxt = this.db;
             foreach (var item in depList)
             {
                 DepartmentsApproval depApprovals = new DepartmentsApproval();
@@ -15733,7 +15733,7 @@ namespace C8.eServices.Mvc.Controllers
         //{
         //    //db context
 
-        //    eServicesDbContext db = new eServicesDbContext();
+        //    //eServicesDbContext db = this.db;
         //    //Save parameters to DB Table
         //    Customer newCust = new Customer();
         //    newCust.FirstName = parameters1;
@@ -15791,5 +15791,18 @@ namespace C8.eServices.Mvc.Controllers
         {
             return View();
         }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (db != null)
+                {
+                    db.Dispose();
+                    db = null;
+                }
+            }
+            base.Dispose(disposing);
+        }
+
     }
 }
