@@ -573,7 +573,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult ConductUnitInspection(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -856,7 +856,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult ConductExitInspection(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -1126,7 +1126,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult UnitMaintenance(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -1326,7 +1326,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult MaintenanceJobSheet(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -1642,7 +1642,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult WaitingListReEntryConfirmation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -1861,7 +1861,7 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult AcceptanceLetter(int rcsAppId)
         {
-            eServicesDbContext cxt = new eServicesDbContext();
+            eServicesDbContext cxt = this.db;
             try
             {
                 Initialise();
@@ -2060,7 +2060,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult GenerateLeaseAgreement(Int32 rcsAppId)
              //public async Task<ActionResult> GenerateLeaseAgreement(int rcsAppId)
         {
-            var cxt = new eServicesDbContext();
+            var cxt = this.db;
            
                 try
                 {
@@ -3006,7 +3006,7 @@ namespace C8.eServices.Mvc.Controllers
         {
             try
             {
-                eServicesDbContext context = new eServicesDbContext();
+                eServicesDbContext context = this.db;
                 Units Add = new Units();
                 Add = unitvalues.Units;
                 Initialise();
@@ -3992,7 +3992,7 @@ namespace C8.eServices.Mvc.Controllers
         {
             try
             {
-                eServicesDbContext context = new eServicesDbContext();
+                eServicesDbContext context = this.db;
                 Initialise();
                 PropertyLeaseApplication rcsApps = null;
                 LeaseDetails lease = null;
@@ -4104,7 +4104,7 @@ namespace C8.eServices.Mvc.Controllers
         {
             try
             {
-                eServicesDbContext context = new eServicesDbContext();
+                eServicesDbContext context = this.db;
                 Initialise();
                 PropertyLeaseApplication rcsApps = null;
                 LeaseDetails lease = null;
@@ -4996,7 +4996,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult
     AssessmentFeeValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -5180,7 +5180,7 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult
 ApplicationFeeValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -5364,7 +5364,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult LeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -5560,7 +5560,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult CaptureCommitteeOutcome(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -5740,7 +5740,7 @@ ApplicationFeeValidation(int? id)
          [DecryptParameter]
         public ActionResult CaptureEvictionDetails(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -5916,7 +5916,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult PropertyManagerLeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6090,7 +6090,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult RevenueManagerLeaseAgreementValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -6268,7 +6268,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult DebitOrderValidation(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -9505,7 +9505,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult Capture()
         {
             Initialise();
-            var core = new eServicesDbContext();
+            var core = this.db;
             var empty = "";
             string id = String.Empty;
             var rcsType = core.RCSTypes.OrderBy(x => x.Name);
@@ -11637,7 +11637,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult ApplicationLeaseServeNotice(int? id, string refno)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
             
@@ -12026,7 +12026,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult TenantAccountValidation(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -12296,7 +12296,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult WaitingListValidation(int? PropertyId)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             PropertyLeaseApplication rcsApps = null;
             LeaseDetails lease = null;
@@ -12368,7 +12368,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult PropertyEvictionValidation(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -12596,7 +12596,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult EvictionCommitteeOutcome(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -12870,7 +12870,7 @@ ApplicationFeeValidation(int? id)
         public ActionResult ConfirmVacatingAppicant(int? id)
         {
 
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer;
 
@@ -13057,7 +13057,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult viewpaymenthistory(int? refNo)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
 
             RCSApplicationStatus rcsApps = null;
@@ -13121,7 +13121,7 @@ ApplicationFeeValidation(int? id)
         #region Insert For a Specific Department
         public void departmentsApprovals(IEnumerable<DepartmentsApproval> depList)
         {
-            var cxt = new eServicesDbContext();
+            var cxt = this.db;
             foreach (var item in depList)
             {
                 DepartmentsApproval depApprovals = new DepartmentsApproval();
@@ -14950,7 +14950,7 @@ ApplicationFeeValidation(int? id)
         //{
         //    //db context
 
-        //    eServicesDbContext db = new eServicesDbContext();
+        //    //eServicesDbContext db = this.db;
         //    //Save parameters to DB Table
         //    Customer newCust = new Customer();
         //    newCust.FirstName = parameters1;
@@ -15077,7 +15077,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult StartRefundProcess(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -15278,7 +15278,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult UpdateResponseForRefund(int? id)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
             var userID = Customer.Id;
 
@@ -15616,7 +15616,7 @@ ApplicationFeeValidation(int? id)
         [DecryptParameter]
         public ActionResult PlmManualApplicationsDocuments(int rcsAppId)
         {
-            eServicesDbContext context = new eServicesDbContext();
+            eServicesDbContext context = this.db;
             Initialise();
 
             PropertyLeaseApplication rcsApps = null;
@@ -15854,5 +15854,18 @@ ApplicationFeeValidation(int? id)
             }
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (db != null)
+                {
+                    db.Dispose();
+                    db = null;
+                }
+            }
+            base.Dispose(disposing);
+        }
+
     }
 }
