@@ -267,22 +267,26 @@ namespace C8.eServices.Mvc.Helpers
             //var MunicipalCheckList = core.DocumentCheckLists.SingleOrDefault(dcl => dcl.DocumentTypeId == MunicipalStatement.Id && dcl.ReferenceTypeId == referenceTypeId);
 
 
-            var PayslipPensionGrant = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.PayslipPensionGrant);
-            var BankStatement = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.BankStatement);
-            var IdentityDocument = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.IdentityDocument);
-            var ProofOfEmployment = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.ProofOfEmployment);
-            var Affidavit = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.Affidavit);
-            var ProofOfAddress = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.ProofOfAddress);
+            // ── Renewal-specific document types ───────────────────────────────────
+            // These keys map to SEPARATE DocumentType/DocumentCheckList rows from the
+            // original application upload (DocumentCaptureApplication), preventing
+            // original docs from appearing or being deleted during the renewal flow.
+            var PayslipPensionGrant = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalProofOfIncome);
+            var BankStatement       = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalBankStatement);
+            var IdentityDocument    = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalIdentityDocument);
+            var ProofOfEmployment   = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalProofOfEmployment);
+            var Affidavit           = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalAffidavit);
+            var ProofOfAddress      = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.RenewalProofOfAddress);
 
 
 
             //Add to checklists
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == IdentityDocument.Id && dcl.ReferenceTypeId == referenceTypeId));
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == PayslipPensionGrant.Id && dcl.ReferenceTypeId == referenceTypeId));
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == BankStatement.Id && dcl.ReferenceTypeId == referenceTypeId));
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ProofOfEmployment.Id && dcl.ReferenceTypeId == referenceTypeId));
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == Affidavit.Id && dcl.ReferenceTypeId == referenceTypeId));
-            documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ProofOfAddress.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (IdentityDocument != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == IdentityDocument.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (PayslipPensionGrant != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == PayslipPensionGrant.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (BankStatement != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == BankStatement.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (ProofOfEmployment != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ProofOfEmployment.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (Affidavit != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == Affidavit.Id && dcl.ReferenceTypeId == referenceTypeId));
+            if (ProofOfAddress != null) documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ProofOfAddress.Id && dcl.ReferenceTypeId == referenceTypeId));
 
 
             var ratesRebateProperty = new RatesRebateProperty();
@@ -2280,15 +2284,22 @@ namespace C8.eServices.Mvc.Helpers
         {
             var findPropertyLease = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == queueItem.PropertyLeaseApplicationId) ?? null;
             var matched = core.MatchedUnits.Where(x => x.PropertyLeaseApplicationId == findPropertyLease.Id && x.RejectedProperty).ToList() ?? null;
-            var rrq = matched.Select(x => x.UnitsId).ToList();
-            var findUnits = core.Units.Where(x => !x.IsTaken && !rrq.Contains(x.Id) && (x.PreferredComplexAreaId == findPropertyLease.PreferredComplexAreaId || x.PreferredComplexAreaId == findPropertyLease.PreferredComplexArea2Id)
-            && x.OccupationTypeId == findPropertyLease.HumanEHCOptionsId).FirstOrDefault() ?? null;
-            var findItem = core.UnitsEkurhuleniHousingCompany.Where(x => !x.IsTaken && !rrq.Contains(x.Id) && (x.PreferredComplexAreaId == findPropertyLease.PreferredComplexAreaId || x.PreferredComplexAreaId == findPropertyLease.PreferredComplexArea2Id)
+            var rrq = matched.Where(x => x.ApplicationAllocatedPropertyId.HasValue).Select(x => x.ApplicationAllocatedPropertyId.Value).ToList();
+            
+            var findItem = core.ApplicationAllocatedProperty.Where(x => !x.IsTaken && !rrq.Contains(x.Id) && (x.OfferedComplexId == findPropertyLease.PreferredComplexAreaId || x.OfferedComplexId == findPropertyLease.PreferredComplexArea2Id)
             && x.HumanEHCOptionId == findPropertyLease.HumanEHCOptionsId).FirstOrDefault() ?? null;
+            
             var CurrentPLMAppMatched = false;
             if (findItem != null)
             {
+                BaseHelper baseHelper = new BaseHelper();
+                baseHelper.Initialise(core);
+                int systemUserId = baseHelper.SystemUser != null ? baseHelper.SystemUser.Id : 1; // Fallback to 1 (Admin/System) if context is null
+
                 findItem.IsTaken = true;
+                findItem.AllocatedByUserId = systemUserId;
+                findItem.PropertyLeaseApplicationId = (int)findPropertyLease.Id;
+                
                 core.SaveChanges();
 
                 // Construct the match unit
@@ -2296,13 +2307,15 @@ namespace C8.eServices.Mvc.Helpers
                 {
                     PropertyLeaseApplicationId = (int)findPropertyLease?.Id,
                     LeaseReferenceNo = findPropertyLease?.ApplicationReferenceNumber,
-                    UnitsEkurhuleniHousingCompanyId = findItem.Id,
+                    ApplicationAllocatedPropertyId = findItem.Id,
                     IsAccepted = false,
                 };
 
                 SaveMatchedUnit(core, match);
-                MarkQueueAsMatched(core, (int)findPropertyLease?.Id);
+                MarkQueueAsMatched(core, (int)findPropertyLease?.Id, findItem.Id);
                 MarkApplicationAsMatched(core, findPropertyLease);
+                SaveUnitHistory(core, (int)findPropertyLease.Id, "Unit Auto-Allocated by System (Waiting List Match)", findItem.Id, systemUserId);
+                
                 CurrentPLMAppMatched = true;
             }
         }
@@ -2561,11 +2574,24 @@ namespace C8.eServices.Mvc.Helpers
             core.MatchedUnits.Add(unit);
             core.SaveChanges();
         }
-        public static void MarkQueueAsMatched(eServicesDbContext core, int propertyApplicationId)
+        public static void MarkQueueAsMatched(eServicesDbContext core, int propertyApplicationId, int? unitId = null)
         {
-            var findQueueItem = core.waitingListQues.FirstOrDefault(x => x.PropertyLeaseApplicationId == propertyApplicationId) ?? null;
-            findQueueItem.IsMatched = true;
-            core.SaveChanges();
+            var findQueueItem = core.waitingListQues.FirstOrDefault(x => x.PropertyLeaseApplicationId == propertyApplicationId);
+            if (findQueueItem != null)
+            {
+                findQueueItem.IsMatched = true;
+                
+                // Also update the PropertyLeaseWaitingList table UI record
+                var waitingListEntry = core.PropertyLeaseWaitingLists.FirstOrDefault(w => w.PropertyLeaseApplicationId == propertyApplicationId && w.QueueStatus == "Waiting");
+                if (waitingListEntry != null)
+                {
+                    waitingListEntry.QueueStatus = "Offered";
+                    if (unitId.HasValue)
+                        waitingListEntry.OfferedUnitId = unitId.Value;
+                }
+                
+                core.SaveChanges();
+            }
         }
         public static void MarkQueueAsDeleted(eServicesDbContext core, int propertyApplicationId)
         {
@@ -2846,6 +2872,166 @@ namespace C8.eServices.Mvc.Helpers
             }
             core.SaveChanges();
         }
+
+        // ─────────────────────────────────────────────
+        // BR19 — Lease Signing Expiry (30-day deadline)
+        // ─────────────────────────────────────────────
+        /// <summary>
+        /// BR19: Disregard applications where the lease agreement has not been signed
+        /// by the tenant within 30 days of being sent. Changes status to LeaseSigningExpired,
+        /// sends email notification, and logs audit trail.
+        /// </summary>
+        public static void CheckLeaseSigningExpiry(eServicesDbContext core)
+        {
+            try
+            {
+                const int thresholdDays = 30;
+
+                var awaitingSignatureStatus = core.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseAgreementGenerated);
+                var expiredStatus = core.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseSigningExpired);
+                var emailContent = core.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.LeaseSigningExpired);
+                var atMessage = core.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseSigningExpired);
+
+                if (awaitingSignatureStatus == null || expiredStatus == null) return;
+
+                DateTime thresholdDate = DateTime.Now.AddDays(-thresholdDays);
+
+                // Find all unsigned agreements where application is still awaiting tenant signature AND is past 30 days
+                var agreements = core.propertyLeaseAgreementMasters
+                    .Include("PropertyLeaseApplication")
+                    .Where(a => a.IsActive && !a.IsDeleted
+                             && a.PropertyLeaseApplication != null
+                             && a.PropertyLeaseApplication.StatusId == awaitingSignatureStatus.Id
+                             && !a.TenantSigned
+                             && a.CreatedDateTime != null
+                             && a.CreatedDateTime <= thresholdDate)
+                    .ToList();
+
+                foreach (var agreement in agreements)
+                {
+                    if (agreement.CreatedDateTime == null || agreement.PropertyLeaseApplicationId == null) continue;
+
+                    var daysSinceSent = (DateTime.Now - agreement.CreatedDateTime.Value).Days;
+                    if (daysSinceSent >= thresholdDays)
+                    {
+                        int appId = (int)agreement.PropertyLeaseApplicationId;
+
+                        // Change application status to expired
+                        ChangeApplicationStatus(core, expiredStatus.Id, appId);
+
+                        // Send customer email notification
+                        if (emailContent != null)
+                        {
+                            EmailHelper.CustomerEmailNotification(core, appId, emailContent.Id);
+                        }
+
+                        // Log audit trail
+                        if (atMessage != null && agreement.PropertyLeaseApplication != null)
+                        {
+                            ActivityTrackerAudit(core, appId,
+                                atMessage.Description ?? "Application disregarded — lease not signed within 30 days",
+                                agreement.PropertyLeaseApplication.CustomerId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+        }
+
+        // ─────────────────────────────────────────────
+        // BR09 — Unit Offer Expiry (30-day deadline)
+        // ─────────────────────────────────────────────
+        /// <summary>
+        /// BR09: Withdraw matched units that have not been accepted after 30 days.
+        /// Marks the match as rejected, releases the unit, re-lists the applicant
+        /// on the waiting list, sends email notification, and logs audit trail.
+        /// </summary>  
+        public static void CheckUnitOfferExpiry(eServicesDbContext core)
+        {
+            try
+            {
+                const int thresholdDays = 30;
+
+                var matchedStatus = core.Status.FirstOrDefault(x => x.Key == StatusKeys.awaited);
+                var expiredStatus = core.Status.FirstOrDefault(x => x.Key == StatusKeys.UnitOfferExpired);
+                var emailContent = core.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UnitOfferExpired);
+                var atMessage = core.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UnitOfferExpired);
+
+                if (matchedStatus == null || expiredStatus == null) return;
+
+                DateTime thresholdDate = DateTime.Now.AddDays(-thresholdDays);
+
+                // Find all unaccepted, non-rejected matched units where application is in "Available Unit Matched" status AND is past 30 days
+                var matchedUnits = core.MatchedUnits
+                    .Include("PropertyLeaseApplication")
+                    .Include("ApplicationAllocatedProperty")
+                    .Where(m => m.PropertyLeaseApplication != null
+                             && m.PropertyLeaseApplication.StatusId == matchedStatus.Id
+                             && !m.IsAccepted
+                             && !m.RejectedProperty
+                             && !m.IsDeleted
+                             && m.CreatedDateTime != null
+                             && m.CreatedDateTime <= thresholdDate)
+                    .ToList();
+
+                foreach (var match in matchedUnits)
+                {
+                    if (match.CreatedDateTime == null || match.PropertyLeaseApplicationId == null) continue;
+
+                    var daysSinceOffer = (DateTime.Now - match.CreatedDateTime.Value).Days;
+                    if (daysSinceOffer >= thresholdDays)
+                    {
+                        int appId = (int)match.PropertyLeaseApplicationId;
+
+                        // Mark the matched unit as rejected
+                        match.RejectedProperty = true;
+                        core.Entry(match).State = System.Data.Entity.EntityState.Modified;
+                        core.SaveChanges();
+
+                        // Release the allocated unit so it can be matched to the next applicant
+                        if (match.ApplicationAllocatedProperty != null)
+                        {
+                            match.ApplicationAllocatedProperty.IsTaken = false;
+                            core.SaveChanges();
+                        }
+
+                        // Change application status to expired
+                        ChangeApplicationStatus(core, expiredStatus.Id, appId);
+
+                        // Re-list the applicant on the waiting list
+                        var queueItem = core.waitingListQues.FirstOrDefault(x => x.PropertyLeaseApplicationId == appId);
+                        if (queueItem != null)
+                        {
+                            queueItem.IsMatched = false;
+                            queueItem.QueueDate = DateTime.Now;
+                            core.SaveChanges();
+                        }
+
+                        // Send customer email notification
+                        if (emailContent != null)
+                        {
+                            EmailHelper.CustomerEmailNotification(core, appId, emailContent.Id);
+                        }
+
+                        // Log audit trail
+                        if (atMessage != null && match.PropertyLeaseApplication != null)
+                        {
+                            ActivityTrackerAudit(core, appId,
+                                atMessage.Description ?? "Unit offer withdrawn — not accepted within 30 days",
+                                match.PropertyLeaseApplication.CustomerId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+        }
+
         public static void VerifrySecondPropertyReject(eServicesDbContext core, int propertyApplicationId)
         {
             try
@@ -3612,6 +3798,29 @@ namespace C8.eServices.Mvc.Helpers
                 return false;
             }
         }
+        
+        public static void AddHistoryLog(eServicesDbContext core, int applicationId, int? clerkId, string actionMessage)
+        {
+            try
+            {
+                var log = new PLMApplicationHistortyLog
+                {
+                    PropertyLeaseApplicationId = applicationId,
+                    UserId = clerkId ?? 1,
+                    AuditAction = actionMessage,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now
+                };
+                core.PLMApplicationHistortyLogs.Add(log);
+                core.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                WorkAllocationHumanHelper.LogSystemError("Failed to add history log: " + ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+        }
+
         public static bool RejectMatchedUnit(eServicesDbContext core, ApplicationAllocatedProperty unit, int propertyApplicationId, int matchedUnitId)
         {
             try
@@ -3936,6 +4145,148 @@ namespace C8.eServices.Mvc.Helpers
 
 
         }
+        public static void PropertyLeaseRenewalMasterData(eServicesDbContext core, LeaseDetails renewalLease, PropertyLeaseApplication property)
+        {
+            int? housingSuperId = property?.PreferredComplexArea?.HousingSuperId;
+            var Q = housingSuperId.HasValue ? core.Customers.FirstOrDefault(x => x.Id == housingSuperId.Value) : null;
+            var day = DateTime.DaysInMonth(DateTime.Now.Year, 07);
+            
+            // Get original lease to fetch the unit (renewals don't have direct ApplicationAllocatedProperty links usually)
+            var originalLease = core.LeaseDetails.FirstOrDefault(x => x.PropertyLeaseApplicationId == property.Id && !x.IsNew && !x.IsDeleted && x.IsActive);
+            
+            // Find matched unit to get the unit data
+            var matchedUnit = core.MatchedUnits.Include(x => x.ApplicationAllocatedProperty)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == property.Id && x.IsActive && !x.IsDeleted);
+
+            ApplicationAllocatedProperty Unit = null;
+            if (matchedUnit != null) Unit = matchedUnit.ApplicationAllocatedProperty;
+
+            PropertyLeaseAgreementMaster MasterLease = core.propertyLeaseAgreementMasters
+                .Include(x => x.CreatedBySystemUser)
+                .Include(x => x.LeaseDetails)
+                .Include(x => x.PropertyLeaseApplication)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == property.Id && x.LeaseDetailsId == renewalLease.Id);
+
+            if (MasterLease == null)
+            {
+                MasterLease = new PropertyLeaseAgreementMaster();
+                MasterLease.PropertyLeaseApplicationId = property.Id;
+                MasterLease.LeaseDetailsId = renewalLease.Id;
+                core.propertyLeaseAgreementMasters.Add(MasterLease);
+            }
+
+            MasterLease.RepresentedBy = Q != null ? (Q.FirstName + " " + Q.LastName) : "";
+            MasterLease.ApplicantFullName = property.FirstName + " " + property.LastName;
+            MasterLease.ApplicantIdentityNumber = property.IDNo;
+            
+            if (Unit != null)
+            {
+                MasterLease.UnitNumber = Unit.SpaceUnitNumber + " " + Unit.BuildingName;
+                MasterLease.DepositTenantContribution = Unit.RequiedDepositAmount;
+                MasterLease.InitialDepositAmonunt = Unit.RequiedDepositAmount;
+                MasterLease.BedRooms = Unit.NumOfBeds;
+                MasterLease.PeopleAllowedOnPremises = Unit.NumOfBeds;
+                MasterLease.LandlordAddress = Unit.Address;
+            }
+
+            MasterLease.PreparationFee = (double)(renewalLease.PreparationFee ?? 0);
+            MasterLease.CreditCheckFee = (double)(renewalLease.CreditCheckFee ?? 0);
+            MasterLease.CalculatedAsFolllows = (double)(renewalLease.CalculatedAsFolllows ?? 0);
+            MasterLease.InitialDepositPremises = (double)(renewalLease.InitialDepositPremises ?? 0);
+            MasterLease.MonthlyUnitRental = (double)renewalLease.RentalAmount;
+            MasterLease.UnitRentalAmountPM = (double)renewalLease.RentalAmount;
+            
+            MasterLease.ShadePortParking = (double)(renewalLease.ShadePortParking ?? 0);
+            MasterLease.OpenParking = (double)(renewalLease.OpenParking ?? 0);
+            MasterLease.StoreRooms = (double)(renewalLease.StoreRooms ?? 0);
+            MasterLease.Electricity = renewalLease.Electricity != null ? (double)renewalLease.Electricity : 0;
+            MasterLease.Refuse = (double)(renewalLease.Refuse ?? 0);
+            MasterLease.SecurityFee = (double)(renewalLease.SecurityFee ?? 0);
+            MasterLease.Sewerage = (double)(renewalLease.Sewerage ?? 0);
+            MasterLease.Water = (double)(renewalLease.Water ?? 0);
+            MasterLease._water = (double)(renewalLease.Water ?? 0);
+            MasterLease._sewerage = (double)(renewalLease.Refuse ?? 0);
+            MasterLease._refuse = (double)(renewalLease.Refuse ?? 0);
+
+            MasterLease.SPP = renewalLease.SPP;
+            MasterLease.OPP = renewalLease.OPP;
+            MasterLease.STR = renewalLease.STR;
+            MasterLease.ELEC = renewalLease.ELEC;
+            MasterLease.SEC = renewalLease.SEC;
+            MasterLease.WTR = renewalLease.WTR;
+            MasterLease.FloorNumber = renewalLease.FloorNumber;
+            MasterLease.BlockNumber = "";
+            MasterLease.Day = "01";
+
+            if (renewalLease.StartDate.HasValue)
+            {
+                MasterLease.CommencementDate = renewalLease.StartDate.Value.ToString("MMMM", CultureInfo.InvariantCulture) + " " + renewalLease.StartDate.Value.Year.ToString();
+            }
+
+            if (renewalLease.EndDate.HasValue)
+            {
+                MasterLease.EndDate = renewalLease.EndDate.Value.ToString("dd/MM/yyyy");
+                MasterLease.UnitRentalDay = renewalLease.EndDate.Value.ToString("dd");
+                MasterLease.UnitRentalDate = renewalLease.EndDate.Value.ToString("MMMM", CultureInfo.InvariantCulture) + " " + renewalLease.EndDate.Value.Year.ToString();
+                MasterLease.ParkingIncreaseDay = renewalLease.EndDate.Value.ToString("dd");
+                MasterLease.ParkingIncreaseMonth = renewalLease.EndDate.Value.ToString("yyyy-MM");
+            }
+
+            if (renewalLease.TerminationNotice.HasValue)
+            {
+                string termStr = renewalLease.TerminationNotice.Value.ToString("dd/MM/yyyy");
+                MasterLease.NoPenaltyMonth = termStr;
+                MasterLease.RentalDueUntill = termStr;
+                MasterLease.PenaltyMonth = termStr;
+            }
+
+            MasterLease.LeaseAdministrationFee = renewalLease.LeaseAdministrationFee != null ? (double)renewalLease.LeaseAdministrationFee : 0;
+            MasterLease.RentalIncreaseDate = "01/07/" + DateTime.Now.Year.ToString().Substring(2, 2);
+            MasterLease.CarportParkingBayNumber = renewalLease.CarportParkingBayNumber;
+            MasterLease.OPenParkingBayNumber = renewalLease.OPenParkingBayNumber;
+            MasterLease.OPenParkingBayRental = (double)(renewalLease.OpenParking ?? 0);
+            MasterLease.ShadePortBayNumber = renewalLease.ShadePortBayNumber;
+            MasterLease.ShadePortBayRental = (double)(renewalLease.ShadePortParking ?? 0);
+            MasterLease._Of1July = day.ToString();
+
+            // Populate Occupants if any
+            var Occupants = core.PropertyResidents.OrderBy(x => x.Id).Where(x => x.RenewalLeaseId == renewalLease.Id && x.IsActive && !x.IsDeleted && x.StatusId != (core.Status.FirstOrDefault(r => r.Key == StatusKeys.DeactiveOccupant).Id)).ToList();
+            if (Occupants != null && Occupants.Count > 0)
+            {
+                int order = 1;
+                foreach (var item in Occupants)
+                {
+                    switch (order)
+                    {
+                        case 1: MasterLease.OccupantONE = item.FirstNames + " " + item.LastName; MasterLease.OccupantONEIdentityNo = item.IDNo; break;
+                        case 2: MasterLease.OccupantTWO = item.FirstNames + " " + item.LastName; MasterLease.OccupantTWOIdentityNo = item.IDNo; break;
+                        case 3: MasterLease.OccupantTHREE = item.FirstNames + " " + item.LastName; MasterLease.OccupantTHREEIdentityNo = item.IDNo; break;
+                        case 4: MasterLease.OccupantFOUR = item.FirstNames + " " + item.LastName; MasterLease.OccupantFOURIdentityNo = item.IDNo; break;
+                        case 5: MasterLease.OccupantFIVE = item.FirstNames + " " + item.LastName; MasterLease.OccupantFIVEIdentityNo = item.IDNo; break;
+                        case 6: MasterLease.OccupantSIX = item.FirstNames + " " + item.LastName; MasterLease.OccupantSIXIdentityNo = item.IDNo; break;
+                    }
+                    order++;
+                }
+            }
+
+            // Reset signatures so it forces signing again for renewals
+            MasterLease.TenantSigned = false;
+            MasterLease.TenantSignature = null;
+            MasterLease.TenantSignDate = null;
+            MasterLease.Witness1Name = null;
+            MasterLease.Witness1Signature = null;
+            MasterLease.Witness1SignatureDate = null;
+            MasterLease.RevenueManagerSigned = false;
+            MasterLease.RevenueManagersSignature = null;
+            MasterLease.RevenueManagerSignatureDate = null;
+            MasterLease.PropertyManagerSigned = false;
+            MasterLease.PropertyManagersSignature = null;
+            MasterLease.PropertyManagerSignatureDate = null;
+
+            core.SaveChanges();
+        }
+
         public static void HumanSettlementMasterAgreement(eServicesDbContext core, HumanSettlementLeaseMaster master, HumanSettlementApplication application, HumanSettlementLeaseDetails Info)
         {
             try
@@ -4150,8 +4501,8 @@ namespace C8.eServices.Mvc.Helpers
         {
             var findItem = core.propertyLeaseAgreementMasters.FirstOrDefault(x => x.PropertyLeaseApplicationId == property.Id && x.LeaseDetailsId == lease.Id);
             DateTime Today = DateTime.Now.Date;
-            findItem.TenantSignDate = Today.ToString().Substring(0, 7);
-            findItem.TenantSignDay = Today.ToString().Substring(8, 2);
+            findItem.TenantSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+            findItem.TenantSignDay = "";
             findItem.TenantSigned = true;
             findItem.TenantSignature = property.FirstName.Substring(0, 1) + property.LastName.Substring(0, 1) + " " + property.IDNo;
             findItem.MainLesseeSigned = true;
@@ -4175,8 +4526,8 @@ namespace C8.eServices.Mvc.Helpers
             DateTime Today = DateTime.Now.Date;//2020/02/02 04/55/5251
             if (findItem.PropertyManagerSigned == true)
             {
-                findItem.ManagersSignDate = Today.ToString().Substring(0, 7);
-                findItem.ManagersSignDay = Today.ToString().Substring(8, 2);
+                findItem.ManagersSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+                findItem.ManagersSignDay = "";
                 ChangeApplicationStatus(core, core.Status.FirstOrDefault(x => x.Key == StatusKeys.IncentivePolicyApplicationPending).Id, (int)property.Id);
 
                 lease.Completed = true;
@@ -4198,8 +4549,8 @@ namespace C8.eServices.Mvc.Helpers
             DateTime Today = DateTime.Now.Date;
             if (findItem.RevenueManagerSigned == true)
             {
-                findItem.ManagersSignDate = Today.ToString().Substring(0, 7);
-                findItem.ManagersSignDay = Today.ToString().Substring(8, 2);
+                findItem.ManagersSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+                findItem.ManagersSignDay = "";
                 ChangeApplicationStatus(core, core.Status.FirstOrDefault(x => x.Key == StatusKeys.IncentivePolicyApplicationPending).Id, (int)property.Id);
 
                 lease.Completed = true;
@@ -4264,27 +4615,48 @@ namespace C8.eServices.Mvc.Helpers
         {
             try
             {
+                var archivedStatusId = core.Status.Where(x => x.Key == StatusKeys.Archived).FirstOrDefault().Id;
+
                 if (PropertyId != null)
                 {
-                    var findItem = core.RoundRobinQueues.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == PropertyId && x.ResponsibilityTypeId == ResposibilityId && x.ClerkId == ClerkId/* && x.EndTaskDateTime == null*/);
-                    findItem.StatusId = core.Status.Where(x => x.Key == StatusKeys.Archived).FirstOrDefault().Id;
-                    findItem.EndTaskDateTime = DateTime.Now;
+                    // Archive ALL active queues for this app + responsibility type.
+                    // NOTE: ClerkId is intentionally NOT used in the filter — ClerkId at creation time
+                    // (Customer.Id from AppSetting) and ClerkId at close time (SystemUser.Id) can differ,
+                    // which previously caused items to stay permanently at status 99 (Submitted).
+                    var items = core.RoundRobinQueues
+                        .Where(x => x.PropertyLeaseApplicationId == PropertyId
+                                 && x.ResponsibilityTypeId == ResposibilityId
+                                 && x.StatusId != archivedStatusId)
+                        .ToList();
+
+                    foreach (var item in items)
+                    {
+                        item.StatusId = archivedStatusId;
+                        item.EndTaskDateTime = DateTime.Now;
+                    }
                     core.SaveChanges();
                 }
 
                 if (LeaseId != null)
                 {
-                    var findItem = core.RoundRobinQueues.OrderByDescending(x => x.Id).FirstOrDefault(x => x.LeaseDetailsId == LeaseId && x.ResponsibilityTypeId == ResposibilityId && x.ClerkId == ClerkId && x.EndTaskDateTime == null);
-                    findItem.StatusId = core.Status.Where(x => x.Key == StatusKeys.Archived).FirstOrDefault().Id;
-                    findItem.EndTaskDateTime = DateTime.Now;
+                    var items = core.RoundRobinQueues
+                        .Where(x => x.LeaseDetailsId == LeaseId
+                                 && x.ResponsibilityTypeId == ResposibilityId
+                                 && x.StatusId != archivedStatusId)
+                        .ToList();
+
+                    foreach (var item in items)
+                    {
+                        item.StatusId = archivedStatusId;
+                        item.EndTaskDateTime = DateTime.Now;
+                    }
                     core.SaveChanges();
                 }
             }
             catch (Exception)
             {
-
+                // Intentionally swallowed - archiving failure should not block workflow
             }
-
         }
         public static void MarkUnitAsInpected(eServicesDbContext core, int Id)
         {

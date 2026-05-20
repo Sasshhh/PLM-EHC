@@ -417,17 +417,9 @@ namespace C8.eServices.Mvc.Controllers
                 .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.LeaseDetailsId == lease.Id && x.IsActive && !x.IsDeleted);
             if (master == null) throw new Exception("Invalid Lease Agreement.");
 
-            // Template path handling (same pattern as original for consistency)
-            // TODO: Add AppSetting key "LA_TEMP_PDF_REVISED" for production deployment
-            var templateSetting = db.AppSettings.FirstOrDefault(r => r.Key == "LA_TEMP_PDF_REVISED");
-            var template = templateSetting?.Value ?? "";
+            // Template is a fixed file shipped with the application — no AppSetting needed.
+            string pdfTemplate = Server.MapPath("~/PDFTemplates/Revised Lease Agreement_v2.pdf");
 
-            string pdfTemplate = "";
-            string IP = System.Web.HttpContext.Current.Request.UserHostAddress;
-
-            pdfTemplate = IP == "::1"
-                ? Server.MapPath("~/PDFTemplates/Revised Lease Agreement_v2.pdf")
-                : Server.MapPath(template);
 
             var timestamp2 = DateTime.Now.ToString("ddMMyyyyHHmmss");
             string folderName = Server.MapPath("~/Templates");
@@ -470,8 +462,9 @@ namespace C8.eServices.Mvc.Controllers
                         : master.CommencementDate ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "SignedDay", master.TenantSignDay ?? "", 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "SignedMonth", master.TenantSignDate ?? "", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "SignedDay2", master.ManagersSignDay ?? "", 9.0f);
-                SetFieldWithFontSize(pdfFormFields, "SignedMonth2", master.ManagersSignDate ?? "", 9.0f);
+                string pmDate = master.PropertyManagerSignatureDate.HasValue ? master.PropertyManagerSignatureDate.Value.ToString("dd MMMM yyyy") : (master.ManagersSignDate ?? "");
+                SetFieldWithFontSize(pdfFormFields, "SignedDay2", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedMonth2", pmDate, 9.0f);
                 SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationFee", master.LeaseAdministrationFee.ToString("F2"), 9.0f);
 
                 // ========================================================================
@@ -594,7 +587,7 @@ namespace C8.eServices.Mvc.Controllers
                         {
                             var sigPos = positions[0];
                             iTextSharp.text.Rectangle rect = sigPos.position;
-                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.ScaleAbsolute(120, 40);
                             sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
                             PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
                             cb.AddImage(sigImage);
@@ -621,7 +614,7 @@ namespace C8.eServices.Mvc.Controllers
                         {
                             var sigPos = positions[0];
                             iTextSharp.text.Rectangle rect = sigPos.position;
-                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.ScaleAbsolute(120, 40);
                             sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
                             PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
                             cb.AddImage(sigImage);
@@ -647,7 +640,7 @@ namespace C8.eServices.Mvc.Controllers
                         {
                             var sigPos = positions[0];
                             iTextSharp.text.Rectangle rect = sigPos.position;
-                            sigImage.ScaleToFit(rect.Width, rect.Height);
+                            sigImage.ScaleAbsolute(120, 40);
                             sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
                             PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
                             cb.AddImage(sigImage);
@@ -659,8 +652,8 @@ namespace C8.eServices.Mvc.Controllers
                     }
                 }
 
-                // Witness 1 Signature - REMOVED: Now displays name as text instead
-                // Note: Witness signature is still captured and stored, but not displayed on PDF
+                // Witness 1 — text name only (PDF template has no signature image field for witness)
+                // Witness1Signature is captured and stored in DB for records, but the PDF only has a text field.
             }
 
             // Flatten the form (make it non-editable)
@@ -817,6 +810,12 @@ namespace C8.eServices.Mvc.Controllers
                 pdfFormFields.SetField("SignatureMainLessee", master.SignatureMainLessee ?? "");
                 pdfFormFields.SetField("SignatureOFSpouse", master.SignatureOfSpouse ?? "");
 
+                // ====================================================================
+                // SIGNATURES: Render as images (Tenant, Property Manager, Revenue Manager)
+                // Field names match LA_Template.pdf exactly
+                // ====================================================================
+
+                // Tenant Signature
                 if (!string.IsNullOrEmpty(master.TenantSignature) && master.TenantSignature.Contains(","))
                 {
                     try
@@ -824,22 +823,56 @@ namespace C8.eServices.Mvc.Controllers
                         string base64Data = master.TenantSignature.Substring(master.TenantSignature.IndexOf(',') + 1);
                         byte[] sigBytes = Convert.FromBase64String(base64Data);
                         iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
-
-                        AcroFields.FieldPosition sigPos = null;
                         var positions = pdfFormFields.GetFieldPositions("TenantsSignature");
                         if (positions != null && positions.Count > 0)
-                            sigPos = positions[0];
-
-                        if (sigPos != null)
                         {
-                            iTextSharp.text.Rectangle rect = sigPos.position;
-                            sigImage.ScaleToFit(rect.Width, rect.Height);
-                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
-                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
-                            cb.AddImage(sigImage);
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Tenant sig error: " + ex.Message); }
+                }
+
+                // Property Manager Signature
+                if (!string.IsNullOrEmpty(master.PropertyManagersSignature) && master.PropertyManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.PropertyManagersSignature.Substring(master.PropertyManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+                        var positions = pdfFormFields.GetFieldPositions("PropertyManagersSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("PM sig error: " + ex.Message); }
+                }
+
+                // Revenue Manager Signature
+                if (!string.IsNullOrEmpty(master.RevenueManagersSignature) && master.RevenueManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.RevenueManagersSignature.Substring(master.RevenueManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+                        var positions = pdfFormFields.GetFieldPositions("RevenueManagersSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("RM sig error: " + ex.Message); }
                 }
             }
             pdfStamper.FormFlattening = true;
@@ -947,16 +980,88 @@ namespace C8.eServices.Mvc.Controllers
                 var Oc_Fou = master.OccupantFOUR == null ? true : pdfFormFields.SetField("Occupant4", master.OccupantFOUR.ToString()) && pdfFormFields.SetField("OccupantIDNO4", master.OccupantFOURIdentityNo.ToString());
                 var Oc_Fiv = master.OccupantFIVE == null ? true : pdfFormFields.SetField("Occupant5", master.OccupantFIVE.ToString()) && pdfFormFields.SetField("OccupantIDNO5", master.OccupantFIVEIdentityNo.ToString());
                 var Oc_Six = master.OccupantSIX == null ? true : pdfFormFields.SetField("Occupant6", master.OccupantSIX.ToString()) && pdfFormFields.SetField("OccupantIDNO6", master.OccupantSIXIdentityNo.ToString());
-                var sign_t = master.TenantSigned == true ? pdfFormFields.SetField("TenantSignDate", master.TenantSignDate.ToString()) && pdfFormFields.SetField("TenantSignDay", master.TenantSignDay.ToString()) && pdfFormFields.SetField("TenantsSignature", master.TenantSignature.ToString()) : true;
-                var sign_p = master.PropertyManagerSigned == true ? pdfFormFields.SetField("PropertyManagersSignature", master.PropertyManagersSignature.ToString()): true;
-                var m_sndt = master.PropertyManagerSigned == true && master.RevenueManagerSigned == true ? pdfFormFields.SetField("ManagersSignDate", master.ManagersSignDate.ToString()) && pdfFormFields.SetField("ManagersSignDay", master.ManagersSignDay.ToString()) : true;
-                var sign_r = master.RevenueManagerSigned == true ? pdfFormFields.SetField("RevenueManagersSignature", master.RevenueManagersSignature.ToString()) : true;
-                var t_wtn1 = master.TenantWitnessONE == null ? true : pdfFormFields.SetField("TenantsWitness1", master.TenantWitnessONE.ToString());
-                var t_wtn2 = master.TenantWitnessTWO == null ? true : pdfFormFields.SetField("TenantsWitness2", master.TenantWitnessTWO.ToString());
-                var m_wtn1 = master.ManagersWitnessONE == null ? true : pdfFormFields.SetField("ManagersWitness1", master.ManagersWitnessONE.ToString());
-                var m_wtn2 = master.ManagersWitnessTWO == null ? true : pdfFormFields.SetField("ManagersWitness2", master.ManagersWitnessTWO.ToString());
-                var m_lesee = master.MainLesseeSigned == true ? pdfFormFields.SetField("SignatureMainLessee", master.SignatureMainLessee.ToString()) : true;
-                var spousee = master.SpouseSigned == true ? pdfFormFields.SetField("SignatureOFSpouse", master.SignatureOfSpouse.ToString()):true;
+                // Sign dates and witness names (text fields)
+                if (master.TenantSigned == true)
+                {
+                    pdfFormFields.SetField("TenantSignDate", master.TenantSignDate ?? "");
+                    pdfFormFields.SetField("TenantSignDay", master.TenantSignDay ?? "");
+                }
+                if (master.PropertyManagerSigned == true && master.RevenueManagerSigned == true)
+                {
+                    pdfFormFields.SetField("ManagersSignDate", master.ManagersSignDate ?? "");
+                    pdfFormFields.SetField("ManagersSignDay", master.ManagersSignDay ?? "");
+                }
+                if (master.TenantWitnessONE != null) pdfFormFields.SetField("TenantsWitness1", master.TenantWitnessONE);
+                if (master.TenantWitnessTWO != null) pdfFormFields.SetField("TenantsWitness2", master.TenantWitnessTWO);
+                if (master.ManagersWitnessONE != null) pdfFormFields.SetField("ManagersWitness1", master.ManagersWitnessONE);
+                if (master.ManagersWitnessTWO != null) pdfFormFields.SetField("ManagersWitness2", master.ManagersWitnessTWO);
+                if (master.MainLesseeSigned == true) pdfFormFields.SetField("SignatureMainLessee", master.SignatureMainLessee ?? "");
+                if (master.SpouseSigned == true) pdfFormFields.SetField("SignatureOFSpouse", master.SignatureOfSpouse ?? "");
+
+                // ====================================================================
+                // SIGNATURES: Render as images (Tenant, Property Manager, Revenue Manager)
+                // Field names match LA_Template.pdf exactly
+                // ====================================================================
+
+                // Tenant Signature
+                if (!string.IsNullOrEmpty(master.TenantSignature) && master.TenantSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.TenantSignature.Substring(master.TenantSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+                        var positions = pdfFormFields.GetFieldPositions("TenantsSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("Tenant sig error: " + ex.Message); }
+                }
+
+                // Property Manager Signature
+                if (!string.IsNullOrEmpty(master.PropertyManagersSignature) && master.PropertyManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.PropertyManagersSignature.Substring(master.PropertyManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+                        var positions = pdfFormFields.GetFieldPositions("PropertyManagersSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("PM sig error: " + ex.Message); }
+                }
+
+                // Revenue Manager Signature
+                if (!string.IsNullOrEmpty(master.RevenueManagersSignature) && master.RevenueManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.RevenueManagersSignature.Substring(master.RevenueManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+                        var positions = pdfFormFields.GetFieldPositions("RevenueManagersSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(sigPos.position.Left, sigPos.position.Bottom);
+                            pdfStamper.GetOverContent(sigPos.page).AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("RM sig error: " + ex.Message); }
+                }
 
             }
             pdfStamper.FormFlattening = true;
@@ -1421,7 +1526,7 @@ namespace C8.eServices.Mvc.Controllers
             if (ApprovalStatusddl == RCSActionTypeKeys.Habitable)
             {
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (Int32)id);
-                MatchingHelper.RoundRobinMarkJobAsFinished(db, (Int32)rcsApps.Id, null, ResponsibilityTypeId.Id, UserId);
+                MatchingHelper.RoundRobinMarkJobAsFinished(db, (Int32)rcsApps.Id, null, ResponsibilityTypeId.Id, Customer.Id);
                 EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                 //customer email here
@@ -1706,6 +1811,8 @@ namespace C8.eServices.Mvc.Controllers
                 //MatchingHelper.MarkUnitAsAvailable(db, Unit.Id);
                 //MatchingHelper.MarkAplicationAsDeleted(db, AppUnit.Id);
 
+                // B1: Close the exit inspection RRQ before opening vacating confirmation
+                MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, Customer.Id);
                 EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingVacatingConfirm).Id, (int)id);
@@ -3070,7 +3177,11 @@ namespace C8.eServices.Mvc.Controllers
                             int emailboodyId = cxt.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InActionGenerateLeaseAgreement).Id;
                             EmailHelper.CustomerEmailNotification(cxt, rcsAppId, emailboodyId);
                             //end of code for post
-                            Session["LeaseAgreementReview"] = string.Format($"Risk assessment reallocated for application reference ,{leaseInfo.ApplicationReferenceNumber}");
+
+                            // Trigger the next workflow step (LeaseAgreementValidation)
+                            EHCRoundRobin(leaseInfo.Id, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+
+                            Session["LeaseAgreementReview"] = string.Format($"Lease agreement generated successfully for application reference ,{leaseInfo.ApplicationReferenceNumber}");
                             break;
                         case RCSActionTypeKeys.Rejected:
                             MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (Int32)leaseInfo.Id);
@@ -3250,6 +3361,9 @@ namespace C8.eServices.Mvc.Controllers
                     var attachments = cxt.Attachments.Where(x => x.PropertyLeaseApplicationId == rcsAppId && x.DocumentTypeId == docdets.Id).ToList();
                     MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.IncentivePolicyApplicationProcessing).Id, rcsAppId);
 
+                    // B2: Close the debit order validation RRQ before opening next step
+                    var debitRespB2 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.DebitOrderVAlidation);
+                    if (debitRespB2 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, leaseInfo.Id, null, debitRespB2.Id, Customer.Id);
                     EHCRoundRobin(leaseInfo.Id, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                     //Send e-mail and SMS notification
@@ -3331,16 +3445,24 @@ namespace C8.eServices.Mvc.Controllers
                       .Include(r => r.HumanEHCOptions).Include(r => r.Status)
                       .Where(x => x.Id == rcsAppId).FirstOrDefault();
 
+                    // Show the bookkeeper's rejection reason on the re-upload screen
+                    var rejectionLog = db.RCSApplicationHistoryLogs
+                        .Where(x => x.RCSApplicationStatusId == rcsAppId
+                                 && x.AuditAction.Contains("Reason:"))
+                        .OrderByDescending(x => x.CreatedDateTime)
+                        .FirstOrDefault();
 
+                    if (rejectionLog != null)
+                    {
+                        var reasonStart = rejectionLog.AuditAction.IndexOf("Reason:");
+                        if (reasonStart >= 0)
+                            TempData["AppFeeRejectionReason"] = rejectionLog.AuditAction.Substring(reasonStart);
+                    }
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
-                    int num = 5;
 
                     return RedirectToAction("ProofOfApplicationFeePayment", "Document", new RouteValueDictionary(SecureActionLinkExtension.Encrypt(new { referenceId = Customer.Id, customerId = Customer.Id, referenceTypeId = referenceType.Id, applicationId = application.Id, agentId = application.Id, returnUrl = "sds", rcsappId = rcsAppId })));
-
-
-
                 }
                 catch (Exception io)
                 {
@@ -4817,58 +4939,48 @@ namespace C8.eServices.Mvc.Controllers
         {
             try
             {
-                using (eServicesDbContext context= new eServicesDbContext())
+                using (eServicesDbContext context = new eServicesDbContext())
                 {
-
                     Initialise();
-                    ApplicationAllocatedProperty collection = capture.ApplicationAllocatedProperties;
-                    ApplicationAllocatedProperty collection1 = context.ApplicationAllocatedProperty.FirstOrDefault(a => a.SolarReference == collection.SolarReference && a.SpaceUnitNumber == collection.SpaceUnitNumber);
-
-                    if (collection1 != null)
+                    var rcsApps = context.PropertyLeaseApplications.FirstOrDefault(x => x.Id == Id);
+                    
+                    // Send application to the bottom of the waiting list queue
+                    var existsInQueue = context.waitingListQues.Any(x => x.PropertyLeaseApplicationId == Id);
+                    if (existsInQueue)
                     {
-                        collection1.RequiedDepositAmount = collection.RequiedDepositAmount;
-                        collection1.MonthlyRentalAmount = collection.MonthlyRentalAmount;
-                        collection1.LettingRequirements = collection.LettingRequirements;
-                        collection1.StreetName = collection.StreetName;
-                        collection1.Township = collection.Township;
-                        collection1.Postal = collection.Postal;
-                        collection1.IsTaken = true;
-                        unitAllocationService.Update(collection1);
+                        MatchingHelper.MarkQueueAsUnMatched(context, Id);
                     }
                     else
                     {
-                        collection.AllocatedByUserId = SystemUser.Id;
-                        collection.PropertyLeaseApplicationId = Id;
-                        unitAllocationService.Save(collection);
+                        int customerIdToUse = rcsApps?.CustomerId ?? (context.Customers.FirstOrDefault(x => x.SystemUserId == SystemUser.Id)?.Id ?? 0);
+                        MatchingHelper.SaveToWaitingListQueue(context, Id, customerIdToUse);
                     }
                     
+                    // Change application status back to Risk Assessment Approved (waiting list entry point)
+                    MatchingHelper.ChangeApplicationStatus(context, (Int32)context.Status.FirstOrDefault(x => x.Key == StatusKeys.Approved)?.Id, Id);
 
-                    MatchedUnits matchedUnit = new MatchedUnits
+                    var customer = context.Customers.FirstOrDefault(x => x.SystemUserId == SystemUser.Id);
+                    String ActivityTrackerMessage = "Application returned to the bottom of the waiting list manually by CSO.";
+                    MatchingHelper.ActivityTrackerAudit(context, Id, ActivityTrackerMessage, customer?.Id ?? 0);
+                    
+                    if (rcsApps != null)
                     {
-                        ApplicationAllocatedPropertyId = collection.Id,
-                        PropertyLeaseApplicationId = Id,
-                        IsAccepted = false,
-                        RejectedProperty = false,
-                    };
-                    unitAllocationService.Save(matchedUnit);
+                        MatchingHelper.AddHistoryLog(context, Id, rcsApps.CustomerId, "Application manually returned to the waiting list by CSO following a unit rejection.");
 
-                    MatchingHelper.ChangeApplicationStatus(context, (Int32)context.Status.FirstOrDefault(x => x.Key == StatusKeys.awaited)?.Id, Id);
-                    String ActivityTrackerMessage = context.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ApplicantUploadsDocuments).Description.ToString();
-                    //Send e-mail and SMS notification
-                    Int32 emailboodyId = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentApproved).Id;
-                    EmailHelper.CustomerEmailNotification(context, Id, emailboodyId);
+                        var emailTemplate = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.plm_re_list_to_queue);
+                        if (emailTemplate != null)
+                        {
+                            EmailHelper.CustomerEmailNotification(context, Id, emailTemplate.Id);
+                        }
+                    }
                 }
-                return View("Vetted", "PropertyLeaseApplication");
+                return RedirectToAction("Vetted", "PropertyLeaseApplication");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return View("Vetted", "PropertyLeaseApplication");
-                throw;
+                System.IO.File.WriteAllText(@"c:\REPO\PLM V1\PLM-EHC\C8.eServices.Mvc\scratch\allocate_error.txt", ex.ToString());
+                return RedirectToAction("Vetted", "PropertyLeaseApplication");
             }
-            
-
-
-            return View();
         }
 
 
@@ -5405,16 +5517,35 @@ namespace C8.eServices.Mvc.Controllers
 
                     if (User.IsInRole("Property Manager"))
                     {
-                        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseAgreementValidation).FirstOrDefault().Id;
+                        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.AgreementApproval).FirstOrDefault().Id;
                         var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
 
                         rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
                         var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
 
+                        int AwaitingLeaseAgreementApprovalId = db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingLeaseAgreementApproval).Id;
+
                         MasterApplication = db.propertyLeaseAgreementMasters.Where(x => x.PropertyManagerSigned == false && list.Contains(x.PropertyLeaseApplicationId)).ToList();
                         var ListMaster = MasterApplication.Select(x => x.PropertyLeaseApplicationId).ToList();
 
-                        rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && ListMaster.Contains(x.Id) && x.StatusId == AwaitingManagersSignature)
+                        rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && ListMaster.Contains(x.Id) && x.StatusId == AwaitingLeaseAgreementApprovalId)
+                            .Include(r => r.CreatedBySystemUser)
+                            .Include(r => r.Customer).Include(r => r.PurchaserType)
+                            .Include(r => r.ModifiedBySystemUser)
+                            .Include(r => r.HumanEHCOptions).Include(r => r.Status).ToList();
+                    }
+
+                    if (User.IsInRole("Director"))
+                    {
+                        var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.AgreementApproval).FirstOrDefault().Id;
+                        var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
+
+                        int AwaitingAgreementApproval = db.Status.FirstOrDefault(i => i.Key == "s_awaiting_agreement_approval_").Id;
+
+                        rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
+                        var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
+
+                        rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && x.StatusId == AwaitingAgreementApproval)
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.Customer).Include(r => r.PurchaserType)
                             .Include(r => r.ModifiedBySystemUser)
@@ -5755,11 +5886,12 @@ namespace C8.eServices.Mvc.Controllers
                     UserId = Customer.Id;
                     var PropertyFacilitiesManagerReviewId = cxt.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview).Id;
 
-                    // Get all applications where current user has an active (not deleted) PropertyFacilitiesManagerReview RRQ
+                    // Get all applications where current user has an active PropertyFacilitiesManagerReview RRQ
+                    // StatusId 99 (Submitted) = active/assigned; StatusId 95 (Archived) = completed
+                    var SubmittedId_FacMgr = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
                     var applicationIds = cxt.RoundRobinQueues
                         .Where(x => x.ClerkId == UserId &&
-                               x.IsActive == true &&
-                               x.IsDeleted == false &&
+                               x.StatusId == SubmittedId_FacMgr &&
                                x.ResponsibilityTypeId == PropertyFacilitiesManagerReviewId &&
                                x.PropertyLeaseApplicationId.HasValue)
                         .Select(x => x.PropertyLeaseApplicationId.Value)
@@ -6349,9 +6481,8 @@ ApplicationFeeValidation(int? id)
                 else if (rcsApps.PurchaserType.Key == PurchaserTypeKeys.NaturalPerson)
                 {
                     MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRiskAssessment).Id, (int)id);
-                    //MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
-                    //EHCRoundRobin(rcsApps.Id, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-                    
+                    // A1: Close deposit payment RRQ before opening risk assessment
+                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
                     EHCRoundRobin(rcsApps.Id, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
 
@@ -6366,7 +6497,8 @@ ApplicationFeeValidation(int? id)
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingApplicationFeeUpload).Id, (int)id);
-                //MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
+                // A2: Close deposit payment RRQ on rejection (re-upload required)
+                MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
 
 
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
@@ -6491,6 +6623,14 @@ ApplicationFeeValidation(int? id)
 
                 ViewBag.CustomerModel = obj;
                 ViewBag.CustomerTypeId = new SelectList(context.Status.Include(x => x.StatusType).Where(x => x.StatusType.Key == StatusTypeKeys.DocumentUpload).ToList(), "Key", "Name");
+
+                // UC022: Load the most recent rejection comment if this application was returned
+                var latestRejection = context.propertyLeaseActionComments
+                    .Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.RejectReason != null && x.RejectReason.Contains("Not Supported"))
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault();
+                ViewBag.RejectionComment = latestRejection != null ? latestRejection.RejectReason : null;
+
                 return View(vm);
             }
             catch (Exception ex)
@@ -6523,6 +6663,9 @@ ApplicationFeeValidation(int? id)
 
                     MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingManagersSignature).Id, (int)id);
 
+                    // B3: Close the generate lease agreement RRQ before opening RM validation
+                    var genRespB3 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.GenerateLeaseAgreement);
+                    if (genRespB3 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, genRespB3.Id, Customer.Id);
                     EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                     //Send e-mail and SMS notification
@@ -6538,6 +6681,9 @@ ApplicationFeeValidation(int? id)
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (int)id);
+                // B4: Close the generate lease agreement RRQ before returning to CSO
+                var genRespB4 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.GenerateLeaseAgreement);
+                if (genRespB4 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, genRespB4.Id, Customer.Id);
                 EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
 
@@ -6917,6 +7063,9 @@ ApplicationFeeValidation(int? id)
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.IllegalActivities).Id, (int)id);
             }
             //                      1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17     18   19
+            // B5: Close the termination validation RRQ before opening committee outcomes
+            var termValRespB5 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.TerminationValidation);
+            if (termValRespB5 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)id, null, termValRespB5.Id, Customer.Id);
             EHCRoundRobin((int)id, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
 
@@ -6964,11 +7113,11 @@ ApplicationFeeValidation(int? id)
 
             if (User.IsInRole("Area Manager"))
             {
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected || x.Key == RCSActionTypeKeys.ReAllocate).OrderBy(x => x.Name), "Key", "Name");
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected || x.Key == RCSActionTypeKeys.ReAllocate || x.Key == RCSActionTypeKeys.NotSupportedDueToTenant || x.Key == RCSActionTypeKeys.NotSupportedDueToCSO).OrderBy(x => x.Name), "Key", "Name");
             }
             else
             {
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved).OrderBy(x => x.Name), "Key", "Name");
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.NotSupportedDueToTenant || x.Key == RCSActionTypeKeys.NotSupportedDueToCSO).OrderBy(x => x.Name), "Key", "Name");
             }
             try
             {
@@ -7067,38 +7216,126 @@ ApplicationFeeValidation(int? id)
 
         [DecryptParameter]
         [HttpPost]
-        public ActionResult PropertyManagerLeaseAgreementValidation(int? id, string ApprovalStatusddl)
+        public ActionResult PropertyManagerLeaseAgreementValidation(int? id, string ApprovalStatusddl, string Comment)
         {
             Initialise();
             var userID = Customer.Id;
             var Keys = db.Status;
             var rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).Include(x => x.PurchaserType).FirstOrDefault();
 
+            // B10: Close the CEO agreement approval RRQ — applies to ALL branches (approve/reject)
+            var ceoRespB10 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.AgreementApproval);
+            if (ceoRespB10 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, ceoRespB10.Id, Customer.Id);
+
             if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
             {
-                CaptureController c = new CaptureController();
+                // ── UC022: CEO/PM APPROVAL ── Activate the lease, flip all switches, save dates
+                var activeLease = db.LeaseDetails.FirstOrDefault(x => x.PropertyLeaseApplicationId == id && x.IsNew && !x.IsDeleted);
+                if (activeLease != null)
+                {
+                    activeLease.Completed  = true;
+                    activeLease.IsActive   = true;
+                    activeLease.StartDate  = activeLease.StartDate ?? DateTime.Now;   // keep CSO-captured date if already set
+                    activeLease.ModifiedDateTime = DateTime.Now;
+                    db.Entry(activeLease).State = EntityState.Modified;
+                }
 
-                if (rcsApps.PurchaserType.Key == PurchaserTypeKeys.Company)
+                // Mark the agreement master with the PM signature date
+                var agreementMaster = db.propertyLeaseAgreementMasters
+                                        .OrderByDescending(x => x.Id)
+                                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                if (agreementMaster != null)
                 {
-                    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingDepositPaid).Id, (int)id);
+                    agreementMaster.PropertyManagerSigned        = true;
+                    agreementMaster.PropertyManagerSignatureDate  = DateTime.Now;
+                    agreementMaster.ManagersSignDate              = DateTime.Now.ToString("dd MMMM yyyy");
+                    agreementMaster.ManagersSignDay               = "";
+                    agreementMaster.ModifiedDateTime              = DateTime.Now;
+                    db.Entry(agreementMaster).State = EntityState.Modified;
                 }
-                else if (rcsApps.PurchaserType.Key == PurchaserTypeKeys.NaturalPerson)
-                {
-                    //Send e-mail and SMS notification
-                    int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.plm_awaiting_debit_order).Id;
-                    EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                }
-                //not sure what message should be recorded here
+
+                // Transition application to active-lease status
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)id);
+                db.SaveChanges();
+
+                // ── Send the hardcoded CCC / debit-order instruction email ──
+                // Dynamic: tenant first name. Everything else is static as per business requirement.
+                string tenantFirstName = rcsApps.FirstName ?? rcsApps.Customer?.FirstName ?? "Tenant";
+                string leaseApprovalEmailBody = $@"
+<p>Dear <strong>{tenantFirstName}</strong>,</p>
+<p>We are pleased to inform you that your lease agreement has been <strong>signed and approved</strong>. Thank you for completing the necessary documentation.</p>
+<p>To ensure a smooth setup of your utility and payment arrangements, we kindly request that you visit your nearest <strong>Client Care Centre (CCC)</strong> to complete the following:</p>
+<ol>
+  <li><strong>Open Billing Account for Electricity &amp; Sewer</strong> – This will activate your utility services under your name for the leased property.</li>
+  <li><strong>Complete the Debit Order Authorization Mandate</strong> – This authorizes the automatic monthly deduction of your rental and/or utility charges.</li>
+</ol>
+<p><strong>What to bring to your CCC visit:</strong></p>
+<ul>
+  <li>A copy of your lease agreement [Accessed on the PLM System &gt; PLM Applications &gt; My Applications &gt; View Application &gt; Documents].</li>
+  <li>Your valid SA ID document</li>
+  <li>Banking details for the debit order mandate</li>
+</ul>
+<p><strong>CCC locations &amp; operating hours:</strong><br/>
+Please visit <a href=""https://www.ekurhuleni.gov.za/for-me/customer-care-centres/"">https://www.ekurhuleni.gov.za/for-me/customer-care-centres/</a> for the nearest CCC address and hours of operation.</p>
+<p><strong>Important note:</strong><br/>
+Activating your billing account and debit order mandate is required before occupancy / before your first payment due date. Failure to complete these steps may delay utility connection or result in late payment fees.</p>
+<p>Thank you for your prompt cooperation.</p>
+<p>Regards,<br/><strong>PLM Team</strong></p>";
+
+                int leaseApprovalEmailBodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.plm_awaiting_debit_order).Id;
+                EmailHelper.CustomerEmailNotification(
+                    db,
+                    rcsApps.Id,
+                    leaseApprovalEmailBodyId,
+                    emailSubject: "Lease Agreement Approved – Next Steps for Billing Account & Debit Order",
+                    appendedBody: leaseApprovalEmailBody);
+
+                // ── Future wiring point: route to deposit / debit order step ──
+                // Company:       MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingDepositPaid).Id, (int)id);
+                // Natural Person: additional debit order routing via EHCRoundRobin can be added here when ready.
+
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementApproved).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement approved for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement approved and lease activated for application reference {rcsApps.ApplicationReferenceNumber}");
             }
-            else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+            else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToTenant)
             {
+                // UC022 Reject: CEO rejects — return to Tenant
+                ClearLeaseSignatures(db, rcsApps.Id);
+                MatchingHelper.AddCommentOnRejectAgreement(db, Comment, (int)id);
+                SaveLeaseRejectionComment(db, (int)id, Comment, "CEO/Property Manager", "Tenant");
+
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingLeaseAgreement).Id, (int)id);
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+                var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToTenant);
+                var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by CEO - returned to Tenant";
+                MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            }
+            else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToCSO)
+            {
+                // UC022 Reject: CEO rejects — return to CSO
+                ClearLeaseSignatures(db, rcsApps.Id);
+                MatchingHelper.AddCommentOnRejectAgreement(db, Comment, (int)id);
+                SaveLeaseRejectionComment(db, (int)id, Comment, "CEO/Property Manager", "CSO");
+
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (int)id);
                 EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+                var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToCSO);
+                var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by CEO - returned to CSO";
+                MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            }
+            else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+            {
+                // Legacy reject path — keep for backward compatibility
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (int)id);
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AssessmentFiguresPOPRejected).Description.ToString();
@@ -7143,11 +7380,11 @@ ApplicationFeeValidation(int? id)
 
             if (User.IsInRole("Area Manager"))
             {
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected || x.Key == RCSActionTypeKeys.ReAllocate).OrderBy(x => x.Name), "Key", "Name");
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected || x.Key == RCSActionTypeKeys.ReAllocate || x.Key == RCSActionTypeKeys.NotSupportedDueToTenant || x.Key == RCSActionTypeKeys.NotSupportedDueToCSO).OrderBy(x => x.Name), "Key", "Name");
             }
             else
             {
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved).OrderBy(x => x.Name), "Key", "Name");
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.NotSupportedDueToTenant || x.Key == RCSActionTypeKeys.NotSupportedDueToCSO).OrderBy(x => x.Name), "Key", "Name");
             }
             try
             {
@@ -7247,44 +7484,74 @@ ApplicationFeeValidation(int? id)
 
         [DecryptParameter]
         [HttpPost]
-        public ActionResult RevenueManagerLeaseAgreementValidation(int? id, string ApprovalStatusddl)
+        public ActionResult RevenueManagerLeaseAgreementValidation(int? id, string ApprovalStatusddl, string Comment)
         {
             Initialise();
             var userID = Customer.Id;
             var Keys = db.Status;
             var rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).Include(x => x.PurchaserType).FirstOrDefault();
 
+            // B6-B9: Declare RM resp type once — used in all branches below
+            var rmRespRMVal = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseAgreementValidation);
+
             if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
             {
                 CaptureController c = new CaptureController();
 
-                if (rcsApps.PurchaserType.Key == PurchaserTypeKeys.Company)
-                {
-                    MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingDepositPaid).Id, (int)id);
+                // B6: Close RM lease agreement validation RRQ before opening CEO approval
+                if (rmRespRMVal != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, rmRespRMVal.Id, Customer.Id);
+                // Sequence: Move from Revenue Manager to CEO/Property Manager
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingLeaseAgreementApproval).Id, (int)id);
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, 1, false, false, 1);
 
-
-                }
-                else if (rcsApps.PurchaserType.Key == PurchaserTypeKeys.NaturalPerson)
-                {
-
-                    //MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.IncentivePolicyApplicationPending).Id, (int)id);
-
-                    //Send e-mail and SMS notification
-                    int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.plm_awaiting_debit_order).Id;
-                    EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                }
-                //not sure what message should be recorded here
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementApproved).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement approved for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement approved by Revenue Manager. Forwarded to CEO for application reference ,{rcsApps.ApplicationReferenceNumber}");
             }
-            else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+            else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToTenant)
             {
+                // UC022 Reject: RM rejects — return to Tenant
+                ClearLeaseSignatures(db, rcsApps.Id);
+                MatchingHelper.AddCommentOnRejectAgreement(db, Comment, (int)id);
+                SaveLeaseRejectionComment(db, (int)id, Comment, "Revenue Manager", "Tenant");
+
+                // B7: Close RM lease agreement validation RRQ before returning to Tenant
+                if (rmRespRMVal != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, rmRespRMVal.Id, Customer.Id);
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingLeaseAgreement).Id, (int)id);
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
+
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+                var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToTenant);
+                var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by Revenue Manager - returned to Tenant";
+                MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            }
+            else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToCSO)
+            {
+                // UC022 Reject: RM rejects — return to CSO
+                ClearLeaseSignatures(db, rcsApps.Id);
+                MatchingHelper.AddCommentOnRejectAgreement(db, Comment, (int)id);
+                SaveLeaseRejectionComment(db, (int)id, Comment, "Revenue Manager", "CSO");
+
+                // B8: Close RM lease agreement validation RRQ before returning to CSO
+                if (rmRespRMVal != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, rmRespRMVal.Id, Customer.Id);
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (int)id);
                 EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
-
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+                var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToCSO);
+                var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by Revenue Manager - returned to CSO";
+                MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            }
+            else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
+            {
+                // Legacy reject path — keep for backward compatibility
+                // B9: Close RM lease agreement validation RRQ (legacy reject)
+                if (rmRespRMVal != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, rmRespRMVal.Id, Customer.Id);
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (int)id);
+                EHCRoundRobin(rcsApps.Id, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AssessmentFiguresPOPRejected).Description.ToString();
@@ -7533,22 +7800,42 @@ ApplicationFeeValidation(int? id)
                 if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
                     return Json(new { success = false, message = "Invalid parameters." });
 
-                Initialise();
-                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
-                if (application == null)
-                    return Json(new { success = false, message = "Application not found." });
+                using (var freshDb = new eServicesDbContext())
+                {
+                    var application = freshDb.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                    if (application == null)
+                        return Json(new { success = false, message = "Application not found." });
 
-                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
-                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
-                if (master == null)
-                    return Json(new { success = false, message = "Lease agreement record not found." });
+                    // Match the same lookup the PDF generator uses — prefer master linked to the active lease
+                    var activeLease = freshDb.LeaseDetails
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
 
-                master.TenantSignature = SignatureImageData;
-                master.TenantSigned = true;
-                master.TenantSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+                    PropertyLeaseAgreementMaster master = null;
+                    if (activeLease != null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id &&
+                            x.LeaseDetailsId == activeLease.Id &&
+                            x.IsActive && !x.IsDeleted);
+                    }
+                    // Fallback: any active master for this app
+                    if (master == null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                    }
+                    if (master == null)
+                        return Json(new { success = false, message = "Lease agreement record not found." });
 
-                db.SaveChanges();
-                return Json(new { success = true });
+                    master.TenantSignature = SignatureImageData;
+                    master.TenantSigned = true;
+                    master.TenantSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+
+                    freshDb.Entry(master).State = System.Data.Entity.EntityState.Modified;
+                    freshDb.SaveChanges();
+                    return Json(new { success = true });
+                }
             }
             catch (Exception ex)
             {
@@ -7573,22 +7860,42 @@ ApplicationFeeValidation(int? id)
                 if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData) || string.IsNullOrEmpty(WitnessName))
                     return Json(new { success = false, message = "Invalid parameters." });
 
-                Initialise();
-                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
-                if (application == null)
-                    return Json(new { success = false, message = "Application not found." });
+                using (var freshDb = new eServicesDbContext())
+                {
+                    var application = freshDb.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                    if (application == null)
+                        return Json(new { success = false, message = "Application not found." });
 
-                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
-                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
-                if (master == null)
-                    return Json(new { success = false, message = "Lease agreement record not found." });
+                    // Match the same lookup the PDF generator uses — prefer master linked to the active lease
+                    var activeLease = freshDb.LeaseDetails
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
 
-                master.Witness1Signature = SignatureImageData;
-                master.Witness1Name = WitnessName;
-                master.Witness1SignatureDate = DateTime.Now;
+                    PropertyLeaseAgreementMaster master = null;
+                    if (activeLease != null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id &&
+                            x.LeaseDetailsId == activeLease.Id &&
+                            x.IsActive && !x.IsDeleted);
+                    }
+                    // Fallback: any active master for this app
+                    if (master == null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                    }
+                    if (master == null)
+                        return Json(new { success = false, message = "Lease agreement record not found." });
 
-                db.SaveChanges();
-                return Json(new { success = true });
+                    master.Witness1Signature = SignatureImageData;
+                    master.Witness1Name = WitnessName;
+                    master.Witness1SignatureDate = DateTime.Now;
+
+                    freshDb.Entry(master).State = System.Data.Entity.EntityState.Modified;
+                    freshDb.SaveChanges();
+                    return Json(new { success = true });
+                }
             }
             catch (Exception ex)
             {
@@ -7643,22 +7950,44 @@ ApplicationFeeValidation(int? id)
                 if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
                     return Json(new { success = false, message = "Invalid parameters." });
 
-                Initialise();
-                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
-                if (application == null)
-                    return Json(new { success = false, message = "Application not found." });
+                using (var freshDb = new eServicesDbContext())
+                {
+                    var application = freshDb.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                    if (application == null)
+                        return Json(new { success = false, message = "Application not found." });
 
-                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
-                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
-                if (master == null)
-                    return Json(new { success = false, message = "Lease agreement record not found." });
+                    // Match the same lookup the PDF generator uses — prefer master linked to the active lease
+                    var activeLease = freshDb.LeaseDetails
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
 
-                master.PropertyManagersSignature = SignatureImageData;
-                master.PropertyManagerSigned = true;
-                master.PropertyManagerSignatureDate = DateTime.Now;
+                    PropertyLeaseAgreementMaster master = null;
+                    if (activeLease != null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id &&
+                            x.LeaseDetailsId == activeLease.Id &&
+                            x.IsActive && !x.IsDeleted);
+                    }
+                    // Fallback: any active master for this app
+                    if (master == null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                    }
+                    if (master == null)
+                        return Json(new { success = false, message = "Lease agreement record not found." });
 
-                db.SaveChanges();
-                return Json(new { success = true });
+                    master.PropertyManagersSignature = SignatureImageData;
+                    master.PropertyManagerSigned = true;
+                    master.PropertyManagerSignatureDate = DateTime.Now;
+                    master.ManagersSignDate = DateTime.Now.ToString("dd MMMM yyyy");
+                    master.ManagersSignDay = "";
+
+                    freshDb.Entry(master).State = System.Data.Entity.EntityState.Modified;
+                    freshDb.SaveChanges();
+                    return Json(new { success = true });
+                }
             }
             catch (Exception ex)
             {
@@ -7682,22 +8011,42 @@ ApplicationFeeValidation(int? id)
                 if (ApplicationId == null || string.IsNullOrEmpty(SignatureImageData))
                     return Json(new { success = false, message = "Invalid parameters." });
 
-                Initialise();
-                var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
-                if (application == null)
-                    return Json(new { success = false, message = "Application not found." });
+                using (var freshDb = new eServicesDbContext())
+                {
+                    var application = freshDb.PropertyLeaseApplications.FirstOrDefault(x => x.Id == ApplicationId);
+                    if (application == null)
+                        return Json(new { success = false, message = "Application not found." });
 
-                var master = db.propertyLeaseAgreementMasters.FirstOrDefault(x =>
-                    x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
-                if (master == null)
-                    return Json(new { success = false, message = "Lease agreement record not found." });
+                    // Match the same lookup the PDF generator uses — prefer master linked to the active lease
+                    var activeLease = freshDb.LeaseDetails
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
 
-                master.RevenueManagersSignature = SignatureImageData;
-                master.RevenueManagerSigned = true;
-                master.RevenueManagerSignatureDate = DateTime.Now;
+                    PropertyLeaseAgreementMaster master = null;
+                    if (activeLease != null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id &&
+                            x.LeaseDetailsId == activeLease.Id &&
+                            x.IsActive && !x.IsDeleted);
+                    }
+                    // Fallback: any active master for this app
+                    if (master == null)
+                    {
+                        master = freshDb.propertyLeaseAgreementMasters.FirstOrDefault(x =>
+                            x.PropertyLeaseApplicationId == application.Id && x.IsActive && !x.IsDeleted);
+                    }
+                    if (master == null)
+                        return Json(new { success = false, message = "Lease agreement record not found." });
 
-                db.SaveChanges();
-                return Json(new { success = true });
+                    master.RevenueManagersSignature = SignatureImageData;
+                    master.RevenueManagerSigned = true;
+                    master.RevenueManagerSignatureDate = DateTime.Now;
+
+                    freshDb.Entry(master).State = System.Data.Entity.EntityState.Modified;
+                    freshDb.SaveChanges();
+                    return Json(new { success = true });
+                }
             }
             catch (Exception ex)
             {
@@ -7772,9 +8121,55 @@ ApplicationFeeValidation(int? id)
             return result;
         }
 
-        public int EHCRoundRobin(int RCSAppID, bool RiskAssessment, bool ValidateDepositPayment, bool InviteToClientTraining, bool UnitInspections, bool UpdateTenantDetails, bool GenerateLeaseAgreement, bool LeaseAgreementValidation, bool DebitOrderValidation, bool ShechuleInspectionSlots, bool MaintananceJobSheet, bool Terminations, bool TerminationValidation, bool CommitteeOutcomes, bool VacatingConfirmation, bool RecomendForRenewal, bool SecondRenewalRecommendation, bool LeaseRenewalRevenue, bool RenewalRiskAssessment, bool UnitMaintenance, bool AgreemrntValidateRevenue, bool six, bool seven, bool eight, int DepartmentID, bool AcknowlegeRefund, bool IssueRefundsCollection, int RefundAppID, bool? IsAwaitingRefundResponse = null, bool? IsAwaitingDocUploadingForMigratedApps = null)
+        /// <summary>
+        /// UC022: Clears all signatures from the lease agreement master record.
+        /// Called when RM or CEO rejects a lease agreement, invalidating all previous signatures.
+        /// </summary>
+        private void ClearLeaseSignatures(eServicesDbContext context, int applicationId)
         {
-            return EHCWorkflowEngine.EHCRoundRobin(db, RCSAppID, RiskAssessment, ValidateDepositPayment, InviteToClientTraining, UnitInspections, UpdateTenantDetails, GenerateLeaseAgreement, LeaseAgreementValidation, DebitOrderValidation, ShechuleInspectionSlots, MaintananceJobSheet, Terminations, TerminationValidation, CommitteeOutcomes, VacatingConfirmation, RecomendForRenewal, SecondRenewalRecommendation, LeaseRenewalRevenue, RenewalRiskAssessment, UnitMaintenance, AgreemrntValidateRevenue, six, seven, eight, DepartmentID, AcknowlegeRefund, IssueRefundsCollection, RefundAppID, IsAwaitingRefundResponse, IsAwaitingDocUploadingForMigratedApps);
+            var master = context.propertyLeaseAgreementMasters
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == applicationId);
+
+            if (master != null)
+            {
+                master.TenantSignature = null;
+                master.TenantSigned = false;
+                master.TenantSignDay = null;
+                master.TenantSignDate = null;
+                master.Witness1Signature = null;
+                master.Witness1Name = null;
+                master.Witness1SignatureDate = null;
+                master.PropertyManagersSignature = null;
+                master.PropertyManagerSigned = false;
+                master.PropertyManagerSignatureDate = null;
+                master.RevenueManagersSignature = null;
+                master.RevenueManagerSigned = false;
+                master.RevenueManagerSignatureDate = null;
+                context.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// UC022: Saves a structured rejection comment to the PropertyLeaseActionComments table.
+        /// Provides audit trail showing who rejected and why.
+        /// </summary>
+        private void SaveLeaseRejectionComment(eServicesDbContext context, int applicationId, string comment, string rejectedBy, string rejectedTarget)
+        {
+            var record = new PropertyLeaseActionComments
+            {
+                PropertyLeaseApplicationId = applicationId,
+                RejectReason = string.Format("[{0}] Not Supported due to {1}: {2}", rejectedBy, rejectedTarget, comment),
+                LeaseRenewalValidation = false,
+                ClerkId = Customer.Id
+            };
+            context.propertyLeaseActionComments.Add(record);
+            context.SaveChanges();
+        }
+
+        public int EHCRoundRobin(int RCSAppID, bool RiskAssessment, bool ValidateDepositPayment, bool InviteToClientTraining, bool UnitInspections, bool UpdateTenantDetails, bool GenerateLeaseAgreement, bool LeaseAgreementValidation, bool DebitOrderValidation, bool ShechuleInspectionSlots, bool MaintananceJobSheet, bool Terminations, bool TerminationValidation, bool CommitteeOutcomes, bool VacatingConfirmation, bool RecomendForRenewal, bool SecondRenewalRecommendation, bool LeaseRenewalRevenue, bool RenewalRiskAssessment, bool UnitMaintenance, bool AgreemrntValidateRevenue, bool six, bool AgreementApprovalCEO, bool eight, int DepartmentID, bool AcknowlegeRefund, bool IssueRefundsCollection, int RefundAppID, bool? IsAwaitingRefundResponse = null, bool? IsAwaitingDocUploadingForMigratedApps = null)
+        {
+            return EHCWorkflowEngine.EHCRoundRobin(db, RCSAppID, RiskAssessment, ValidateDepositPayment, InviteToClientTraining, UnitInspections, UpdateTenantDetails, GenerateLeaseAgreement, LeaseAgreementValidation, DebitOrderValidation, ShechuleInspectionSlots, MaintananceJobSheet, Terminations, TerminationValidation, CommitteeOutcomes, VacatingConfirmation, RecomendForRenewal, SecondRenewalRecommendation, LeaseRenewalRevenue, RenewalRiskAssessment, UnitMaintenance, AgreemrntValidateRevenue, six, AgreementApprovalCEO, eight, DepartmentID, AcknowlegeRefund, IssueRefundsCollection, RefundAppID, IsAwaitingRefundResponse, IsAwaitingDocUploadingForMigratedApps);
         }
 
         //public ActionResult BulkReAllocate(int? id, int? rrqID, string ResponsibilityType, string ViewName, string TitleName, string BodyName)
@@ -11938,6 +12333,9 @@ ApplicationFeeValidation(int? id)
 
                     
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault();
+                    // B11: Close the vacating confirmation RRQ before opening terminations
+                    var vacConfRespB11 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.VacatingConfirmation);
+                    if (vacConfRespB11 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, vacConfRespB11.Id, Customer.Id);
                     //                                                               1     2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
                     EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
                     var BackOffice =EHCWorkflowEngine.GetBackOfficeId(db, LeaseApplication.PropertyLeaseApplicationId, true);
@@ -13468,7 +13866,9 @@ ApplicationFeeValidation(int? id)
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            // Report: use StatusId == Submitted to show active queue items in the date range
+            var SubmittedId_Rpt1 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt1 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -13909,7 +14309,9 @@ ApplicationFeeValidation(int? id)
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            // Report: use StatusId == Submitted to show active queue items in the date range
+            var SubmittedId_Rpt2 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt2 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -15484,7 +15886,9 @@ ApplicationFeeValidation(int? id)
 
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RiskAssessment).FirstOrDefault().Id;
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId) && x.ClerkId == UserId && x.EndTaskDateTime == null).ToList();
+                    // Use StatusId == SubmittedId to identify active queue items (not EndTaskDateTime which is unreliable)
+                    var SubmittedId_Risk = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId) && x.ClerkId == UserId && x.StatusId == SubmittedId_Risk).ToList();
 
                     var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
 
@@ -16413,8 +16817,6 @@ ApplicationFeeValidation(int? id)
                             ClerkId = facilitiesManagerId,
                             StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted).Id,
                             CurrentTaskDateTime = DateTime.Now,
-                            IsActive = true,
-                            IsDeleted = false,
                             CreatedDateTime = DateTime.Now,
                             ModifiedDateTime = DateTime.Now,
                             CreatedBySystemUserId = SystemUser.Id
@@ -16572,9 +16974,9 @@ ApplicationFeeValidation(int? id)
                     var rcsApps = maintenance.PropertyLeaseApplication;
                     var responsibilityType = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview);
                     
-                    // Mark job as finished for Facilities Manager in Round Robin
-                    // Mark job as finished for Facilities Manager in Round Robin
-                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, responsibilityType.Id, SystemUser.Id);
+                    // Mark job as finished — ClerkId param is kept for signature compatibility but the method
+                    // no longer filters by it (ClerkId mismatch between Customer.Id and SystemUser.Id was root cause)
+                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, responsibilityType.Id, Customer.Id);
 
                     // Check if this was NotHabitable (Major Defects) - these pause the app at CustomerQueryPending
                     var notHabitableAction = db.RCSActionTypes.FirstOrDefault(x => x.Key == RCSActionTypeKeys.NotHabitable);
@@ -16607,6 +17009,11 @@ ApplicationFeeValidation(int? id)
                 {
                     // Send back to Maintenance Manager or Customer Query
                     var rcsApps = maintenance.PropertyLeaseApplication;
+                    var responsibilityType = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.PropertyFacilitiesManagerReview);
+
+                    // Close the queue — was previously missing on the rejection path, causing items to stay at status 99
+                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)rcsApps.Id, null, responsibilityType.Id, Customer.Id);
+
                     MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)rcsApps.Id);
                     
                     ActivityTrackerAudit(
@@ -16694,8 +17101,7 @@ ApplicationFeeValidation(int? id)
                     {
                         rrq.StatusId = SubmittedId;
                         rrq.ClerkId = ClerkId;
-                        rrq.IsActive = true;
-                        rrq.IsDeleted = false;
+                        // IsActive/IsDeleted are record-deletion flags, not workflow state — do not modify
                         db.Entry(rrq).State = EntityState.Modified;
                     }
                     else
