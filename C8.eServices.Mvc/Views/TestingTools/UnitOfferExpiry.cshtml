@@ -1,0 +1,161 @@
+@model List<C8.eServices.Mvc.Models.MatchedUnits>
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "BR09 — Unit Offer Expiry";
+}
+
+<style>
+    .tool-badge-safe    { background: #d1e7dd; color: #0f5132; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-warning { background: #fff3cd; color: #664d03; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-danger  { background: #f8d7da; color: #842029; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .btn-backdate  { background: #e63946; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-backdate:hover  { background: #c1121f; color: white; }
+    .btn-run-checker     { background: #1a472a; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .btn-run-checker:hover { background: #2d6a4f; color: white; }
+    .tool-alert-warning  { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px 18px; margin-bottom: 15px; }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background:#1a472a; color:white; padding:14px 18px;">
+                <h4 style="margin:0; font-size:16px;">
+                    <i class="ion ion-home"></i>&nbsp; BR09 — Unit Offer Expiry Checker &nbsp;
+                    <small style="font-size:12px; opacity:0.8;">Testing tool — backdate unit match date to simulate 30-day acceptance deadline breach</small>
+                </h4>
+            </div>
+
+            <div class="panel-body">
+
+                @* ── Alerts ── *@
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Success!</strong> @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Error:</strong> @TempData["Error"]
+                    </div>
+                }
+
+                @* ── Collapsible How It Works ── *@
+                <div class="panel panel-default" style="margin-bottom:15px;">
+                    <div class="panel-heading" style="cursor:pointer; padding:8px 15px;" data-toggle="collapse" data-target="#howItWorks">
+                        <strong><i class="ion ion-information-circled"></i> How This Tool Works</strong>
+                        <span class="pull-right"><i class="ion ion-chevron-down"></i></span>
+                    </div>
+                    <div id="howItWorks" class="collapse">
+                        <div class="panel-body" style="font-size:13px; color:#444;">
+                            <p><strong>Business Rule BR09:</strong> If a matched unit is not accepted by the applicant within <strong>30 days</strong>, the offer must be withdrawn and the unit re-allocated to the next applicant.</p>
+                            <ol style="margin-bottom:8px;">
+                                <li><strong>Backdate 31d</strong> — Sets the matched unit's <code>CreatedDateTime</code> to 31 days ago. This simulates a unit offer that has been pending for over 30 days.</li>
+                                <li><strong>Run BR09 Checker</strong> — Calls <code>MatchingHelper.CheckUnitOfferExpiry</code> which scans all unaccepted matched units. Any where <code>CreatedDateTime</code> is 30+ days old will have:
+                                    <ul>
+                                        <li>The match marked as rejected</li>
+                                        <li>The unit released for re-allocation</li>
+                                        <li>The application status changed to <strong>Unit Offer Expired</strong></li>
+                                        <li>The applicant re-listed on the waiting list</li>
+                                        <li>An email sent and audit log recorded</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <p style="margin:0;" class="text-muted"><strong>[OVERDUE]</strong> = unit offered 30+ days ago — will trigger on next checker run.</p>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── Run Checker Action Bar ── *@
+                <div class="tool-alert-warning" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong><i class="ion ion-refresh"></i> Run BR09 Checker</strong><br />
+                        <small style="color:#664d03;">Scans all unaccepted matched units. Any unit offered 30+ days ago will be withdrawn, the unit released, and the applicant re-listed on the waiting list.</small>
+                    </div>
+                    @using (Html.BeginForm("RunUnitOfferChecker", "TestingTools", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-run-checker" onclick="return confirm('Run the BR09 Unit Offer Checker for ALL eligible matched units?')">
+                            <i class="ion ion-refresh"></i> Run BR09 Unit Offer Checker
+                        </button>
+                    }
+                </div>
+
+                @* ── DataTable ── *@
+                <table id="tblUnitOfferExpiry" class="table table-bordered table-hover table-striped" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>App Reference</th>
+                            <th>Applicant</th>
+                            <th>Unit Offered</th>
+                            <th>Match Date</th>
+                            <th>Days Since Offered</th>
+                            <th>Status</th>
+                            <th style="min-width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            double daysSinceOffer = item.CreatedDateTime.HasValue ? (DateTime.Now - item.CreatedDateTime.Value).TotalDays : 0;
+                            string bClass = daysSinceOffer >= 30 ? "tool-badge-danger"
+                                          : daysSinceOffer >= 20 ? "tool-badge-warning"
+                                          : "tool-badge-safe";
+                            string bLabel = daysSinceOffer >= 30 ? "[OVERDUE] " + (int)daysSinceOffer + "d"
+                                          : (int)daysSinceOffer + "d";
+                            string appRef = item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.ApplicationReferenceNumber : "N/A";
+                            string fullName = item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.FullName : "N/A";
+                            string unitInfo = item.ApplicationAllocatedProperty != null
+                                ? (item.ApplicationAllocatedProperty.BuildingName ?? "") + " Unit " + (item.ApplicationAllocatedProperty.SpaceUnitNumber ?? "")
+                                : (item.LeaseReferenceNo ?? "N/A");
+                            string statusName = (item.PropertyLeaseApplication != null && item.PropertyLeaseApplication.Status != null) ? item.PropertyLeaseApplication.Status.Name : "-";
+
+                            <tr>
+                                <td><strong>@appRef</strong></td>
+                                <td>@fullName</td>
+                                <td>@unitInfo</td>
+                                <td>@(item.CreatedDateTime.HasValue ? item.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td><span class="@bClass">@bLabel</span></td>
+                                <td>@statusName</td>
+                                <td>
+                                    @using (Html.BeginForm("BackdateUnitOffer", "TestingTools", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="matchedUnitId" value="@item.Id" />
+                                        <button type="submit" class="btn-backdate" onclick="return confirm('Backdate this unit offer CreatedDateTime to 31 days ago?')">
+                                            <i class="ion ion-clock"></i> Backdate 31d
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="ion ion-information-circled"></i> No pending unit offers found. Matched units must be in <strong>Available Unit Matched</strong> status and still unaccepted to appear here.
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#tblUnitOfferExpiry').DataTable({
+            responsive: true,
+            pageLength: 25,
+            order: [[4, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [6] }
+            ]
+        });
+    });
+</script>

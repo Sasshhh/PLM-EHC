@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -7,6 +7,15 @@
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
 }
 
+<head>
+    <style>
+        .require::after {
+            content: "*";
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 <div id="bankAccountPanel">
     <div class="panel panel-default">
@@ -256,7 +265,7 @@
 
                 <div id="divComment" style="display:none">
                     <div class="form-group">
-                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1 require" })
                         <div class="col-md-4">
                             @Html.TextArea("Comment", new { @class = "form-control" })
                             @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
@@ -350,23 +359,11 @@
 
 <script>
         function clickSubmit() {
-            //Swal.fire({
-            //    title: 'Are you sure?',
-            //    text: "You won't be able to revert this!",
-            //    icon: 'warning',
-            //    showCancelButton: true,
-            //    confirmButtonColor: '#3085d6',
-            //    cancelButtonColor: '#d33',
-            //    confirmButtonText: 'Yes, delete it!'
-            //}).then((result) => {
-            //    if (result.value) {
-            //        Swal.fire(
-            //            'Deleted!',
-            //            'Your file has been deleted.',
-            //            'success'
-            //        )
-            //    }
-            //})
+            var form = $('form')[0];
+            if (!form.reportValidity()) {
+                return;
+            }
+
             swal({
                 icon: "info",
                 title: "Are you sure you want to submit the following document approval?",
@@ -398,6 +395,20 @@
             //});
         }
 
+</script>
+<script>
+    // Show / hide rejection comment box based on selection
+    $(function () {
+        $('select[name="ApprovalStatusddl"]').on('change', function () {
+            if ($(this).val() === 'Rejected' || $(this).val() === 'Rcs_Rejected') {
+                $('#divComment').show();
+                $('#divComment textarea').attr('required', 'required');
+            } else {
+                $('#divComment').hide();
+                $('#divComment textarea').removeAttr('required');
+            }
+        });
+    });
 </script>
 <script>
         $(function () {

@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -228,6 +228,13 @@ namespace C8.eServices.Mvc.Keys
         public const string AwaitingLeaseRenewalAgreementConclusionOutcome = "s_awaiting_renewal_agreement_conclusion_outcome";
         public const string LeaseRenewalAgreementConcluded = "s_lease_renewal_agreement_concluded";
 
+        // UC021 — Lease Renewal Agreement Generation & Signing
+        public const string AwaitingRenewalLeaseCapture = "s_awaiting_renewal_lease_capture";
+        public const string AwaitingRenewalAgreementGeneration = "s_awaiting_renewal_agreement_generation";
+        public const string AwaitingRenewalTenantSignature = "s_awaiting_renewal_tenant_signature";
+        public const string AwaitingRenewalRMSignature = "s_awaiting_renewal_rm_signature";
+        public const string AwaitingRenewalCEOSignature = "s_awaiting_renewal_ceo_signature";
+        public const string RenewalAgreementAllSigned = "s_renewal_agreement_all_signed";
 
         //Lease Termination
         public const string TerminationLeaseByTenant = "s_termination_review";
@@ -324,5 +331,35 @@ namespace C8.eServices.Mvc.Keys
         public const string ExaminationPassed = "s_examination_passed";
         public const string ExaminationFailed = "s_examination_failed";
 
+        // BR19 — Lease Signing Expiry (30-day deadline)
+        public const string LeaseSigningExpired = "s_lease_signing_expired";
+
+        // BR09 — Unit Offer Expiry (30-day deadline)
+        public const string UnitOfferExpired = "s_unit_offer_expired";
+
+        // UC023 — Manage Lease Termination
+        public const string AwaitingCSOTerminationReview = "s_awaiting_cso_termination_review";
+        public const string AwaitingTerminationAppraisal = "s_awaiting_termination_appraisal";
+        public const string TerminationNotSupported = "s_termination_not_supported";
+        public const string LegalReferralPending = "s_legal_referral_pending";
+
+        // UC024 — Capture Eviction Outcome & CEO Authorization
+        public const string AwaitingEvictionCEOAuth = "s_awaiting_eviction_ceo_auth";
+
+        // UC025 — Serve Eviction Notice & Proof of Service
+        public const string AwaitingEvictionService = "s_awaiting_eviction_service";
+        public const string EvictionNoticeServed = "s_eviction_notice_served";
+        public const string AwaitingProofOfService = "s_awaiting_proof_of_service";
+        public const string ProofOfServiceCaptured = "s_proof_of_service_captured";
+
+        // UC026 — Manage Disputes
+        public const string DisputeOpenAwaitingReview = "s_dispute_open_awaiting_review";
+        public const string DisputeReferred = "s_dispute_referred";
+        public const string DisputeResolved = "s_dispute_resolved";
+        public const string DisputeClosed = "s_dispute_closed";
+
+        // UC030 — Refund approvals & Closure
+        public const string AwaitingRefundAuthorisation = "s_awaiting_refund_authorisation";
+        public const string FormerTenant = "s_former_tenant";
     }
 }

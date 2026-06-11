@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -106,5 +106,11 @@ namespace C8.eServices.Mvc.Keys
         public const string UpdateRefundResponseNoRefundDue = "plm_update_refund_response_norefund_due";
 
         public const string RenewalRejectByCustomer = "plm_renewal_reject_by_customer";
+
+        // BR19 — Lease Signing Expiry (30-day deadline)
+        public const string LeaseSigningExpired = "plm_lease_signing_expired";
+
+        // BR09 — Unit Offer Expiry (30-day deadline)
+        public const string UnitOfferExpired = "plm_unit_offer_expired";
     }
 }

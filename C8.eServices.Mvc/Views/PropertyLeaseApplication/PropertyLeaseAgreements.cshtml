@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -222,7 +222,7 @@
 
                                 @if (User.IsInRole("Property Manager"))
                                 {
-                                    if (item.Status.Key == StatusKeys.AwaitingManagersSignature)
+                                    if (item.Status.Key == StatusKeys.AwaitingLeaseAgreementApproval)
                                     {
                                         @Html.ActionLink("Signature", "PropertyManagerLeaseAgreementValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
@@ -286,6 +286,19 @@ namespace C8.eServices.Mvc.Helpers
             }
             return hasRight;
 
+        }
+
+        /// <summary>
+        /// 2-argument overload for IsAuthorized (Compatibility for Views)
+        /// </summary>
+        public static bool IsAuthorized(System.Security.Principal.IPrincipal user, string applicationKey)
+        {
+            var claims = new List<Claim>();
+            if (user is ClaimsPrincipal principal)
+            {
+                claims = principal.Claims.ToList();
+            }
+            return IsAuthorized(user, applicationKey, user.Identity.Name, claims);
         }
 
         /// <summary>

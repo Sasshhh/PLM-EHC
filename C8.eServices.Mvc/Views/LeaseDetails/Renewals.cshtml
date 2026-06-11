@@ -171,9 +171,29 @@
                                     {
                                 @Html.ActionLink("Director Decision", "CEORenewalDecision", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
                                     }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalLeaseCapture)
+                                    {
+                                        @Html.ActionLink("Capture Renewal Details", "CaptureRenewalLeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalAgreementGeneration)
+                                    {
+                                        @Html.ActionLink("Generate Agreement", "GenerateRenewalLeaseAgreement", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-success" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalTenantSignature)
+                                    {
+                                        @Html.ActionLink("Tenant Validation", "RenewalLeaseAgreementValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalRMSignature)
+                                    {
+                                        @Html.ActionLink("RM Validation", "RenewalRevenueManagerValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalCEOSignature)
+                                    {
+                                        @Html.ActionLink("CEO Validation", "RenewalPropertyManagerValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
                                     else if (item.Status.Key == StatusKeys.AwaitingLeaseRenewalAgreementConclusion)
                                     {
-                                @Html.ActionLink("Conclude Agreement", "ConcludeRenewalAgreement", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                        @Html.ActionLink("Capture Renewal Details", "CaptureRenewalLeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
                                     }
                                     else if (item.Status.Key == StatusKeys.AwaitingREACApproval)
                                     {
@@ -228,7 +248,6 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        debugger;
         if ('@ViewBag.LeaseRenewalSession' !== null && '@ViewBag.LeaseRenewalSession' !== '') {
             $('#LeaseRenewalSessionModal').modal({
                 backdrop: 'static',

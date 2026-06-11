@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -80,6 +80,12 @@ namespace C8.eServices.Mvc.Models
         public int? TenantComplaintId { get; set; }
         [ForeignKey("TenantComplaintId")]
         public TenantComplaint TenantComplaint { get; set; }
+
+        [Column(Order = 22)]
+        [Display(Name = "Service Request Id")]
+        public int? ServiceRequestId { get; set; }
+        [ForeignKey("ServiceRequestId")]
+        public ServiceRequest ServiceRequest { get; set; }
 
     }
 }

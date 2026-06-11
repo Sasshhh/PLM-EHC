@@ -1,17 +1,17 @@
 -- ==============================================================================
--- PLM FULL PRODUCTION DEPLOYMENT — COMPLETE METADATA SEED
+-- PLM FULL PRODUCTION DEPLOYMENT â€” COMPLETE METADATA SEED
 -- ==============================================================================
 -- Source: Verified against CRMPLMDEV_2025 local database 2026-05-18
 -- All statements idempotent (safe to re-run). Inserts ALL fields.
 -- Change the USE statement below to your production database name.
 -- ==============================================================================
-USE [PropertyLeaseManagement]   -- ← UPDATE TO YOUR PROD DB NAME
+USE [PropertyLeaseManagement]   -- â†� UPDATE TO YOUR PROD DB NAME
 GO
 SET NOCOUNT ON
 GO
 
 PRINT '==================================================================='
-PRINT 'PLM FULL PRODUCTION DEPLOYMENT — START'
+PRINT 'PLM FULL PRODUCTION DEPLOYMENT â€” START'
 PRINT 'Execution Time: ' + CONVERT(VARCHAR, GETDATE(), 120)
 PRINT '==================================================================='
 
@@ -351,20 +351,108 @@ IF NOT EXISTS(SELECT 1 FROM DocumentCheckLists WHERE DocumentTypeId=@dt AND Appl
 PRINT '  dt_renewal_letter'
 
 SET @dt = NULL
+SET @dt = NULL
 SELECT @dt=Id FROM DocumentTypes WHERE [Key]='dt_risk_assessment_renewal'
 IF @dt IS NULL BEGIN INSERT INTO DocumentTypes([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime,ModifiedDateTime,CreatedBySystemUserId) VALUES('dt_risk_assessment_renewal','Risk Assessment Supporting Document','Supporting Document',1,0,GETDATE(),GETDATE(),1) SET @dt=SCOPE_IDENTITY() END ELSE UPDATE DocumentTypes SET [Name]='Risk Assessment Supporting Document',[Description]='Supporting Document',IsActive=1,IsDeleted=0 WHERE [Key]='dt_risk_assessment_renewal'
 IF NOT EXISTS(SELECT 1 FROM DocumentCheckLists WHERE DocumentTypeId=@dt AND ApplicationId=@AppId AND ReferenceTypeId=@RefTypeId) INSERT INTO DocumentCheckLists(DocumentTypeId,ApplicationId,ReferenceTypeId,IsActive,IsDeleted,IsLocked,CreatedBySystemUserId,CreatedDateTime,ModifiedBySystemUserId,ModifiedDateTime) VALUES(@dt,@AppId,@RefTypeId,1,0,0,1,GETDATE(),1,GETDATE())
 PRINT '  dt_risk_assessment_renewal'
 
+-- ==============================================================
+-- SECTION UC023: NEW TERMINATION STATUSES (5 rows)
+-- ==============================================================
+PRINT ''
+PRINT '--- Section UC023: Termination Statuses ---'
+
+IF NOT EXISTS (SELECT 1 FROM Status WHERE [Key] = 's_awaiting_cso_termination_review')
+    INSERT INTO Status ([Key],[Name],[Description],[StatusTypeId],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('s_awaiting_cso_termination_review','Awaiting CSO Termination Review','Tenant notice awaiting CSO review gate',1,1,0,GETDATE())
+ELSE UPDATE Status SET [Name]='Awaiting CSO Termination Review',[Description]='Tenant notice awaiting CSO review gate',[StatusTypeId]=1,IsActive=1,IsDeleted=0 WHERE [Key]='s_awaiting_cso_termination_review'
+PRINT '  s_awaiting_cso_termination_review'
+
+IF NOT EXISTS (SELECT 1 FROM Status WHERE [Key] = 's_awaiting_termination_appraisal')
+    INSERT INTO Status ([Key],[Name],[Description],[StatusTypeId],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('s_awaiting_termination_appraisal','Awaiting Termination Appraisal','CSO reviewed and supported, awaiting Revenue Manager appraisal',1,1,0,GETDATE())
+ELSE UPDATE Status SET [Name]='Awaiting Termination Appraisal',[Description]='CSO reviewed and supported, awaiting Revenue Manager appraisal',[StatusTypeId]=1,IsActive=1,IsDeleted=0 WHERE [Key]='s_awaiting_termination_appraisal'
+PRINT '  s_awaiting_termination_appraisal'
+
+IF NOT EXISTS (SELECT 1 FROM Status WHERE [Key] = 's_termination_not_supported')
+    INSERT INTO Status ([Key],[Name],[Description],[StatusTypeId],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('s_termination_not_supported','Termination Not Supported','CSO rejected the tenant termination notice',1,1,0,GETDATE())
+ELSE UPDATE Status SET [Name]='Termination Not Supported',[Description]='CSO rejected the tenant termination notice',[StatusTypeId]=1,IsActive=1,IsDeleted=0 WHERE [Key]='s_termination_not_supported'
+PRINT '  s_termination_not_supported'
+
+IF NOT EXISTS (SELECT 1 FROM Status WHERE [Key] = 's_legal_referral_pending')
+    INSERT INTO Status ([Key],[Name],[Description],[StatusTypeId],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('s_legal_referral_pending','Legal Referral Pending','Revenue Manager referred case to Legal Services',1,1,0,GETDATE())
+ELSE UPDATE Status SET [Name]='Legal Referral Pending',[Description]='Revenue Manager referred case to Legal Services',[StatusTypeId]=1,IsActive=1,IsDeleted=0 WHERE [Key]='s_legal_referral_pending'
+PRINT '  s_legal_referral_pending'
+
+IF NOT EXISTS (SELECT 1 FROM Status WHERE [Key] = 's_awaiting_eviction_ceo_auth')
+    INSERT INTO Status ([Key],[Name],[Description],[StatusTypeId],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('s_awaiting_eviction_ceo_auth','Awaiting Eviction CEO Authorization','CSO captured eviction outcome, awaiting CEO signature',1,1,0,GETDATE())
+ELSE UPDATE Status SET [Name]='Awaiting Eviction CEO Authorization',[Description]='CSO captured eviction outcome, awaiting CEO signature',[StatusTypeId]=1,IsActive=1,IsDeleted=0 WHERE [Key]='s_awaiting_eviction_ceo_auth'
+PRINT '  s_awaiting_eviction_ceo_auth'
+
+-- ==============================================================
+-- SECTION UC023/UC024: NEW ACTIVITY TRACKER MESSAGES (9 rows)
+-- ==============================================================
+PRINT ''
+PRINT '--- Section UC023/UC024: Termination Activity Tracker Messages ---'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_cso_supported')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_cso_supported','CSO Supported Termination','CSO reviewed and supported termination notice',1,0,GETDATE())
+PRINT '  at_termination_cso_supported'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_cso_not_supported')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_cso_not_supported','CSO Not Supported Termination','CSO reviewed and did not support termination notice',1,0,GETDATE())
+PRINT '  at_termination_cso_not_supported'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_rm_approved')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_rm_approved','RM Approved Termination','Revenue Manager approved termination',1,0,GETDATE())
+PRINT '  at_termination_rm_approved'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_rm_rejected')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_rm_rejected','RM Rejected Termination','Revenue Manager rejected termination',1,0,GETDATE())
+PRINT '  at_termination_rm_rejected'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_rm_referred_legal')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_rm_referred_legal','RM Referred To Legal','Revenue Manager referred termination to Legal Services',1,0,GETDATE())
+PRINT '  at_termination_rm_referred_legal'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_termination_cso_initiated')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_termination_cso_initiated','CSO Initiated Termination','CSO initiated lease termination directly',1,0,GETDATE())
+PRINT '  at_termination_cso_initiated'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_eviction_ceo_approved')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_eviction_ceo_approved','CEO Approved Eviction','CEO authorized eviction',1,0,GETDATE())
+PRINT '  at_eviction_ceo_approved'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_eviction_ceo_rejected')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_eviction_ceo_rejected','CEO Rejected Eviction','CEO rejected eviction',1,0,GETDATE())
+PRINT '  at_eviction_ceo_rejected'
+
+IF NOT EXISTS (SELECT 1 FROM ActivityTrackerMessages WHERE [Key] = 'at_eviction_notice_generated')
+    INSERT INTO ActivityTrackerMessages ([Key],[Name],[Description],IsActive,IsDeleted,CreatedDateTime)
+    VALUES ('at_eviction_notice_generated','Eviction Notice Generated','Eviction notice generated from template',1,0,GETDATE())
+PRINT '  at_eviction_notice_generated'
+
+
 Done:
 PRINT ''
 PRINT '==================================================================='
-PRINT 'PLM FULL PRODUCTION DEPLOYMENT � COMPLETE'
+PRINT 'PLM FULL PRODUCTION DEPLOYMENT - COMPLETE'
 PRINT 'End Time: ' + CONVERT(VARCHAR, GETDATE(), 120)
 PRINT '==================================================================='
-PRINT 'TOTALS: 21 Statuses | 14 ResponsibilityTypes | 2 RCSActionTypes'
-PRINT '        14 EmailContentTypes | 15 ActivityTrackerMessages'
+PRINT 'TOTALS: 26 Statuses | 14 ResponsibilityTypes | 2 RCSActionTypes'
+PRINT '        14 EmailContentTypes | 24 ActivityTrackerMessages'
 PRINT '        8 DocumentTypes | 8 DocumentCheckLists'
 SET NOCOUNT OFF
 GO
-

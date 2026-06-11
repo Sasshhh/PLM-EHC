@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -43,18 +43,25 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult UnitDetails(int? RcsApplicationId)
         {
 
-            var matchedUnit = db.MatchedUnits.OrderByDescending(a => a.CreatedDateTime).Include(r => r.PropertyLeaseApplication).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplicationId && !x.IsDeleted && !x.RejectedProperty) ?? null;
+            var matchedUnit = db.MatchedUnits.OrderByDescending(a => a.CreatedDateTime).Include(r => r.PropertyLeaseApplication).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplicationId && !x.IsDeleted && !x.RejectedProperty);
             var appstatus = db.PropertyLeaseApplications.Include(r => r.Status).FirstOrDefault(x => x.Id == RcsApplicationId);
-            if ((appstatus.Status.Key == StatusKeys.AwaitingUnitOffers) ||(appstatus.Status.Key == StatusKeys.ApplicationDiscardedNoUnitAvailable) || (appstatus.Status.Key == StatusKeys.Approved)) return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+            
+            if (appstatus == null || appstatus.Status.Key == StatusKeys.AwaitingUnitOffers || appstatus.Status.Key == StatusKeys.ApplicationDiscardedNoUnitAvailable || appstatus.Status.Key == StatusKeys.Approved) 
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
 
-            var units = db.Units.FirstOrDefault(x => x.Id == matchedUnit.UnitsId && !x.IsDeleted) ?? null;
+            if (matchedUnit == null)
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+
+            var units = db.Units.FirstOrDefault(x => x.Id == matchedUnit.UnitsId && !x.IsDeleted);
             var appallunit = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId);
-            //var unit = db.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == matchedUnit.UnitsEkurhuleniHousingCompanyId && !x.IsDeleted) ?? null;
+            
+            if (appallunit == null)
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+
             UnitViewModel model = new UnitViewModel
             {
-                MatchedUnitId = (int)matchedUnit?.Id,
-                //UnitsEkurhuleniHousingCompany = unit ?? null,
-                UnitDescription = appallunit.SpaceUnitNumber + " - "+ db.humanEHCOptions.FirstOrDefault(x => x.Id == appallunit.HumanEHCOptionId)?.Name ?? "No Description Available",
+                MatchedUnitId = (int)matchedUnit.Id,
+                UnitDescription = appallunit.SpaceUnitNumber + " - " + db.humanEHCOptions.FirstOrDefault(x => x.Id == appallunit.HumanEHCOptionId)?.Name ?? "No Description Available",
                 AllocatedUnit = appallunit
             };
             return View(model);
@@ -63,16 +70,27 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult UnitDetails(int RcsApplicationId)
         {
-            var matchedUnit = db.MatchedUnits.Include(r=>r.PropertyLeaseApplication).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplicationId && !x.IsAccepted && !x.IsDeleted) ?? null;
+            var matchedUnit = db.MatchedUnits.Include(r=>r.PropertyLeaseApplication).OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplicationId && !x.IsAccepted && !x.IsDeleted);
             var p = db.PropertyLeaseApplications.Include(r=>r.Status).FirstOrDefault(x => x.Id == RcsApplicationId);
-            if (p.Status.Key == StatusKeys.AwaitingDepositPaid) return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+            
+            if (p == null || p.Status.Key == StatusKeys.AwaitingDepositPaid) 
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
 
-            var units = db.Units.FirstOrDefault(x => x.Id == matchedUnit.UnitsId && !x.IsDeleted) ?? null;
+            if (matchedUnit == null)
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+
+            var units = db.Units.FirstOrDefault(x => x.Id == matchedUnit.UnitsId && !x.IsDeleted);
+            var appallunit = db.ApplicationAllocatedProperty.Find(matchedUnit.ApplicationAllocatedPropertyId);
+
+            if (appallunit == null)
+                return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = RcsApplicationId, appId = "" });
+
             UnitViewModel model = new UnitViewModel
             {
-                MatchedUnitId = (int)matchedUnit?.Id,
-                UnitInformation = units ?? null,
-                UnitDescription = db.humanEHCOptions.FirstOrDefault(x => x.Id == units.OccupationTypeId)?.Description ?? "No Description Available"
+                MatchedUnitId = (int)matchedUnit.Id,
+                UnitInformation = units,
+                UnitDescription = appallunit.SpaceUnitNumber + " - " + db.humanEHCOptions.FirstOrDefault(x => x.Id == appallunit.HumanEHCOptionId)?.Name ?? "No Description Available",
+                AllocatedUnit = appallunit
             };
             return View(model);
         }
@@ -107,7 +125,8 @@ namespace C8.eServices.Mvc.Controllers
             var output = result == true ? "Success" : "Failure";
             return Json(output, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult RejectMatchedUnit(int? id)
+        [HttpPost]
+        public JsonResult RejectMatchedUnit(int? id, string reason)
         {
             var matchedUnit = db.MatchedUnits.FirstOrDefault(x => x.Id == id) ?? null;
             var unitInformation = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == matchedUnit.ApplicationAllocatedPropertyId);
@@ -116,10 +135,19 @@ namespace C8.eServices.Mvc.Controllers
             var output = result == true ? "Success" : "Failure";
             var rcsApps = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == matchedUnit.PropertyLeaseApplicationId);
             var custmusers = db.Customers.FirstOrDefault(x => x.Id == rcsApps.CustomerId);
+            
+            // Record Reject Action in Activity Tracker
             var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.RejectMatchedUnit).Description.ToString();
             MatchingHelper.ActivityTrackerAudit(db,rcsApps.Id, ActivityTrackerMessage, custmusers.Id);
+            
+            // Send email
             int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.Rejectproperty).Id;
             EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
+
+            // Log rejection reason in application history
+            string logMessage = string.IsNullOrWhiteSpace(reason) ? "Unit Offer Rejected." : $"Unit Offer Rejected. Reason: {reason}";
+            MatchingHelper.AddHistoryLog(db, rcsApps.Id, custmusers.Id, logMessage);
+
             return Json(output, JsonRequestBehavior.AllowGet);
         }
         public ActionResult LeaseForm()

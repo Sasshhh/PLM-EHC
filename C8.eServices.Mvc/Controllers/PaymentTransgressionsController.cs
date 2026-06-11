@@ -57,12 +57,27 @@ namespace C8.eServices.Mvc.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(PaymentTransgression model, HttpPostedFileBase[] documents, string selectedLetterType)
+        public ActionResult Create(PaymentTransgression model, HttpPostedFileBase[] uploadedFiles, string selectedLetterType)
         {
             try
             {
+                // Remove server-generated fields from validation
+                ModelState.Remove("CaseReferenceNumber");
+
                 if (!ModelState.IsValid)
                 {
+                    var errorMessages = new List<string>();
+                    foreach (var key in ModelState.Keys)
+                    {
+                        var state = ModelState[key];
+                        if (state.Errors.Any())
+                        {
+                            errorMessages.Add(key + ": " + string.Join("; ", state.Errors.Select(e => e.ErrorMessage ?? e.Exception?.Message)));
+                        }
+                    }
+                    
+                    ModelState.AddModelError("", "VALIDATION ERROR: " + string.Join(" | ", errorMessages));
+                    
                     ViewBag.Categories = new SelectList(_db.PaymentTransgressionCategories.Where(c => c.IsActive && !c.IsDeleted).OrderBy(c => c.DisplayOrder), "Id", "Name");
                     ViewBag.Severities = new SelectList(_db.PaymentTransgressionSeverities.Where(s => s.IsActive && !s.IsDeleted).OrderBy(s => s.Level), "Id", "Name");
                     ViewBag.Complexes = new SelectList(_db.PreferredComplexAreas.Where(c => c.IsActive && !c.IsDeleted).OrderBy(c => c.Name), "Id", "Name");
@@ -103,9 +118,9 @@ namespace C8.eServices.Mvc.Controllers
                 _db.SaveChanges();
 
                 // Save uploaded documents
-                if (documents != null && documents.Length > 0)
+                if (uploadedFiles != null && uploadedFiles.Length > 0)
                 {
-                    SaveDocuments(model.Id, documents);
+                    SaveDocuments(model.Id, uploadedFiles);
                 }
 
                 // Log audit trail
@@ -166,6 +181,23 @@ namespace C8.eServices.Mvc.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error retrieving tenant details: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// GET: PaymentTransgressions/SearchTenants - AJAX endpoint to search active tenants
+        /// </summary>
+        [HttpGet]
+        public JsonResult SearchTenants(string query)
+        {
+            try
+            {
+                var tenants = _engine.SearchTenants(query);
+                return Json(new { success = true, data = tenants }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error searching tenants: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -266,8 +298,12 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     transgression.StatusId = letterSentStatus.Id;
                     transgression.LetterSentDate = DateTime.Now;
-                    _db.SaveChanges();
                 }
+
+                // TODO: Cesar Attachment Workflow
+                // When letter templates are finalised, upgrade NotificationEngine to attach the generated HTML/PDF 
+                // to the Cesar EmailAttachmentQueue so it gets physically emailed to the tenant.
+                // Currently, only a plain text notification is sent.
 
                 // Log audit trail
                 _engine.LogAuditTrail(id, "Letter Generated and Sent", 
@@ -290,8 +326,31 @@ namespace C8.eServices.Mvc.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while generating the letter: " + ex.Message;
-                return RedirectToAction("GenerateLetter", new { q = new AesCrypto().Encrypt("id=" + id) });
+                return RedirectToAction("Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + id) });
             }
+        }
+
+        /// <summary>
+        /// GET: PaymentTransgressions/DownloadLetter
+        /// Serves the generated letter file for viewing in the browser
+        /// </summary>
+        [HttpGet]
+        [DecryptParameter]
+        public ActionResult DownloadLetter(int id)
+        {
+            var transgression = _db.PaymentTransgressions.Find(id);
+            if (transgression == null || string.IsNullOrEmpty(transgression.LetterFilePath))
+            {
+                return HttpNotFound("Letter not found.");
+            }
+
+            if (!System.IO.File.Exists(transgression.LetterFilePath))
+            {
+                return HttpNotFound("The physical letter file could not be found on the server.");
+            }
+
+            var mimeType = "text/html"; // Letters are currently generated as HTML
+            return File(transgression.LetterFilePath, mimeType);
         }
 
         /// <summary>

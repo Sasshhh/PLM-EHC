@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -145,13 +145,6 @@
             </table>
         </div>
         <br />
-        @if (Model.DocumentsViewModel != null)
-        {
-            <div class="panel-heading">Upload Completed Lease Agreement</div>
-            @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
-            <br />
-        }
-
         <div style="width: 90%;margin: 0 auto;">
             @using (Html.BeginForm())
             {
@@ -164,7 +157,7 @@
                     <div class="form-group">
                         @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
                         <div class="col-md-2">
-                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", onchange = "ChangeStatus()", @Id = "ApprovalStatus" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -174,9 +167,9 @@
 
                 <div id="divComment" style="display:none">
                     <div class="form-group">
-                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <span> @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
                         <div class="col-md-4">
-                            @Html.TextArea("Comment", new { @class = "form-control" })
+                            @Html.TextArea("Comment", new { @class = "form-control", @Id = "Comment" })
                             @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -188,7 +181,7 @@
                 <br />
 
                 <div id="divbtn" style="display:block">
-                    <input type="button" value="Submit" name="btnApproval" onclick="checkdocs('@Model.PropertyLeaseApplications.Id')" class="button1" />
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
                     <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
                     <br />
                     <br />
@@ -291,34 +284,7 @@
         $(document).ready(function () {
             // You can add code here to check if signature is already captured
         });
-    function checkdocs(id) {
-        debugger;
-        //alert('inside check docs');
 
-
-
-            $.getJSON("../PropertyLeaseApplication/FinalLeaseAgreementDocChecker?id=" + id,
-                function (result) {
-                    console.log(result);
-                    if (result == "true") {
-                        try {
-                            clickSubmit();
-                        }
-                        catch (cat) {
-                            swal("Error!", "Please upload required documents.", "error");
-                        }
-                    }
-                    else {
-                        swal("Error!", "Please upload required documents.", "error");
-                    }
-                });
-
-
-
-
-
-
-    }
 
     function ApproveLeaseAgreement() {
         $.getJSON("../PropertyLeaseApplication/RevenueManagergnLeaseAgreement?id="+@ViewBag.PropertyLeaseAppliactionId ,
@@ -389,7 +355,25 @@
 }
 
 <script>
+    function ChangeStatus() {
+        var status = document.getElementById("ApprovalStatus").value;
+        if (status == "plm_not_supported_tenant" || status == "plm_not_supported_cso" || status == "Rcs_Rejected") {
+            jQuery('#divComment').css("display", "block");
+        } else {
+            jQuery('#divComment').css("display", "none");
+        }
+    }
     function clickSubmit() {
+        var status = document.getElementById("ApprovalStatus").value;
+        var isRejection = (status == "plm_not_supported_tenant" || status == "plm_not_supported_cso" || status == "Rcs_Rejected");
+
+        if (!isRejection) {
+            var sigData = document.getElementById("capturedRevenueManagerSignatureData").value;
+            if (!sigData || sigData === "") {
+                swal("Error", "Please draw and confirm your signature before approving.", "warning");
+                return;
+            }
+        }
         swal({
             icon: "info",
             title: "Are you sure you want to submit this lease agreement?",
@@ -400,8 +384,16 @@
 
         }).then(function (isConfirm) {
             if (isConfirm) {
-
-                document.getElementById("btnApproval").click();
+                if (isRejection) {
+                    var Comment = document.getElementById("Comment").value;
+                    if (Comment == "" || Comment == null) {
+                        swal("Error", "Comment required when rejecting", "warning");
+                    } else {
+                        document.getElementById("btnApproval").click();
+                    }
+                } else {
+                    document.getElementById("btnApproval").click();
+                }
             }
         });
     }

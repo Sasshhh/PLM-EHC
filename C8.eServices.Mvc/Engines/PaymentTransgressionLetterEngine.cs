@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using C8.eServices.Mvc.DataAccessLayer;
@@ -44,10 +44,14 @@ namespace C8.eServices.Mvc.Engines
 
         private string GeneratePaymentTransgressionNotice(PaymentTransgression transgression)
         {
+            var lastPaymentStr = transgression.LastPaymentAmount.GetValueOrDefault().ToString("N2");
+            var totalAmountStr = transgression.TotalAmountDue.ToString("N2");
+
             return $@"
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset='utf-8'>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 40px; }}
         .header {{ text-align: center; margin-bottom: 30px; }}
@@ -78,8 +82,8 @@ namespace C8.eServices.Mvc.Engines
         
         <div class='details'>
             <strong>Financial Information:</strong><br/>
-            Last Payment: R{transgression.LastPaymentAmount:N2} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
-            <strong>Total Amount Due: R{transgression.TotalAmountDue:N2}</strong>
+            Last Payment: R{lastPaymentStr} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
+            <strong>Total Amount Due: R{totalAmountStr}</strong>
         </div>
         
         <div class='details'>
@@ -124,10 +128,14 @@ namespace C8.eServices.Mvc.Engines
                           && !pt.IsDeleted 
                           && pt.Id <= transgression.Id);
 
+            var lastPaymentStr = transgression.LastPaymentAmount.GetValueOrDefault().ToString("N2");
+            var totalAmountStr = transgression.TotalAmountDue.ToString("N2");
+
             return $@"
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset='utf-8'>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 40px; }}
         .header {{ text-align: center; margin-bottom: 30px; border-bottom: 2px solid #dc3545; padding-bottom: 10px; }}
@@ -147,7 +155,7 @@ namespace C8.eServices.Mvc.Engines
     
     <div class='content'>
         <div class='warning'>
-            <strong>⚠️ OFFICIAL WARNING</strong><br/>
+            <strong>âš ï¸ OFFICIAL WARNING</strong><br/>
             This is warning number {transgressionCount} issued against your tenancy. Continued non-compliance may result in lease termination.
         </div>
         
@@ -165,8 +173,8 @@ namespace C8.eServices.Mvc.Engines
         
         <div class='details'>
             <strong>Financial Information:</strong><br/>
-            Last Payment: R{transgression.LastPaymentAmount:N2} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
-            <strong style='color: #dc3545;'>Total Amount Due: R{transgression.TotalAmountDue:N2}</strong>
+            Last Payment: R{lastPaymentStr} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
+            <strong style='color: #dc3545;'>Total Amount Due: R{totalAmountStr}</strong>
         </div>
         
         <div class='details'>
@@ -218,10 +226,14 @@ namespace C8.eServices.Mvc.Engines
                           && !pt.IsDeleted 
                           && pt.Id <= transgression.Id);
 
+            var lastPaymentStr = transgression.LastPaymentAmount.GetValueOrDefault().ToString("N2");
+            var totalAmountStr = transgression.TotalAmountDue.ToString("N2");
+
             return $@"
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset='utf-8'>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 40px; }}
         .header {{ text-align: center; margin-bottom: 30px; border-bottom: 3px solid #dc3545; padding-bottom: 10px; background-color: #f8d7da; padding: 20px; }}
@@ -234,7 +246,7 @@ namespace C8.eServices.Mvc.Engines
 </head>
 <body>
     <div class='header'>
-        <h1 style='color: #dc3545; margin: 0;'>⚠️ FINAL WRITTEN WARNING ⚠️</h1>
+        <h1 style='color: #dc3545; margin: 0;'>âš ï¸ FINAL WRITTEN WARNING âš ï¸</h1>
         <h2 style='margin: 10px 0;'>PAYMENT TRANSGRESSION - LAST WARNING</h2>
         <p>Case Reference: {transgression.CaseReferenceNumber}</p>
         <p>Date: {DateTime.Now:dd MMMM yyyy}</p>
@@ -242,7 +254,7 @@ namespace C8.eServices.Mvc.Engines
     
     <div class='content'>
         <div class='final-warning'>
-            🚨 THIS IS YOUR FINAL WARNING - WARNING #{transgressionCount} 🚨<br/>
+            ðŸš¨ THIS IS YOUR FINAL WARNING - WARNING #{transgressionCount} ðŸš¨<br/>
             LEASE TERMINATION PROCEEDINGS WILL COMMENCE IF THIS MATTER IS NOT RESOLVED IMMEDIATELY
         </div>
         
@@ -262,8 +274,8 @@ namespace C8.eServices.Mvc.Engines
         
         <div class='details'>
             <strong>Financial Information:</strong><br/>
-            Last Payment: R{transgression.LastPaymentAmount:N2} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
-            <strong style='color: #dc3545; font-size: 1.2em;'>Total Amount Due: R{transgression.TotalAmountDue:N2}</strong>
+            Last Payment: R{lastPaymentStr} on {transgression.LastPaymentDate:dd MMM yyyy}<br/>
+            <strong style='color: #dc3545; font-size: 1.2em;'>Total Amount Due: R{totalAmountStr}</strong>
         </div>
         
         <div class='details'>
@@ -277,10 +289,10 @@ namespace C8.eServices.Mvc.Engines
         </div>
         
         <div class='critical'>
-            <strong style='color: #dc3545;'>⚠️ CRITICAL - IMMEDIATE ACTION REQUIRED ⚠️</strong><br/><br/>
+            <strong style='color: #dc3545;'>âš ï¸ CRITICAL - IMMEDIATE ACTION REQUIRED âš ï¸</strong><br/><br/>
             You are required to take the following actions <strong>WITHIN 7 WORKING DAYS</strong>:
             <ol style='margin: 15px 0;'>
-                <li>Settle your outstanding balance of R{transgression.TotalAmountDue:N2} in full</li>
+                <li>Settle your outstanding balance of R{totalAmountStr} in full</li>
                 <li>If unable to pay in full, contact our office IMMEDIATELY to arrange a payment plan</li>
                 <li>Provide a written explanation and commitment to prevent future transgressions</li>
                 <li>Attend a compulsory meeting with our Client Services Office</li>
@@ -312,7 +324,7 @@ namespace C8.eServices.Mvc.Engines
     </div>
     
     <div class='footer'>
-        <p><strong style='color: #dc3545;'>⚠️ THIS IS YOUR FINAL WARNING - ACTION REQUIRED WITHIN 7 WORKING DAYS ⚠️</strong></p>
+        <p><strong style='color: #dc3545;'>âš ï¸ THIS IS YOUR FINAL WARNING - ACTION REQUIRED WITHIN 7 WORKING DAYS âš ï¸</strong></p>
         <p>This is an official legal document. Please retain this letter for your records.</p>
     </div>
 </body>
@@ -338,7 +350,7 @@ namespace C8.eServices.Mvc.Engines
                 var fileName = $"{transgression.CaseReferenceNumber}_{letterType.Replace(" ", "_")}_{DateTime.Now:yyyyMMddHHmmss}.html";
                 var filePath = Path.Combine(directory, fileName);
 
-                System.IO.File.WriteAllText(filePath, letterContent);
+                System.IO.File.WriteAllText(filePath, letterContent, System.Text.Encoding.UTF8);
 
                 return filePath;
             }
@@ -350,3 +362,4 @@ namespace C8.eServices.Mvc.Engines
         }
     }
 }
+

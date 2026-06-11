@@ -12,8 +12,8 @@ namespace C8.eServices.Mvc.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
-            AutomaticMigrationDataLossAllowed = true;
+            AutomaticMigrationsEnabled = false; // DISABLED: Use explicit migrations only
+            AutomaticMigrationDataLossAllowed = false;
             ContextKey = "C8.eServices.Mvc.DataAccessLayer.eServicesDbContext";
         }
 

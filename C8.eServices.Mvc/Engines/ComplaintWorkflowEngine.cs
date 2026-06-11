@@ -59,23 +59,34 @@ namespace C8.eServices.Mvc.Engines
             return cso;
         }
 
-        public void RoundRobinMarkFinished(int clerkId, string responsibilityTypeKey)
+        public void RoundRobinMarkFinished(int clerkId, string responsibilityTypeKey, int? complaintId = null)
         {
             var responsibilityType = _db.ResponsibilityTypes
                 .FirstOrDefault(r => r.Key == responsibilityTypeKey);
+
             if (responsibilityType == null) return;
 
-            var entry = _db.RoundRobinQueues
-                .Where(r => r.ClerkId == clerkId
-                         && r.ResponsibilityTypeId == responsibilityType.Id
+            var archivedStatusId = _db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
+
+            var query = _db.RoundRobinQueues
+                .Where(r => r.ResponsibilityTypeId == responsibilityType.Id
                          && r.PropertyLeaseApplicationId == null
-                         && r.IsActive)
-                .OrderBy(r => r.Id)
-                .FirstOrDefault();
+                         && r.StatusId != archivedStatusId);
+
+            if (complaintId.HasValue)
+            {
+                query = query.Where(r => r.TenantComplaintId == complaintId.Value);
+            }
+            else
+            {
+                query = query.Where(r => r.ClerkId == clerkId);
+            }
+
+            var entry = query.OrderBy(r => r.Id).FirstOrDefault();
 
             if (entry == null) return;
 
-            entry.IsActive = false;
+            entry.StatusId = archivedStatusId;
             entry.EndTaskDateTime = DateTime.Now;
             entry.ModifiedDateTime = DateTime.Now;
             _db.SaveChanges();

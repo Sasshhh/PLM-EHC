@@ -1,0 +1,437 @@
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using C8.eServices.Mvc.DataAccessLayer
+@using C8.eServices.Mvc.Keys
+@using C8.eServices.Mvc.Models
+@{
+    var lease = Model.LeaseDetails;
+    var app   = Model.PropertyLeaseApplications;
+    var cust  = Model.Customer;
+    var residents    = ViewBag.Residents    as List<PropertyResident>    ?? new List<PropertyResident>();
+    var complaints   = ViewBag.Complaints   as List<TenantComplaint>     ?? new List<TenantComplaint>();
+    var transgressions = ViewBag.Transgressions as List<PaymentTransgression> ?? new List<PaymentTransgression>();
+    var serviceReqs  = ViewBag.ServiceRequests as List<ServiceRequest>   ?? new List<ServiceRequest>();
+    var risk         = ViewBag.RiskAssessment as RiskAssessmentOutcome;
+    bool cap72ok  = ViewBag.Is72MonthCapOk  != null && (bool)ViewBag.Is72MonthCapOk;
+    bool payOk    = ViewBag.IsPaymentCompliant != null && (bool)ViewBag.IsPaymentCompliant;
+    bool canRenew = cap72ok && payOk;
+    DateTime? leaseStart = lease.StartDate;
+    DateTime? leaseEnd   = lease.EndDate;
+    int durationMonths   = ViewBag.LeaseDurationMonths != null ? (int)ViewBag.LeaseDurationMonths : 0;
+}
+<style>
+    :root {
+        --plm-dark:  #0f172a;
+        --plm-navy:  #1e3a5f;
+        --plm-teal:  #0ea5e9;
+        --plm-green: #22c55e;
+        --plm-red:   #ef4444;
+        --plm-amber: #f59e0b;
+        --plm-card:  #ffffff;
+        --plm-bg:    #f1f5f9;
+    }
+
+    .eval-hero {
+        background: linear-gradient(135deg, var(--plm-dark) 0%, var(--plm-navy) 100%);
+        border-radius: 10px;
+        padding: 22px 28px;
+        margin-bottom: 24px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .eval-hero-title { font-size: 20px; font-weight: 700; margin: 0; }
+    .eval-hero-sub   { font-size: 12px; opacity: .7; margin-top: 2px; }
+    .eval-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 14px; border-radius: 30px; font-size: 12px; font-weight: 700;
+    }
+    .pill-green { background: rgba(34,197,94,.2); color: #16a34a; border:1px solid #16a34a; }
+    .pill-red   { background: rgba(239,68,68,.2);  color: #b91c1c; border:1px solid #b91c1c; }
+    .pill-amber { background: rgba(245,158,11,.2); color: #92400e; border:1px solid #d97706; }
+    .pill-blue  { background: rgba(14,165,233,.15); color: #0369a1; border:1px solid #0369a1; }
+
+    .eval-section {
+        background: var(--plm-card);
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        margin-bottom: 18px;
+        overflow: hidden;
+    }
+    .eval-section-hdr {
+        background: var(--plm-navy);
+        color: #fff;
+        padding: 10px 18px;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .eval-section-body { padding: 16px 18px; }
+
+    .kv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
+    .kv-item label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing:.4px; margin: 0; }
+    .kv-item span  { font-size: 14px; font-weight: 600; color: #1e293b; display: block; margin-top: 2px; }
+
+    .rule-bar {
+        border-radius: 6px; padding: 10px 16px; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 10px; font-size: 13px;
+    }
+    .rule-pass { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .rule-fail { background: #fef2f2; border-left: 4px solid #ef4444; }
+
+    .eval-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .eval-table th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align:left; }
+    .eval-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #1e293b; }
+    .eval-table tr:last-child td { border-bottom: none; }
+    .eval-table tr:hover td { background: #f8fafc; }
+    .no-data { text-align:center; color:#94a3b8; padding: 20px; font-style: italic; font-size: 13px; }
+
+    .outcome-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        border-radius: 10px;
+        padding: 24px 28px;
+        color: #fff;
+        margin-top: 24px;
+    }
+    .outcome-card h5 { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+    .outcome-btn {
+        display: inline-block; padding: 12px 28px; border-radius: 6px;
+        font-weight: 700; font-size: 14px; cursor: pointer; border: 2px solid transparent;
+        margin-right: 10px; margin-bottom: 10px; transition: all .2s;
+    }
+    .btn-recommend  { background: #22c55e; color:#fff; }
+    .btn-recommend:hover  { background: #16a34a; }
+    .btn-not-recommend { background: #ef4444; color:#fff; }
+    .btn-not-recommend:hover { background: #dc2626; }
+    .btn-review { background: transparent; color:#f59e0b; border-color: #f59e0b; }
+    .btn-review:hover { background: #f59e0b; color:#fff; }
+</style>
+
+@* -- Hero Header -- *@
+<div class="eval-hero">
+    <div>
+        <div class="eval-hero-title"><i class="ion ion-document-text"></i> &nbsp;Evaluating Application - Lease Renewal Recommendation</div>
+        <div class="eval-hero-sub">UC018 ?- Step 6 - Review all tenant data before making a recommendation</div>
+    </div>
+    <div>
+        @if (app != null)
+        {
+            <span class="eval-pill pill-blue"><i class="ion ion-pricetag"></i> @app.ApplicationReferenceNumber</span>
+        }
+        &nbsp;
+        <span class="eval-pill @(canRenew ? "pill-green" : "pill-red")">
+            <i class="ion @(canRenew ? "ion-checkmark-circled" : "ion-close-circled")"></i>
+            @(canRenew ? "Eligible for Renewal" : "Renewal Concerns Detected")
+        </span>
+    </div>
+</div>
+
+@* -- Business Rule Checks -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-alert-circled"></i> Business Rule Compliance (BR21 ?- BR39)</div>
+    <div class="eval-section-body">
+        <div class="rule-bar @(cap72ok ? "rule-pass" : "rule-fail")">
+            <i class="ion @(cap72ok ? "ion-checkmark-circled" : "ion-close-circled")" style="font-size:18px;"></i>
+            <div>
+                <strong>BR21 - 72-Month Lease Cap:</strong>
+                @(cap72ok ? "PASS - Tenant has not exceeded the maximum 72-month (6-year) lease period." : "FAIL - Tenant has reached or exceeded the 72-month renewal limit. Renewal is not permitted.")
+            </div>
+        </div>
+        <div class="rule-bar @(payOk ? "rule-pass" : "rule-fail")">
+            <i class="ion @(payOk ? "ion-checkmark-circled" : "ion-close-circled")" style="font-size:18px;"></i>
+            <div>
+                <strong>BR39 - Payment Compliance (>=95% on-time, no active disputes):</strong>
+                @(payOk ? "PASS - No active payment transgressions or complaints on record." : "FAIL - Active payment transgressions or complaints exist. Review required before recommending.")
+            </div>
+        </div>
+    </div>
+</div>
+
+@* -- 1. Tenant & Lease Details -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-person"></i> Tenant &amp; Lease Details</div>
+    <div class="eval-section-body">
+        <div class="kv-grid">
+            <div class="kv-item"><label>Full Name</label><span>@(cust != null ? cust.FullName : lease.FirstNames + " " + lease.LastName)</span></div>
+            <div class="kv-item"><label>ID Number</label><span>@(cust != null ? cust.IdentificationNumber : lease.IDNo)</span></div>
+            <div class="kv-item"><label>Email</label><span>@(cust != null && cust.SystemUser != null ? cust.SystemUser.EmailAddress : (cust != null ? cust.EmailAddress : "-"))</span></div>
+            <div class="kv-item"><label>App Reference</label><span>@(app != null ? app.ApplicationReferenceNumber : "-")</span></div>
+            <div class="kv-item"><label>Lease Reference</label><span>@lease.LeaseReferenceNo</span></div>
+            <div class="kv-item"><label>Lease Status</label><span>@(lease.Status != null ? lease.Status.Name : "-")</span></div>
+            <div class="kv-item"><label>Lease Start Date</label><span>@(leaseStart.HasValue ? leaseStart.Value.ToString("yyyy-MM-dd") : "-")</span></div>
+            <div class="kv-item"><label>Lease End Date</label><span>@(leaseEnd.HasValue ? leaseEnd.Value.ToString("yyyy-MM-dd") : "-")</span></div>
+            <div class="kv-item"><label>Period (Months)</label><span>@durationMonths months</span></div>
+            <div class="kv-item"><label>Deposit Held</label><span>R @lease.DepositeAmount.ToString("N2")</span></div>
+            <div class="kv-item"><label>Monthly Rental</label><span>R @lease.TotalIncludingVAT.ToString("N2")</span></div>
+            @if (app != null)
+            {
+                <div class="kv-item"><label>Application Status</label><span>@(app.Status != null ? app.Status.Name : "-")</span></div>
+            }
+        </div>
+    </div>
+</div>
+
+@* -- Linked Records (Application & Lease Views) -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-folder"></i> Linked Records (Application &amp; Lease)</div>
+    <div class="eval-section-body">
+        
+        <h5 style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Property Lease Application</h5>
+        <table class="eval-table" style="margin-bottom: 24px;">
+            <thead>
+                <tr>
+                    <th>Reference Number</th>
+                    <th>Applicant Type</th>
+                    <th>Status</th>
+                    <th>Captured Date</th>
+                    <th>Customer Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (app != null)
+                {
+                    <tr>
+                        <td><strong>@app.ApplicationReferenceNumber</strong></td>
+                        <td>@(app.PurchaserType != null ? app.PurchaserType.Name : "-")</td>
+                        <td><span class="eval-pill pill-blue" style="font-size:11px;">@(app.Status != null ? app.Status.Name : "-")</span></td>
+                        <td>@(app.CreatedDateTime.HasValue ? app.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "-")</td>
+                        <td>@(app.Customer != null ? app.Customer.FullName : "-")</td>
+                        <td>
+                            @Html.ActionLink("View Application", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + app.Id.ToString()) }, new { @class = "btn btn-primary btn-sm", @target = "_blank", @style="font-size:11px; font-weight:600;" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h5 style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Tenant Lease Details</h5>
+        <table class="eval-table">
+            <thead>
+                <tr>
+                    <th>Lease Reference No</th>
+                    <th>Tenant Type</th>
+                    <th>Status</th>
+                    <th>Captured Date</th>
+                    <th>Customer Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>@lease.LeaseReferenceNo</strong></td>
+                    <td>@(lease.PurchaserType != null ? lease.PurchaserType.Name : "-")</td>
+                    <td><span class="eval-pill pill-blue" style="font-size:11px;">@(lease.Status != null ? lease.Status.Name : "-")</span></td>
+                    <td>@(lease.CreatedDateTime.HasValue ? lease.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "-")</td>
+                    <td>@lease.FirstNames @lease.LastName</td>
+                    <td>
+                        @Html.ActionLink("View Lease", "ApplincantDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + lease.Id.ToString()) }, new { @class = "btn btn-primary btn-sm", @target = "_blank", @style="font-size:11px; font-weight:600;" })
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+</div>
+
+@* -- 2. Occupants -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-people"></i> Occupant(s) Details</div>
+    <div class="eval-section-body">
+        @if (residents.Any())
+        {
+            <table class="eval-table">
+                <thead><tr><th>First Name</th><th>Surname</th><th>ID Number</th><th>Occupant Ref</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var r in residents)
+                    {
+                        <tr>
+                            <td>@r.FirstNames</td>
+                            <td>@r.LastName</td>
+                            <td>@r.IDNo</td>
+                            <td>@r.OccupantReferenceNo</td>
+                            <td><span class="eval-pill pill-blue" style="font-size:11px;">@(r.Status != null ? r.Status.Name : "-")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="no-data"><i class="ion ion-information-circled"></i> No occupants registered on this lease.</p>
+        }
+    </div>
+</div>
+
+@* -- 3. Payment Transgressions (Rental Arrears) -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-cash"></i> Rental Arrears &amp; Payment Transgressions
+        @if (transgressions.Any())
+        {
+            <span class="eval-pill pill-red" style="margin-left:auto; font-size:11px;">@transgressions.Count record(s)</span>
+        }
+        else
+        {
+            <span class="eval-pill pill-green" style="margin-left:auto; font-size:11px;">None on record</span>
+        }
+    </div>
+    <div class="eval-section-body">
+        @if (transgressions.Any())
+        {
+            <table class="eval-table">
+                <thead><tr><th>Case Ref</th><th>Category</th><th>Severity</th><th>Amount Due</th><th>Last Payment</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                    @foreach (var t in transgressions)
+                    {
+                        <tr>
+                            <td><strong>@t.CaseReferenceNumber</strong></td>
+                            <td>@(t.Category != null ? t.Category.Name : "-")</td>
+                            <td>
+                                @if (t.Severity != null)
+                                {
+                                    var sev = t.Severity.Name ?? "";
+                                    var sevClass = sev.ToLower().Contains("high") ? "pill-red" : sev.ToLower().Contains("medium") ? "pill-amber" : "pill-green";
+                                    <span class="eval-pill @sevClass" style="font-size:11px;">@sev</span>
+                                }
+                            </td>
+                            <td>R @t.TotalAmountDue.ToString("N2")</td>
+                            <td>@(t.LastPaymentDate.HasValue ? t.LastPaymentDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                            <td>@(t.Status != null ? t.Status.Name : "-")</td>
+                            <td>@(t.CreatedDateTime.HasValue ? t.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="no-data"><i class="ion ion-checkmark-circled" style="color:#22c55e;"></i> No payment transgressions found for this tenancy.</p>
+        }
+    </div>
+</div>
+
+@* -- 4. Complaints -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-flag"></i> Complaints Against Tenant
+        @if (complaints.Any())
+        {
+            <span class="eval-pill pill-amber" style="margin-left:auto; font-size:11px;">@complaints.Count complaint(s)</span>
+        }
+        else
+        {
+            <span class="eval-pill pill-green" style="margin-left:auto; font-size:11px;">None on record</span>
+        }
+    </div>
+    <div class="eval-section-body">
+        @if (complaints.Any())
+        {
+            <table class="eval-table">
+                <thead><tr><th>Case Ref</th><th>Complainant</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                    @foreach (var c in complaints)
+                    {
+                        <tr>
+                            <td><strong>@c.CaseReferenceNumber</strong></td>
+                            <td>@c.ComplainantFirstName @c.ComplainantSurname</td>
+                            <td>@(c.DetailedDescription != null && c.DetailedDescription.Length > 80 ? c.DetailedDescription.Substring(0,80) + "-" : c.DetailedDescription)</td>
+                            <td>@(c.Status != null ? c.Status.Name : "-")</td>
+                            <td>@(c.CreatedDateTime.HasValue ? c.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="no-data"><i class="ion ion-checkmark-circled" style="color:#22c55e;"></i> No complaints filed against this tenant.</p>
+        }
+    </div>
+</div>
+
+@* -- 5. Service Requests (Maintenance) -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-wrench"></i> Maintenance / Service Requests
+        @if (serviceReqs.Any())
+        {
+            <span class="eval-pill pill-blue" style="margin-left:auto; font-size:11px;">@serviceReqs.Count request(s)</span>
+        }
+    </div>
+    <div class="eval-section-body">
+        @if (serviceReqs.Any())
+        {
+            <table class="eval-table">
+                <thead><tr><th>Ref #</th><th>Category</th><th>Description</th><th>Priority</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                    @foreach (var s in serviceReqs)
+                    {
+                        <tr>
+                            <td><strong>@s.RequestReferenceNumber</strong></td>
+                            <td>@(s.Category != null ? s.Category.Name : "-")</td>
+                            <td>@(s.DetailedDescription != null && s.DetailedDescription.Length > 70 ? s.DetailedDescription.Substring(0,70) + "-" : s.DetailedDescription)</td>
+                            <td>@(s.Priority != null ? s.Priority.Name : "-")</td>
+                            <td>@(s.Status != null ? s.Status.Name : "-")</td>
+                            <td>@(s.CreatedDateTime.HasValue ? s.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="no-data"><i class="ion ion-information-circled"></i> No service requests on record for this tenancy.</p>
+        }
+    </div>
+</div>
+
+@* -- 6. ITC/TPN Risk Assessment -- *@
+<div class="eval-section">
+    <div class="eval-section-hdr"><i class="ion ion-stats-bars"></i> Tenant Compliance - ITC / TPN Risk Assessment</div>
+    <div class="eval-section-body">
+        @if (risk != null)
+        {
+            <div class="kv-grid">
+                <div class="kv-item"><label>Assessed By</label><span>@risk.FirstName @risk.LastName</span></div>
+                <div class="kv-item"><label>Official Number</label><span>@risk.OfficialNumber</span></div>
+                <div class="kv-item"><label>CSO Outcome</label>
+                    <span>
+                        @if (!string.IsNullOrEmpty(risk.Outcome))
+                        {
+                            var rc = risk.Outcome.ToLower().Contains("recommend") && !risk.Outcome.ToLower().Contains("not") ? "pill-green" : risk.Outcome.ToLower().Contains("review") ? "pill-amber" : "pill-red";
+                            <span class="eval-pill @rc" style="font-size:12px;">@risk.Outcome</span>
+                        }
+                        else { <span>-</span> }
+                    </span>
+                </div>
+                <div class="kv-item"><label>CSO Reason</label><span>@(string.IsNullOrEmpty(risk.Reason) ? "-" : risk.Reason)</span></div>
+                <div class="kv-item"><label>Assessment Date</label><span>@(risk.DateStamp.HasValue ? risk.DateStamp.Value.ToString("yyyy-MM-dd") : "-")</span></div>
+                <div class="kv-item"><label>RM Outcome</label><span>@(string.IsNullOrEmpty(risk.RM_Outcome) ? "Pending" : risk.RM_Outcome)</span></div>
+                <div class="kv-item"><label>Director Outcome</label><span>@(string.IsNullOrEmpty(risk.CEO_Outcome) ? "Pending" : risk.CEO_Outcome)</span></div>
+                <div class="kv-item"><label>Status</label><span>@(risk.Status != null ? risk.Status.Name : "-")</span></div>
+                <div class="kv-item"><label>Supporting Document</label>
+                    <span>
+                        @if (!string.IsNullOrEmpty(risk.SupportingDoccuments))
+                        {
+                            <a href="@Url.Content(risk.SupportingDoccuments)" target="_blank" class="btn btn-xs btn-primary" style="font-size:10px; padding:2px 8px; border-radius:3px;"><i class="ion ion-document-text"></i> View Document</a>
+                        }
+                        else
+                        {
+                            @:-
+                        }
+                    </span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="no-data"><i class="ion ion-information-circled"></i> No ITC/TPN risk assessment captured for this application yet.</p>
+        }
+    </div>
+</div>
+
+
+@Html.Partial("_WorkflowHistory", Model)
+

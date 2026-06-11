@@ -324,11 +324,34 @@
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script type="text/javascript">
         var maintenanceId = @Html.Raw(maintenanceId);
-        var signaturePad;
+
+        // === Vanilla Canvas Signature (no external library needed) ===
+        var _facCanvas, _facCtx, _facDrawing = false, _facHasMark = false;
+
+        function initializeSignaturePad() {
+            _facCanvas = document.getElementById('facSignaturePad');
+            if (!_facCanvas) return;
+            _facCtx = _facCanvas.getContext('2d');
+            _facCtx.strokeStyle = '#000';
+            _facCtx.lineWidth = 2;
+            _facCtx.lineCap = 'round';
+
+            _facCanvas.onmousedown  = function (e) { _facDrawing = true; _facCtx.beginPath(); var r = _facCanvas.getBoundingClientRect(); _facCtx.moveTo(e.clientX - r.left, e.clientY - r.top); };
+            _facCanvas.onmousemove  = function (e) { if (!_facDrawing) return; _facHasMark = true; var r = _facCanvas.getBoundingClientRect(); _facCtx.lineTo(e.clientX - r.left, e.clientY - r.top); _facCtx.stroke(); };
+            _facCanvas.onmouseup    = function () { _facDrawing = false; };
+            _facCanvas.onmouseleave = function () { _facDrawing = false; };
+
+            _facCanvas.ontouchstart = function (e) { e.preventDefault(); _facDrawing = true; _facCtx.beginPath(); var r = _facCanvas.getBoundingClientRect(); _facCtx.moveTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); };
+            _facCanvas.ontouchmove  = function (e) { e.preventDefault(); if (!_facDrawing) return; _facHasMark = true; var r = _facCanvas.getBoundingClientRect(); _facCtx.lineTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); _facCtx.stroke(); };
+            _facCanvas.ontouchend   = function () { _facDrawing = false; };
+        }
+
+        function clearFacilitiesSignature() {
+            if (_facCtx) { _facCtx.clearRect(0, 0, _facCanvas.width, _facCanvas.height); _facHasMark = false; }
+        }
+        // === End Vanilla Canvas ===
 
         $(document).ready(function () {
             @if (ViewBag.MessageTitle != null && ViewBag.Message != null)
@@ -349,41 +372,14 @@
             }
         });
 
-        function initializeSignaturePad() {
-            var canvas = document.getElementById('facSignaturePad');
-            if (canvas) {
-                signaturePad = new SignaturePad(canvas, {
-                    backgroundColor: 'rgb(255, 255, 255)',
-                    penColor: 'rgb(0, 0, 0)'
-                });
-            }
-        }
-
         function authorizeFacilitiesSignature() {
             var officialNumber = $('#facOfficialNumber').val();
             if (!officialNumber) {
                 swal("Warning", "Please enter your official number to authorize", "warning");
                 return;
             }
-
             swal("Authorized", "You may now select your decision and capture your signature", "success");
             $('#facSignatureFormSection').show();
-            
-            // Resize canvas once shown
-            var canvas = document.getElementById('facSignaturePad');
-            if (canvas) {
-                var ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
-                signaturePad.clear();
-            }
-        }
-
-        function clearFacilitiesSignature() {
-            if (signaturePad) {
-                signaturePad.clear();
-            }
         }
 
         function submitFacilitiesSignature() {
@@ -396,12 +392,12 @@
                 return;
             }
 
-            if (signaturePad.isEmpty()) {
-                swal("Error", "Please provide a signature", "error");
+            if (!_facHasMark) {
+                swal("Error", "Please draw your signature before submitting", "error");
                 return;
             }
 
-            var signatureData = signaturePad.toDataURL();
+            var signatureData = _facCanvas.toDataURL('image/png');
 
             swal({
                 icon: "warning",

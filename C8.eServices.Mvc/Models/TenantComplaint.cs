@@ -151,6 +151,14 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Lease Termination Date")]
         public DateTime? LeaseTerminationDate { get; set; }
 
+        [Column(Order = 37)]
+        [Display(Name = "SLA Escalation Triggered")]
+        public bool EscalationTriggered { get; set; }
+
+        [Column(Order = 38)]
+        [Display(Name = "Escalation Date")]
+        public DateTime? EscalationDate { get; set; }
+
         // Navigation Properties
         public virtual ICollection<ComplaintEvidence> Evidence { get; set; }
         public virtual ICollection<ComplaintInvestigation> Investigations { get; set; }

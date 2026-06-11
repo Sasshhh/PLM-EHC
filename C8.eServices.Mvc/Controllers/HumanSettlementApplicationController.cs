@@ -7337,7 +7337,8 @@ namespace C8.eServices.Mvc.Controllers
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt1 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt1 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -7900,25 +7901,21 @@ namespace C8.eServices.Mvc.Controllers
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var findItem = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
                 var UserId = GetBackOfficeId(db, RCSAppID, true);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                // UC023: Route to Revenue Officer for termination queue (not Letting Officer)
+                var revenueOfficerSetting = db.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.RevenueOfficer);
+                var StoredUser = revenueOfficerSetting != null ? Convert.ToInt16(revenueOfficerSetting.Value) : 0;
                 var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault();
-                if (activeDirectoryOn != 0)
+                if (activeDirectoryOn != 0 && ResponsibilityTypeId != null)
                 {
-
-                    //AssignedToUser = AssigedToCCRR(AccountsManagementUsers, RoundRobingQueue, ResponsibilityTypeId.Id);
-                    //var ClerkId = db.Customers.Where(x => x.SystemUserId == AssignedToUser && x.IsDeleted == false).FirstOrDefault().Id;
                     var statusList = db.Status.ToList();
                     var StatusId = statusList.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
-
-
-
 
                     var roundRobinQueue = new RoundRobinQueue
                     {
                         PropertyLeaseApplicationId = RcsApplication.Id,
-                        LeaseDetailsId = findItem.Id,
+                        LeaseDetailsId = findItem != null ? findItem.Id : (int?)null,
                         ResponsibilityTypeId = ResponsibilityTypeId.Id,
                         CurrentTaskDateTime = DateTime.Now,
                         ClerkId = activeDirectoryOn,
@@ -7926,31 +7923,8 @@ namespace C8.eServices.Mvc.Controllers
                     };
                     db.RoundRobinQueues.Add(roundRobinQueue);
                     db.SaveChanges();
-                    BackOfficeNotification(RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name);
+                    try { BackOfficeNotification(RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name); } catch { }
                 }
-                else
-                {
-                    //var roundRobinLog = new RoundRobinLog
-                    //{
-                    //    PropertyLeaseApplicationId = RcsApplication.Id,
-                    //    ResponsibilityTypeId = ResponsibilityTypeId.Id,
-                    //    CCCId = Convert.ToInt16(RcsApplication.CCCId),
-                    //    CCCName = RcsApplication.CCC.CCCName,
-                    //    LogEntry = "No user set up for CCC " + RcsApplication.CCC.CCCName + " for role: " + ResponsibilityTypeId.Name,
-                    //    RoleID = AccountsManagement,
-                    //    RoleName = "Acknowledge RCS Application",
-                    //    IsActive = true,
-                    //    IsDeleted = false
-
-                    //};
-                    //db.RoundRobinLogs.Add(roundRobinLog);
-                    //db.SaveChanges();
-
-                }
-
-
-                // JK.20140724a - Custom profile information.
-
             }
             else if (TerminationValidation)
             {
@@ -14170,7 +14144,8 @@ namespace C8.eServices.Mvc.Controllers
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt2 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt2 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -14619,7 +14594,8 @@ namespace C8.eServices.Mvc.Controllers
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt3 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt3 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();

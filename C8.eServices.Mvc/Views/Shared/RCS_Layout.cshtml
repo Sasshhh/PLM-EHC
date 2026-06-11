@@ -780,6 +780,82 @@
 
                         }
                     }
+                    @if (Request.IsAuthenticated && (User.IsInRole("Client Services Officer") || User.IsInRole("Customers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-chatboxes-outline"></i>
+                                <span class="text">Complaints</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/Complaints/Index">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Complaints Dashboard</span>
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Customers"))
+                                {
+                                    <li>
+                                        <a href="~/Complaints/Create">
+                                            <i class="ion ion-ios-plus-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Lodge New Complaint</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-briefcase-outline"></i>
+                                <span class="text">Service Requests</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/ServiceRequests/Index">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Service Requests Dashboard</span>
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Customers"))
+                                {
+                                    <li>
+                                        <a href="~/ServiceRequests/Create">
+                                            <i class="ion ion-ios-plus-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Create Service Request</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-gavel"></i>
+                                <span class="text">Disputes</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/LeaseDisputes">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Disputes Dashboard</span>
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Customers"))
+                                {
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/RegisterLeaseDispute">
+                                            <i class="ion ion-ios-plus-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Register Lease Dispute</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+
                     @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
                     {
 
@@ -1358,6 +1434,21 @@
                                 </li>
                             </ul>
                         </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-cancel"></i>
+                                <span class="text">Termination</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Terminations</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     }
                     @if (Request.IsAuthenticated && User.IsInRole("Revenue Manager"))
                     {
@@ -1402,6 +1493,39 @@
                                     <a href="~/leaseDetails/Renewals">
                                         <i class="ion ion-android-checkmark-circle" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Lease Review</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-cancel"></i>
+                                <span class="text">Termination</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Terminations</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    @if (Request.IsAuthenticated && User.IsInRole("CEO"))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-cancel"></i>
+                                <span class="text">Termination</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/RefundAuthorisation">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Refund Authorisations</span>
                                     </a>
                                 </li>
                             </ul>
@@ -2718,6 +2842,24 @@
                                     <a href="~/TestingTools/WaitingListBackdate">
                                         <i class="ion ion-clock" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                         <span class="text">Backdate Waiting List</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/TestingTools/LeaseBackdate">
+                                        <i class="ion ion-calendar" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Backdate Active Lease</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/TestingTools/LeaseSigningExpiry">
+                                        <i class="ion ion-document-text" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Lease Signing Expiry</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/TestingTools/UnitOfferExpiry">
+                                        <i class="ion ion-home" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Unit Offer Expiry</span>
                                     </a>
                                 </li>
                             </ul>

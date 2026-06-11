@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -271,6 +271,7 @@ namespace C8.eServices.Mvc.Keys
         public const string PropertyManager = "r_property_manager";
         public const string RevenueManager = "r_revenue_manager";
         public const string RevenueOfficer = "r_revenue_officer";
+        public const string CEO = "s_ceo";
         public const string CommunityDevelopmentOfficer = "r_community_development_officer";
         public const string ClientServicesOfficer = "u_client_services_officer";
         public const string HousingSupervisor = "u_housing_super_visor";

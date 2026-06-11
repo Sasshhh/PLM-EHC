@@ -28,8 +28,10 @@ namespace C8.eServices.Mvc.Engines
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month.ToString("D2");
 
+            var searchPrefix = $"{prefix}-{year}-{month}";
+
             var lastCaseNumber = _db.PaymentTransgressions
-                .Where(pt => pt.CaseReferenceNumber.StartsWith($"{prefix}-{year}-{month}"))
+                .Where(pt => pt.CaseReferenceNumber.StartsWith(searchPrefix))
                 .OrderByDescending(pt => pt.CaseReferenceNumber)
                 .Select(pt => pt.CaseReferenceNumber)
                 .FirstOrDefault();
@@ -52,29 +54,31 @@ namespace C8.eServices.Mvc.Engines
         /// </summary>
         public dynamic GetTenantDetailsByOfficialNumber(string officialNumber)
         {
-            var application = _db.PropertyLeaseApplications
-                .Where(p => p.Customer.IdentificationNumber == officialNumber && p.IsActive && !p.IsDeleted)
-                .OrderByDescending(p => p.Id)
-                .Select(p => new
+            var leaseDetails = _db.LeaseDetails
+                .Where(ld => ld.PropertyLeaseApplication != null && ld.PropertyLeaseApplication.Customer != null &&
+                             ld.PropertyLeaseApplication.Customer.IdentificationNumber == officialNumber &&
+                             ld.IsActive && !ld.IsDeleted)
+                .OrderByDescending(ld => ld.Id)
+                .Select(ld => new
                 {
-                    p.Customer.IdentificationNumber,
-                    p.ApplicationReferenceNumber,
-                    p.Customer.FirstName,
-                    p.Customer.LastName,
-                    Email = p.Customer.EmailAddress ?? "",
-                    PhoneNumber = p.Customer.CellPhoneNumber ?? "",
-                    ComplexId = 0, // TODO: Get from ApplicationAllocatedProperty
-                    ComplexName = "",
-                    BlockNumber = "",
-                    UnitNumber = "",
-                    CurrentAccountNumber = "", // TODO: Get account number
-                    LastPaymentAmount = 0m, // TODO: Update with actual payment tracking
+                    IdentificationNumber = ld.PropertyLeaseApplication.Customer.IdentificationNumber,
+                    ApplicationReferenceNumber = ld.PropertyLeaseApplication.ApplicationReferenceNumber,
+                    FirstName = ld.PropertyLeaseApplication.Customer.FirstName,
+                    LastName = ld.PropertyLeaseApplication.Customer.LastName,
+                    Email = ld.PropertyLeaseApplication.Customer.EmailAddress ?? "",
+                    PhoneNumber = ld.PropertyLeaseApplication.Customer.CellPhoneNumber ?? "",
+                    ComplexId = 0,
+                    ComplexName = ld.OfficeParkName ?? ld.buildingName,
+                    BlockNumber = ld.buildingName ?? "",
+                    UnitNumber = ld.SpaceUnitNo ?? "",
+                    CurrentAccountNumber = "",
+                    LastPaymentAmount = 0m,
                     LastPaymentDate = (DateTime?)null,
-                    TotalAmountDue = 0m // TODO: Calculate from billing system
+                    TotalAmountDue = 0m
                 })
                 .FirstOrDefault();
 
-            return application;
+            return leaseDetails;
         }
 
         /// <summary>
@@ -180,6 +184,46 @@ namespace C8.eServices.Mvc.Engines
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Searches for tenants with an active lease based on a query
+        /// </summary>
+        public object SearchTenants(string query)
+        {
+            var baseQuery = _db.LeaseDetails
+                .Where(ld => ld.IsActive && !ld.IsDeleted && ld.PropertyLeaseApplication != null && ld.PropertyLeaseApplication.Customer != null);
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                baseQuery = baseQuery.Where(ld => 
+                    (ld.PropertyLeaseApplication.Customer.FirstName != null && ld.PropertyLeaseApplication.Customer.FirstName.Contains(query)) ||
+                    (ld.PropertyLeaseApplication.Customer.LastName != null && ld.PropertyLeaseApplication.Customer.LastName.Contains(query)) ||
+                    (ld.PropertyLeaseApplication.Customer.IdentificationNumber != null && ld.PropertyLeaseApplication.Customer.IdentificationNumber.Contains(query)) ||
+                    (ld.PropertyLeaseApplication.ApplicationReferenceNumber != null && ld.PropertyLeaseApplication.ApplicationReferenceNumber.Contains(query))
+                );
+            }
+
+            var activeLeases = baseQuery
+                .OrderByDescending(ld => ld.Id)
+                .Select(ld => new
+                {
+                    OfficialNumber = ld.PropertyLeaseApplication.Customer.IdentificationNumber,
+                    Name = ld.PropertyLeaseApplication.Customer.FirstName,
+                    Surname = ld.PropertyLeaseApplication.Customer.LastName,
+                    TenancyRef = ld.PropertyLeaseApplication.ApplicationReferenceNumber,
+                    Complex = ld.OfficeParkName ?? ld.buildingName
+                })
+                .Take(20)
+                .ToList();
+
+            var uniqueTenants = activeLeases
+                .GroupBy(t => t.OfficialNumber)
+                .Select(g => g.First())
+                .Take(10)
+                .ToList();
+
+            return uniqueTenants;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -191,6 +191,42 @@ namespace C8.eServices.Mvc.Keys
 
         // Tenant Training Keys
         public const string TenantInvitedToTraining = "at_tenant_invited_to_training";
+
+        // UC022: Lease Agreement Rejection
+        public const string LeaseAgreementRejectedToTenant = "at_lease_agreement_rejected_tenant";
+        public const string LeaseAgreementRejectedToCSO = "at_lease_agreement_rejected_cso";
+
+        // BR19 — Lease Signing Expiry (30-day deadline)
+        public const string LeaseSigningExpired = "at_lease_signing_expired";
+
+        // BR09 — Unit Offer Expiry (30-day deadline)
+        public const string UnitOfferExpired = "at_unit_offer_expired";
+
+        // UC023 — Manage Lease Termination
+        public const string TerminationCSOReviewSupported = "at_termination_cso_supported";
+        public const string TerminationCSOReviewNotSupported = "at_termination_cso_not_supported";
+        public const string TerminationRMApproved = "at_termination_rm_approved";
+        public const string TerminationRMRejected = "at_termination_rm_rejected";
+        public const string TerminationRMReferredLegal = "at_termination_rm_referred_legal";
+        public const string TerminationCSOInitiated = "at_termination_cso_initiated";
+
+        // UC024 — Eviction CEO Authorization
+        public const string EvictionCEOApproved = "at_eviction_ceo_approved";
+        public const string EvictionCEORejected = "at_eviction_ceo_rejected";
+        public const string EvictionNoticeGenerated = "at_eviction_notice_generated";
+
+        // UC025 — Serve Eviction Notice & Proof of Service
+        public const string EvictionNoticeServed = "at_eviction_notice_served";
+        public const string ProofOfServiceCaptured = "at_proof_of_service_captured";
+
+        // UC026 — Manage Disputes
+        public const string DisputeRegistered = "at_dispute_registered";
+        public const string DisputeReviewed = "at_dispute_reviewed";
+        public const string DisputeReferredLegal = "at_dispute_referred_legal";
+        public const string DisputeResolved = "at_dispute_resolved";
+        public const string DisputeNotResolved = "at_dispute_not_resolved";
+        public const string DisputeClosedCEO = "at_dispute_closed_ceo";
+        public const string DisputeRejectedCEO = "at_dispute_rejected_ceo";
 
     }
 }

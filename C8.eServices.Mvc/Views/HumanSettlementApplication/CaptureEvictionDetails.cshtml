@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -10,6 +10,43 @@
     <style>
         .swal-modal .swal-text {
             text-align: center;
+        }
+        /* --- PREMIUM BUTTON DESIGN SYSTEM --- */
+        .premium-btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 10px 24px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-radius: 4px;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .premium-btn-primary {
+            color: #fff !important;
+            background-color: #1e8449 !important;
+            border-color: #1e8449 !important;
+        }
+        .premium-btn-primary:hover {
+            background-color: #155d33 !important;
+            border-color: #155d33 !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .premium-btn-default {
+            color: #333 !important;
+            background-color: #fff !important;
+            border-color: #ccc !important;
+        }
+        .premium-btn-default:hover {
+            background-color: #e6e6e6 !important;
+            border-color: #adadad !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
     </style>
 </head>
@@ -52,7 +89,7 @@
         }
 
         <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm("CaptureEvictionDetails", "HumanSettlementApplication", FormMethod.Post))
+            @using (Html.BeginForm("CaptureEvictionDetails", "HumanSettlementApplication", FormMethod.Post, new { id = "evictionForm" }))
             {
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(model => model.HumanSettlementApplication.Id, new { @Name = "ApplicationId" })
@@ -62,7 +99,7 @@
                     <div class="form-group">
                         @Html.Label("Eviction Reason", htmlAttributes: new { @class = "control-label col-md-1" })
                         <div class="col-md-2">
-                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", @id = "ApprovalStatusddl" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -84,9 +121,8 @@
                 <br />
 
                 <div id="divbtn" style="display:block">
-                    <input type="button" value="Cancel" name="Cancel" onclick="Cancel()" class="button1" />
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
-                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <input type="button" value="Cancel" name="Cancel" onclick="location.href='@Url.Action("HumanApplicationEvictions", "HumanSettlementApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("ViewName=" + ViewCodeKeys.CaptureEvictionDetails) })'" class="premium-btn premium-btn-default" />
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
                     <br />
                     <br />
                     <br />
@@ -170,6 +206,11 @@
 
 <script>
     function clickSubmit() {
+        var form = document.getElementById("evictionForm");
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         swal({
             icon: "info",
             title: "Are you sure you want to submit this application for eviction?",
@@ -181,18 +222,8 @@
             if (isConfirm) {
                 $.getJSON("../PropertyLeaseApplication/ValidateDocumentUpload",
                     function (result) {
-
-                        document.getElementById("btnApproval").click();
-
-                        @*debugger;
-                        var val = '@ViewBag.DocumentUploadedCapture';
-                        if (val == "" || val == null) {
-                            swal("Error", "Document/s Required To Submit", "warning");
-                        } else {
-                            document.getElementById("btnApproval").click();
-                        }*@
+                        form.submit();
                     });
-
             }
         });
     }

@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.ApplicationDetailsViewModel
+@model C8.eServices.Mvc.ViewModels.ApplicationDetailsViewModel
 
 @{
     ViewBag.Title = "Create";
@@ -1268,7 +1268,7 @@
                                                                             @item.IDNo
                                                                         </td>
                                                                         <td>
-                                                                            @item.Status.Name
+                                                                            @(item.Status != null ? item.Status.Name : "")
                                                                         </td>
                                                                     </tr>
                                                                 }
@@ -1453,7 +1453,7 @@
                                                                         @item.CreatedDateTime
                                                                     </td>
                                                                     <td>
-                                                                        @item.Status.Name
+                                                                        @(item.Status != null ? item.Status.Name : "")
                                                                     </td>
                                                                     <td>
                                                                         @if (item.PurchaserType != null)

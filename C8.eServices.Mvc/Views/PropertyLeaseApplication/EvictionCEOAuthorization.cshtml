@@ -1,0 +1,378 @@
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using C8.eServices.Mvc.Keys
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text { text-align: center; }
+        /* --- SIGNATURE PAD STYLING --- */
+        canvas#signature-pad {
+            background-color: #fff;
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #ccc;
+            cursor: crosshair;
+        }
+        .require::after {
+            content: " *";
+            font-weight: bold;
+            color: red;
+        }
+        /* --- PREMIUM BUTTON DESIGN SYSTEM --- */
+        .premium-btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 10px 24px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-radius: 4px;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .premium-btn-primary {
+            color: #fff !important;
+            background-color: #1e8449 !important;
+            border-color: #1e8449 !important;
+        }
+        .premium-btn-primary:hover {
+            background-color: #155d33 !important;
+            border-color: #155d33 !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .premium-btn-default {
+            color: #333 !important;
+            background-color: #fff !important;
+            border-color: #ccc !important;
+        }
+        .premium-btn-default:hover {
+            background-color: #e6e6e6 !important;
+            border-color: #adadad !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .premium-btn-clear {
+            color: #1e8449 !important;
+            background-color: transparent !important;
+            border: 1px solid #1e8449 !important;
+            padding: 4px 12px;
+            font-size: 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .premium-btn-clear:hover {
+            color: #fff !important;
+            background-color: #1e8449 !important;
+        }
+    </style>
+</head>
+<script src="@Url.Content("~/Scripts/moment.js")"></script>
+
+<div id="bankAccountPanel">
+    <div class="panel panel-default">
+
+        @* ── Section 1: Application Info ── *@
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead>
+                    <tr>
+                        <th>Reference Number</th>
+                        <th>Applicant Type</th>
+                        <th>Status</th>
+                        <th>Application Date</th>
+                        <th>Applicant Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.PropertyLeaseApplications.ApplicationReferenceNumber</td>
+                        <td>@(Model.PropertyLeaseApplications.PurchaserType != null ? Model.PropertyLeaseApplications.PurchaserType.Name : "N/A")</td>
+                        <td>@(Model.PropertyLeaseApplications.Status != null ? Model.PropertyLeaseApplications.Status.Name : "N/A")</td>
+                        <td>@Model.PropertyLeaseApplications.CreatedDateTime</td>
+                        <td>@(Model.PropertyLeaseApplications.Customer != null ? Model.PropertyLeaseApplications.Customer.FullName : "")</td>
+                        <td>
+                             @if (Model.PropertyLeaseApplications != null)
+                             {
+                                 @Html.ActionLink("View", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplications.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                             }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br />
+
+        @* ── Section 2: Lease Details ── *@
+        <div class="panel-heading">Tenant Lease Details</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead>
+                    <tr>
+                        <th>Lease Ref No.</th>
+                        <th>Applicant Type</th>
+                        <th>Status</th>
+                        <th>Captured Date</th>
+                        <th>Tenant Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.LeaseDetails.LeaseReferenceNo</td>
+                        <td>@(Model.LeaseDetails.PurchaserType != null ? Model.LeaseDetails.PurchaserType.Name : "N/A")</td>
+                        <td>@(Model.LeaseDetails.Status != null ? Model.LeaseDetails.Status.Name : "N/A")</td>
+                        <td>@Model.LeaseDetails.CreatedDateTime</td>
+                        <td>@Model.LeaseDetails.FirstNames @Model.LeaseDetails.LastName</td>
+                        <td>
+                             @if (Model.LeaseDetails != null)
+                             {
+                                 @Html.ActionLink("View", "ApplincantDetails", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.LeaseDetails.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                             }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br />
+
+        @* ── Section 3: Termination & Eviction References ── *@
+        <div class="panel-heading">Termination & Eviction Details</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead>
+                    <tr>
+                        <th>Termination Ref#</th>
+                        <th>Eviction Ref#</th>
+                        <th>Reason</th>
+                        <th>Termination Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>@ViewBag.TerminationRef</strong></td>
+                        <td><strong>@ViewBag.EvictionRef</strong></td>
+                        <td>@ViewBag.TerminationReason</td>
+                        <td>
+                            @if (Model.LeaseTermination != null && Model.LeaseTermination.TerminationDate != null)
+                            {
+                                @Model.LeaseTermination.TerminationDate.ToString("dd MMMM yyyy")
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br />
+
+        @* ── Section 4: Eviction Documents (if any) ── *@
+        @if (Model.Attachments != null && Model.Attachments.Count > 0)
+        {
+            <div class="panel-heading">Eviction Documents</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table class="table table-bordered table-hover table-striped panel panel-default display">
+                    <thead>
+                        <tr>
+                            <th>Document Type</th>
+                            <th>Document</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Attachments)
+                        {
+                            <tr>
+                                <td>Eviction Notice</td>
+                                <td>
+                                    <input type="button" class="btn btn-warning btn-sm" value="View" onclick="location.href='@item.FilePath'" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <br />
+        }
+
+        @* ── Section 5: CEO Authorization Decision ── *@
+        <div class="panel-heading">CEO Authorization Decision (UC024-S2)</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <form action="@Url.Action("EvictionCEOAuthorization", "PropertyLeaseApplication", new { q = Request.QueryString["q"] })" method="post" id="validationForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <br />
+                <input type="hidden" name="id" value="@Model.LeaseDetails.Id" />
+
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        @Html.Label("Action", htmlAttributes: new { @class = "control-label col-md-2 require" })
+                        <div class="col-md-3">
+                            @Html.DropDownList("ApprovalStatusddl", (SelectList)ViewBag.ApprovalStatus, "-- Select Action --", new { @class = "form-control", @id = "ApprovalStatusddl", @required = "required" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 require" for="OfficialNumber">Official Number</label>
+                        <div class="col-md-3">
+                            <input type="text" name="OfficialNumber" id="OfficialNumber" class="form-control" placeholder="Enter Official Number" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 require">Signature</label>
+                        <div class="col-md-5">
+                            <canvas id="signature-pad"></canvas>
+                            <div style="margin-top:5px;">
+                                <button type="button" class="premium-btn-clear" onclick="clearSignature()">Clear Signature</button>
+                            </div>
+                            <input type="hidden" id="hdnSignatureBlob" name="hdnSignatureBlob" value="" />
+                        </div>
+                    </div>
+
+                    <div id="rejectReasonDiv" style="display:none;">
+                        <div class="form-group">
+                            @Html.Label("Comments / Reason", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-6">
+                                <textarea name="RejectComment" id="RejectComment" class="form-control" rows="3" placeholder="Enter your comments here..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <div id="divbtn" style="display:block" class="col-md-offset-2">
+                    <input type="button" value="Submit Authorization" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
+                    @Html.ActionLink("Cancel", "PropertyLeaseApplicationTerminations", null, new { @class = "premium-btn premium-btn-default" })
+                    <br /><br /><br />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="@Url.Content("~/scripts/Datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/scripts/Datatables/dataTables.bootstrap.js")"></script>
+}
+
+<script type="text/javascript">
+    function clickSubmit() {
+        var statusval = document.getElementById("ApprovalStatusddl").value;
+        var comment = document.getElementById("RejectComment").value.trim();
+        var officialNo = document.getElementById("OfficialNumber").value.trim();
+        var signature = document.getElementById("hdnSignatureBlob").value;
+
+        // 1. Check Outcome Selection
+        if (statusval == "") {
+            swal("Error", "Please select an Action.", "warning");
+            return;
+        }
+
+        // 2. Check Official Number
+        if (officialNo == "") {
+            swal("Error", "Please enter your Official Number.", "warning");
+            return;
+        }
+
+        // 3. Check Signature
+        if (signature == "") {
+            swal("Error", "Please sign before submitting.", "warning");
+            document.getElementById("signature-pad").scrollIntoView({ behavior: "smooth" });
+            return;
+        }
+
+        // 4. Check Forced Rejection Comment
+        if (statusval === '@RCSActionTypeKeys.Rejected' && comment == "") {
+            swal("Error", "A reason is mandatory when rejecting.", "warning");
+            document.getElementById("RejectComment").focus();
+            return;
+        }
+
+        // 5. Confirmation
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit the following as final approval?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                document.getElementById("validationForm").submit();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#ApprovalStatusddl').change(function () {
+            var selectedValue = $(this).val();
+            if (selectedValue === '@RCSActionTypeKeys.Rejected') {
+                $('#rejectReasonDiv').show();
+            } else {
+                $('#rejectReasonDiv').hide();
+            }
+        });
+
+        // ================================
+        // CANVAS SIGNATURE LOGIC
+        // ================================
+        var canvas = document.getElementById('signature-pad');
+        var ctx = canvas.getContext('2d');
+        var drawing = false;
+
+        // Set canvas dimensions
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        // --- Mouse Events ---
+        canvas.addEventListener('mousedown', function (e) { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', function (e) { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+        canvas.addEventListener('mouseup', function () { drawing = false; updateHiddenField(); });
+
+        // --- Touch Events (Mobile/Tablet) ---
+        canvas.addEventListener('touchstart', function (e) {
+            e.preventDefault();
+            drawing = true;
+            ctx.beginPath();
+            var touch = e.touches[0];
+            var rect = canvas.getBoundingClientRect();
+            ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        });
+
+        canvas.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+            if (drawing) {
+                var touch = e.touches[0];
+                var rect = canvas.getBoundingClientRect();
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener('touchend', function () { drawing = false; updateHiddenField(); });
+    });
+
+    function updateHiddenField() {
+        var canvas = document.getElementById('signature-pad');
+        document.getElementById('hdnSignatureBlob').value = canvas.toDataURL();
+    }
+
+    function clearSignature() {
+        var canvas = document.getElementById('signature-pad');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('hdnSignatureBlob').value = "";
+    }
+</script>

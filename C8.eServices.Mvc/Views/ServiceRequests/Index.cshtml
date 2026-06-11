@@ -45,23 +45,23 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    var statusKey = item.Status?.Key ?? "";
-                    var statusName = item.Status?.Name ?? "Unknown";
+                    var statusKey = item.Status != null ? item.Status.Key : "";
+                    var statusName = item.Status != null ? item.Status.Name : "Unknown";
                     var statusClass = statusKey == ServiceRequestStatusKeys.Open ? "status-open" :
                                      statusKey == ServiceRequestStatusKeys.InProgress ? "status-inprogress" :
                                      statusKey == ServiceRequestStatusKeys.Resolved ? "status-resolved" :
                                      statusKey == ServiceRequestStatusKeys.Closed ? "status-closed" :
                                      statusKey == ServiceRequestStatusKeys.Deleted ? "status-deleted" : "";
                     
-                    var priorityName = item.ServiceRequestPriority?.Name ?? "N/A";
+                    var priorityName = item.Priority != null ? item.Priority.Name : "N/A";
                     var priorityClass = priorityName.Contains("High") || priorityName.Contains("Urgent") ? "priority-high" : "";
                     
                     <tr>
                         <td>@item.RequestReferenceNumber</td>
                         <td>@item.DateSubmitted.ToString("dd MMM yyyy HH:mm")</td>
-                        <td>@(item.ServiceRequestCategory?.Name ?? "N/A")</td>
+                        <td>@(item.Category != null ? item.Category.Name : "N/A")</td>
                         <td><span class="@priorityClass">@priorityName</span></td>
-                        <td>@(item.Complex?.Name ?? "N/A")</td>
+                        <td>@(item.Complex != null ? item.Complex.Name : "N/A")</td>
                         <td><span class="status-badge @statusClass">@statusName</span></td>
                         <td>
                             @if (item.EscalationTriggered)
@@ -74,7 +74,7 @@
                             }
                         </td>
                         <td>
-                            @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink("Details", "Details", new { q = C8.eServices.Mvc.Helpers.SecureActionLinkExtension.EncryptToString(new { id = item.Id }) }, new { @class = "btn btn-primary btn-sm" })
                         </td>
                     </tr>
                 }

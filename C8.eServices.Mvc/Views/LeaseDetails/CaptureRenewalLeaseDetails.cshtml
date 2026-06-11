@@ -1,0 +1,275 @@
+@model C8.eServices.Mvc.ViewModels.TenantViewModel
+
+@{
+    ViewBag.Title = "Capture Renewal Lease Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    .requiredflex { display: flex; }
+    .require::after { content: "*"; font-weight: bold; color: red; }
+    .required:before { content: '*'; color: red; }
+    .step-app > .step-steps > li > a { display: block; padding: 10px; color: white; background-color: #848484; text-decoration: none; border-right: 1px solid #fff; }
+    .number { background-color: transparent !important; border: 1.5px solid white; border-radius: 50px; color: white !important; }
+    .error { color: tomato; }
+    .button1 { font-size: 13px; }
+</style>
+
+<div class="panel-group" id="instructions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                    <span>Instructions</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseInstructions" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <p>Fill in all lease renewal information that will be present on the new lease agreement. Once done, click Generate Lease Renewal Agreement.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+
+@using (Html.BeginForm("CaptureRenewalLeaseDetails", "LeaseDetails", FormMethod.Post, new { id = "renewal-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Lease.Id)
+    @Html.HiddenFor(m => m.PropertyLeaseApplication.Id)
+
+    <div id="demo">
+        <div class="step-app">
+            <ul class="step-steps">
+                <li><a href="#step1"><span class="number">1</span>Tenant Information <span class="ion ion-person"></span></a></li>
+                <li><a href="#step2"><span class="number">2</span>Lease Information <span class="ion ion-document"></span></a></li>
+            </ul>
+
+            <div class="step-content">
+                <!-- STEP 1: TENANT INFO (READONLY) -->
+                <div class="step-tab-panel" id="step1">
+                    <fieldset>
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><h4 class="panel-title">Tenant Information</h4></div>
+                            <div class="panel-body form-horizontal">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.PurchaserTypeId, "Tenant Type", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.DropDownListFor(m => m.Lease.PurchaserTypeId, (SelectList)ViewBag.Purchaser, new { @class = "form-control", @disabled = "disabled" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.FirstName, "First Name", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.FirstName, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.LastName, "Surname", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.LastName, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.IDNo, "ID Number", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.IDNo, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.DOB, "Date of Birth", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBox("DOB", (string)ViewBag.DOB, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Contact Details</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.CellNo, "Cellphone", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.CellNo, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.PurEmail, "Email", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.PurEmail, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Current Address</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.ResAddress, "Address", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.ResAddress, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.ResSuburb, "Suburb", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.ResSuburb, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.PropertyLeaseApplication.ResPostal, "Postal Code", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.PropertyLeaseApplication.ResPostal, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- STEP 2: LEASE INFO -->
+                <div class="step-tab-panel" id="step2">
+                    <fieldset>
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><h4 class="panel-title">Lease Details</h4></div>
+                            <div class="panel-body form-horizontal">
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Property Info</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.ApplicationAllocatedProperty.BuildingName, "Complex/Building Name", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.ApplicationAllocatedProperty.OfferedComplex.Name, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                    @Html.LabelFor(m => m.ApplicationAllocatedProperty.SpaceUnitNumber, "Space/Unit Number", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.ApplicationAllocatedProperty.SpaceUnitNumber, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.ApplicationAllocatedProperty.Address, "Leasing Address", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(m => m.ApplicationAllocatedProperty.Address, new { @class = "form-control", @readonly = "readonly" })
+                                    </div>
+                                </div>
+                                <br/>
+
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Leasing Period</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.StartDate, "Commencement Date", new { @class = "control-label col-md-2 require" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", @id = "lease_startdate", @onchange = "CalculateDates()", required = "required" })
+                                        @Html.ValidationMessageFor(m => m.Lease.StartDate, "", new { @class = "text-danger" })
+                                    </div>
+                                    @Html.LabelFor(m => m.Lease.PeriodInMonths, "Period (Months)", new { @class = "control-label col-md-2 require" })
+                                    <div class="col-md-2">
+                                        @Html.TextBox("Lease.PeriodInMonths", (int)ViewBag.PeriodInMonths, new { @class = "form-control", type = "number", @id = "lease_period", @onchange = "CalculateDates()", required = "required" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.EndDate, "Expiry Date", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", @readonly = "readonly", @id = "end_date" })
+                                    </div>
+                                    @Html.LabelFor(m => m.Lease.RenewalNotice, "Renewal Notice", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.RenewalNotice, "{0:yyyy-MM-dd}", new { @class = "form-control", @readonly = "readonly", @id = "renewal_notice" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.TerminationNotice, "Termination Notice", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.TerminationNotice, "{0:yyyy-MM-dd}", new { @class = "form-control", @readonly = "readonly", @id = "termination_notice" })
+                                    </div>
+                                </div>
+                                <br/>
+
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Lease Financials</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.DepositeAmount, "Refundable Deposit", new { @class = "control-label col-md-2 require" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.DepositeAmount, "{0:0.00}", new { @class = "form-control", type = "number", step = "0.01", required = "required" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.RentalAmount, "Monthly Rental Fee", new { @class = "control-label col-md-2 require" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.RentalAmount, "{0:0.00}", new { @class = "form-control", type = "number", step = "0.01", @id = "rental_amount", @onkeyup = "CalculateFinancials()", required = "required" })
+                                    </div>
+                                    @Html.LabelFor(m => m.Lease.VATAmount, "VAT Amount", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.VATAmount, "{0:0.00}", new { @class = "form-control", @readonly = "readonly", @id = "vat_amount" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.TotalIncludingVAT, "Total including VAT", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-2">
+                                        @Html.TextBoxFor(m => m.Lease.TotalIncludingVAT, "{0:0.00}", new { @class = "form-control", @readonly = "readonly", @id = "total_amount" })
+                                    </div>
+                                </div>
+                                <br/>
+
+                                <div class="panel-group" style="margin-bottom: -1px;"><div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title" align="center"><a>Modifications</a></h4></div></div></div><br />
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.Lease.ApplicantComment, "Modifications to Original Lease", new { @class = "control-label col-md-2" })
+                                    <div class="col-md-8">
+                                        @Html.TextAreaFor(m => m.Lease.ApplicantComment, new { @class = "form-control", rows = "4" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            
+            <div class="step-footer col-md-offset-4" align="center" style="display:inline-flex; align-items:center; position:relative">
+                <button data-direction="prev" class="btn btn-default button1">Previous</button>
+                <button data-direction="next" class="btn btn-default button1">Next</button>
+                <button data-direction="finish" class="btn btn-success button1">Generate Lease Renewal Agreement</button>
+            </div>
+            
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-steps.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#demo').steps({
+                onFinish: function () {
+                    $('#renewal-form').submit();
+                }
+            });
+            CalculateDates();
+            CalculateFinancials();
+        });
+
+        function CalculateDates() {
+            var startDateVal = document.getElementById('lease_startdate').value;
+            var periodMonths = parseInt(document.getElementById('lease_period').value, 10);
+            
+            if (startDateVal && !isNaN(periodMonths)) {
+                var startD = new Date(startDateVal);
+                
+                // End date = Start Date + Months - 1 day
+                var endD = new Date(startD);
+                endD.setMonth(endD.getMonth() + periodMonths);
+                endD.setDate(endD.getDate() - 1);
+                
+                var formatEndD = new Date(endD.getTime() - (endD.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                document.getElementById('end_date').value = formatEndD;
+                
+                // Renewal Notice = 3 months before End Date
+                var renewalD = new Date(endD);
+                renewalD.setMonth(renewalD.getMonth() - 3);
+                var formatRenewalD = new Date(renewalD.getTime() - (renewalD.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                document.getElementById('renewal_notice').value = formatRenewalD;
+                
+                // Termination Notice = 1 month before End Date
+                var termD = new Date(endD);
+                termD.setMonth(termD.getMonth() - 1);
+                var formatTermD = new Date(termD.getTime() - (termD.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                document.getElementById('termination_notice').value = formatTermD;
+            }
+        }
+
+        function CalculateFinancials() {
+            var rentalVal = parseFloat(document.getElementById('rental_amount').value);
+            if (!isNaN(rentalVal)) {
+                var vat = rentalVal * 0.15;
+                var total = rentalVal + vat;
+                
+                document.getElementById('vat_amount').value = vat.toFixed(2);
+                document.getElementById('total_amount').value = total.toFixed(2);
+            }
+        }
+    </script>
+}

@@ -1,4 +1,4 @@
-﻿
+
 @model C8.eServices.Mvc.ViewModels.DocumentsViewModel
 @using System.Web
 
@@ -180,7 +180,7 @@
                                         @Html.Hidden(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<br/>") : string.Empty : string.Empty)
                                         if (d != null)
                                         {
-                                            <input type="button" id="btnExternal" class="button1" value="Download" onclick="location.href='@Url.Action("GetDocument", "File", new { q = d.File.Data })'" />
+                                            <input type="button" id="btnExternal" class="button1" value="Download" onclick="window.open('@Url.Action("GetDocument", "File", new { q = d.File.Data })', '_blank')" />
                                         }
                                         else
                                         {

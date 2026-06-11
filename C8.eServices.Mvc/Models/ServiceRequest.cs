@@ -106,6 +106,17 @@ namespace C8.eServices.Mvc.Models
         public int? CreatedByCustomerId { get; set; }
 
         /// <summary>
+        /// The Letting Officer assigned to handle this service request
+        /// Determined by PreferredComplexArea.LettingOfficerId at submission time
+        /// </summary>
+        public int? AssignedToId { get; set; }
+
+        /// <summary>
+        /// Date this service request was assigned to a Letting Officer
+        /// </summary>
+        public DateTime? DateAssigned { get; set; }
+
+        /// <summary>
         /// Reason for deletion (required when deleting)
         /// </summary>
         public string DeletionReason { get; set; }
@@ -125,6 +136,9 @@ namespace C8.eServices.Mvc.Models
 
         [ForeignKey("CreatedByCustomerId")]
         public virtual Customer CreatedByCustomer { get; set; }
+
+        [ForeignKey("AssignedToId")]
+        public virtual Customer AssignedTo { get; set; }
 
         public virtual ICollection<ServiceRequestDocument> Documents { get; set; }
 

@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.TenantViewModel
+@model C8.eServices.Mvc.ViewModels.TenantViewModel
 
 
 
@@ -985,7 +985,7 @@
                                                                 <div class="form-group">
                                                                     @Html.LabelFor(model => model.PropertyLeaseApplication.HasDSTV, "Enable DSTV Service", htmlAttributes: new { @class = "control-label col-md-2" })
                                                                     <div class="col-md-2">
-                                                                        @Html.CheckBoxFor(model => model.PropertyLeaseApplication.HasDSTV, new { @id = "HasDSTV", @onchange = "toggleDSTVFields()" })
+                                                                        @Html.CheckBox("PropertyLeaseApplication.HasDSTV", Model.PropertyLeaseApplication.HasDSTV ?? false, new { @id = "HasDSTV", @onchange = "toggleDSTVFields()" })
                                                                         <span class="help-block">Every unit has a DSTV access point. Check this if tenant wants DSTV service activated.</span>
                                                                     </div>
                                                                 </div>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
@@ -203,6 +203,12 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<ServiceRequestPriority> ServiceRequestPriorities { get; set; }
         public DbSet<ServiceRequestDocument> ServiceRequestDocuments { get; set; }
         public DbSet<ServiceRequestAuditLog> ServiceRequestAuditLogs { get; set; }
+
+        // UC025 — Serve Eviction Notice & Proof of Service
+        public DbSet<EvictionServiceRecord> EvictionServiceRecords { get; set; }
+
+        // UC026 — Manage Disputes
+        public DbSet<LeaseDispute> LeaseDisputes { get; set; }
 
         // Entity Collections.
         public DbSet<Account> Accounts { get; set; }

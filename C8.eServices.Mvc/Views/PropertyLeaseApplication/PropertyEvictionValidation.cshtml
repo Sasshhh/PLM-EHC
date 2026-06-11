@@ -1,9 +1,10 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
 @{
-    //ViewBag.Title = "Details";
+    bool isVoluntary = Model.LeaseDetails.Status != null && Model.LeaseDetails.Status.Key == StatusKeys.AwaitingTerminationAppraisal;
+    ViewBag.Title = isVoluntary ? "Authorize Lease Termination" : "Conduct Property Eviction";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
 }
 <head>
@@ -23,12 +24,27 @@
             border-width: thin;
             margin-left: 50px;
         }
+
+        /* --- SIGNATURE PAD STYLING --- */
+        canvas#signature-pad {
+            background-color: #fff;
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #ccc;
+            cursor: crosshair;
+        }
+
+        .require::after {
+            content: " *";
+            font-weight: bold;
+            color: red;
+        }
     </style>
 </head>
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 <div id="bankAccountPanel">
     <div class="panel panel-default">
-        <div class="panel-heading">Evaluating Application</div>
+        <div class="panel-heading">@(isVoluntary ? "Authorize Lease Termination" : "Evaluating Application")</div>
         <div style="width: 90%;margin: 0 auto;">
             <br />
             <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
@@ -87,7 +103,7 @@
         <div class="panel-heading">Tenant Lease Details</div>
         <div style="width: 90%;margin: 0 auto;">
             <br />
-            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+            <table id="FailureTable_Lease" class="table table-bordered table-hover table-striped panel panel-default display ">
                 <thead>
                     <tr>
                         <th>
@@ -151,7 +167,7 @@
         <div class="panel-heading">Tenant Account Balance</div>
         <div style="width: 90%;margin: 0 auto;">
             <br />
-            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+            <table id="FailureTable_Balance" class="table table-bordered table-hover table-striped panel panel-default display ">
                 <thead>
                     <tr>
                         <th>
@@ -172,31 +188,43 @@
                             @Model.LeaseDetails.TotalIncludingVAT.ToString("C")
                         </td>
                     </tr>
-
-                    @*@foreach (var item in Model.Attachments)
-                    {
-                        <tr>
-                            <td>
-                                Exit Inspection Document
-                            </td>
-                            <td>
-                                <input type="button" id="btnExternal" class="button1" value="View" onclick="location.href='@item.FilePath'" />
-                            </td>
-
-                        </tr>
-                    }*@
-
-
                 </tbody>
             </table>
-          
         </div>
-  
+        
+        @if (isVoluntary)
+        {
+            <div style="width: 90%; margin: 0 auto; margin-top: 15px;">
+                <button type="button" class="btn btn-info btn-md" id="btnAccountValidation" onclick="toggleAccountValidation()">
+                    <span class="fa fa-university"></span> Account Validation
+                </button>
+                
+                <div id="accountValidationDiv" style="display: none; margin-top: 15px;">
+                    <div class="panel panel-info" style="border-color: #31708f;">
+                        <div class="panel-heading" style="background-color: #31708f; color: white; border-color: #31708f;">
+                            <strong>Tenant Bank Account Validation</strong>
+                        </div>
+                        <div class="panel-body" style="background-color: #fcf8e3; border: 1px solid #faebcc;">
+                            @if (ViewBag.BankingDetailsDvm != null)
+                            {
+                                @Html.Partial("_DocumentsPartialProofOfBankingDetails", (C8.eServices.Mvc.ViewModels.DocumentsViewModel)ViewBag.BankingDetailsDvm)
+                            }
+                            else
+                            {
+                                <p class="text-warning">No bank account details document available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+        }
+
         <br />
         <div class="panel-heading">Required Termination</div>
         <div style="width: 90%;margin: 0 auto;">
             <br />
-            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+            <table id="FailureTable_Termination" class="table table-bordered table-hover table-striped panel panel-default display ">
                 <thead>
                     <tr>
                         <th>
@@ -235,89 +263,111 @@
             </table>
         </div>
         <br />
-        <div class="panel-heading">Conduct Property Eviction</div>
-        <div style="width: 90%;margin: 0 auto;">
-            <br />
-            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
-                <thead>
-                    <tr>
-                        <th>
-                            Document Type
-                        </th>
-                        <th>
-                            Document
-                        </th>
 
-                    </tr>
-                </thead>
-                <tbody>
-
-                    @foreach (var item in Model.Attachments)
-                    {
+        @if (!isVoluntary)
+        {
+            <div class="panel-heading">Conduct Property Eviction</div>
+            <div style="width: 90%;margin: 0 auto;">
+                <br />
+                <table id="FailureTable_Evic" class="table table-bordered table-hover table-striped panel panel-default display ">
+                    <thead>
                         <tr>
-                            <td>
-                                Property Eviction Template
-                            </td>
-                            <td>
-                                <input type="button" id="btnExternal" class="button1" value="View" onclick="location.href='@item.FilePath'" />
-                            </td>
+                            <th>
+                                Document Type
+                            </th>
+                            <th>
+                                Document
+                            </th>
 
                         </tr>
-                    }
+                    </thead>
+                    <tbody>
 
+                        @foreach (var item in Model.Attachments)
+                        {
+                            <tr>
+                                <td>
+                                    Property Eviction Template
+                                </td>
+                                <td>
+                                    <input type="button" id="btnExternal" class="button1" value="View" onclick="location.href='@item.FilePath'" />
+                                </td>
 
-                </tbody>
-            </table>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+                <br />
+                <br />
+            </div>
             <br />
+            <div class="panel-heading">Upload Property Eviction Document/s</div>
+            @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
             <br />
-        </div>
-        <br />
-        <div class="panel-heading">Upload Property Eviction Document/s</div>
-        @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
-        <br />
+        }
+
         <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm())
-            {
+            <form action="@Url.Action("PropertyEvictionValidation", "PropertyLeaseApplication", new { q = Request.QueryString["q"] })" method="post" id="validationForm">
                 @Html.AntiForgeryToken()
                 <br />
-                @Html.HiddenFor(model => model.PropertyLeaseApplication.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
-                @Html.HiddenFor(model => model.LeaseDetails.Id, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
-                @Html.HiddenFor(model => model.LeaseDetails.LeaseReferenceNo, htmlAttributes: new { @class = "form-control", @Style = "display:none;" })
+                <input type="hidden" name="id" value="@Model.LeaseDetails.Id" />
                 <div class="form-horizontal">
                     @if (ViewBag.ApprovalStatus != null)
                     {
                         <div class="form-group">
-                            @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
+                            <label class="control-label col-md-1">Approval Status</label>
                             <div class="col-md-2">
-                                @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required" })
+                                @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", @id = "ApprovalStatus" })
                                 @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                             </div>
                         </div>
                     }
-                </div>
-                <div id="divComment" style="display:block">
-                    <div class="form-group">
-                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-4">
-                            @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "Comments" })
-                            @Html.ValidationMessage("RejectComment", "", new { @class = "text-danger" })
+
+                    @if (isVoluntary)
+                    {
+                        <div class="form-group">
+                            <label class="control-label col-md-1 required" for="OfficialNumber">Official Number *</label>
+                            <div class="col-md-3">
+                                <input type="text" name="OfficialNumber" id="OfficialNumber" class="form-control" placeholder="Enter Official Number" required />
+                            </div>
                         </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-1 require">Signature</label>
+                            <div class="col-md-5">
+                                <canvas id="signature-pad"></canvas>
+                                <div style="margin-top:5px;">
+                                    <button type="button" class="btn btn-xs btn-default" onclick="clearSignature()">Clear Signature</button>
+                                </div>
+                                <input type="hidden" id="hdnSignatureBlob" name="hdnSignatureBlob" value="" />
+                            </div>
+                        </div>
+                    }
+
+                    <div id="divComment" style="display:block">
+                        <div class="form-group">
+                            <label class="control-label col-md-1" id="lblComments">Comment</label>
+                            <div class="col-md-4">
+                                @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "Comments" })
+                                @Html.ValidationMessage("RejectComment", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
                     </div>
                     <br />
-                    <br />
-                    <br />
-                </div>
-                <br />
 
-                <div id="divbtn" style="display:block">
-
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
-                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
-                    <br />
-                    <br />
-                    <br />
+                    <div id="divbtn" style="display:block">
+                        <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                        <input type="submit" value="Submit" style="display:none;" name="btnApprovalStatus" class="button1" id="btnApproval" />
+                        <br />
+                        <br />
+                        <br />
+                    </div>
                 </div>
-            }
+            </form>
         </div>
     </div>
 </div>
@@ -329,7 +379,6 @@
     <script type="text/javascript">
 
         function loadAccounts() {
-            //debugger;
             $('#FailureTable').DataTable({
                 "ajax": {
                     "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
@@ -379,49 +428,148 @@
 
         $(function () {
             $('#RCSTable').DataTable();
-
+            $('#FailureTable_Lease').DataTable();
+            $('#FailureTable_Balance').DataTable();
+            $('#FailureTable_Termination').DataTable();
+            $('#FailureTable_Evic').DataTable();
         });
 
     </script>
-
 }
 
 <script>
     function clickSubmit() {
+        var isVoluntary = @(isVoluntary ? "true" : "false");
+        var statusval = document.getElementById("ApprovalStatus").value;
+        var comment = document.getElementById("Comments").value.trim();
+
+        if (isVoluntary) {
+            var officialNo = document.getElementById("OfficialNumber").value.trim();
+            var signature = document.getElementById("hdnSignatureBlob").value;
+
+            // 1. Check Official Number
+            if (officialNo == "") {
+                swal("Error", "Please enter your Official Number.", "warning");
+                return;
+            }
+
+            // 2. Check Signature
+            if (signature == "") {
+                swal("Error", "Please sign the document before submitting.", "warning");
+                document.getElementById("signature-pad").scrollIntoView({ behavior: "smooth" });
+                return;
+            }
+        }
+
+        // 3. Check Outcome Selection
+        if (statusval == "") {
+            swal("Error", "Please select an Action.", "warning");
+            return;
+        }
+
+        // 4. Check Forced Rejection Comment
+        if (statusval == "Rejected" && comment == "") {
+            swal("Error", "A reason is mandatory when rejecting.", "warning");
+            document.getElementById("Comments").focus();
+            return;
+        }
+
+        // 5. Confirmation
         swal({
             icon: "info",
-            title: "Are you sure you want to submit the following document approval?",
+            title: isVoluntary ? "Are you sure you want to submit this decision?" : "Are you sure you want to submit the following document approval?",
             buttons: [
                 'No!',
                 'Yes, I am sure!'
             ]
-
         }).then(function (isConfirm) {
             if (isConfirm) {
-
-                var statuskey = document.getElementById('ApprovalStatus').value;
-                var comment = document.getElementById('Comments').value;
-                if (statuskey == "Rcs_Rejected") {
-                    if (comment == null || comment == "") {
-                        swal("error", "Please enter reason for rejecting termination", "warning")
-                    }
-                } else {
-                    document.getElementById("btnApproval").click();
-                }
+                document.getElementById("btnApproval").click();
             }
         });
     }
 
+    document.getElementById('ApprovalStatus').addEventListener('change', function () {
+        var status = this.value;
+        var label = document.getElementById('lblComments');
+        if (status === 'Rejected') {
+            label.innerHTML = "Reason for Rejection *";
+            label.style.color = "red";
+            label.style.fontWeight = "bold";
+        } else {
+            label.innerHTML = "Comment";
+            label.style.color = "black";
+            label.style.fontWeight = "normal";
+        }
+    });
 </script>
+
+@if (isVoluntary)
+{
+    <script>
+        // ================================
+        // CANVAS SIGNATURE LOGIC
+        // ================================
+        var canvas = document.getElementById('signature-pad');
+        var ctx = canvas.getContext('2d');
+        var drawing = false;
+
+        // Set canvas dimensions
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        // --- Mouse Events ---
+        canvas.addEventListener('mousedown', function (e) { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', function (e) { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+        canvas.addEventListener('mouseup', function () { drawing = false; updateHiddenField(); });
+
+        // --- Touch Events (Mobile/Tablet) ---
+        canvas.addEventListener('touchstart', function (e) {
+            e.preventDefault();
+            drawing = true;
+            ctx.beginPath();
+            var touch = e.touches[0];
+            var rect = canvas.getBoundingClientRect();
+            ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        });
+
+        canvas.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+            if (drawing) {
+                var touch = e.touches[0];
+                var rect = canvas.getBoundingClientRect();
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener('touchend', function () { drawing = false; updateHiddenField(); });
+
+        function updateHiddenField() {
+            document.getElementById('hdnSignatureBlob').value = canvas.toDataURL();
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('hdnSignatureBlob').value = "";
+        }
+
+        function toggleAccountValidation() {
+            var div = document.getElementById('accountValidationDiv');
+            if (div.style.display === 'none') {
+                div.style.display = 'block';
+            } else {
+                div.style.display = 'none';
+            }
+        }
+    </script>
+}
+
 <script>
-        $(function () {
-            $('#FailureTable').DataTable();
-
-                var display = "@ViewBag.Message";
-
+    $(function () {
+        var display = "@ViewBag.Message";
         if (display != null && display != "") {
             $('#MessageModal4').modal('show');
-        }});
+        }
+    });
 </script>
-
-

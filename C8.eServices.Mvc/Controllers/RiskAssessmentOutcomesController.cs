@@ -628,18 +628,10 @@ namespace C8.eServices.Mvc.Controllers
                         // Change "s_added_to_waiting_list" to whatever Key matches your DB Status
                         SetApplicationStatus(context, rcsAppId, "s_added_to_waiting_list");
 
-                        // D. AUTOMATIC MATCHING/ALLOCATION TRIGGER
-                        // Try to find and allocate a matching unit immediately
-                        bool unitMatched = TryAutoMatchUnit(context, rcsAppId, complexId, typologyId);
+                        // D. ADD TO GLOBAL ENGINE QUEUE
+                        MatchingHelper.SaveToWaitingListQueue(context, rcsAppId, app.CustomerId);
 
-                        if (unitMatched)
-                        {
-                            Session["ConductRiskAssessmentSession"] = "Application Approved & Unit Automatically Matched!";
-                        }
-                        else
-                        {
-                            Session["ConductRiskAssessmentSession"] = "Application Approved & Added to Waiting List.";
-                        }
+                        Session["ConductRiskAssessmentSession"] = "Application Approved & Added to Waiting List Queue.";
                     }
                 }
                 else
@@ -732,87 +724,7 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        /// <summary>
-        /// Attempts to automatically match and allocate a unit to the applicant immediately after CEO approval.
-        /// Returns true if a match was found and allocated, false otherwise.
-        /// </summary>
-        private bool TryAutoMatchUnit(eServicesDbContext context, int appId, int complexId, int typologyId)
-        {
-            try
-            {
-                // 1. Find an available unit matching the applicant's preferences
-                var availableUnit = context.ApplicationAllocatedProperty
-                    .Where(u => u.OfferedComplexId == complexId
-                             && u.HumanEHCOptionId == typologyId
-                             && u.IsTaken == false
-                             && u.IsActive == true)
-                    .OrderBy(u => u.Id) // First available unit
-                    .FirstOrDefault();
 
-                if (availableUnit == null)
-                {
-                    // No matching unit available - applicant stays in waiting list
-                    return false;
-                }
-
-                // 2. Get the waiting list entry we just created
-                var waitingListEntry = context.PropertyLeaseWaitingLists
-                    .FirstOrDefault(w => w.PropertyLeaseApplicationId == appId
-                                      && w.QueueStatus == "Waiting");
-
-                if (waitingListEntry == null)
-                {
-                    return false;
-                }
-
-                // 3. Perform the allocation (Lock the unit)
-                availableUnit.AllocatedByUserId = SystemUser.Id;
-                availableUnit.PropertyLeaseApplicationId = appId;
-                availableUnit.IsTaken = true;
-
-                // 4. Create the offer record (MatchedUnits)
-                var matchedUnit = new MatchedUnits
-                {
-                    ApplicationAllocatedPropertyId = availableUnit.Id,
-                    PropertyLeaseApplicationId = appId,
-                    IsAccepted = false,
-                    RejectedProperty = false
-                };
-                context.MatchedUnits.Add(matchedUnit);
-
-                // 5. Update waiting list status
-                waitingListEntry.QueueStatus = "Offered";
-                waitingListEntry.OfferedUnitId = availableUnit.Id;
-
-                // 6. Update main application status to "Awaited" (Waiting for customer acceptance)
-                var awaitedStatus = context.Status.FirstOrDefault(s => s.Key == StatusKeys.awaited);
-                if (awaitedStatus != null)
-                {
-                    MatchingHelper.ChangeApplicationStatus(context, awaitedStatus.Id, appId);
-                }
-
-                // 7. Save unit allocation history
-                MatchingHelper.SaveUnitHistory(context, appId, "Unit Auto-Allocated by CEO Approval", availableUnit.Id, SystemUser.Id);
-
-                // 8. Send email notification
-                var emailContent = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.AtUnitMatchApplication);
-                if (emailContent != null)
-                {
-                    EmailHelper.CustomerEmailNotification(context, appId, emailContent.Id);
-                }
-
-                // Commit all changes
-                context.SaveChanges();
-
-                return true; // Successfully matched and allocated
-            }
-            catch (Exception ex)
-            {
-                // Log error but don't crash - applicant will remain in waiting list
-                Console.WriteLine($"Auto-match error for App {appId}: {ex.Message}");
-                return false;
-            }
-        }
 
 
 

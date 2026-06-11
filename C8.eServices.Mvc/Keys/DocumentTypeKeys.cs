@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -129,6 +129,17 @@ namespace C8.eServices.Mvc.Keys
         public const string Affidavit = "dt_affidavit_document";
         public const string ProofOfAddress = "dt_proof_of_address";
         public const string DebitOrder = "dt_debit_order";
+
+        // ── Renewal-specific document types ────────────────────────────────────
+        // These are SEPARATE from the original application document types above.
+        // Using distinct keys/checklists prevents original docs from appearing or
+        // being deletable on the tenant renewal upload page (AcceptLeaseRenewal).
+        public const string RenewalIdentityDocument  = "dt_renewal_identity_document";
+        public const string RenewalProofOfIncome     = "dt_renewal_proof_of_income";
+        public const string RenewalBankStatement     = "dt_renewal_bank_statement";
+        public const string RenewalProofOfEmployment = "dt_renewal_proof_of_employment";
+        public const string RenewalAffidavit         = "dt_renewal_affidavit";
+        public const string RenewalProofOfAddress    = "dt_renewal_proof_of_address";
 
         public const string HSAgreementOfLease = "dt_final_agreement_of_lease";
 

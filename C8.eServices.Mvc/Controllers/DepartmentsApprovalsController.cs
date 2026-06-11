@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Globalization;
@@ -1677,7 +1677,7 @@ namespace C8.eServices.Mvc.Controllers
 
         [DecryptParameter]
         [HttpPost]
-        public ActionResult ApplicationFeeValidation(int? id, string ApprovalStatusddl)
+        public ActionResult ApplicationFeeValidation(int? id, string ApprovalStatusddl, string Comment)
         {
             Initialise();
             var userID = Customer.Id;
@@ -1749,7 +1749,11 @@ namespace C8.eServices.Mvc.Controllers
             {
                 rcsApps.StatusId = Keys.Where(x => x.Key == StatusKeys.UploadPOPApplicationFee).FirstOrDefault().Id;
                 db.SaveChanges();
-                var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AcknowledgementAppFeeRejected).Description.ToString()/* + DecisionType*/;
+
+                // Save rejection reason — will be shown to customer on re-upload screen
+                var rejectionReason = string.IsNullOrWhiteSpace(Comment) ? "No reason provided." : Comment;
+                var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AcknowledgementAppFeeRejected).Description.ToString()
+                                            + " Reason: " + rejectionReason;
                 var RCSHistoryLog = new RCSApplicationHistoryLog
                 {
                     RCSApplicationStatusId = rcsApps.Id,
@@ -1760,12 +1764,14 @@ namespace C8.eServices.Mvc.Controllers
                 };
                 db.RCSApplicationHistoryLogs.Add(RCSHistoryLog);
                 db.SaveChanges();
+
                 var getemailbody = db.EmailContentTypes.Where(x => x.Key == EmailContentKeys.ApplicationProofOfPaymentRejected).FirstOrDefault();
                 Email SendMail = new Email();
                 string attorneyemail = rcsApps.Customer.EmailAddress;
                 string attorneyname = rcsApps.Customer.FirstName + " " + rcsApps.Customer.LastName;
-                string emailbody = getemailbody.Description + rcsApps.ApplicationReferenceNumber;
-                //string emailbody = "Your proof of payment documents for RCS application fee has been rejected , please re-upload required documents for RCS Application Reference Number: " + rcsApps.ApplicationReferenceNumber;
+                // Include the bookkeeper's reason in the email so the customer knows what to fix
+                string emailbody = getemailbody.Description + rcsApps.ApplicationReferenceNumber
+                                   + ". Reason: " + rejectionReason;
                 SendMail.GenerateEmail(attorneyemail, "RCS-Online Application",
                               emailbody, "1", false, AppSettingKeys.EservicesDefaultEmailTemplate, attorneyname);
 
@@ -1780,11 +1786,6 @@ namespace C8.eServices.Mvc.Controllers
                 };
                 db.RCSApplicationHistoryLogs.Add(RCSHistoryLog2);
                 db.SaveChanges();
-                //foreach (var item in departapprovals)
-                //{
-                //    item.StatusId = rcsApps.StatusId;
-                //    db.SaveChanges();
-                //}
             }
             else if( ApprovalStatusddl == RCSActionTypeKeys.ReAllocate)
             {

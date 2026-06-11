@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -40,13 +41,23 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             IQueryable<ServiceRequest> query = _db.ServiceRequests
+                .Include(sr => sr.Status)
+                .Include(sr => sr.Category)
+                .Include(sr => sr.Priority)
+                .Include(sr => sr.Complex)
                 .Where(sr => sr.IsActive && !sr.IsDeleted);
 
-            // Tenants see only their own requests; CSO sees all
-            if (!User.IsInRole("Client Services Officer") && customer != null)
+            // Tenants see only their own requests
+            if (!User.IsInRole("Client Services Officer") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators") && customer != null)
             {
                 query = query.Where(sr => sr.CreatedByCustomerId == customer.Id);
             }
+            // CSOs see only requests assigned to them (complex-based routing)
+            else if (User.IsInRole("Client Services Officer") && customer != null)
+            {
+                query = query.Where(sr => sr.AssignedToId == customer.Id);
+            }
+            // Admins and Super Admins see all (no filter)
 
             var requests = query.OrderByDescending(sr => sr.DateSubmitted).ToList();
 
@@ -98,14 +109,21 @@ namespace C8.eServices.Mvc.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(ServiceRequest model, HttpPostedFileBase[] documents)
+        public ActionResult Create(ServiceRequest model, HttpPostedFileBase[] uploadDocuments)
         {
             try
             {
+                ModelState.Remove("RequestReferenceNumber");
+                ModelState.Remove("StatusId");
+                ModelState.Remove("DateSubmitted");
+                ModelState.Remove("EscalationTriggered");
+                ModelState.Remove("IsActive");
+                ModelState.Remove("IsDeleted");
+
                 if (!ModelState.IsValid)
                 {
-                    PopulateDropdowns();
-                    return View(model);
+                    var mErrors = string.Join("; ", ModelState.SelectMany(kvp => kvp.Value.Errors.Select(e => kvp.Key + ": " + (string.IsNullOrEmpty(e.ErrorMessage) ? e.Exception?.Message : e.ErrorMessage))));
+                    throw new Exception("ModelState Validation failed: " + mErrors);
                 }
 
                 // Generate ticket reference number (EHC_SR_###_YYYY)
@@ -145,21 +163,31 @@ namespace C8.eServices.Mvc.Controllers
                 _db.SaveChanges();
 
                 // Save uploaded documents (UC17D Step 13-16)
-                if (documents != null && documents.Length > 0)
+                if (uploadDocuments != null && uploadDocuments.Length > 0)
                 {
-                    SaveDocuments(model.Id, documents);
+                    SaveDocuments(model.Id, uploadDocuments);
                 }
+
+                // Assign to Letting Officer of the selected complex (UC17D - Complex-Based Routing)
+                _engine.AssignToLettingOfficer(model);
 
                 // Log audit trail
                 _engine.LogAuditTrail(model.Id, "Service Request Created",
                     $"Request {model.RequestReferenceNumber} created by {model.ReportedByName} {model.ReportedBySurname}",
                     model.CreatedByCustomerId);
 
-                // Send email notification with ticket reference (UC17D Step 20)
+                // Send creation notification to tenant (UC17D Step 20)
                 _engine.SendCreationNotification(model);
 
-                TempData["SuccessMessage"] = $"Service request {model.RequestReferenceNumber} created successfully.";
-                return RedirectToAction("Details", new { id = model.Id });
+                TempData["SuccessMessage"] = $"Service request {model.RequestReferenceNumber} created successfully and assigned to a Client Services Officer.";
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = model.Id }));
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+            {
+                var errors = string.Join("; ", dbEx.EntityValidationErrors.SelectMany(x => x.ValidationErrors).Select(x => x.PropertyName + ": " + x.ErrorMessage));
+                ModelState.AddModelError("", "DB Validation Error: " + errors);
+                PopulateDropdowns();
+                return View(model);
             }
             catch (Exception ex)
             {
@@ -176,7 +204,14 @@ namespace C8.eServices.Mvc.Controllers
         [EncryptedActionParameter]
         public ActionResult Details(int id)
         {
-            var serviceRequest = _db.ServiceRequests.Find(id);
+            var serviceRequest = _db.ServiceRequests
+                .Include(sr => sr.Status)
+                .Include(sr => sr.Category)
+                .Include(sr => sr.Priority)
+                .Include(sr => sr.Complex)
+                .Include(sr => sr.Documents)
+                .Include(sr => sr.AuditLogs)
+                .FirstOrDefault(sr => sr.Id == id);
             if (serviceRequest == null)
             {
                 return HttpNotFound();
@@ -233,14 +268,14 @@ namespace C8.eServices.Mvc.Controllers
             if (customer == null || !_engine.IsCreator(id, customer.Id))
             {
                 TempData["ErrorMessage"] = "Only the creator of the service request can edit it.";
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
 
             // Validate: status must be Open (BR37)
             if (!_engine.CanEditOrDelete(id))
             {
                 TempData["ErrorMessage"] = "This service request can no longer be edited. Only requests with Open status can be modified.";
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
 
             PopulateDropdowns(serviceRequest);
@@ -277,14 +312,14 @@ namespace C8.eServices.Mvc.Controllers
                 if (customer == null || !_engine.IsCreator(id, customer.Id))
                 {
                     TempData["ErrorMessage"] = "Only the creator of the service request can edit it.";
-                    return RedirectToAction("Details", new { id = id });
+                    return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
                 }
 
                 // Validate: status must be Open (BR37)
                 if (!_engine.CanEditOrDelete(id))
                 {
                     TempData["ErrorMessage"] = "This service request can no longer be edited. Only requests with Open status can be modified.";
-                    return RedirectToAction("Details", new { id = id });
+                    return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
                 }
 
                 // Track changes for audit trail
@@ -316,7 +351,7 @@ namespace C8.eServices.Mvc.Controllers
                     customer.Id);
 
                 TempData["SuccessMessage"] = "Service request updated successfully.";
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
             catch (Exception ex)
             {
@@ -357,21 +392,21 @@ namespace C8.eServices.Mvc.Controllers
                 if (customer == null || !_engine.IsCreator(id, customer.Id))
                 {
                     TempData["ErrorMessage"] = "Only the creator of the service request can delete it.";
-                    return RedirectToAction("Details", new { id = id });
+                    return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
                 }
 
                 // Validate: status must be Open (BR37)
                 if (!_engine.CanEditOrDelete(id))
                 {
                     TempData["ErrorMessage"] = "This service request can no longer be deleted. Only requests with Open status can be deleted.";
-                    return RedirectToAction("Details", new { id = id });
+                    return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
                 }
 
                 // Validate: reason is mandatory (UC17E Step 9)
                 if (string.IsNullOrWhiteSpace(deletionReason))
                 {
                     TempData["ErrorMessage"] = "A reason for deletion is required.";
-                    return RedirectToAction("Details", new { id = id });
+                    return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
                 }
 
                 // Set status to Deleted (BR36)
@@ -397,7 +432,7 @@ namespace C8.eServices.Mvc.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while deleting the service request: " + ex.Message;
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
         }
 
@@ -434,13 +469,27 @@ namespace C8.eServices.Mvc.Controllers
                     $"Status changed to {statusName}",
                     customer?.Id);
 
+                if (newStatusKey == ServiceRequestStatusKeys.InProgress)
+                {
+                    // Close the Open queue entry, open an In Progress queue entry
+                    _engine.RoundRobinMarkFinished(id, ResponsibilityTypeKeys.ServiceRequestOpen);
+                    _engine.RoundRobinOpenInProgress(serviceRequest);
+                }
+                else if (newStatusKey == ServiceRequestStatusKeys.Resolved)
+                {
+                    // Close the In Progress queue entry
+                    _engine.RoundRobinMarkFinished(id, ResponsibilityTypeKeys.ServiceRequestInProgress);
+                    TempData["SuccessMessage"] = $"Resolved service request, email sent to {serviceRequest.ReportedByName} {serviceRequest.ReportedBySurname} on {serviceRequest.EmailAddress}.";
+                    return RedirectToAction("Index");
+                }
+
                 TempData["SuccessMessage"] = $"Status updated to {statusName}.";
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while updating the status: " + ex.Message;
-                return RedirectToAction("Details", new { id = id });
+                return RedirectToAction("Details", C8.eServices.Mvc.Helpers.SecureActionLinkExtension.Encrypt(new { id = id }));
             }
         }
 
@@ -529,3 +578,4 @@ namespace C8.eServices.Mvc.Controllers
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿@using System.Activities.Statements
+@using System.Activities.Statements
 @using C8.eServices.Mvc.DataAccessLayer
 @using C8.eServices.Mvc.Helpers
 @using C8.eServices.Mvc.Keys
@@ -163,6 +163,15 @@ else if (ViewBag.Application == ApplicationKeys.IncentivePolicy)
             </div>
         </div>
     </div>*@
+
+@if (ViewBag.AppFeeRejectionReason != null)
+{
+    <div class="alert alert-danger" role="alert" style="margin-bottom: 15px;">
+        <strong><span class="glyphicon glyphicon-exclamation-sign"></span> Your proof of payment was rejected.</strong><br />
+        @ViewBag.AppFeeRejectionReason<br />
+        <em>Please review the reason above and upload the correct document below.</em>
+    </div>
+}
 
 <div class="panel-group" id="documentsUpload">
     <div class="panel panel-default">

@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.ViewModels;
@@ -2676,7 +2676,8 @@ db.RCSApplicationHistoryLogs.Where(d => d.RCSApplicationStatusId == rcsapp.Id &&
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt1 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt1 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
  
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -3149,7 +3150,8 @@ db.RCSApplicationHistoryLogs.Where(d => d.RCSApplicationStatusId == rcsapp.Id &&
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt2 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt2 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();
@@ -3596,7 +3598,8 @@ db.RCSApplicationHistoryLogs.Where(d => d.RCSApplicationStatusId == rcsapp.Id &&
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt3 = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt3 && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.IsActive == true && DateTime.Compare(x.CreatedDateTime.Value.Date, DateTime.Now.Date) <= 0).ToList();
             //var RoundRobingQueue = db.RoundRobinQueues.Where(x=>x.CreatedDateTime.Value.Day == DateTime.Now.Date).ToList();

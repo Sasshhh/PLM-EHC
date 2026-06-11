@@ -4,32 +4,371 @@
     ViewBag.Title = "Confirm Investigation Appointment";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
     var complaint = ViewBag.Complaint as C8.eServices.Mvc.Models.TenantComplaint;
+    var schedulesList = ViewBag.Schedules as List<C8.eServices.Mvc.Models.InspectionSchedule>;
 }
 
 <style>
-    .appointment-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 30px;
-        border-radius: 10px;
+    /* ===== PREMIUM APPOINTMENT SELECTOR ===== */
+    
+    .appt-selected-display {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 2px dashed rgba(99, 102, 241, 0.4);
+        border-radius: 16px;
+        padding: 40px 30px;
         text-align: center;
-        margin-bottom: 20px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
     }
-    .appointment-card .date {
-        font-size: 48px;
-        font-weight: bold;
+    .appt-selected-display:hover {
+        border-color: rgba(99, 102, 241, 0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
     }
-    .appointment-card .month-year {
-        font-size: 24px;
+    .appt-selected-display::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        animation: pulse-bg 4s ease-in-out infinite;
     }
-    .appointment-card .time {
-        font-size: 32px;
-        margin-top: 10px;
-        padding: 10px 30px;
-        background: rgba(255,255,255,0.2);
+    @@keyframes pulse-bg {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+    .appt-placeholder-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 16px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
         border-radius: 20px;
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: white;
+        animation: float 3s ease-in-out infinite;
     }
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .appt-placeholder-text {
+        color: #94a3b8;
+        font-size: 16px;
+        position: relative;
+        z-index: 1;
+    }
+    .appt-placeholder-text strong {
+        color: #e2e8f0;
+        display: block;
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+    .appt-change-btn {
+        display: inline-block;
+        margin-top: 14px;
+        padding: 10px 28px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff !important;
+        border: none;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+    .appt-change-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Selected state */
+    .appt-selected-display.has-selection {
+        border: 2px solid #22c55e;
+        background: linear-gradient(135deg, #052e16 0%, #14532d 100%);
+    }
+    .appt-selected-display.has-selection .appt-placeholder-icon {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+    .appt-selected-display.has-selection .appt-placeholder-text strong {
+        color: #bbf7d0;
+    }
+    .appt-selected-info {
+        display: none;
+    }
+    .appt-selected-display.has-selection .appt-selected-info {
+        display: block;
+    }
+    .appt-selected-display.has-selection .appt-no-selection {
+        display: none;
+    }
+    .appt-sel-date {
+        font-size: 32px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.5px;
+    }
+    .appt-sel-time {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 20px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 20px;
+        color: #d1fae5;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    /* ===== MODAL ===== */
+    .appt-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .appt-modal-overlay.active {
+        display: flex;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .appt-modal {
+        background: linear-gradient(170deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 24px;
+        width: 90%;
+        max-width: 580px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 120px rgba(99, 102, 241, 0.08);
+        animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    @@keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .appt-modal-header {
+        padding: 32px 32px 0;
+        text-align: center;
+        position: relative;
+    }
+    .appt-modal-header-glow {
+        position: absolute;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 120px;
+        background: radial-gradient(ellipse, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .appt-modal-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        background: linear-gradient(135deg, #6366f1, #a78bfa);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+    }
+    .appt-modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 6px;
+    }
+    .appt-modal-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 0;
+    }
+    .appt-modal-close {
+        position: absolute;
+        top: 20px;
+        right: 24px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
+        color: #94a3b8;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .appt-modal-close:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+
+    /* Slot Cards */
+    .appt-slots-container {
+        padding: 24px 32px 32px;
+    }
+    .appt-slot-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .appt-slot-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .appt-slot-card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        transform: translateX(4px);
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+    }
+    .appt-slot-card:hover::before {
+        opacity: 1;
+    }
+    .appt-slot-card.selected {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3), 0 8px 30px rgba(99, 102, 241, 0.15);
+    }
+    .appt-slot-card.selected::after {
+        content: '\2713';
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 50%;
+        color: white;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        animation: checkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @@keyframes checkPop {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+
+    .appt-slot-date-block {
+        width: 64px;
+        height: 72px;
+        background: linear-gradient(135deg, #312e81, #4338ca);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+    }
+    .appt-slot-day {
+        font-size: 26px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+    .appt-slot-month {
+        font-size: 11px;
+        font-weight: 600;
+        color: #c7d2fe;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 2px;
+    }
+    .appt-slot-details {
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+    .appt-slot-fulldate {
+        font-size: 16px;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 4px;
+    }
+    .appt-slot-time-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        background: rgba(99, 102, 241, 0.15);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        border-radius: 20px;
+        color: #a5b4fc;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .appt-slot-time-badge i {
+        font-size: 14px;
+    }
+
+    .appt-modal-confirm-btn {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        opacity: 0.4;
+        pointer-events: none;
+    }
+    .appt-modal-confirm-btn.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .appt-modal-confirm-btn.active:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+    }
+
+    /* ===== EXISTING STYLES (kept) ===== */
     .info-section {
         background: #fff;
         border: 1px solid #ddd;
@@ -67,6 +406,38 @@
         color: #856404;
         margin-right: 10px;
     }
+
+    /* ===== ACTION BUTTONS ===== */
+    .btn-confirm-appt {
+        background-color: #b0b0b0 !important;
+        border-color: #a0a0a0 !important;
+        color: #fff !important;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    .btn-confirm-appt.enabled {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: #fff !important;
+        cursor: pointer;
+        opacity: 1;
+    }
+    .btn-confirm-appt.enabled:hover {
+        background-color: #218838 !important;
+        border-color: #1e7e34 !important;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        transform: translateY(-1px);
+    }
+    .btn-back-action {
+        background-color: #fff !important;
+        border: 2px solid #337ab7 !important;
+        color: #337ab7 !important;
+        margin-left: 10px;
+    }
+    .btn-back-action:hover {
+        background-color: #337ab7 !important;
+        color: #fff !important;
+    }
 </style>
 
 <div class="panel-group">
@@ -82,17 +453,6 @@
         <div class="panel-body">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                    <!-- Appointment Visual -->
-                    @if (Model.AppointmentDate.HasValue)
-                    {
-                        <div class="appointment-card">
-                            <div class="date">@Model.AppointmentDate.Value.Day</div>
-                            <div class="month-year">@Model.AppointmentDate.Value.ToString("MMMM yyyy")</div>
-                            <div class="time">
-                                <i class="ion ion-ios-time"></i> @Model.AppointmentTime
-                            </div>
-                        </div>
-                    }
 
                     <!-- Warning -->
                     <div class="warning-box">
@@ -131,6 +491,78 @@
                     {
                         @Html.AntiForgeryToken()
                         @Html.HiddenFor(model => model.Id)
+                        <input type="hidden" name="action" id="confirmAction" value="accept" />
+                        <input type="hidden" name="selectedScheduleId" id="hiddenSelectedScheduleId" value="" />
+
+                        if (schedulesList != null && schedulesList.Count == 1)
+                        {
+                            var sched = schedulesList.First();
+                            <!-- Single slot: auto-select, show the premium card -->
+                            <div class="appt-selected-display has-selection" style="cursor: default;">
+                                <div class="appt-placeholder-icon">
+                                    <i class="ion ion-ios-calendar"></i>
+                                </div>
+                                <div class="appt-selected-info" style="display: block;">
+                                    <div class="appt-sel-date">
+                                        @(sched.DateToSchedule != null && sched.DateToSchedule.ShecduleDate.HasValue ? sched.DateToSchedule.ShecduleDate.Value.ToString("dd MMMM yyyy") : "")
+                                    </div>
+                                    <div class="appt-sel-time">
+                                        <i class="ion ion-ios-time"></i> @(sched.TimeSlot != null ? sched.TimeSlot.Name : "")
+                                    </div>
+                                </div>
+                                <div class="appt-placeholder-text" style="margin-top: 10px; position: relative; z-index: 1;">
+                                    <span style="color: #86efac;">Your scheduled appointment</span>
+                                </div>
+                            </div>
+                            <script>
+                                $(function() { $('#hiddenSelectedScheduleId').val('@sched.Id'); });
+                            </script>
+                        }
+                        else if (schedulesList != null && schedulesList.Count > 1)
+                        {
+                            <!-- Multiple slots: show the selector trigger -->
+                            <div class="appt-selected-display" id="apptSelectorTrigger" onclick="openApptModal()">
+                                <div class="appt-placeholder-icon">
+                                    <i class="ion ion-ios-calendar"></i>
+                                </div>
+                                <!-- No selection state -->
+                                <div class="appt-no-selection">
+                                    <div class="appt-placeholder-text">
+                                        <strong>No Appointment Selected</strong>
+                                        Choose a date &amp; time that works best for you
+                                    </div>
+                                    <span class="appt-change-btn">
+                                        <i class="ion ion-ios-calendar-outline"></i> Select Appointment
+                                    </span>
+                                </div>
+                                <!-- Has selection state -->
+                                <div class="appt-selected-info">
+                                    <div class="appt-placeholder-text">
+                                        <span style="color: #86efac; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Selected Appointment</span>
+                                    </div>
+                                    <div class="appt-sel-date" id="displaySelDate"></div>
+                                    <div class="appt-sel-time" id="displaySelTime"></div>
+                                    <span class="appt-change-btn" style="margin-top: 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                        <i class="ion ion-ios-compose-outline"></i> Change Selection
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.AppointmentDate.HasValue)
+                        {
+                            <!-- Fallback: single appointment from investigation record -->
+                            <div class="appt-selected-display has-selection" style="cursor: default;">
+                                <div class="appt-placeholder-icon">
+                                    <i class="ion ion-ios-calendar"></i>
+                                </div>
+                                <div class="appt-selected-info" style="display: block;">
+                                    <div class="appt-sel-date">@Model.AppointmentDate.Value.ToString("dd MMMM yyyy")</div>
+                                    <div class="appt-sel-time">
+                                        <i class="ion ion-ios-time"></i> @Model.AppointmentTime
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <div class="info-section">
                             <div class="section-title">
@@ -150,19 +582,19 @@
 
                             <div class="form-group" style="margin-top: 20px;">
                                 <div class="col-md-12 text-center">
-                                    <button type="submit" class="btn btn-success btn-lg" id="confirmBtn" disabled>
+                                    <button type="submit" class="btn btn-lg btn-confirm-appt" id="confirmBtn" disabled onclick="$('#confirmAction').val('accept');">
                                         <i class="ion ion-checkmark-circled"></i> Confirm Appointment
                                     </button>
                                     @if (complaint != null)
                                     {
                                         <a href="@Url.Action("Details", "Complaints", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + complaint.Id) })" 
-                                           class="btn btn-default btn-lg">
+                                           class="btn btn-lg btn-back-action">
                                             <i class="ion ion-arrow-left-c"></i> Back to Details
                                         </a>
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("Index", "Complaints")" class="btn btn-default btn-lg">
+                                        <a href="@Url.Action("Index", "Complaints")" class="btn btn-lg btn-back-action">
                                             <i class="ion ion-arrow-left-c"></i> Back to List
                                         </a>
                                     }
@@ -176,13 +608,138 @@
     </div>
 </div>
 
+<!-- ===== APPOINTMENT MODAL ===== -->
+@if (schedulesList != null && schedulesList.Count > 1)
+{
+    <div class="appt-modal-overlay" id="apptModal">
+        <div class="appt-modal">
+            <div class="appt-modal-header">
+                <div class="appt-modal-header-glow"></div>
+                <button type="button" class="appt-modal-close" onclick="closeApptModal()">&times;</button>
+                <div class="appt-modal-icon">
+                    <i class="ion ion-ios-calendar"></i>
+                </div>
+                <div class="appt-modal-title">Choose Your Slot</div>
+                <p class="appt-modal-subtitle">Select the date &amp; time that works best for your schedule</p>
+            </div>
+
+            <div class="appt-slots-container">
+                @{ var slotIndex = 0; }
+                @foreach (var sched in schedulesList)
+                {
+                    var schedDate = (sched.DateToSchedule != null && sched.DateToSchedule.ShecduleDate.HasValue) ? sched.DateToSchedule.ShecduleDate.Value : DateTime.MinValue;
+                    var schedDay = schedDate != DateTime.MinValue ? schedDate.Day.ToString() : "";
+                    var schedMonth = schedDate != DateTime.MinValue ? schedDate.ToString("MMM").ToUpper() : "";
+                    var schedFullDate = schedDate != DateTime.MinValue ? schedDate.ToString("dd MMMM yyyy") : "";
+                    var schedTimeName = sched.TimeSlot != null ? sched.TimeSlot.Name : "";
+                    
+                    <div class="appt-slot-card" 
+                         data-slot-id="@sched.Id" 
+                         data-slot-date="@schedFullDate"
+                         data-slot-time="@schedTimeName"
+                         onclick="selectSlot(this)"
+                         style="animation-delay: @(slotIndex * 0.06)s;">
+                        <div class="appt-slot-date-block">
+                            <div class="appt-slot-day">@schedDay</div>
+                            <div class="appt-slot-month">@schedMonth</div>
+                        </div>
+                        <div class="appt-slot-details">
+                            <div class="appt-slot-fulldate">@schedFullDate</div>
+                            <div class="appt-slot-time-badge">
+                                <i class="ion ion-ios-time"></i> @schedTimeName
+                            </div>
+                        </div>
+                    </div>
+                    slotIndex++;
+                }
+
+                <button type="button" class="appt-modal-confirm-btn" id="modalConfirmBtn" onclick="confirmSlotSelection()">
+                    <i class="ion ion-checkmark-round"></i> &nbsp; Confirm Selection
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @section scripts {
     <script>
+        var selectedSlotId = null;
+
         $(function () {
-            // Enable confirm button only when checkbox is checked
+            updateConfirmBtnState();
+
             $('#confirmCheckbox').change(function () {
-                $('#confirmBtn').prop('disabled', !this.checked);
+                updateConfirmBtnState();
             });
+        });
+
+        function updateConfirmBtnState() {
+            var checkboxChecked = $('#confirmCheckbox').is(':checked');
+            var hasSchedule = $('#hiddenSelectedScheduleId').val() !== '';
+            // If no schedules list (single/fallback), always allow if checkbox checked
+            var schedulesExist = $('.appt-slot-card').length > 0;
+            var canConfirm = checkboxChecked && (hasSchedule || !schedulesExist);
+            $('#confirmBtn').prop('disabled', !canConfirm);
+            if (canConfirm) {
+                $('#confirmBtn').addClass('enabled');
+            } else {
+                $('#confirmBtn').removeClass('enabled');
+            }
+        }
+
+        function openApptModal() {
+            $('#apptModal').addClass('active');
+            $('body').css('overflow', 'hidden');
+        }
+
+        function closeApptModal() {
+            $('#apptModal').removeClass('active');
+            $('body').css('overflow', '');
+        }
+
+        function selectSlot(el) {
+            // Remove previous selection
+            $('.appt-slot-card').removeClass('selected');
+            // Mark this one
+            $(el).addClass('selected');
+            selectedSlotId = $(el).data('slot-id');
+            // Enable modal confirm button
+            $('#modalConfirmBtn').addClass('active');
+        }
+
+        function confirmSlotSelection() {
+            if (!selectedSlotId) return;
+
+            var $card = $('.appt-slot-card.selected');
+            var dateText = $card.data('slot-date');
+            var timeText = $card.data('slot-time');
+
+            // Set hidden field
+            $('#hiddenSelectedScheduleId').val(selectedSlotId);
+
+            // Update the display card
+            var $trigger = $('#apptSelectorTrigger');
+            $trigger.addClass('has-selection');
+            $('#displaySelDate').text(dateText);
+            $('#displaySelTime').html('<i class="ion ion-ios-time"></i> ' + timeText);
+
+            // Update confirm button state
+            updateConfirmBtnState();
+
+            // Close modal
+            closeApptModal();
+        }
+
+        // Close modal on overlay click
+        $(document).on('click', '.appt-modal-overlay', function (e) {
+            if ($(e.target).hasClass('appt-modal-overlay')) {
+                closeApptModal();
+            }
+        });
+
+        // Close modal on Escape key
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeApptModal();
         });
     </script>
 }

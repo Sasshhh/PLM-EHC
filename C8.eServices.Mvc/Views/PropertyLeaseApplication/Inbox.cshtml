@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -180,95 +180,95 @@
                                 @Html.DisplayFor(modelItem => item.Status.Name)
                             </td>
                             <td>
-                                @if (item.Status.Key == StatusKeys.AwaitingAssessmentPayment)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingAssessmentPayment)
                                 {
                                     @Html.ActionLink("External Payment", "Index2", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("RcsApplicationId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
-                                @if (item.Status.Key == StatusKeys.awaited)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.awaited)
                                 {
                                     @Html.ActionLink("View", "UnitDetails", "MatchedUnits", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("RcsApplicationId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
-                                @if (item.Status.Key == StatusKeys.ReuploadApplicationDocs)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.ReuploadApplicationDocs)
                                 {
                                     @*@Html.ActionLink("Upload", "UploadDocs", new { q = item.Data }, new { @class = "btn btn-primary" })*@
                                 }
-                                @if (item.Status.Key == StatusKeys.Approved)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.Approved)
                                 {
                                     @Html.ActionLink("Acceptance Letter", "AcceptanceLetter", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
-                                @if (item.Status.Key == StatusKeys.AwaitingAssessmentPayment)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingAssessmentPayment)
                                 {
                                     @Html.ActionLink("Upload Proof Of Payment", "UploadAssessmentFee", new { q = item.Data }, new { @class = "btn btn-primary" })
                                 }
-                                @if (item.Status.Key == StatusKeys.AwaitingDepositPaid)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingDepositPaid)
                                 {
                                     @Html.ActionLink("Upload Proof Of Payment", "UploadAssessmentFee", new { q = item.Data }, new { @class = "btn btn-primary" })
                                 }
-                                @if (item.Status.Key == StatusKeys.AwaitingApplicationFeeUpload)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingApplicationFeeUpload)
                                 {
                                     @Html.ActionLink("Upload Proof Of Payment", "UploadApplicationFee", new { q = item.Data }, new { @class = "btn btn-primary" })
                                 }
-                                @*@if (item.Status.Key == StatusKeys.AwaitingDepartmentComments)
+                                @*@if (item.Status != null && item.Status.Key == StatusKeys.AwaitingDepartmentComments)
                                     {
                                         @Html.ActionLink("Departmental Review", "Index", "DepartmentalComments", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }*@
-                                @*@if (item.Status.Key == StatusKeys.AwaitingHoDResponse)
+                                @*@if (item.Status != null && item.Status.Key == StatusKeys.AwaitingHoDResponse)
                                     {
                                         @Html.ActionLink("Send For HOD Assessment", "Index", "Hods", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }*@
-                                @if (item.Status.Key == StatusKeys.ViewRCCCertificate)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.ViewRCCCertificate)
                                 {
                                     @Html.ActionLink("View RCC Certificate", "ViewRCCCertificate", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
-                                @*@if (item.Status.Key == StatusKeys.AwaitingDepartmentInputs)
+                                @*@if (item.Status != null && item.Status.Key == StatusKeys.AwaitingDepartmentInputs)
                                     {
                                         @Html.ActionLink("Affected Departments", "AffectedDepart", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }*@
-                                @if (item.Status.Key == StatusKeys.IncentivePolicyApplicationPending)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.IncentivePolicyApplicationPending)
                                 {
                                     @Html.ActionLink("Generate Debit Order", "DebitOrderRegistration", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString() + "&Data=" + item.Data.ToString()) }, new { @class = "btn btn-primary" })
                                     @*@Html.ActionLink("Generate Debit Order Authority", "GenerateDebitOrder", new { q = item.Data }, new { @class = "btn btn-primary" })*@
                                 }
-                                @if (item.Status.Key == StatusKeys.AwaitingTenantUpdateDetails)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingTenantUpdateDetails)
                                 {
                                     @Html.ActionLink("Update Tenant Record", "UpdateTenantRecord", new { q = item.Data }, new { @class = "btn btn-primary" })
                                 }
-                                @*@if (item.Status.Key == StatusKeys.RatesRebatePropertyAccountConflict)
+                                @*@if (item.Status != null && item.Status.Key == StatusKeys.RatesRebatePropertyAccountConflict)
                                     {
                                         @Html.ActionLink("Conduct Unit Inspection", "ConductUnitInspection", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }*@
-                                @*@if (item.Status.Key == StatusKeys.CustomerQueryPending || item.Status.Key == StatusKeys.UnitInhabitable)
+                                @*@if (item.Status != null && item.Status.Key == StatusKeys.CustomerQueryPending || item.Status.Key == StatusKeys.UnitInhabitable)
                                     {
                                         @Html.ActionLink("Maintenance Job Sheet", "MaintenanceJobSheet", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }*@
-                                @if (item.Status.Key == StatusKeys.ReuploadApplicationDocs)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.ReuploadApplicationDocs)
                                 {
                                     @Html.ActionLink("Re-Upload", "ReUploadDocuments", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
 
                                 }
-                                @if (item.Status.Key == StatusKeys.AwaitingTenantDocuments)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingTenantDocuments)
                                 {
                                     @Html.ActionLink("Upload Documents", "UpdateTenanntDocuments", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("rcsAppId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
 
                                 }
-                                @if (item.Status.Key == StatusKeys.InAwaitingWaitingListReEntry)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.InAwaitingWaitingListReEntry)
                                 {
                                     @Html.ActionLink("Unit Still Required", "WaitingListValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("PropertyId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     @*@Html.ActionLink("Waiting List Re-Entry", "WaitingListValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("PropertyId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })*@
 
                                 }
-                                @if (item.Status.Key == StatusKeys.AwitingInspectionSchedule)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwitingInspectionSchedule)
                                 {
                                     @Html.ActionLink("Unit Inspection Schedule", "ScheduleUnitInspectionSlot", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
 
                                 }
 
-                                @if (item.Status.Key == StatusKeys.AwaitingLeaseAgreement)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingLeaseAgreement)
                                 {
                                     @Html.ActionLink("Generate Lease Agreement", "GenerateLeaseAgreement", new { q = item.Data }, new { @class = "btn btn-primary" })
                                 }
 
-                                @if (item.Status.Key == StatusKeys.LeaseAgreementGenerated)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.LeaseAgreementGenerated)
                                 {
                                     @Html.ActionLink("Agreement Validation", "LeaseAgreementValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }

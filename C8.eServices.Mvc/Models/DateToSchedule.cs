@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -25,5 +25,11 @@ namespace C8.eServices.Mvc.Models
         [ForeignKey("HumanSettlementApplicationId")]
         [Display(Name = "Human Settlement Application")]
         public HumanSettlementApplication HumanSettlementApplication { get; set; }
+
+        [Column(Order = 13)]
+        public int? TenantComplaintId { get; set; }
+        [ForeignKey("TenantComplaintId")]
+        [Display(Name = "Tenant Complaint")]
+        public TenantComplaint TenantComplaint { get; set; }
     }
 }

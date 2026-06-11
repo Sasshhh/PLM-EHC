@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.LeaseDetails>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -151,6 +151,12 @@
                             <td>
                                 @if (item.Status != null)
                                 {
+                                    @* UC023: CSO initial termination notice review *@
+                                    if (item.Status.Key == StatusKeys.AwaitingCSOTerminationReview)
+                                    {
+                                        @Html.ActionLink("Review Notice", "TerminationCSOReviewDetails", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+
                                     if (item.Status.Key == StatusKeys.TerminationLeaseByTenant)
                                     {
                                         @Html.ActionLink("Exit Inspection", "ConductExitInspection", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString() + "&LeseId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
@@ -184,7 +190,28 @@
 
                                     if (item.Status.Key == StatusKeys.AwaitingExitInspection)
                                     {
-                                        @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "leaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("LeseId=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                        @Html.ActionLink("Schedule Exit Inspection", "ScheduleInspectionSlots", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
+                                        @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "leaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("LeseId=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+
+                                    if (item.Status.Key == StatusKeys.AwaitingTerminationAppraisal)
+                                    {
+                                        @Html.ActionLink("Authorize Termination", "PropertyEvictionValidation", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                    }
+
+                                    if (item.Status.Key == StatusKeys.LegalReferralPending || item.Status.Key == StatusKeys.AwaitingEvictionCEOAuth)
+                                    {
+                                        @Html.ActionLink("CEO Authorization", "EvictionCEOAuthorization", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-danger" })
+                                    }
+
+                                    if (item.Status.Key == StatusKeys.AwaitingEvictionService)
+                                    {
+                                        @Html.ActionLink("Serve Eviction Notice", "ServeEvictionNotice", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    }
+
+                                    if (item.Status.Key == StatusKeys.EvictionNoticeServed)
+                                    {
+                                        @Html.ActionLink("Capture Proof of Service", "CaptureProofOfService", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info" })
                                     }
 
                                 }
@@ -203,12 +230,22 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        debugger;
-        if ('@ViewBag.BOAccountValidationTSession' !== null && '@ViewBag.BOAccountValidationTSession' !== '') {
-            $('#BOAccountValidationSessionModal').modal({
-                backdrop: 'static',
-                keyboard: false,
-                show: true
+        var boSessionMsg = "@Html.Raw(ViewBag.BOAccountValidationTSession)";
+        if (boSessionMsg !== null && boSessionMsg !== '') {
+            var alertType = "success";
+            var alertTitle = "Success";
+            if (boSessionMsg.indexOf("APPROVED") !== -1 || boSessionMsg.indexOf("approved") !== -1 || boSessionMsg.indexOf("referred") !== -1) {
+                alertTitle = boSessionMsg.indexOf("referred") !== -1 ? "Legal Referral" : "Action Authorized";
+                alertType = "success";
+            } else if (boSessionMsg.indexOf("REJECTED") !== -1 || boSessionMsg.indexOf("rejected") !== -1) {
+                alertTitle = "Action Rejected";
+                alertType = "warning";
+            }
+            swal({
+                title: alertTitle,
+                text: boSessionMsg,
+                icon: alertType,
+                button: "OK",
             });
         }
     });

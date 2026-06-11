@@ -554,38 +554,32 @@
             if (isConfirm) {
                 debugger;
                 var statusval = document.getElementById("ApprovalStatus").value;
-                //var reject = document.getElementById("reject");
-                //var accept = document.getElementById("Approve");
-                if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
-                    //alert('rej');
-                    var RejectComment = document.getElementById("RejectComment").value;
+                // NOTE: the reason textarea id is 'OutcomeReason', not 'RejectComment'
+                var outcomeReasonEl = document.getElementById("OutcomeReason");
+                var RejectComment = outcomeReasonEl ? outcomeReasonEl.value : "";
 
+                if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
                     if ((RejectComment == null || RejectComment == "")) {
                         swal("error", "Please enter the risk assessment outcome comment!", "warning");
                     } else {
                         document.getElementById("btnApproval").click();
-                       /* WaitingListBusy();*/
                     }
-                    //    document.getElementById("btnApproval").click();
                 } else {
-                 /*   alert('approval');*/
                     document.getElementById("btnApproval").click();
-                  /*  WaitingListBusy();*/
                 }
             }
         });
     }
     function checkdocs(id) {
         debugger;
-        //alert('inside check docs');
-
-
         var statusval = document.getElementById("ApprovalStatus").value;
-        if (statusval == "Rcs_Rejected_documents") {
+
+        // Rcs_Rejected_documents and Rcs_Rejected_unaffordability: no doc upload needed
+        if (statusval == "Rcs_Rejected_documents" || statusval == "Rcs_Rejected_unaffordability") {
             clickSubmit();
-           
-        } else if (statusval == "Rcs_Approval" || statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc") {
-         
+
+        } else if (statusval == "Rcs_Approval" || statusval == "Rcs_Rejected_itc") {
+            // Approval AND ITC rejection both require documents to be uploaded first
             $.getJSON("../PropertyLeaseApplication/CaptureDocChecker2?id=" + id,
                 function (result) {
                     console.log(result);
@@ -601,25 +595,15 @@
                         swal("Error!", "Please upload required documents.", "error");
                     }
                 });
-           
+
         } else if (statusval == "r_re_allocate_application") {
-
-
             if (isLettingOfficerSelected()) {
                 clickSubmit();
             }
             else {
                 swal("Error!", "Please select letting officer .", "error");
             }
-         
-        
-          
-         
         }
-
-
-
-
     }
     function isLettingOfficerSelected() {
         var lettingOfficerDropdown = document.getElementById("LettingOfficer");
@@ -741,14 +725,24 @@
             jQuery('#AllocateSpaceUnitDiv').css("display", "none")
             makeFieldsNotRequired();
         }
-        else if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
+        else if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_documents") {
+            // These rejections: show reason box, hide docs panel
+            jQuery('#reject').css("display", "block")
+            jQuery('#LeetingOfficers').css("display", "none")
+            jQuery('#documentsDiv').css("display", "none")
+            jQuery('#Approve').css("display", "none")
+            jQuery('#AllocateSpaceUnitDiv').css("display", "none")
+            jQuery('#ConfirmTypology').css("display", "none")
+            makeFieldsNotRequired();
+        } else if (statusval == "Rcs_Rejected_itc") {
+            // ITC rejection: show reason box AND documents panel (ITC doc must be captured)
             jQuery('#reject').css("display", "block")
             jQuery('#LeetingOfficers').css("display", "none")
             jQuery('#documentsDiv').css("display", "block")
             jQuery('#Approve').css("display", "none")
             jQuery('#AllocateSpaceUnitDiv').css("display", "none")
+            jQuery('#ConfirmTypology').css("display", "none")
             makeFieldsNotRequired();
-
         }
 
     }

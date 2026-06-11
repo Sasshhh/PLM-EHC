@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -131,7 +131,7 @@
                                 @Html.DisplayFor(modelItem => item.Status.Name)
                             </td>
                             <td>
-                                @if (item.Status.Key != null)
+                                @if (item.Status != null && item.Status.Key != null)
                                 {
                                     @Html.ActionLink("View", "Details", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
                                 }

@@ -1,4 +1,4 @@
-﻿
+
 @model IEnumerable<C8.eServices.Mvc.Models.LeaseDetails>
 @using C8.eServices.Mvc.Keys;
 @{
@@ -139,6 +139,10 @@
                                     {
                                         @Html.ActionLink("Renewal Available", "LeaseOfferValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalTenantSignature)
+                                    {
+                                        @Html.ActionLink("Sign Agreement", "RenewalLeaseAgreementValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                    }
                                     else if (item.Status.Key == StatusKeys.AwaitingRenewalTenantLease)
                                     {
                                         @Html.ActionLink("Renew Lease", "TenantLeaseRenewal", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
@@ -151,7 +155,10 @@
                                     {
                                         @Html.ActionLink("Upload Document(s)", "AcceptLeaseRenewal", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }
-
+                                    else if (item.Status.Key == StatusKeys.AwaitingRenewalTenantSignature)
+                                    {
+                                        @Html.ActionLink("Sign Agreement", "RenewalLeaseAgreementValidation", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                    }
                                     else
                                     {
                                         @Html.ActionLink("View", "ApplincantDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + item.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })

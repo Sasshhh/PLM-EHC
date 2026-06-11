@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -730,7 +730,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -869,7 +869,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1106,7 +1106,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1231,7 +1231,7 @@ namespace C8.eServices.Mvc.Controllers
                
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1422,7 +1422,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1623,7 +1623,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1825,7 +1825,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -1857,6 +1857,11 @@ namespace C8.eServices.Mvc.Controllers
             ViewBag.IncentivePolicyId = incentivePolicyId;
             ViewBag.Data = SecureActionLinkExtension.Encrypt(string.Format("incentivePolicyId={0}", incentivePolicyId));
             ViewBag.CustomerType = CustType.CustomerTypeId;
+
+            // Show rejection reason from bookkeeper if applicant was sent back to re-upload
+            if (TempData["AppFeeRejectionReason"] != null)
+                ViewBag.AppFeeRejectionReason = TempData["AppFeeRejectionReason"].ToString();
+
             return View(dvm);
         }
 
@@ -2018,7 +2023,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -2163,7 +2168,7 @@ namespace C8.eServices.Mvc.Controllers
                 //}
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)customerDocument.FileId, CreatedDateTime = customerDocument.CreatedDateTime };
                     customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
                 }
 
@@ -2459,8 +2464,7 @@ namespace C8.eServices.Mvc.Controllers
         /// <param name="applicationId">The application identifier.</param>
         /// <returns></returns>
         [EncryptedActionParameter]
-        [Authorize(Roles = "Senior Housing Specialist, Regional Manager, Customer, Housing Liaison Officer, Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer, Client Services Officer, Revenue Officer")]
-
+        [Authorize(Roles = "Caretaker, Senior Housing Specialist, Regional Manager, Customer, Housing Liaison Officer, Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Client Services Officer,Revenue Officer,Maintenance Manager,Property & Facilities Manager")]
         public ActionResult RenderDocumentDetails(int documentCheckListId, int referenceTypeId, int referenceId, int customerId, int applicationId, int rcsappId)
         {
             eServicesDbContext _context = new eServicesDbContext();
@@ -2477,8 +2481,8 @@ namespace C8.eServices.Mvc.Controllers
                 
             foreach (var doc in docs)
             {
-                doc.DocumentLocation = string.Format("uploads/{0}/{1}", doc.DocumentCheckList.DocumentType.Name,doc.DocumentName);
-                if (doc.LocationType.Key == LocationTypeKeys.Database) 
+                doc.DocumentLocation = string.Format("uploads/{0}/{1}", doc.DocumentCheckList?.DocumentType?.Name ?? "Unknown", doc.DocumentName);
+                if (doc.LocationType != null && doc.LocationType.Key == LocationTypeKeys.Database && doc.File != null) 
                     doc.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", doc.FileId));
 
                 doc.Data = HttpUtility.UrlEncode(SecureActionLinkExtension.Encrypt(string.Format("documentId={0}", doc.Id)));
@@ -2494,8 +2498,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         [EncryptedActionParameter]
-        [Authorize(Roles = "Caretaker, Senior Housing Specialist, Regional Manager,Housing Liaison Officer, Customer,  Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Revenue Officer")]
-
+        [Authorize(Roles = "Caretaker, Senior Housing Specialist, Regional Manager, Customer, Housing Liaison Officer, Clerks,Administrators,Customers,Super Administrators,Submit Figures,Rates,Issue Certificate,Internal Registration,Area Manager,Credit Control,Sundry Account,Acknowledge RCS Application,Billing,Acknowledge Refund Application,Issue Refunds collection,Back Office System Administrator,System Administrators,Lease Official,Property Manager,Housing Supervisor,Finance Administrator,Revenue Manager,Community Development Officer,Letting Officer,Client Services Officer,Revenue Officer,Maintenance Manager,Property & Facilities Manager")]
         public ActionResult HumanRenderDocumentDetails(int documentCheckListId, int referenceTypeId, int referenceId, int customerId, int applicationId, int rcsappId)
         {
             eServicesDbContext _context = new eServicesDbContext();
@@ -2512,8 +2515,8 @@ namespace C8.eServices.Mvc.Controllers
 
             foreach (var doc in docs)
             {
-                doc.DocumentLocation = string.Format("uploads/{0}/{1}", doc.DocumentCheckList.DocumentType.Name, doc.DocumentName);
-                if (doc.LocationType.Key == LocationTypeKeys.Database)
+                doc.DocumentLocation = string.Format("uploads/{0}/{1}", doc.DocumentCheckList?.DocumentType?.Name ?? "Unknown", doc.DocumentName);
+                if (doc.LocationType != null && doc.LocationType.Key == LocationTypeKeys.Database && doc.File != null)
                     doc.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", doc.FileId));
 
                 doc.Data = HttpUtility.UrlEncode(SecureActionLinkExtension.Encrypt(string.Format("documentId={0}", doc.Id)));

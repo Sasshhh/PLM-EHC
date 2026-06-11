@@ -103,8 +103,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -165,8 +166,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -225,8 +227,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -316,8 +319,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -455,8 +459,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -627,8 +632,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -687,8 +693,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -748,8 +755,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -808,8 +816,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -869,8 +878,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -930,8 +940,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -989,8 +1000,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1048,8 +1060,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1107,8 +1120,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1166,8 +1180,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1225,8 +1240,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1284,8 +1300,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1343,8 +1360,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1400,8 +1418,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1457,8 +1476,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1514,8 +1534,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1580,8 +1601,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1637,8 +1659,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1694,8 +1717,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1752,8 +1776,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1810,8 +1835,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1868,8 +1894,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1933,8 +1960,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -1990,8 +2018,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -2065,8 +2094,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -2126,8 +2156,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -2186,8 +2217,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -2244,8 +2276,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -2496,7 +2529,29 @@ namespace C8.eServices.Mvc.Helpers
             schedule.IsApproved = true;
             core.SaveChanges();
 
-            ChangeApplicationStatus(core, (int)core.Status.FirstOrDefault(x => x.Key == StatusKeys.RatesRebateAdditionalPropertyOwnersPending)?.Id, (int)schedule.PropertyLeaseApplicationId);
+            var app = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == schedule.PropertyLeaseApplicationId);
+            
+            var lease = core.LeaseDetails.FirstOrDefault(l => l.PropertyLeaseApplicationId == app.Id && l.IsActive && !l.IsDeleted);
+            var isExitInspection = false;
+            if (lease != null)
+            {
+                var leaseStatus = core.Status.FirstOrDefault(s => s.Id == lease.StatusId);
+                if (leaseStatus != null && leaseStatus.Key == StatusKeys.AwaitingExitInspection)
+                {
+                    isExitInspection = true;
+                }
+            }
+
+            if (isExitInspection)
+            {
+                ChangeApplicationStatus(core, (int)core.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection)?.Id, (int)schedule.PropertyLeaseApplicationId);
+            }
+            else
+            {
+                // Pre-occupancy inspection scheduling
+                ChangeApplicationStatus(core, (int)core.Status.FirstOrDefault(x => x.Key == StatusKeys.RatesRebateAdditionalPropertyOwnersPending)?.Id, (int)schedule.PropertyLeaseApplicationId);
+            }
+
             PropertyLeaseApplicationController cc = new PropertyLeaseApplicationController();
             //                                                           1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
             cc.EHCRoundRobin((int)schedule.PropertyLeaseApplicationId, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
@@ -4895,8 +4950,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -4953,8 +5009,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5020,8 +5077,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5077,8 +5135,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5123,9 +5182,37 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
 
+            // Resolve all application IDs linked to the lease
+            var applicationIds = new List<int> { rcsappId };
+            var leaseTermination = core.LeaseTerminations.FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsappId && !x.IsDeleted);
+            if (leaseTermination != null && leaseTermination.LeaseDetailsId != null)
+            {
+                var leaseId = leaseTermination.LeaseDetailsId.Value;
+                var leaseDetails = core.LeaseDetails.FirstOrDefault(ld => ld.Id == leaseId && !ld.IsDeleted);
+                if (leaseDetails != null)
+                {
+                    applicationIds.Add(leaseDetails.PropertyLeaseApplicationId);
+                    var leaseRef = leaseDetails.LeaseReferenceNo;
+                    if (!string.IsNullOrEmpty(leaseRef))
+                    {
+                        var linkedAppIds = core.LeaseDetails
+                            .Where(ld => ld.LeaseReferenceNo == leaseRef && !ld.IsDeleted)
+                            .Select(ld => ld.PropertyLeaseApplicationId)
+                            .ToList();
+                        applicationIds.AddRange(linkedAppIds);
+                    }
+                }
+                var terminationAppIds = core.LeaseTerminations
+                    .Where(lt => lt.LeaseDetailsId == leaseId && !lt.IsDeleted && lt.PropertyLeaseApplicationId != null)
+                    .Select(lt => lt.PropertyLeaseApplicationId.Value)
+                    .ToList();
+                applicationIds.AddRange(terminationAppIds);
+            }
+            var uniqueAppIds = applicationIds.Distinct().ToList();
+
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && uniqueAppIds.Contains(o.PropertyLeaseApplicationId ?? 0) && o.IsActive && !o.IsDeleted).ToList();
 
             dvm.DocumentCheckLists = documentCheckLists;
 
@@ -5133,8 +5220,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5170,6 +5258,7 @@ namespace C8.eServices.Mvc.Helpers
             var ApplicationLeaseAgreementEHC = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.ApplicationLeaseAgreementEHC);
             var WarningLetter = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.WarningLetter);
             var TerminationLetter = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.TerminationLetter);
+            var ConductExitInspection = core.DocumentTypes.SingleOrDefault(dt => dt.Key == DocumentTypeKeys.ConductExitInspection);
 
             documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == IdentityDocument.Id && dcl.ReferenceTypeId == referenceTypeId));
             documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ExitInterviewForm.Id && dcl.ReferenceTypeId == referenceType.Id));
@@ -5179,6 +5268,16 @@ namespace C8.eServices.Mvc.Helpers
             //Termination Letter - Cancellatrion letter
             documentCheckLists.Add(core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == TerminationLetter.Id && dcl.ReferenceTypeId == referenceType.Id));
             
+            //Completed Exit Inspection Document
+            if (ConductExitInspection != null)
+            {
+                var exitInspectionCheckList = core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == ConductExitInspection.Id && dcl.ReferenceTypeId == referenceType.Id);
+                if (exitInspectionCheckList != null)
+                {
+                    documentCheckLists.Add(exitInspectionCheckList);
+                }
+            }
+
             dvm.ReturnUrl = returnUrl;
             dvm.CustomerId = customerId ?? referenceId;
             dvm.ApplicationId = (int)applicationId;
@@ -5190,17 +5289,48 @@ namespace C8.eServices.Mvc.Helpers
             dvm.ReferenceId = (int)referenceId;
             dvm.IsUploadView = IsUpload;
 
+            // Resolve all application IDs linked to the lease
+            var applicationIds = new List<int> { rcsappId };
+            var leaseTermination = core.LeaseTerminations.FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsappId && !x.IsDeleted);
+            if (leaseTermination != null && leaseTermination.LeaseDetailsId != null)
+            {
+                var leaseId = leaseTermination.LeaseDetailsId.Value;
+                var leaseDetails = core.LeaseDetails.FirstOrDefault(ld => ld.Id == leaseId && !ld.IsDeleted);
+                if (leaseDetails != null)
+                {
+                    applicationIds.Add(leaseDetails.PropertyLeaseApplicationId);
+                    var leaseRef = leaseDetails.LeaseReferenceNo;
+                    if (!string.IsNullOrEmpty(leaseRef))
+                    {
+                        var linkedAppIds = core.LeaseDetails
+                            .Where(ld => ld.LeaseReferenceNo == leaseRef && !ld.IsDeleted)
+                            .Select(ld => ld.PropertyLeaseApplicationId)
+                            .ToList();
+                        applicationIds.AddRange(linkedAppIds);
+                    }
+                }
+                var terminationAppIds = core.LeaseTerminations
+                    .Where(lt => lt.LeaseDetailsId == leaseId && !lt.IsDeleted && lt.PropertyLeaseApplicationId != null)
+                    .Select(lt => lt.PropertyLeaseApplicationId.Value)
+                    .ToList();
+                applicationIds.AddRange(terminationAppIds);
+            }
+            var uniqueAppIds = applicationIds.Distinct().ToList();
+
             var checkListIds = documentCheckLists.Select(x => x.Id).ToList();
 
-            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).ToList();
+            dvm.Documents = core.Documents.Where(o => checkListIds.Contains(o.DocumentCheckListId) && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && uniqueAppIds.Contains(o.PropertyLeaseApplicationId ?? 0) && o.IsActive && !o.IsDeleted).ToList();
 
             //Warning Letter - Contravention letter
             var warningLetterCheckList = core.DocumentCheckLists.Include(dcl => dcl.DocumentType).SingleOrDefault(dcl => dcl.DocumentTypeId == WarningLetter.Id && dcl.ReferenceTypeId == referenceType.Id);
-            documentCheckLists.Add(warningLetterCheckList);
-            var warningLetterDoc = core.Documents.Where(o => o.DocumentCheckListId == warningLetterCheckList.Id && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && o.PropertyLeaseApplicationId == rcsappId && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).FirstOrDefault();
-            if (warningLetterDoc != null) 
+            if (warningLetterCheckList != null)
             {
-                 dvm.Documents.Add(warningLetterDoc);
+                documentCheckLists.Add(warningLetterCheckList);
+                var warningLetterDoc = core.Documents.Where(o => o.DocumentCheckListId == warningLetterCheckList.Id && o.ReferenceId == referenceId && o.ReferenceTypeId == referenceTypeId && uniqueAppIds.Contains(o.PropertyLeaseApplicationId ?? 0) && o.IsActive && !o.IsDeleted).OrderByDescending(p=>p.CreatedDateTime).FirstOrDefault();
+                if (warningLetterDoc != null) 
+                {
+                     dvm.Documents.Add(warningLetterDoc);
+                }
             }
             dvm.DocumentCheckLists = documentCheckLists;
 
@@ -5208,8 +5338,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5269,8 +5400,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 if (customerDocument.FileId != null)
                 {
-                    customerDocument.File = new C8.eServices.Mvc.Models.File { CreatedDateTime = customerDocument.CreatedDateTime };
-                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", customerDocument.FileId));
+                    var savedFileId = customerDocument.FileId;
+                    customerDocument.File = new C8.eServices.Mvc.Models.File { Id = (int)savedFileId, CreatedDateTime = customerDocument.CreatedDateTime };
+                    customerDocument.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", savedFileId));
                 }
 
                 var docCheckList =
@@ -5320,6 +5452,36 @@ namespace C8.eServices.Mvc.Helpers
             var findApplication = core.PropertyLeaseApplications.Include(r => r.Status).FirstOrDefault(x => x.Id == PropertyLeaseId) ?? null;
             findApplication.IsFullyMigrated = true;
             core.SaveChanges();
+        }
+
+        // UC023 — Generate unique Termination Reference Number (EHC_TERM_###_YYYY)
+        public static string GenerateTerminationReference(eServicesDbContext core)
+        {
+            int year = DateTime.Now.Year;
+            string prefix = "EHC_TERM_";
+            string suffix = "_" + year;
+
+            // Count existing termination refs for this year to determine next number
+            int existingCount = core.LeaseTerminations
+                .Count(lt => lt.TerminationReferenceNumber != null && lt.TerminationReferenceNumber.EndsWith(suffix));
+
+            int nextNumber = existingCount + 1;
+            return prefix + nextNumber.ToString("D3") + suffix;
+        }
+
+        // UC024 — Generate unique Eviction Reference Number (EHC_EVIC_###_YYYY)
+        public static string GenerateEvictionReference(eServicesDbContext core)
+        {
+            int year = DateTime.Now.Year;
+            string prefix = "EHC_EVIC_";
+            string suffix = "_" + year;
+
+            // Count existing eviction refs for this year to determine next number
+            int existingCount = core.LeaseTerminations
+                .Count(lt => lt.EvictionReferenceNumber != null && lt.EvictionReferenceNumber.EndsWith(suffix));
+
+            int nextNumber = existingCount + 1;
+            return prefix + nextNumber.ToString("D3") + suffix;
         }
     }
 }

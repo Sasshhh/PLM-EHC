@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -252,13 +252,42 @@
                 @if (ViewBag.ApprovalStatus != null)
                 {
                     <div class="form-group">
-                        @Html.Label("Tenant Vacated", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-2">
+                        @Html.Label("Tenant Vacated", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-3">
                             @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Id = "ApprovalStatus", @Name = "ApprovalStatusddl", @required = "required" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                         </div>
                     </div>
                 }
+
+                <div id="divHandoverDetails" style="display:none;">
+                    <hr />
+                    <h4>Possession & Handover Logging</h4>
+                    <br />
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.LeaseTermination.AccessCardNumber, "Access Card Number", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(model => model.LeaseTermination.AccessCardNumber, new { @class = "form-control", @id = "AccessCardNumber", @placeholder = "e.g. CARD-98312" })
+                            @Html.ValidationMessageFor(model => model.LeaseTermination.AccessCardNumber, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.LeaseTermination.KeyNumber, "Key Number", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(model => model.LeaseTermination.KeyNumber, new { @class = "form-control", @id = "KeyNumber", @placeholder = "e.g. KEY-883" })
+                            @Html.ValidationMessageFor(model => model.LeaseTermination.KeyNumber, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.LeaseTermination.OtherPossessions, "Other Possessions", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-6">
+                            @Html.TextAreaFor(model => model.LeaseTermination.OtherPossessions, new { @class = "form-control", @id = "OtherPossessions", @rows = "3", @placeholder = "List any other returned items, e.g. parking remote, window latch" })
+                            @Html.ValidationMessageFor(model => model.LeaseTermination.OtherPossessions, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
             </div>
                 <div id="divComment" style="display:none">
                     <div class="form-group">
@@ -348,6 +377,17 @@
         $(function () {
             $('#RCSTable').DataTable();
 
+            $('#ApprovalStatus').change(function () {
+                if ($(this).val() === 'plm_vacated') {
+                    $('#divHandoverDetails').slideDown();
+                } else {
+                    $('#divHandoverDetails').slideUp();
+                }
+            });
+
+            if ($('#ApprovalStatus').val() === 'plm_vacated') {
+                $('#divHandoverDetails').show();
+            }
         });
 
     </script>

@@ -108,24 +108,21 @@ namespace C8.eServices.Mvc.Helpers
 
         public static Customer GetPropertyFacilitiesManagerId(eServicesDbContext core, int Id)
         {
-            Customer clerk = new Customer();
-            var appu = core.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == Id);
-            var matched = core.MatchedUnits.FirstOrDefault(x => x.Id == appu.MatchedID);
-
-            if (matched.ApplicationAllocatedPropertyId != null)
+            // Property & Facilities Manager is a system-wide one-to-one role
+            // (like Revenue Manager, CEO, Property Manager) — not per-complex.
+            // Read directly from the AppSetting rather than the complex table.
+            try
             {
-                var unit = core.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == matched.ApplicationAllocatedPropertyId);
-                var complex = core.PreferredComplexAreas.FirstOrDefault(x => x.Id == unit.OfferedComplexId);
-                clerk = core.Customers.FirstOrDefault(x => x.Id == complex.HousingSuperId);
+                var setting = core.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.PropertyFacilitiesManager);
+                if (setting != null && int.TryParse(setting.Value, out int customerId) && customerId > 0)
+                {
+                    var customer = core.Customers.FirstOrDefault(x => x.Id == customerId);
+                    if (customer != null) return customer;
+                }
             }
-            else
-            {
-                var unit = core.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == matched.UnitsEkurhuleniHousingCompanyId);
-                var complex = core.PreferredComplexAreas.FirstOrDefault(x => x.Id == unit.PreferredComplexAreaId);
-                clerk = core.Customers.FirstOrDefault(x => x.Id == complex.HousingSuperId);
-            }
+            catch { }
 
-            return clerk ?? new Customer { Id = 0 };
+            return new Customer { Id = 0 };
         }
 
         public static bool BackOfficeNotification(eServicesDbContext db, int RCSAppID, int CustomerID, string QueueName)
@@ -178,14 +175,15 @@ namespace C8.eServices.Mvc.Helpers
             bool UnitMaintenance,
             bool AgreemrntValidateRevenue,
             bool PropertyFacilitiesManagerReview, // Renamed from 'six'
-            bool seven,
+            bool AgreementApprovalCEO,
             bool eight,
             int DepartmentID,
             bool AcknowlegeRefund,
             bool IssueRefundsCollection,
             int RefundAppID,
             bool? IsAwaitingRefundResponse = null,
-            bool? IsAwaitingDocUploadingForMigratedApps = null)
+            bool? IsAwaitingDocUploadingForMigratedApps = null,
+            bool? IsAwaitingRefundAuthorisation = null)
         {
             var applicationUserRoles = db.Roles.ToList();
             var dates = new string[2];
@@ -194,7 +192,8 @@ namespace C8.eServices.Mvc.Helpers
             var startDate = DateTime.Parse(dates[0]).Date;
             var endDate = DateTime.Parse(dates[1]).Date.AddDays(1).AddTicks(-1);
             var oneDayTime = endDate - startDate;
-            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.IsActive == true && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
+            var SubmittedId_Rpt = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+            var RoundRobingQueue = db.RoundRobinQueues.Where(x => x.StatusId == SubmittedId_Rpt && (startDate <= x.CreatedDateTime && endDate >= x.CreatedDateTime)).ToList();
 
             var AssignedToUser = 0;
             var responsibilityTypes = db.ResponsibilityTypes.ToList();
@@ -410,10 +409,9 @@ namespace C8.eServices.Mvc.Helpers
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.RevenueManager).FirstOrDefault().Value);
-                var activeDirectoryOn2 = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseAgreementValidation).FirstOrDefault();
-                if (activeDirectoryOn != 0 && activeDirectoryOn2 != 0)
+                if (activeDirectoryOn != 0)
                 {
                     var statusList = db.Status.ToList();
                     var StatusId = statusList.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
@@ -428,19 +426,8 @@ namespace C8.eServices.Mvc.Helpers
                     };
                     db.RoundRobinQueues.Add(roundRobinQueue);
                     db.SaveChanges();
-
-                    var roundRobinQueue2 = new RoundRobinQueue
-                    {
-                        PropertyLeaseApplicationId = RcsApplication.Id,
-                        ResponsibilityTypeId = ResponsibilityTypeId.Id,
-                        CurrentTaskDateTime = DateTime.Now,
-                        ClerkId = activeDirectoryOn2,
-                        StatusId = StatusId
-                    };
-                    db.RoundRobinQueues.Add(roundRobinQueue2);
-                    db.SaveChanges();
+                    
                     BackOfficeNotification(db, RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name);
-                    BackOfficeNotification(db, RCSAppID, activeDirectoryOn2, ResponsibilityTypeId.Name);
                 }
             }
             else if (DebitOrderValidation)
@@ -471,12 +458,15 @@ namespace C8.eServices.Mvc.Helpers
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var findItem = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
-                var UserId = GetBackOfficeId(db, RCSAppID, true);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
-                var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
+                // UC023: Use RevenueOfficer as the default termination clerk; GetBackOfficeId may throw if no ApplicantUnit exists
+                Customer backOfficeUser = null;
+                try { backOfficeUser = GetBackOfficeId(db, RCSAppID, true); } catch { }
+                var revenueOfficerSetting = db.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.RevenueOfficer);
+                var StoredUser = revenueOfficerSetting != null ? Convert.ToInt16(revenueOfficerSetting.Value) : 0;
+                var activeDirectoryOn = (backOfficeUser != null && backOfficeUser.Id != 0) ? backOfficeUser.Id : StoredUser;
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault();
-                if (activeDirectoryOn != 0)
+                if (activeDirectoryOn != 0 && ResponsibilityTypeId != null)
                 {
                     var statusList = db.Status.ToList();
                     var StatusId = statusList.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
@@ -484,7 +474,7 @@ namespace C8.eServices.Mvc.Helpers
                     var roundRobinQueue = new RoundRobinQueue
                     {
                         PropertyLeaseApplicationId = RcsApplication.Id,
-                        LeaseDetailsId = findItem.Id,
+                        LeaseDetailsId = findItem != null ? findItem.Id : (int?)null,
                         ResponsibilityTypeId = ResponsibilityTypeId.Id,
                         CurrentTaskDateTime = DateTime.Now,
                         ClerkId = activeDirectoryOn,
@@ -729,6 +719,30 @@ namespace C8.eServices.Mvc.Helpers
                     BackOfficeNotification(db, RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name);
                 }
             }
+            else if (AgreementApprovalCEO)
+            {
+                var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
+                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.PropertyManager).FirstOrDefault().Value);
+
+                var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.AgreementApproval).FirstOrDefault();
+                if (activeDirectoryOn != 0)
+                {
+                    var statusList = db.Status.ToList();
+                    var StatusId = statusList.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
+
+                    var roundRobinQueue = new RoundRobinQueue
+                    {
+                        PropertyLeaseApplicationId = RcsApplication.Id,
+                        ResponsibilityTypeId = ResponsibilityTypeId.Id,
+                        CurrentTaskDateTime = DateTime.Now,
+                        ClerkId = activeDirectoryOn,
+                        StatusId = StatusId
+                    };
+                    db.RoundRobinQueues.Add(roundRobinQueue);
+                    db.SaveChanges();
+                    BackOfficeNotification(db, RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name);
+                }
+            }
             else if (PropertyFacilitiesManagerReview)
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
@@ -827,6 +841,32 @@ namespace C8.eServices.Mvc.Helpers
                     var roundRobinQueue = new RoundRobinQueue
                     {
                         PropertyLeaseApplicationId = RcsApplication.Id,
+                        ResponsibilityTypeId = ResponsibilityTypeId.Id,
+                        CurrentTaskDateTime = DateTime.Now,
+                        ClerkId = activeDirectoryOn,
+                        StatusId = StatusId
+                    };
+                    db.RoundRobinQueues.Add(roundRobinQueue);
+                    db.SaveChanges();
+                    BackOfficeNotification(db, RCSAppID, activeDirectoryOn, ResponsibilityTypeId.Name);
+                }
+            }
+            else if (IsAwaitingRefundAuthorisation != null && IsAwaitingRefundAuthorisation.Value == true)
+            {
+                var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
+                var findItem = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
+                var activeDirectoryOn = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.CEO).FirstOrDefault().Value);
+
+                var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault();
+                if (activeDirectoryOn != 0 && ResponsibilityTypeId != null)
+                {
+                    var statusList = db.Status.ToList();
+                    var StatusId = statusList.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
+
+                    var roundRobinQueue = new RoundRobinQueue
+                    {
+                        PropertyLeaseApplicationId = RcsApplication.Id,
+                        LeaseDetailsId = findItem.Id,
                         ResponsibilityTypeId = ResponsibilityTypeId.Id,
                         CurrentTaskDateTime = DateTime.Now,
                         ClerkId = activeDirectoryOn,

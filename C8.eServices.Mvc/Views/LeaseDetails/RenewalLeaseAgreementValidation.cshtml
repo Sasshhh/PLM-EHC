@@ -1,0 +1,536 @@
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+        #signaturePadCanvas {
+            border: 2px solid #1e8449;
+            border-radius: 4px;
+            background: #fff;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        #signaturePreviewImg {
+            border: 1px solid #ccc;
+            max-width: 300px;
+            max-height: 100px;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+<div id="bankAccountPanel">
+    <div class="panel-group" id="instructions">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseInstructions">
+                        <span>Instructions</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseInstructions" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <p>
+                        <u><b>Steps For Correct Lease</b></u><br />
+                        1) View the generated lease agreement<br />
+                        2) If lease agreement is in order, click "Draw Tenant Signature", draw your signature, then click "Confirm Signature"<br />
+                        3) Enter the witness full name in the "Witness 1 Name" field<br />
+                        4) Click "Draw Witness Signature", have the witness draw their signature, then click "Confirm Signature"<br />
+                        5) Once both signatures are captured, the PDF will auto-download<br />
+                        6) Then select the "approve" Status from the approval status dropdown<br />
+                        7) Then click submit<br />
+                        <br />
+
+                        <u><b>Steps For Incorrect Lease</b></u><br />
+                        1) View the generated lease agreement<br />
+                        2) If lease agreement has issues, IGNORE the signature action and move on to step 3<br />
+                        3) Select the "reject" Status from the approval status dropdown, and add a comment in the box that will pop up<br />
+                        4) Then click submit<br />
+
+                    </p>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Evaluating Application</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Reference Number
+                        </th>
+                        <th>
+                            Applicant Type
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Captured Date
+                        </th>
+                        <th>
+                            Customer Name
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>
+                            @Model.PropertyLeaseApplications.ApplicationReferenceNumber
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.PurchaserType.Name
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.Status.Name
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.CreatedDateTime
+                        </td>
+                        <td>
+                            @Model.PropertyLeaseApplications.Customer.FullName
+                        </td>
+                        <td>
+                            @Html.ActionLink("View", "Details", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplications.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary", @target = "_blank" })
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+
+
+        </div>
+
+        <br />
+
+        <div class="panel-heading">Generated Lease Agreement</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <br />
+            <table id="FailureTable" class="table table-bordered table-hover table-striped panel panel-default display ">
+                <thead>
+                    <tr>
+                        <th>
+                            Document Type
+                        </th>
+                        <th>
+                            Document
+                        </th>
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            @Model.DocName
+                        </td>
+                        <td>
+                            <input type="button" id="btnExternal" class="button1" value="View" onclick="location.href='@Url.Action("pdfGenerateRenewalLeaseAgreement", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("LeaseId=" + ViewBag.LeaseId.ToString()) })'" />
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                @Html.Label("Tenant Signature", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <input type="hidden" id="capturedSignatureData" name="capturedSignatureData" value="" />
+                                    <div id="signatureStatus" style="margin-bottom:5px;"></div>
+                                    <button type="button" class="button1" onclick="openTenantSignaturePad()">Draw Tenant Signature</button>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top:20px;">
+                                @Html.Label("Witness 1 Name", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <input type="text" id="witness1Name" class="form-control" placeholder="Enter witness full name" maxlength="200" />
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top:10px;">
+                                @Html.Label("Witness 1 Signature", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    <input type="hidden" id="capturedWitness1SignatureData" name="capturedWitness1SignatureData" value="" />
+                                    <div id="witness1SignatureStatus" style="margin-bottom:5px;"></div>
+                                    <button type="button" class="button1" onclick="openWitness1SignaturePad()">Draw Witness Signature</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div style="width: 90%;margin: 0 auto;">
+            @using (Html.BeginForm("RenewalLeaseAgreementValidation", "LeaseDetails", FormMethod.Post, new { @id = "EvaluateForm" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Hidden("id", (int)ViewBag.LeaseId)
+
+                <br />
+
+                if (ViewBag.ApprovalStatus != null)
+                {
+                    <div class="form-group">
+                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
+                        <div class="col-md-2">
+                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", onchange = "ChangeStatus()", @Id = "ApprovalStatus" })
+                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
+
+                <br />
+                <br />
+
+                <div id="divComment" style="display:none">
+                    <div class="form-group">
+                        <span> @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-4">
+                            @Html.TextArea("Comment", new { @class = "form-control", @Id = "Comment" })
+                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="signaturePadModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:520px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="signatureModalTitle">Draw Your Signature</h4>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <canvas id="signaturePadCanvas" width="460" height="160"></canvas>
+                <br /><br />
+                <button type="button" class="btn btn-default" onclick="clearSignaturePad()">Clear</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="button1" id="confirmSignatureBtn" onclick="confirmTenantSignature()">Confirm Signature</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="@Url.Content( "~/scripts/Datatables/jquery.dataTables.min.js" )"></script>
+    <script src="@Url.Content( "~/scripts/Datatables/dataTables.bootstrap.js" )"></script>
+    <script>
+        var _sigCanvas, _sigCtx, _sigDrawing = false, _sigHasMark = false;
+        var _currentSignatureType = ''; // 'tenant' or 'witness1'
+
+        function openTenantSignaturePad() {
+            _currentSignatureType = 'tenant';
+            $('#signatureModalTitle').text('Draw Tenant Signature');
+            $('#confirmSignatureBtn').attr('onclick', 'confirmTenantSignature()');
+            openSignaturePad();
+        }
+
+        function openWitness1SignaturePad() {
+            var witnessName = $('#witness1Name').val().trim();
+            if (!witnessName) {
+                swal('Error', 'Please enter the witness name before capturing signature.', 'warning');
+                return;
+            }
+            _currentSignatureType = 'witness1';
+            $('#signatureModalTitle').text('Draw Witness Signature');
+            $('#confirmSignatureBtn').attr('onclick', 'confirmWitness1Signature()');
+            openSignaturePad();
+        }
+
+        function openSignaturePad() {
+            $('#signaturePadModal').modal({ backdrop: 'static', keyboard: false, show: true });
+            _sigCanvas = document.getElementById('signaturePadCanvas');
+            _sigCtx = _sigCanvas.getContext('2d');
+            _sigCtx.clearRect(0, 0, _sigCanvas.width, _sigCanvas.height);
+            _sigHasMark = false;
+            _sigCtx.strokeStyle = '#000';
+            _sigCtx.lineWidth = 2;
+            _sigCtx.lineCap = 'round';
+
+            _sigCanvas.onmousedown = function (e) { _sigDrawing = true; _sigCtx.beginPath(); var r = _sigCanvas.getBoundingClientRect(); _sigCtx.moveTo(e.clientX - r.left, e.clientY - r.top); };
+            _sigCanvas.onmousemove = function (e) { if (!_sigDrawing) return; _sigHasMark = true; var r = _sigCanvas.getBoundingClientRect(); _sigCtx.lineTo(e.clientX - r.left, e.clientY - r.top); _sigCtx.stroke(); };
+            _sigCanvas.onmouseup = function () { _sigDrawing = false; };
+            _sigCanvas.onmouseleave = function () { _sigDrawing = false; };
+
+            _sigCanvas.ontouchstart = function (e) { e.preventDefault(); _sigDrawing = true; _sigCtx.beginPath(); var r = _sigCanvas.getBoundingClientRect(); _sigCtx.moveTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); };
+            _sigCanvas.ontouchmove = function (e) { e.preventDefault(); if (!_sigDrawing) return; _sigHasMark = true; var r = _sigCanvas.getBoundingClientRect(); _sigCtx.lineTo(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); _sigCtx.stroke(); };
+            _sigCanvas.ontouchend = function () { _sigDrawing = false; };
+        }
+
+        function clearSignaturePad() {
+            if (_sigCtx) _sigCtx.clearRect(0, 0, _sigCanvas.width, _sigCanvas.height);
+            _sigHasMark = false;
+        }
+
+        function confirmTenantSignature() {
+            if (!_sigHasMark) {
+                swal('Error', 'Please draw your signature before confirming.', 'warning');
+                return;
+            }
+            var dataUrl = _sigCanvas.toDataURL('image/png');
+            $.ajax({
+                url: '@Url.Action("SaveRenewalTenantSignatureImage", "LeaseDetails")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ LeaseId: @ViewBag.LeaseId, SignatureImageData: dataUrl }),
+                success: function (result) {
+                    if (result && result.success) {
+                        document.getElementById('capturedSignatureData').value = dataUrl;
+                        document.getElementById('signatureStatus').innerHTML = '<span style="color:green;"><b>&#10003; Tenant signature captured.</b></span><br/><img src="' + dataUrl + '" id="signaturePreviewImg" style="border:1px solid #ccc;max-width:200px;max-height:60px;" />';
+                        $('#signaturePadModal').modal('hide');
+                        checkBothSignaturesAndDownload();
+                    } else {
+                        swal('Error', (result && result.message) ? result.message : 'Failed to save tenant signature.', 'error');
+                    }
+                },
+                error: function () {
+                    swal('Error', 'An error occurred while saving the tenant signature.', 'error');
+                }
+            });
+        }
+
+        function confirmWitness1Signature() {
+            if (!_sigHasMark) {
+                swal('Error', 'Please draw the witness signature before confirming.', 'warning');
+                return;
+            }
+            var witnessName = $('#witness1Name').val().trim();
+            if (!witnessName) {
+                swal('Error', 'Please enter the witness name.', 'warning');
+                return;
+            }
+            var dataUrl = _sigCanvas.toDataURL('image/png');
+            $.ajax({
+                url: '@Url.Action("SaveRenewalWitness1SignatureImage", "LeaseDetails")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ LeaseId: @ViewBag.LeaseId, SignatureImageData: dataUrl, WitnessName: witnessName }),
+                success: function (result) {
+                    if (result && result.success) {
+                        document.getElementById('capturedWitness1SignatureData').value = dataUrl;
+                        document.getElementById('witness1SignatureStatus').innerHTML = '<span style="color:green;"><b>&#10003; Witness signature captured.</b></span><br/><img src="' + dataUrl + '" id="witness1SignaturePreviewImg" style="border:1px solid #ccc;max-width:200px;max-height:60px;" />';
+                        $('#signaturePadModal').modal('hide');
+                        checkBothSignaturesAndDownload();
+                    } else {
+                        swal('Error', (result && result.message) ? result.message : 'Failed to save witness signature.', 'error');
+                    }
+                },
+                error: function () {
+                    swal('Error', 'An error occurred while saving the witness signature.', 'error');
+                }
+            });
+        }
+
+        function checkBothSignaturesAndDownload() {
+            $.ajax({
+                url: '@Url.Action("CheckRenewalSignatureStatus", "LeaseDetails")',
+                type: 'GET',
+                data: { LeaseId: @ViewBag.LeaseId },
+                success: function (result) {
+                    if (result && result.tenantSigned && result.witness1Signed) {
+                        swal({
+                            title: 'Success!',
+                            text: 'Both signatures captured. Downloading lease agreement...',
+                            icon: 'success',
+                            timer: 2000,
+                            buttons: false
+                        });
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("pdfGenerateRenewalLeaseAgreement", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("LeaseId=" + ViewBag.LeaseId.ToString()) })';
+                        }, 2000);
+                    }
+                },
+                error: function () {
+                    console.log('Error checking signature status');
+                }
+            });
+        }
+
+        // Check signature status on page load
+        $(document).ready(function () {
+            $.ajax({
+                url: '@Url.Action("CheckRenewalSignatureStatus", "LeaseDetails")',
+                type: 'GET',
+                data: { LeaseId: @ViewBag.LeaseId },
+                success: function (result) {
+                    if (result) {
+                        if (result.tenantSigned && result.tenantSignatureData) {
+                            document.getElementById('capturedSignatureData').value = result.tenantSignatureData;
+                            document.getElementById('signatureStatus').innerHTML = '<span style="color:green;"><b>&#10003; Tenant signature captured.</b></span><br/><img src="' + result.tenantSignatureData + '" style="border:1px solid #ccc;max-width:200px;max-height:60px;" />';
+                        }
+                        if (result.witness1Signed && result.witness1SignatureData) {
+                            if (result.witness1Name) {
+                                $('#witness1Name').val(result.witness1Name);
+                                $('#witness1Name').prop('readonly', true);
+                            }
+                            document.getElementById('capturedWitness1SignatureData').value = result.witness1SignatureData;
+                            document.getElementById('witness1SignatureStatus').innerHTML = '<span style="color:green;"><b>&#10003; Witness signature captured.</b></span><br/><img src="' + result.witness1SignatureData + '" style="border:1px solid #ccc;max-width:200px;max-height:60px;" />';
+                        }
+                    }
+                },
+                error: function () {
+                    console.log('Error loading signature status');
+                }
+            });
+        });
+    </script>
+    <script type="text/javascript">
+
+        function loadAccounts() {
+            //debugger;
+            $('#FailureTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action( "LoadDetails", "DepartmentsApprovals" )",
+                    "type": "GET",
+                    "datatype": "json",
+                    "timeout": 60000
+                },
+                "columns": [
+
+                    {
+                        "data": "CreatedDateTime", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+                    {
+                        "render": function (data) {
+                            return "System";
+                        }
+                    },
+                    { "data": "FailureReason", "autoWidth": true },
+                    {
+                        "data": "CapturedDate", "autoWidth": true,
+                        "render": function (data) {
+                            return convertDate(data);
+                        }
+                    },
+
+                     { "data": "AssignedTo", "autoWidth": true }],
+                "language": {
+                    "emptyTable": "No Data.",
+                },
+                "Initcomplete": "",
+                "destroy": true
+            });
+        }
+
+        function convertDate(data) {
+            try {
+                var dtStart = new Date(parseInt(data.substr(6)));
+                var dtStartWrapper = moment(dtStart);
+                return dtStartWrapper.format("YYYY-MM-DD");
+            }
+            catch (ex) {
+            }
+        }
+
+        $(function () {
+            $('#RCSTable').DataTable();
+
+        });
+
+    </script>
+
+}
+
+<script>
+    function ChangeStatus() {
+        var status = document.getElementById("ApprovalStatus").value;
+        if (status == "Rcs_Rejected") {
+            jQuery('#divComment').css("display", "block")
+        } else {
+            jQuery('#divComment').css("display", "none")
+
+        }
+    }
+    function clickSubmit() {
+        var status = document.getElementById("ApprovalStatus").value;
+        if (status !== "Rcs_Rejected") {
+            var sigData = document.getElementById("capturedSignatureData").value;
+            if (!sigData || sigData === "") {
+                swal("Error", "Please draw and confirm your signature before approving.", "warning");
+                return;
+            }
+        }
+        swal({
+            icon: "info",
+            title: "Are you sure you want to submit this lease agreement?",
+            buttons: [
+                'No!',
+                'Yes, I am sure!'
+            ]
+
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                var status = document.getElementById("ApprovalStatus").value;
+                var Comment = document.getElementById("Comment").value;
+                if (status == "Rcs_Rejected") {
+                    if (Comment == "" || Comment == null) {
+                        swal("Error", "Comment required when rejecting", "warning");
+                    } else
+                    {
+                        document.getElementById("btnApproval").click();
+                    }
+                } else
+                {
+                    document.getElementById("btnApproval").click();
+                }
+            }
+        });
+    }
+
+</script>
+<script>
+        $(function () {
+            $('#FailureTable').DataTable();
+
+                var display = "@ViewBag.Message";
+
+        if (display != null && display != "") {
+            $('#MessageModal4').modal('show');
+        }
+
+            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
+             var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
+            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
+                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
+            }*@
+
+        });
+</script>
+
+

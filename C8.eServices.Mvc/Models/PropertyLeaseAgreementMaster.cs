@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -427,5 +427,71 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Branch Code")]
         [StringLength(10)]
         public string TenantBranchCode { get; set; }
+
+        // RENEWAL LEASE AGREEMENT SIGNATURES
+        [Column(Order = 122)]
+        [Display(Name = "Renewal Tenant Signature")]
+        public string RenewalTenantSignature { get; set; }
+
+        [Column(Order = 123)]
+        [Display(Name = "Renewal Tenant Signed")]
+        public bool RenewalTenantSigned { get; set; }
+
+        [Column(Order = 124)]
+        [Display(Name = "Renewal Tenant Signature Date")]
+        public DateTime? RenewalTenantSignatureDate { get; set; }
+
+        [Column(Order = 125)]
+        [Display(Name = "Renewal Witness 1 Signature")]
+        public string RenewalWitness1Signature { get; set; }
+
+        [Column(Order = 126)]
+        [Display(Name = "Renewal Witness 1 Name")]
+        [StringLength(200)]
+        public string RenewalWitness1Name { get; set; }
+
+        [Column(Order = 127)]
+        [Display(Name = "Renewal Witness 1 Signature Date")]
+        public DateTime? RenewalWitness1SignatureDate { get; set; }
+
+        [Column(Order = 128)]
+        [Display(Name = "Renewal Property Manager Signature")]
+        public string RenewalPropertyManagersSignature { get; set; }
+
+        [Column(Order = 129)]
+        [Display(Name = "Renewal Property Manager Signed")]
+        public bool RenewalPropertyManagerSigned { get; set; }
+
+        [Column(Order = 130)]
+        [Display(Name = "Renewal Property Manager Signature Date")]
+        public DateTime? RenewalPropertyManagerSignatureDate { get; set; }
+
+        [Column(Order = 131)]
+        [Display(Name = "Renewal Revenue Manager Signature")]
+        public string RenewalRevenueManagersSignature { get; set; }
+
+        [Column(Order = 132)]
+        [Display(Name = "Renewal Revenue Manager Signed")]
+        public bool RenewalRevenueManagerSigned { get; set; }
+
+        [Column(Order = 133)]
+        [Display(Name = "Renewal Revenue Manager Signature Date")]
+        public DateTime? RenewalRevenueManagerSignatureDate { get; set; }
+
+        [Column(Order = 134)]
+        [Display(Name = "Renewal Signature Main Lessee")]
+        public string RenewalSignatureMainLessee { get; set; }
+
+        [Column(Order = 135)]
+        [Display(Name = "Renewal Main Lessee Signed")]
+        public bool RenewalMainLesseeSigned { get; set; }
+
+        [Column(Order = 136)]
+        [Display(Name = "Renewal Main Lessee Signature Date")]
+        public DateTime? RenewalMainLesseeSignatureDate { get; set; }
+
+        [Column(Order = 137)]
+        [Display(Name = "Renewal Signature Of Spouse")]
+        public string RenewalSignatureOfSpouse { get; set; }
     }
 }

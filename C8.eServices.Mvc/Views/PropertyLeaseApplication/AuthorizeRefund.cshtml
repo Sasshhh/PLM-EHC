@@ -1,0 +1,304 @@
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@using System.Text;
+@using C8.eServices.Mvc.DataAccessLayer;
+@using C8.eServices.Mvc.Keys
+@{
+    ViewBag.Title = "Authorize Refund";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+<head>
+    <style>
+        .swal-modal .swal-text {
+            text-align: center;
+        }
+        .header-centered {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .info-table th {
+            background-color: #f8f9fa;
+            width: 35%;
+        }
+        canvas#signature-pad {
+            background-color: #fff;
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #ccc;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+
+<div class="container" style="margin-top: 20px;">
+    <h2 class="header-centered">CEO - Refund Authorization &amp; Sign-off</h2>
+
+    <div class="panel-group">
+        <!-- 1. Calculation Details Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Refund &amp; Deductions Breakdown</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    <table class="table table-bordered info-table" style="background-color: #ffffff;">
+                        <tbody>
+                            <tr>
+                                <th>Lease Reference No</th>
+                                <td>@Model.LeaseDetails.LeaseReferenceNo</td>
+                            </tr>
+                            <tr>
+                                <th>Tenant Name</th>
+                                <td>@(Model.Customer != null ? Model.Customer.FullName : "N/A")</td>
+                            </tr>
+                            <tr>
+                                <th>Deposit Held</th>
+                                <td><strong>R @Model.LeaseDetails.DepositeAmount.ToString("F2")</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Maintenance Cost</th>
+                                <td>R @(Model.LeaseTermination != null && Model.LeaseTermination.MaintenanceCost.HasValue ? Model.LeaseTermination.MaintenanceCost.Value.ToString("F2") : "0.00")</td>
+                            </tr>
+                            <tr>
+                                <th>Approved Deductions</th>
+                                <td>R @(Model.LeaseTermination != null && Model.LeaseTermination.ApprovedDeductions.HasValue ? Model.LeaseTermination.ApprovedDeductions.Value.ToString("F2") : "0.00")</td>
+                            </tr>
+                            <tr class="success" style="background-color: #dff0d8 !important;">
+                                <th>Nett Refund Amount</th>
+                                <td><strong style="color: #27ae60; font-size: 1.1em;">R @(Model.LeaseTermination != null && Model.LeaseTermination.NettRefundAmount.HasValue ? Model.LeaseTermination.NettRefundAmount.Value.ToString("F2") : "0.00")</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Financial Officer Recommendation</th>
+                                <td><span class="label label-info">@(Model.LeaseTermination != null ? Model.LeaseTermination.DepositRefundRecommended : "N/A")</span></td>
+                            </tr>
+                            <tr>
+                                <th>Financial Officer Reason</th>
+                                <td>@(Model.LeaseTermination != null ? Model.LeaseTermination.FinancialOfficerReason : "N/A")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Revenue Manager Review Outcome Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Revenue Manager Review Status</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    <table class="table table-bordered info-table" style="background-color: #ffffff;">
+                        <tbody>
+                            <tr>
+                                <th>Revenue Manager Review Support</th>
+                                <td>
+                                    @if (Model.LeaseTermination != null && Model.LeaseTermination.RevenueManagerRefundSupport == true)
+                                    {
+                                        <span class="label label-success" style="font-size: 0.9em; padding: 5px 10px;">SUPPORTED</span>
+                                    }
+                                    else if (Model.LeaseTermination != null && Model.LeaseTermination.RevenueManagerRefundSupport == false)
+                                    {
+                                        <span class="label label-danger" style="font-size: 0.9em; padding: 5px 10px;">NOT SUPPORTED</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="label label-default" style="font-size: 0.9em; padding: 5px 10px;">PENDING</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>RM Official Number</th>
+                                <td>@(Model.LeaseTermination != null ? Model.LeaseTermination.RevenueManagerRefundOfficialNumber : "N/A")</td>
+                            </tr>
+                            <tr>
+                                <th>RM Comments</th>
+                                <td>@(Model.LeaseTermination != null ? Model.LeaseTermination.RevenueManagerRefundReason : "N/A")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Documents Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Documents</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    @Html.Partial("_DocumentsPartialTerminationLetter", Model.DocumentsViewModelRefundDeposits)
+                    <br />
+                    @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. CEO Action Form -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">CEO Refund Authorization Sign-off</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                     <form action="@Request.RawUrl" method="post" id="ceoReviewForm" class="form-horizontal">
+                         @Html.AntiForgeryToken()
+                         @Html.HiddenFor(m => m.LeaseDetails.Id)
+
+                         <div class="form-group">
+                             <label class="control-label col-md-3">CEO Official Number <span class="text-danger">*</span></label>
+                             <div class="col-md-6">
+                                 <input type="text" name="CEORefundOfficialNumber" id="ceoOfficialNumber" class="form-control" required placeholder="Enter CEO Official Number" />
+                             </div>
+                         </div>
+
+                         <div class="form-group">
+                             <label class="control-label col-md-3">CEO Signature <span class="text-danger">*</span></label>
+                             <div class="col-md-6">
+                                 <canvas id="signature-pad"></canvas>
+                                 <div style="margin-top:5px;">
+                                     <button type="button" class="btn btn-xs btn-default" onclick="clearSignature()">Clear Signature</button>
+                                 </div>
+                                 <input type="hidden" name="CEORefundSignature" id="hdnSignatureBlob" />
+                             </div>
+                         </div>
+
+                         <div class="form-group">
+                             <label class="control-label col-md-3">Authorization Outcome <span class="text-danger">*</span></label>
+                             <div class="col-md-6">
+                                 <select name="CEORefundResponse" id="ceoResponse" class="form-control" required onchange="StatusChange()">
+                                     <option value="">-- Select Option --</option>
+                                     <option value="Approve Full">Approve Full Refund</option>
+                                     <option value="Approve Partial">Approve Partial Refund</option>
+                                     <option value="No Refund">No Refund</option>
+                                     <option value="Reject">Reject / Return to FO</option>
+                                 </select>
+                             </div>
+                         </div>
+
+                         <div id="divComment" class="form-group" style="display:none;">
+                             <label class="control-label col-md-3" id="lblReason">Comment / Reason <span class="text-danger">*</span></label>
+                             <div class="col-md-6">
+                                 <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Provide comments or reasons for the decision"></textarea>
+                             </div>
+                         </div>
+
+                         <div class="form-group">
+                             <div class="col-md-offset-3 col-md-6">
+                                 <input type="button" value="Submit Authorization" onclick="clickSubmit()" class="button1" style="min-width: 180px;" />
+                                 <input type="submit" id="btnRealSubmit" style="display:none;" />
+                             </div>
+                         </div>
+                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================================
+    // 1. CANVAS SIGNATURE LOGIC
+    // ================================
+    var canvas = document.getElementById('signature-pad');
+    var ctx = canvas.getContext('2d');
+    var drawing = false;
+
+    // Set canvas dimensions
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    // --- Mouse Events ---
+    canvas.addEventListener('mousedown', function (e) { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousemove', function (e) { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', function () { drawing = false; updateHiddenField(); });
+
+    // --- Touch Events (Mobile/Tablet) ---
+    canvas.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        drawing = true;
+        ctx.beginPath();
+        var touch = e.touches[0];
+        var rect = canvas.getBoundingClientRect();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+        if (drawing) {
+            var touch = e.touches[0];
+            var rect = canvas.getBoundingClientRect();
+            ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener('touchend', function () { drawing = false; updateHiddenField(); });
+
+    function updateHiddenField() {
+        document.getElementById('hdnSignatureBlob').value = canvas.toDataURL();
+    }
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('hdnSignatureBlob').value = "";
+    }
+
+    // ================================
+    // 2. DYNAMIC UX (Comment visibility)
+    // ================================
+    function StatusChange() {
+        var responseValue = $("#ceoResponse").val();
+        var label = document.getElementById('lblReason');
+        
+        if (responseValue === "Approve Partial" || responseValue === "No Refund" || responseValue === "Reject") {
+            $("#divComment").show();
+            $("#Comments").attr("required", "required");
+            if (responseValue === "Reject") {
+                label.innerHTML = 'Reason for Rejection <span class="text-danger">*</span>';
+            } else if (responseValue === "No Refund") {
+                label.innerHTML = 'Reason for No Refund <span class="text-danger">*</span>';
+            } else {
+                label.innerHTML = 'Reason for Partial Refund <span class="text-danger">*</span>';
+            }
+        } else {
+            $("#divComment").hide();
+            $("#Comments").removeAttr("required");
+        }
+    }
+
+    // ================================
+    // 3. SUBMIT VALIDATION CHAIN
+    // ================================
+    function clickSubmit() {
+        var officialNumber = $("#ceoOfficialNumber").val();
+        var signature = $("#hdnSignatureBlob").val();
+        var response = $("#ceoResponse").val();
+        var comment = $("#Comments").val();
+
+        if (!officialNumber) {
+            swal("Validation Error", "Please enter your CEO Official Number.", "warning");
+            return;
+        }
+        if (!signature || signature === "") {
+            swal("Validation Error", "Please sign the document before submitting.", "warning");
+            document.getElementById("signature-pad").scrollIntoView({ behavior: "smooth" });
+            return;
+        }
+        if (!response) {
+            swal("Validation Error", "Please select an Authorization Outcome.", "warning");
+            return;
+        }
+        if ((response === "Approve Partial" || response === "No Refund" || response === "Reject") && (!comment || comment.trim() === "")) {
+            swal("Validation Error", "A comment is required for this decision outcome.", "warning");
+            return;
+        }
+
+        swal({
+            title: "Confirm Submission",
+            text: "Are you sure you want to submit this refund authorization?",
+            icon: "info",
+            buttons: ["Cancel", "Yes, Submit!"],
+            dangerMode: true,
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                $("#btnRealSubmit").click();
+            }
+        });
+    }
+</script>

@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -76,17 +76,16 @@
         if (display != null && display != "") {
             var message = "@ViewBag.MessageBodySwal";
             swal("Error!", message, "warning");
-            //swal({
-            //    icon: "error",
-            //    title: message,
-            //    type: "error",
-            //    closeOnClickOutside: false,
-            //    buttons: [
-            //        'Cancel',
-            //        'Rerty!'
-            //    ]
-
-            //});
+        }
+        
+        var evictionSessionMsg = "@Html.Raw(ViewBag.EvictionDetailsSession)";
+        if (evictionSessionMsg !== null && evictionSessionMsg !== '') {
+            swal({
+                title: "Eviction Processed",
+                text: evictionSessionMsg,
+                icon: "success",
+                button: "OK",
+            });
         }
     });
 

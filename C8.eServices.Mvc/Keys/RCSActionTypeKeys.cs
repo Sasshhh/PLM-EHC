@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -58,5 +58,12 @@ namespace C8.eServices.Mvc.Keys
         public const string NoRefundDue = "plm_no_refund_due";
 
         public const string ReallocateApplication = "r_re_allocate_application";
+
+        // UC022: Lease Agreement Rejection Sub-Types
+        public const string NotSupportedDueToTenant = "plm_not_supported_tenant";
+        public const string NotSupportedDueToCSO = "plm_not_supported_cso";
+
+        // UC023-S3 — Legal Referral (Revenue Manager)
+        public const string LegalReferral = "plm_legal_referral";
     }
 }

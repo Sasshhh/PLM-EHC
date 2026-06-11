@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -58,10 +58,35 @@ namespace C8.eServices.Mvc.Keys
 
         public const string DepositRefund = "r_deposit_refund";
         public const string DepositRefundResponse = "r_awaiting_deposit_refund_response";
+        public const string RefundAuthorisation = "r_refund_authorisation";
         public const string AwaitingDocUploadingForMigratedApps = "r_awaiting_doc_upload_migrating_application";
         public const string PropertyFacilitiesManagerReview = "r_property_facilities_manager_review";
 
         public const string ComplaintInvestigation = "r_complaint_investigation";
         public const string LeaseRenewalCEOApproval = "r_lease_renewal_ceo_approval";
+
+        // Service Request routing keys (UC17D)
+        public const string ServiceRequestOpen = "r_service_request_open";
+        public const string ServiceRequestInProgress = "r_service_request_in_progress";
+
+        // UC021 — Lease Renewal Agreement Signing
+        public const string RenewalTenantSign = "r_renewal_tenant_sign";
+        public const string RenewalRMSign = "r_renewal_rm_sign";
+        public const string RenewalCEOSign = "r_renewal_ceo_sign";
+
+        // UC023 — CSO Termination Review Gate
+        public const string CSOTerminationReview = "r_cso_termination_review";
+
+        // UC024 — CEO Eviction Authorization
+        public const string EvictionCEOAuth = "r_eviction_ceo_auth";
+
+        // UC025 — Serve Eviction Notice & Proof of Service
+        public const string EvictionService = "r_eviction_service";
+        public const string ProofOfService = "r_proof_of_service";
+
+        // UC026 — Manage Disputes
+        public const string DisputeReview = "r_dispute_review";
+        public const string DisputeResolution = "r_dispute_resolution";
+        public const string DisputeClosure = "r_dispute_closure";
     }
 }

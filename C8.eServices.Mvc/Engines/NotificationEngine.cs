@@ -214,6 +214,58 @@ namespace C8.eServices.Mvc.Engines
             }
         }
 
+        public bool SendServiceRequestOutcomeNotification(ServiceRequest serviceRequest)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(serviceRequest.EmailAddress) &&
+                    string.IsNullOrWhiteSpace(serviceRequest.ContactNumber))
+                    return false;
+
+                var subject = $"Service Request Resolved - {serviceRequest.RequestReferenceNumber}";
+                var body = $"Your service request <strong>{serviceRequest.RequestReferenceNumber}</strong> has been resolved.<br/>" +
+                           $"Resolved Date: {serviceRequest.DateResolved?.ToString("dd MMMM yyyy HH:mm")}<br/><br/>" +
+                           "If you have any questions or require further assistance, please contact our Client Services team.<br/><br/>" +
+                           "Regards,<br/>Property Lease Management Team";
+
+                QueueEmail(serviceRequest.EmailAddress, $"{serviceRequest.ReportedByName} {serviceRequest.ReportedBySurname}", subject, body, serviceRequest.RequestReferenceNumber);
+                QueueSms(serviceRequest.ContactNumber, $"Service Request {serviceRequest.RequestReferenceNumber} has been resolved. Check your email for details. PLM Team");
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool SendServiceRequestAssignmentNotification(ServiceRequest serviceRequest, Customer cso)
+        {
+            try
+            {
+                var systemUser = _db.SystemUsers.FirstOrDefault(su => su.Id == cso.SystemUserId);
+                if (systemUser == null || string.IsNullOrWhiteSpace(systemUser.EmailAddress)) return false;
+
+                var subject = $"New Service Request Assigned - {serviceRequest.RequestReferenceNumber}";
+                var body = $"A new service request has been assigned to you:<br/>" +
+                           $"Reference: <strong>{serviceRequest.RequestReferenceNumber}</strong><br/>" +
+                           $"Complex: {serviceRequest.Complex?.Name ?? serviceRequest.ComplexId.ToString()}<br/>" +
+                           $"Category: {serviceRequest.Category?.Name}<br/>" +
+                           $"Priority: {serviceRequest.Priority?.Name ?? "Not set"}<br/>" +
+                           $"Reported By: {serviceRequest.ReportedByName} {serviceRequest.ReportedBySurname}<br/>" +
+                           $"Date Submitted: {serviceRequest.DateSubmitted:dd MMMM yyyy HH:mm}<br/><br/>" +
+                           "Please log in to the Property Lease Management system to action this request.<br/><br/>" +
+                           "Regards,<br/>Property Lease Management System";
+
+                QueueEmail(systemUser.EmailAddress, $"{cso.FirstName} {cso.LastName}", subject, body, serviceRequest.RequestReferenceNumber);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public bool SendPaymentTransgressionNotification(PaymentTransgression transgression, string letterType)
         {
             try
@@ -304,6 +356,14 @@ namespace C8.eServices.Mvc.Engines
                 Email = systemUser.EmailAddress,
                 Cellphone = application.CellNo
             };
+        }
+
+        /// <summary>
+        /// Queues an SLA escalation email (used by ComplaintSLAEngine).
+        /// </summary>
+        public void QueueEscalationEmail(string recipientEmail, string recipientName, string subject, string body, string referenceNumber)
+        {
+            QueueEmail(recipientEmail, recipientName, subject, body, referenceNumber);
         }
 
         private class RespondentContactInfo

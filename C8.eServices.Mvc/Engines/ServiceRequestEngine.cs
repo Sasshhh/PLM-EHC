@@ -124,6 +124,7 @@ namespace C8.eServices.Mvc.Engines
                     if (statusKey == ServiceRequestStatusKeys.Resolved)
                     {
                         serviceRequest.DateResolved = DateTime.Now;
+                        _notificationEngine.SendServiceRequestOutcomeNotification(serviceRequest);
                     }
                     else if (statusKey == ServiceRequestStatusKeys.Closed)
                     {
@@ -133,6 +134,108 @@ namespace C8.eServices.Mvc.Engines
                     _db.SaveChanges();
                 }
             }
+        }
+
+        /// <summary>
+        /// Assigns a service request to the Letting Officer of the selected complex (UC17D).
+        /// Creates a Round Robin Queue entry and sends assignment notification.
+        /// </summary>
+        public Customer AssignToLettingOfficer(ServiceRequest serviceRequest)
+        {
+            var complex = _db.PreferredComplexAreas.Find(serviceRequest.ComplexId);
+            var fallbackId = Convert.ToInt32(
+                _db.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.LettingOfficer)?.Value ?? "0");
+
+            var clerkId = (complex != null && complex.LettingOfficerId.HasValue)
+                ? complex.LettingOfficerId.Value
+                : fallbackId;
+
+            if (clerkId == 0) return null;
+
+            var cso = _db.Customers.Find(clerkId);
+            if (cso == null) return null;
+
+            var responsibilityType = _db.ResponsibilityTypes
+                .FirstOrDefault(r => r.Key == ResponsibilityTypeKeys.ServiceRequestOpen);
+            if (responsibilityType == null) return null;
+
+            var statusId = _db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted)?.Id ?? 1;
+
+            var queue = new RoundRobinQueue
+            {
+                ServiceRequestId = serviceRequest.Id,
+                PropertyLeaseApplicationId = null,
+                TenantComplaintId = null,
+                ResponsibilityTypeId = responsibilityType.Id,
+                CurrentTaskDateTime = DateTime.Now,
+                ClerkId = clerkId,
+                StatusId = statusId,
+                CreatedDateTime = DateTime.Now,
+                DepartmentId = 1
+            };
+            _db.RoundRobinQueues.Add(queue);
+
+            serviceRequest.AssignedToId = clerkId;
+            serviceRequest.DateAssigned = DateTime.Now;
+            _db.SaveChanges();
+
+            _notificationEngine.SendServiceRequestAssignmentNotification(serviceRequest, cso);
+            return cso;
+        }
+
+        /// <summary>
+        /// Closes active Round Robin queue entries for a service request at a given step.
+        /// </summary>
+        public void RoundRobinMarkFinished(int serviceRequestId, string responsibilityTypeKey)
+        {
+            var responsibilityType = _db.ResponsibilityTypes
+                .FirstOrDefault(r => r.Key == responsibilityTypeKey);
+            if (responsibilityType == null) return;
+
+            var archivedStatusId = _db.Status.FirstOrDefault(x => x.Key == StatusKeys.Archived).Id;
+
+            var entry = _db.RoundRobinQueues
+                .Where(r => r.ServiceRequestId == serviceRequestId
+                         && r.ResponsibilityTypeId == responsibilityType.Id
+                         && r.StatusId != archivedStatusId)
+                .OrderBy(r => r.Id)
+                .FirstOrDefault();
+
+            if (entry == null) return;
+
+            entry.StatusId = archivedStatusId;
+            entry.EndTaskDateTime = DateTime.Now;
+            entry.ModifiedDateTime = DateTime.Now;
+            _db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Opens a new Round Robin Queue entry when transitioning to In Progress.
+        /// </summary>
+        public void RoundRobinOpenInProgress(ServiceRequest serviceRequest)
+        {
+            var responsibilityType = _db.ResponsibilityTypes
+                .FirstOrDefault(r => r.Key == ResponsibilityTypeKeys.ServiceRequestInProgress);
+            if (responsibilityType == null) return;
+
+            if (!serviceRequest.AssignedToId.HasValue) return;
+
+            var statusId = _db.Status.FirstOrDefault(s => s.Key == StatusKeys.Submitted)?.Id ?? 1;
+
+            var queue = new RoundRobinQueue
+            {
+                ServiceRequestId = serviceRequest.Id,
+                PropertyLeaseApplicationId = null,
+                TenantComplaintId = null,
+                ResponsibilityTypeId = responsibilityType.Id,
+                CurrentTaskDateTime = DateTime.Now,
+                ClerkId = serviceRequest.AssignedToId.Value,
+                StatusId = statusId,
+                CreatedDateTime = DateTime.Now,
+                DepartmentId = 1
+            };
+            _db.RoundRobinQueues.Add(queue);
+            _db.SaveChanges();
         }
 
         /// <summary>

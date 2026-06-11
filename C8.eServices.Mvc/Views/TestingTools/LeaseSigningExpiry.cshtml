@@ -1,0 +1,148 @@
+@model List<C8.eServices.Mvc.Models.PropertyLeaseAgreementMaster>
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "BR19 — Lease Signing Expiry";
+}
+
+<style>
+    .tool-badge-safe    { background: #d1e7dd; color: #0f5132; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-warning { background: #fff3cd; color: #664d03; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-danger  { background: #f8d7da; color: #842029; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .btn-backdate  { background: #e63946; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-backdate:hover  { background: #c1121f; color: white; }
+    .btn-run-checker     { background: #1a472a; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .btn-run-checker:hover { background: #2d6a4f; color: white; }
+    .tool-alert-warning  { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px 18px; margin-bottom: 15px; }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background:#1a472a; color:white; padding:14px 18px;">
+                <h4 style="margin:0; font-size:16px;">
+                    <i class="ion ion-document-text"></i>&nbsp; BR19 — Lease Signing Expiry Checker &nbsp;
+                    <small style="font-size:12px; opacity:0.8;">Testing tool — backdate agreement creation date to simulate 30-day signing deadline breach</small>
+                </h4>
+            </div>
+
+            <div class="panel-body">
+
+                @* ── Alerts ── *@
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Success!</strong> @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Error:</strong> @TempData["Error"]
+                    </div>
+                }
+
+                @* ── Collapsible How It Works ── *@
+                <div class="panel panel-default" style="margin-bottom:15px;">
+                    <div class="panel-heading" style="cursor:pointer; padding:8px 15px;" data-toggle="collapse" data-target="#howItWorks">
+                        <strong><i class="ion ion-information-circled"></i> How This Tool Works</strong>
+                        <span class="pull-right"><i class="ion ion-chevron-down"></i></span>
+                    </div>
+                    <div id="howItWorks" class="collapse">
+                        <div class="panel-body" style="font-size:13px; color:#444;">
+                            <p><strong>Business Rule BR19:</strong> If a lease agreement is not signed by the tenant within <strong>30 days</strong> of being sent, the application must be disregarded.</p>
+                            <ol style="margin-bottom:8px;">
+                                <li><strong>Backdate 31d</strong> — Sets the agreement's <code>CreatedDateTime</code> to 31 days ago. This simulates an agreement that has been pending for over 30 days.</li>
+                                <li><strong>Run BR19 Checker</strong> — Calls <code>MatchingHelper.CheckLeaseSigningExpiry</code> which scans all unsigned agreements awaiting tenant signature. Any where <code>CreatedDateTime</code> is 30+ days old will have the application status changed to <strong>Lease Signing Expired</strong>, an email sent to the tenant, and an audit log recorded.</li>
+                            </ol>
+                            <p style="margin:0;" class="text-muted"><strong>[OVERDUE]</strong> = agreement sent 30+ days ago — will trigger on next checker run.</p>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── Run Checker Action Bar ── *@
+                <div class="tool-alert-warning" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong><i class="ion ion-refresh"></i> Run BR19 Checker</strong><br />
+                        <small style="color:#664d03;">Scans all unsigned lease agreements. Any agreement sent 30+ days ago will have its application disregarded and the tenant notified.</small>
+                    </div>
+                    @using (Html.BeginForm("RunLeaseSigningChecker", "TestingTools", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-run-checker" onclick="return confirm('Run the BR19 Lease Signing Checker for ALL eligible agreements?')">
+                            <i class="ion ion-refresh"></i> Run BR19 Lease Signing Checker
+                        </button>
+                    }
+                </div>
+
+                @* ── DataTable ── *@
+                <table id="tblLeaseSigningExpiry" class="table table-bordered table-hover table-striped" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>App Reference</th>
+                            <th>Tenant</th>
+                            <th>Agreement Created</th>
+                            <th>Days Since Sent</th>
+                            <th>Status</th>
+                            <th style="min-width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            double daysSinceSent = item.CreatedDateTime.HasValue ? (DateTime.Now - item.CreatedDateTime.Value).TotalDays : 0;
+                            string bClass = daysSinceSent >= 30 ? "tool-badge-danger"
+                                          : daysSinceSent >= 20 ? "tool-badge-warning"
+                                          : "tool-badge-safe";
+                            string bLabel = daysSinceSent >= 30 ? "[OVERDUE] " + (int)daysSinceSent + "d"
+                                          : (int)daysSinceSent + "d";
+                            string appRef = item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.ApplicationReferenceNumber : "N/A";
+                            string fullName = item.ApplicantFullName ?? (item.PropertyLeaseApplication != null ? item.PropertyLeaseApplication.FullName : "N/A");
+                            string statusName = (item.PropertyLeaseApplication != null && item.PropertyLeaseApplication.Status != null) ? item.PropertyLeaseApplication.Status.Name : "-";
+
+                            <tr>
+                                <td><strong>@appRef</strong></td>
+                                <td>@fullName</td>
+                                <td>@(item.CreatedDateTime.HasValue ? item.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td><span class="@bClass">@bLabel</span></td>
+                                <td>@statusName</td>
+                                <td>
+                                    @using (Html.BeginForm("BackdateLeaseAgreement", "TestingTools", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="agreementId" value="@item.Id" />
+                                        <button type="submit" class="btn-backdate" onclick="return confirm('Backdate this agreement CreatedDateTime to 31 days ago?')">
+                                            <i class="ion ion-clock"></i> Backdate 31d
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="ion ion-information-circled"></i> No unsigned lease agreements found. Agreements must be in <strong>Awaiting Applicant's Signature</strong> status to appear here.
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#tblLeaseSigningExpiry').DataTable({
+            responsive: true,
+            pageLength: 25,
+            order: [[3, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [5] }
+            ]
+        });
+    });
+</script>

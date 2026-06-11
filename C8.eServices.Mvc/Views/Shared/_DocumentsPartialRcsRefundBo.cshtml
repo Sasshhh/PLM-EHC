@@ -1,4 +1,4 @@
-﻿
+
 @model C8.eServices.Mvc.ViewModels.DocumentsViewModel
 @using System.Web
 
@@ -98,7 +98,7 @@
                                 <div id="@("docDetails_" + doc.Id)" class="docDetails">
                                     @foreach (var d in documents)
                                     {
-                                        @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='glyphicon glyphicon-remove' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)
+                                        @Html.Raw(d != null ? string.Format("<a href='{0}' target='_blank' rel='noopener noreferrer'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<a href='javascript:void();' onclick='deleteDocument(\"" + d.Data + "\");'><span class='glyphicon glyphicon-remove' title='Delete document'></span></a><br/>") : string.Empty : string.Empty)
                                     }
                                 </div>
                                 @Html.Raw(string.Format("<small>{0}</small>", doc.DocumentType.Description))
@@ -177,14 +177,14 @@
                                 <td style="align-content:center">
                                     @foreach (var d in documents)
                                     {
-                                        @Html.Hidden(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<br/>") : string.Empty : string.Empty)
+                                        @Html.Hidden(d != null ? string.Format("<a href='{0}' target='_blank' rel='noopener noreferrer'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<br/>") : string.Empty : string.Empty)
                                         if (d != null)
                                         {
-                                            <input type="button" id="btnExternal" class="button1" value="Download" onclick="location.href='@Url.Action("GetDocument", "File", new { q = d.File.Data })'" />
+                                            <input type="button" id="btnExternal" class="button1" value="Download" onclick="window.open('@Url.Action("GetDocument", "File", new { q = d.File.Data })', '_blank')" />
                                         }
                                         else
                                         {
-                                            @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (@*d.CreatedDateTime*@d.DocumentName == null) ? "No Document<br/>" @*string.Empty*@ : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<br/>") : string.Empty : string.Empty)
+                                            @Html.Raw(d != null ? string.Format("<a href='{0}' target='_blank' rel='noopener noreferrer'>{1}</a>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (@*d.CreatedDateTime*@d.DocumentName == null) ? "No Document<br/>" @*string.Empty*@ : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document<br/>") @Html.Raw(d != null ? (d.IsLocked == false) ? string.Format("&nbsp;&nbsp;<br/>") : string.Empty : string.Empty)
                                         }
                                         <br />
                                     }

@@ -24,7 +24,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h4><i class="ion ion-cash"></i> Payment Transgression — @Model.CaseReferenceNumber</h4>
+        <h4><i class="ion ion-cash"></i> Payment Transgression - @Model.CaseReferenceNumber</h4>
     </div>
     <div class="panel-body">
 
@@ -121,6 +121,12 @@
                     <tr><td><strong>Generated Date</strong></td><td>@(Model.LetterGeneratedDate.HasValue ? Model.LetterGeneratedDate.Value.ToString("dd MMMM yyyy HH:mm") : "—")</td></tr>
                     <tr><td><strong>Sent Date</strong></td><td>@(Model.LetterSentDate.HasValue ? Model.LetterSentDate.Value.ToString("dd MMMM yyyy HH:mm") : "—")</td></tr>
                 </table>
+                @if (!string.IsNullOrEmpty(Model.LetterFilePath))
+                {
+                    <a href="@Url.Action("DownloadLetter", "PaymentTransgressions", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.Id) })" target="_blank" class="btn btn-info btn-sm" style="margin-top: 10px;">
+                        <i class="ion ion-eye"></i> View Generated Letter
+                    </a>
+                }
             </div>
         }
 

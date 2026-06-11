@@ -1,9 +1,9 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
 @{
-    ViewBag.Title = "";
+    ViewBag.Title = "Revenue Manager Refund Review";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
 }
 <head>
@@ -11,133 +11,168 @@
         .swal-modal .swal-text {
             text-align: center;
         }
+        .header-centered {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .info-table th {
+            background-color: #f8f9fa;
+            width: 35%;
+        }
     </style>
 </head>
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 
-<div id="bankAccountPanel">
-    <div class="panel panel-default">
-        <br />
-        <div class="panel-heading">Documents</div>
-        <div style="width: 90%;margin: 0 auto;">
-            <div style="display:block">
-                @Html.Partial("_DocumentsPartialTerminationLetter", Model.DocumentsViewModelRefundDeposits)
-                <br />
+<div class="container" style="margin-top: 20px;">
+    <h2 class="header-centered">Revenue Manager - Deposit Refund Review</h2>
+
+    <div class="panel-group">
+        <!-- 1. Calculation Details Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Refund &amp; Deductions Breakdown</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    <table class="table table-bordered info-table" style="background-color: #ffffff;">
+                        <tbody>
+                            <tr>
+                                <th>Lease Reference No</th>
+                                <td>@Model.LeaseDetails.LeaseReferenceNo</td>
+                            </tr>
+                            <tr>
+                                <th>Tenant Name</th>
+                                <td>@(Model.Customer != null ? Model.Customer.FullName : "N/A")</td>
+                            </tr>
+                            <tr>
+                                <th>Deposit Held</th>
+                                <td><strong>R @Model.LeaseDetails.DepositeAmount.ToString("F2")</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Maintenance Cost</th>
+                                <td>R @(Model.LeaseTermination != null && Model.LeaseTermination.MaintenanceCost.HasValue ? Model.LeaseTermination.MaintenanceCost.Value.ToString("F2") : "0.00")</td>
+                            </tr>
+                            <tr>
+                                <th>Approved Deductions</th>
+                                <td>R @(Model.LeaseTermination != null && Model.LeaseTermination.ApprovedDeductions.HasValue ? Model.LeaseTermination.ApprovedDeductions.Value.ToString("F2") : "0.00")</td>
+                            </tr>
+                            <tr class="success" style="background-color: #dff0d8 !important;">
+                                <th>Nett Refund Amount</th>
+                                <td><strong style="color: #27ae60; font-size: 1.1em;">R @(Model.LeaseTermination != null && Model.LeaseTermination.NettRefundAmount.HasValue ? Model.LeaseTermination.NettRefundAmount.Value.ToString("F2") : "0.00")</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Financial Officer Recommendation</th>
+                                <td><span class="label label-info">@(Model.LeaseTermination != null ? Model.LeaseTermination.DepositRefundRecommended : "N/A")</span></td>
+                            </tr>
+                            <tr>
+                                <th>Financial Officer Reason</th>
+                                <td>@(Model.LeaseTermination != null ? Model.LeaseTermination.FinancialOfficerReason : "N/A")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <br />
-        <div class="panel-heading">Upload Proff of Banking Details</div>
-        <div style="width: 90%;margin: 0 auto;">
-            <div style="display:block">
-                @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
-                <br />
+
+        <!-- 2. Documents Panel -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Documents</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    @Html.Partial("_DocumentsPartialTerminationLetter", Model.DocumentsViewModelRefundDeposits)
+                    <br />
+                    @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
+                </div>
             </div>
         </div>
 
+        <!-- 3. Review Outcome Form -->
+        <div class="panel panel-default">
+            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Capture Outcome</div>
+            <div class="panel-body">
+                <div style="width: 95%; margin: 0 auto;">
+                    <form action="@Request.RawUrl" method="post" id="rmReviewForm" class="form-horizontal">
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.LeaseDetails.Id)
 
-        <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm())
-            {
-                @Html.AntiForgeryToken()
-
-                <br />
-                <br />
-                if (ViewBag.ApprovalStatus != null)
-                {
-                    <div class="form-group">
-                        @Html.Label("Response", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-2">
-                            @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @onchange = "StatusChange()", @Id = "appStatus", @Name = "ApprovalStatusddl", @required = "required" })
-                            @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            <label class="control-label col-md-3">RM Official Number <span class="text-danger">*</span></label>
+                            <div class="col-md-6">
+                                <input type="text" name="RevenueManagerRefundOfficialNumber" id="rmOfficialNumber" class="form-control" required placeholder="Enter RM Official Number" />
+                            </div>
                         </div>
-                    </div>
-                }
-                <br />
-                <div id="divComment" style="display:none">
-                    <div class="form-group">
-                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })
-                        <div class="col-md-4">
-                            @Html.TextArea("Comment", new { @class = "form-control", @Id = "Comments" })
-                            @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <br />
-                    <br />
-                    <br />
-                </div>
-                <br />
-                <br />
 
-                <div id="divbtn" style="display:block">
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
-                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
-                    <br />
-                    <br />
-                    <br />
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Review Outcome <span class="text-danger">*</span></label>
+                            <div class="col-md-6">
+                                <select name="RevenueManagerRefundSupport" id="rmSupport" class="form-control" required onchange="StatusChange()">
+                                    <option value="">-- Select Option --</option>
+                                    <option value="True">Supported</option>
+                                    <option value="False">Not Supported</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="divComment" class="form-group" style="display:none;">
+                            <label class="control-label col-md-3">Reason / Comment <span class="text-danger">*</span></label>
+                            <div class="col-md-6">
+                                <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Provide reason for not supporting the recommendations"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-offset-3 col-md-6">
+                                <input type="button" value="Submit Review" onclick="clickSubmit()" class="button1" style="min-width: 150px;" />
+                                <input type="submit" id="btnRealSubmit" style="display:none;" />
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    function clickSubmit() {
-        swal({
-            icon: "info",
-            title: "Are you sure you want to continue?",
-            buttons: [
-                'No!',
-                'Yes, I am sure!'
-            ]
+    function StatusChange() {
+        var supportValue = $("#rmSupport").val();
+        if (supportValue === "False") {
+            $("#divComment").show();
+            $("#Comments").attr("required", "required");
+        } else {
+            $("#divComment").hide();
+            $("#Comments").removeAttr("required");
+        }
+    }
 
+    function clickSubmit() {
+        var officialNumber = $("#rmOfficialNumber").val();
+        var support = $("#rmSupport").val();
+        var comment = $("#Comments").val();
+
+        if (!officialNumber) {
+            swal("Validation Error", "Please enter your RM Official Number.", "warning");
+            return;
+        }
+        if (!support) {
+            swal("Validation Error", "Please select a Review Outcome.", "warning");
+            return;
+        }
+        if (support === "False" && (!comment || comment.trim() === "")) {
+            swal("Validation Error", "A comment is required if the refund is Not Supported.", "warning");
+            return;
+        }
+
+        swal({
+            title: "Confirm Submission",
+            text: "Are you sure you want to submit this refund review outcome?",
+            icon: "info",
+            buttons: ["Cancel", "Yes, Submit!"],
+            dangerMode: true,
         }).then(function (isConfirm) {
             if (isConfirm) {
-                debugger;
-                var appStatus = document.getElementById('appStatus').value;
-                var comment = document.getElementById('Comments').value;
-                if ((comment == null || comment == "") && appStatus == "plm_no_refund_due") {
-                    swal("error", "Please enter comment", "warning")
-                }
-                else {
-                    document.getElementById("btnApproval").click();
-                }
+                $("#btnRealSubmit").click();
             }
         });
     }
-    function StatusChange() {
-        debugger;
-        var appStatus = document.getElementById('appStatus').value;
-        if (appStatus == "plm_no_refund_due") {
-            $("#divComment").css("display", "block");
-        }
-        else
-        {
-            $("#divComment").css("display", "none");
-        }
-    }
-    
-    function opendocumentUploadDiv() {
-        $("#documentuploadModal").modal('show');
-    }
-
 </script>
-<script>
-        $(function () {
-            $('#FailureTable').DataTable();
-
-            var display = "@ViewBag.Message";
-
-            if (display != null && display != "") {
-                $('#MessageModal4').modal('show');
-            }
-
-            @*var IncompleteDepartmentUsers = "@ViewBag.Message2";
-            var IncompleteDepartmentUsersTitle = "@ViewBag.MessageTitle2";
-            if (IncompleteDepartmentUsers != null && IncompleteDepartmentUsers != "") {
-                swal(IncompleteDepartmentUsersTitle, IncompleteDepartmentUsers, "warning");
-            }*@
-
-            });
-</script>
-
-

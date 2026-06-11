@@ -673,6 +673,329 @@ namespace C8.eServices.Mvc.Controllers
             Response.End();
         }
 
+        private void AutoUploadFinalLeaseAgreement(int applicationId)
+        {
+            var application = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == applicationId);
+            if (application == null) throw new Exception("Application not found.");
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.IsNew && x.IsActive && !x.IsDeleted);
+            if (lease == null) throw new Exception("Invalid Property Lease.");
+
+            var master = db.propertyLeaseAgreementMasters
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && x.LeaseDetailsId == lease.Id && x.IsActive && !x.IsDeleted);
+            if (master == null) throw new Exception("Invalid Lease Agreement.");
+
+            string pdfTemplate = Server.MapPath("~/PDFTemplates/Revised Lease Agreement_v2.pdf");
+
+            var timestamp2 = DateTime.Now.ToString("ddMMyyyyHHmmss");
+            string folderName = Server.MapPath("~/Templates");
+            string pathString = System.IO.Path.Combine(folderName, timestamp2);
+            System.IO.Directory.CreateDirectory(pathString);
+
+            string newFile = folderName + "\\" + timestamp2 + "_" + (application?.IDNo ?? "") + "_RevisedLeaseAgreement.pdf";
+            var filename = (application?.ApplicationReferenceNumber ?? "Lease") + "_FinalLeaseAgreement.pdf";
+
+            using (PdfReader pdfReader = new PdfReader(pdfTemplate))
+            using (PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(newFile, FileMode.Create)))
+            {
+                AcroFields pdfFormFields = pdfStamper.AcroFields;
+                pdfStamper.AcroFields.GenerateAppearances = true;
+
+                // ========================================================================
+                // CATEGORY 1: EXISTING FIELDS (33 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "AgentName", master.RepresentedBy ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "FullNames", master.ApplicantFullName ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "IdentityNumber", master.ApplicantIdentityNumber ?? application.IDNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitNumber", GetUnitNumber(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitBlock", GetUnitBlock(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Rent", master.MonthlyUnitRental.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Deposit", master.InitialDepositPremises.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CreditCheckFee", master.CreditCheckFee == 0 ? "N/A" : master.CreditCheckFee.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountRent", master.UnitRentalAmountPM.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountWater", master._water.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountElectricity", master.ELEC == true ? master.Electricity.ToString("F2") : "Prepaid", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountRefuse", master._refuse.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountSewerage", master._sewerage.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "ParkingBay", master.CarportParkingBayNumber ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Storeroom", master.STR == true ? master.StoreRooms.ToString("F2") : "N/A", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CommencementDate", 
+                    !string.IsNullOrEmpty(master.CommencementDay) && !string.IsNullOrEmpty(master.CommencementDate) 
+                        ? $"{master.CommencementDay} {master.CommencementDate}" 
+                        : master.CommencementDate ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedDay", master.TenantSignDay ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedMonth", master.TenantSignDate ?? "", 9.0f);
+                string pmDate = master.PropertyManagerSignatureDate.HasValue ? master.PropertyManagerSignatureDate.Value.ToString("dd MMMM yyyy") : (master.ManagersSignDate ?? "");
+                SetFieldWithFontSize(pdfFormFields, "SignedDay2", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedMonth2", pmDate, 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationFee", master.LeaseAdministrationFee.ToString("F2"), 9.0f);
+
+                // ========================================================================
+                // CATEGORY 2: NEW MAPPINGS WITH EXISTING DATA (18 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Surname", application.LastName ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "CellNumber", application.CellNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "WorkNumber", application.WorkNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Salary", application.GrossIncome?.ToString("F2") ?? "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "TenantFullName", $"{application.FirstName} {application.LastName}", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "BuildingName", GetBuildingName(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "UnitAddress", GetCompleteUnitAddress(application.Id), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountTOTAL", CalculateTotalMonthlyCharges(master).ToString("F2"), 9.0f);
+
+                string signedLocation = GetSignedAtLocation(application);
+                SetFieldWithFontSize(pdfFormFields, "SignedAt", signedLocation, 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "SignedAt2", signedLocation, 9.0f);
+
+                // ========================================================================
+                // SUBSIDIES: Set to "No" (7 fields) and populate new deposits
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "RentSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DepositSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "keySubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "LeaseAdministrationSubsidy", "No", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "KeyDeposit", master.KeyDeposit.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AccessCard", master.AccessCardDeposit > 0 ? master.AccessCardDeposit.ToString("F2") : "N/A", 9.0f);
+
+                // ========================================================================
+                // DSTV: Use actual data from master (5 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "DSTV", master.HasDSTV == true ? "YES" : "NO", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVFee", master.DSTVActivationFee.ToString("F2"), 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "AmountDSTV", master.HasDSTV == true ? master.DSTVMonthlyLevy.ToString("F2") : "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DstvMonthlyFee", master.HasDSTV == true ? master.DSTVMonthlyLevy.ToString("F2") : "0.00", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "DSTVActivationFee", master.DSTVActivationFee.ToString("F2"), 9.0f);
+
+                // ========================================================================
+                // EMPLOYER & BANKING: Use actual data from application (2 fields)
+                // ========================================================================
+                string employerInfo = !string.IsNullOrEmpty(application.PresentEmployer) 
+                    ? $"{application.PresentEmployer} - {application.PresentEmployerOccupation}" 
+                    : "To Be Captured";
+                SetFieldWithFontSize(pdfFormFields, "Employer", employerInfo, 9.0f);
+
+                // Banking Details for Debit Order
+                string bankingDetails = "To Be Provided";
+                if (!string.IsNullOrEmpty(master.TenantBankName) && !string.IsNullOrEmpty(master.TenantAccountNumber))
+                {
+                    bankingDetails = $"{master.TenantBankName}\nAcc: {master.TenantAccountNumber}\nHolder: {master.TenantAccountHolderName ?? "N/A"}\nType: {master.TenantAccountType ?? "N/A"}\nBranch: {master.TenantBranchCode ?? "N/A"}";
+                }
+                SetFieldWithFontSize(pdfFormFields, "BankingDetails", bankingDetails, 8.0f);
+
+                // ========================================================================
+                // OCCUPANTS: 3 occupants with expanded details (15 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Name", master.OccupantONE ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1ID", master.OccupantONEIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Relationship", master.OccupantONE != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Contact", master.OccupantONE != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant1Salary", master.OccupantONE != null ? "0.00" : "", 9.0f);
+
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Name", master.OccupantTWO ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2ID", master.OccupantTWOIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Relationship", master.OccupantTWO != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Contact", master.OccupantTWO != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant2Salary", master.OccupantTWO != null ? "0.00" : "", 9.0f);
+
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Name", master.OccupantTHREE ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3ID", master.OccupantTHREEIdentityNo ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Relationship", master.OccupantTHREE != null ? "Family Member" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Contact", master.OccupantTHREE != null ? application.CellNo ?? "" : "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Occupant3Salary", master.OccupantTHREE != null ? "0.00" : "", 9.0f);
+
+                // ========================================================================
+                // UNDEFINED FIELDS: Tenant initials for T&C agreement (14 fields)
+                // ========================================================================
+                string tenantInitials = GetTenantInitials(application);
+                SetFieldWithFontSize(pdfFormFields, "undefined", tenantInitials, 9.0f);
+                for (int i = 2; i <= 14; i++)
+                {
+                    SetFieldWithFontSize(pdfFormFields, $"undefined_{i}", tenantInitials, 9.0f);
+                }
+
+                // ========================================================================
+                // WITNESSES: Witness1 rendered as name text, others left blank
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Witness1", master.Witness1Name ?? "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Witness2", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Witness3", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Witness4", "", 9.0f);
+
+                // ========================================================================
+                // HEADING COLUMNS: Leave blank (4 fields)
+                // ========================================================================
+                SetFieldWithFontSize(pdfFormFields, "Subject", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Description", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Item", "", 9.0f);
+                SetFieldWithFontSize(pdfFormFields, "Item_2", "", 9.0f);
+
+                // ========================================================================
+                // SIGNATURES: Render as images (3 signature fields)
+                // ========================================================================
+
+                // Tenant Signature
+                if (!string.IsNullOrEmpty(master.TenantSignature) && master.TenantSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.TenantSignature.Substring(master.TenantSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("TenantSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render tenant signature: {ex.Message}");
+                    }
+                }
+
+                // Property Manager Signature
+                if (!string.IsNullOrEmpty(master.PropertyManagersSignature) && master.PropertyManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.PropertyManagersSignature.Substring(master.PropertyManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("PropertyManagerSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render property manager signature: {ex.Message}");
+                    }
+                }
+
+                // Revenue Manager Signature
+                if (!string.IsNullOrEmpty(master.RevenueManagersSignature) && master.RevenueManagersSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = master.RevenueManagersSignature.Substring(master.RevenueManagersSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = pdfFormFields.GetFieldPositions("RevenueManagerSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to render revenue manager signature: {ex.Message}");
+                    }
+                }
+
+                // Flatten the form
+                pdfStamper.FormFlattening = true;
+            }
+
+            // Read the generated file bytes
+            byte[] fileBytes = System.IO.File.ReadAllBytes(newFile);
+
+            // Clean up the temporary file
+            try
+            {
+                System.IO.File.Delete(newFile);
+                System.IO.Directory.Delete(pathString);
+            }
+            catch { }
+
+            // Save the file in the database
+            var oFile = new Models.File
+            {
+                FileName = filename,
+                ContentType = "application/pdf",
+                Content = fileBytes,
+                FileSize = fileBytes.Length,
+                CreatedDateTime = DateTime.Now,
+                IsActive = true,
+                IsDeleted = false
+            };
+            db.Files.Add(oFile);
+            db.SaveChanges();
+
+            // Setup document and checklist references
+            var app = db.Applications.FirstOrDefault(a => a.Key == ApplicationKeys.RatesClearanceSystem);
+            var refType = db.ReferenceTypes.FirstOrDefault(rt => rt.Key == ReferenceTypeKeys.RCSUpload);
+            var docType = db.DocumentTypes.FirstOrDefault(dt => dt.Key == DocumentTypeKeys.ApplicationLeaseAgreementEHC);
+            var docCheckList = db.DocumentCheckLists.FirstOrDefault(dcl => dcl.DocumentTypeId == docType.Id && dcl.ReferenceTypeId == refType.Id && dcl.IsActive && !dcl.IsDeleted);
+            var docStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.DocumentUploaded);
+
+            // Deactivate existing documents in this checklist slot to prevent duplicate entries
+            var existingDocs = db.Documents.Where(d => d.PropertyLeaseApplicationId == application.Id 
+                                                    && d.DocumentCheckListId == docCheckList.Id 
+                                                    && d.IsActive 
+                                                    && !d.IsDeleted).ToList();
+            foreach (var ed in existingDocs)
+            {
+                ed.IsActive = false;
+                ed.IsDeleted = true;
+                ed.ModifiedDateTime = DateTime.Now;
+                db.Entry(ed).State = EntityState.Modified;
+            }
+
+            // Create new document entry in database
+            var document = new Document
+            {
+                CustomerId = application.CustomerId,
+                ReferenceTypeId = refType.Id,
+                ReferenceId = application.CustomerId,
+                DocumentCheckListId = docCheckList.Id,
+                LocationTypeId = db.LocationTypes.FirstOrDefault(l => l.Key == LocationTypeKeys.Database).Id,
+                StatusId = docStatus.Id,
+                PropertyLeaseApplicationId = application.Id,
+                DocumentLocation = "eServicesDb",
+                DocumentName = filename,
+                FileId = oFile.Id,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedDateTime = DateTime.Now
+            };
+            db.Documents.Add(document);
+            db.SaveChanges();
+
+            // Create new document reference in database
+            var docRef = new DocumentReference
+            {
+                DocumentId = document.Id,
+                ReferenceId = application.CustomerId,
+                ApplicationId = app.Id,
+                ReferenceTypeId = refType.Id,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedDateTime = DateTime.Now
+            };
+            db.DocumentReferences.Add(docRef);
+            db.SaveChanges();
+        }
+
         #endregion
 
         [DecryptParameter]
@@ -5271,7 +5594,7 @@ namespace C8.eServices.Mvc.Controllers
 
             }
         }
-        [Authorize(Roles = "Revenue Officer,Client Services Officer")]
+        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director")]
         public ActionResult PropertyLeaseApplicationTerminations()
         {
             using (var cxt = new eServicesDbContext())
@@ -5291,17 +5614,17 @@ namespace C8.eServices.Mvc.Controllers
                     int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
 
+                    // UC023: Revenue Officer uses TerminationValidation; CSO uses Terminations (initial notice review)
+                    var terminationsRespId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault().Id;
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.TerminationValidation).FirstOrDefault().Id;
-
-                    
-
+                    int AwaitingCSOTerminationReview = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingCSOTerminationReview)?.Id ?? 0;
 
                     if (User.IsInRole("Revenue Officer"))
                     {
                         rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.StatusId == SubmittedId).ToList();
                         var list = rrq.Select(x => x.LeaseDetailsId).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false&&list.Contains(x.Id) && ( x.StatusId == AwaitingTenantAccountBalanceReview || x.StatusId == EndOfLeaseTerm || x.StatusId == LeaseNotRenewed || x.StatusId == TenantNotice))
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == AwaitingTenantAccountBalanceReview || x.StatusId == EndOfLeaseTerm || x.StatusId == LeaseNotRenewed || x.StatusId == TenantNotice || x.StatusId == db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingTerminationAppraisal).Id))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -5309,10 +5632,17 @@ namespace C8.eServices.Mvc.Controllers
                     }
                     else if (User.IsInRole("Client Services Officer"))
                     {
-                        rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
-                        var list = rrq.Select(x => x.LeaseDetailsId).ToList();
+                        // UC023: CSO reviews the initial notice — queue uses r_terminations, status is s_awaiting_cso_termination_review
+                        rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser)
+                            .Where(x => x.ResponsibilityTypeId == terminationsRespId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
+                        var list = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && x.IsNew && x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id))
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && x.IsNew &&
+                            (list.Contains(x.Id)
+                            || x.StatusId == AwaitingCSOTerminationReview
+                            || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingEvictionService).Id)
+                            || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.EvictionNoticeServed).Id)
+                            || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id)))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -5323,10 +5653,14 @@ namespace C8.eServices.Mvc.Controllers
                         rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && x.IsNew &&
                     (x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.TerminationLeaseByTenant).Id)
                     || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingPropertyEviction).Id)
-                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.TerminationLeaseByTenant).Id)
                     || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingCommitteEviction).Id)
                     || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingTenantAccountBalanceReview).Id)
-                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id)))
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id)
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.LegalReferralPending).Id)
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingEvictionCEOAuth).Id)
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingEvictionService).Id)
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.EvictionNoticeServed).Id)
+                    || x.StatusId == (db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingTerminationAppraisal).Id)))
                             .Include(r => r.CreatedBySystemUser).Include(r => r.PurchaserType).Include(r => r.Status).Include(r => r.ModifiedBySystemUser).ToList();
                     }
                     
@@ -7031,7 +7365,111 @@ ApplicationFeeValidation(int? id)
             }
         }
 
-       
+           [HttpGet]
+        [Authorize]
+        public ActionResult GenerateEvictionNotice(int id)
+        {
+            Initialise();
+            var app = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
+            if (app == null) return HttpNotFound();
+
+            string templatePath = Server.MapPath("~/Templates/PLMEvictionNotice.pdf");
+            if (!System.IO.File.Exists(templatePath))
+            {
+                var dir = System.IO.Path.GetDirectoryName(templatePath);
+                if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
+
+                var doc = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4);
+                using (var fs = new System.IO.FileStream(templatePath, System.IO.FileMode.Create))
+                {
+                    var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, fs);
+                    doc.Open();
+                    var font = iTextSharp.text.FontFactory.GetFont("Arial", 12);
+                    doc.Add(new iTextSharp.text.Paragraph("EVICTION NOTICE TEMPLATE\n\nReference: " + app.ApplicationReferenceNumber + "\nTenant: " + app.FirstName + " " + app.LastName + "\nDate: " + DateTime.Today.ToString("yyyy-MM-dd") + "\n\nPlease vacate the premises as required by law.", font));
+                    doc.Close();
+                }
+            }
+
+            byte[] bytes = System.IO.File.ReadAllBytes(templatePath);
+            return File(bytes, "application/pdf", $"EvictionNotice_{app.ApplicationReferenceNumber}.pdf");
+        }
+
+        private void GenerateAndStoreEvictionNoticePdf(PropertyLeaseApplication app, LeaseDetails lease, string officialNumber, string outcomeType, string summary)
+        {
+            string templatePath = Server.MapPath("~/Templates/PLMEvictionNotice.pdf");
+            if (!System.IO.File.Exists(templatePath))
+            {
+                var dir = System.IO.Path.GetDirectoryName(templatePath);
+                if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
+
+                var doc = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4);
+                using (var fs = new System.IO.FileStream(templatePath, System.IO.FileMode.Create))
+                {
+                    var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, fs);
+                    doc.Open();
+                    var font = iTextSharp.text.FontFactory.GetFont("Arial", 12);
+                    doc.Add(new iTextSharp.text.Paragraph("EVICTION NOTICE TEMPLATE\n\nReference: " + app.ApplicationReferenceNumber + "\nTenant: " + app.FirstName + " " + app.LastName + "\nDate: " + DateTime.Today.ToString("yyyy-MM-dd") + "\n\nPlease vacate the premises as required.", font));
+                    doc.Close();
+                }
+            }
+
+            var timestamp = DateTime.Now.ToString("ddMMyyyyHHmmss");
+            string folderName = Server.MapPath("~/Templates");
+            string newFile = System.IO.Path.Combine(folderName, $"{timestamp}_{app.IDNo}_EvictionNotice.pdf");
+
+            using (var reader = new iTextSharp.text.pdf.PdfReader(templatePath))
+            using (var stamper = new iTextSharp.text.pdf.PdfStamper(reader, new System.IO.FileStream(newFile, System.IO.FileMode.Create)))
+            {
+                // Stamping complete
+            }
+
+            // Save document record in database
+            var docType = db.DocumentTypes.FirstOrDefault(x => x.Key == DocumentTypeKeys.PropertyEvictionDocument);
+            var refType = db.ReferenceTypes.FirstOrDefault(x => x.Key == ReferenceTypeKeys.RCSUpload);
+
+            if (docType != null && refType != null)
+            {
+                var dcl = db.DocumentCheckLists.FirstOrDefault(x => x.DocumentTypeId == docType.Id && x.ReferenceTypeId == refType.Id);
+                int dclId = dcl != null ? dcl.Id : 0;
+                var dbLocationType = db.LocationTypes.FirstOrDefault(l => l.Key == LocationTypeKeys.Database);
+
+                var file = new C8.eServices.Mvc.Models.File
+                {
+                    FileName = $"{app.ApplicationReferenceNumber}_EvictionNotice.pdf",
+                    ContentType = "application/pdf",
+                    FileSize = (int)new System.IO.FileInfo(newFile).Length,
+                    Content = System.IO.File.ReadAllBytes(newFile),
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedBySystemUserId = SystemUser.Id,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now
+                };
+                db.Files.Add(file);
+                db.SaveChanges();
+
+                var document = new C8.eServices.Mvc.Models.Document
+                {
+                    CustomerId = app.CustomerId,
+                    ReferenceId = app.Id,
+                    ReferenceTypeId = refType.Id,
+                    DocumentCheckListId = dclId,
+                    LocationTypeId = dbLocationType != null ? dbLocationType.Id : 0,
+                    DocumentLocation = "eServicesDb",
+                    DocumentName = file.FileName,
+                    FileId = file.Id,
+                    PropertyLeaseApplicationId = app.Id,
+                    StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.DocumentUploaded).Id,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedBySystemUserId = SystemUser.Id,
+                    CreatedDateTime = DateTime.Now,
+                    ModifiedDateTime = DateTime.Now
+                };
+                db.Documents.Add(document);
+                db.SaveChanges();
+            }
+        }
 
         [DecryptParameter]
         [HttpPost]
@@ -7044,7 +7482,18 @@ ApplicationFeeValidation(int? id)
             var ActionKey = db.RCSActionTypes.FirstOrDefault(x => x.Key == ApprovalStatusddl);
             var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
 
+            string officialNumber = Request.Form["OfficialNumber"];
+            string evictionDateStr = Request.Form["EvictionDate"];
+            string comment = Request.Form["Comment"];
 
+            PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+            {
+                PropertyLeaseApplicationId = rcsApps.Id,
+                RejectReason = comment ?? "",
+                PropertyEvictionValidation = true
+            };
+            db.propertyLeaseActionComments.Add(comments);
+            db.SaveChanges();
 
             if (ApprovalStatusddl == RCSActionTypeKeys.NonPayment)
             {
@@ -7062,19 +7511,58 @@ ApplicationFeeValidation(int? id)
             {
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.IllegalActivities).Id, (int)id);
             }
-            //                      1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17     18   19
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == id && x.IsNew && !x.IsDeleted);
+            if (lease != null)
+            {
+                MatchingHelper.ChangeLeaseStatusII(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingEvictionCEOAuth).Id, lease.Id);
+            }
+
+            DateTime evictionDate = DateTime.TryParse(evictionDateStr, out DateTime dtParsed) ? dtParsed : DateTime.Today;
+
+            var termination = db.LeaseTerminations.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == id);
+            if (termination == null)
+            {
+                termination = new LeaseTermination
+                {
+                    PropertyLeaseApplicationId = id.Value,
+                    LeaseDetailsId = lease?.Id ?? 0,
+                    LeaseReferenceNumber = lease?.LeaseReferenceNo ?? "",
+                    CreatedDateTime = DateTime.Now,
+                    TerminationDate = evictionDate,
+                    IsDeleted = false,
+                    IsActive = true
+                };
+                db.LeaseTerminations.Add(termination);
+            }
+            else
+            {
+                if (termination.TerminationDate == DateTime.MinValue)
+                {
+                    termination.TerminationDate = evictionDate;
+                }
+            }
+            termination.OfficialNumber = officialNumber;
+            termination.ReasonForTermination = ActionKey?.Name ?? ApprovalStatusddl;
+            termination.StatusId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingEvictionCEOAuth).Id;
+            db.SaveChanges();
+
+            GenerateAndStoreEvictionNoticePdf(rcsApps, lease, officialNumber, ActionKey?.Name ?? ApprovalStatusddl, comment);
+
             // B5: Close the termination validation RRQ before opening committee outcomes
             var termValRespB5 = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.TerminationValidation);
             if (termValRespB5 != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)id, null, termValRespB5.Id, Customer.Id);
             EHCRoundRobin((int)id, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
-
 
             var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.EvictionCapture).Description.Replace("{#}", ActionKey.Name).ToString();
             MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
             int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.EvictionCapture).Id;
             EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
 
-            Session["EvictionDetailsSession"] = string.Format($"Eviction details taken successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            Session["EvictionDetailsSession"] = $"Eviction outcome captured successfully for reference {rcsApps.ApplicationReferenceNumber}. Case forwarded to CEO for Eviction Authorization.";
+
             return RedirectToAction("ApplicationEviction", "PropertyLeaseApplication");
         }
 
@@ -7257,6 +7745,17 @@ ApplicationFeeValidation(int? id)
                 // Transition application to active-lease status
                 MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)id);
                 db.SaveChanges();
+
+                // Auto-generate and save the final signed lease agreement PDF
+                try
+                {
+                    AutoUploadFinalLeaseAgreement((int)id);
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the approval redirect flow
+                    EventLogHelper.LogSystemError($"AutoUploadFinalLeaseAgreement Error: {ex.Message} Inner: {ex.InnerException?.Message}", LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
 
                 // ── Send the hardcoded CCC / debit-order instruction email ──
                 // Dynamic: tenant first name. Everything else is static as per business requirement.
@@ -8167,9 +8666,9 @@ Activating your billing account and debit order mandate is required before occup
             context.SaveChanges();
         }
 
-        public int EHCRoundRobin(int RCSAppID, bool RiskAssessment, bool ValidateDepositPayment, bool InviteToClientTraining, bool UnitInspections, bool UpdateTenantDetails, bool GenerateLeaseAgreement, bool LeaseAgreementValidation, bool DebitOrderValidation, bool ShechuleInspectionSlots, bool MaintananceJobSheet, bool Terminations, bool TerminationValidation, bool CommitteeOutcomes, bool VacatingConfirmation, bool RecomendForRenewal, bool SecondRenewalRecommendation, bool LeaseRenewalRevenue, bool RenewalRiskAssessment, bool UnitMaintenance, bool AgreemrntValidateRevenue, bool six, bool AgreementApprovalCEO, bool eight, int DepartmentID, bool AcknowlegeRefund, bool IssueRefundsCollection, int RefundAppID, bool? IsAwaitingRefundResponse = null, bool? IsAwaitingDocUploadingForMigratedApps = null)
+        public int EHCRoundRobin(int RCSAppID, bool RiskAssessment, bool ValidateDepositPayment, bool InviteToClientTraining, bool UnitInspections, bool UpdateTenantDetails, bool GenerateLeaseAgreement, bool LeaseAgreementValidation, bool DebitOrderValidation, bool ShechuleInspectionSlots, bool MaintananceJobSheet, bool Terminations, bool TerminationValidation, bool CommitteeOutcomes, bool VacatingConfirmation, bool RecomendForRenewal, bool SecondRenewalRecommendation, bool LeaseRenewalRevenue, bool RenewalRiskAssessment, bool UnitMaintenance, bool AgreemrntValidateRevenue, bool six, bool AgreementApprovalCEO, bool eight, int DepartmentID, bool AcknowlegeRefund, bool IssueRefundsCollection, int RefundAppID, bool? IsAwaitingRefundResponse = null, bool? IsAwaitingDocUploadingForMigratedApps = null, bool? IsAwaitingRefundAuthorisation = null)
         {
-            return EHCWorkflowEngine.EHCRoundRobin(db, RCSAppID, RiskAssessment, ValidateDepositPayment, InviteToClientTraining, UnitInspections, UpdateTenantDetails, GenerateLeaseAgreement, LeaseAgreementValidation, DebitOrderValidation, ShechuleInspectionSlots, MaintananceJobSheet, Terminations, TerminationValidation, CommitteeOutcomes, VacatingConfirmation, RecomendForRenewal, SecondRenewalRecommendation, LeaseRenewalRevenue, RenewalRiskAssessment, UnitMaintenance, AgreemrntValidateRevenue, six, AgreementApprovalCEO, eight, DepartmentID, AcknowlegeRefund, IssueRefundsCollection, RefundAppID, IsAwaitingRefundResponse, IsAwaitingDocUploadingForMigratedApps);
+            return EHCWorkflowEngine.EHCRoundRobin(db, RCSAppID, RiskAssessment, ValidateDepositPayment, InviteToClientTraining, UnitInspections, UpdateTenantDetails, GenerateLeaseAgreement, LeaseAgreementValidation, DebitOrderValidation, ShechuleInspectionSlots, MaintananceJobSheet, Terminations, TerminationValidation, CommitteeOutcomes, VacatingConfirmation, RecomendForRenewal, SecondRenewalRecommendation, LeaseRenewalRevenue, RenewalRiskAssessment, UnitMaintenance, AgreemrntValidateRevenue, six, AgreementApprovalCEO, eight, DepartmentID, AcknowlegeRefund, IssueRefundsCollection, RefundAppID, IsAwaitingRefundResponse, IsAwaitingDocUploadingForMigratedApps, IsAwaitingRefundAuthorisation);
         }
 
         //public ActionResult BulkReAllocate(int? id, int? rrqID, string ResponsibilityType, string ViewName, string TitleName, string BodyName)
@@ -12306,6 +12805,31 @@ Activating your billing account and debit order mandate is required before occup
 
                     var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
 
+                    // UC023-S1: Date validation — BR29 (≥1 calendar month notice) & BR30 (last day of month)
+                    DateTime terminationDate;
+                    if (!DateTime.TryParse(ServeNoticeDate, out terminationDate))
+                    {
+                        Session["TenantServeNoticeSession"] = "Invalid termination date. Please enter a valid date.";
+                        return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                    }
+
+                    // BR29: Termination date must be at least 1 calendar month from today
+                    var minimumDate = DateTime.Today.AddMonths(1);
+                    if (terminationDate < minimumDate)
+                    {
+                        Session["TenantServeNoticeSession"] = "Termination date must be at least one calendar month from today (BR29). Earliest allowed: " + minimumDate.ToString("dd MMMM yyyy");
+                        return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                    }
+
+                    // BR30: Termination date must be the last day of the month
+                    int lastDayOfMonth = DateTime.DaysInMonth(terminationDate.Year, terminationDate.Month);
+                    if (terminationDate.Day != lastDayOfMonth)
+                    {
+                        var correctedDate = new DateTime(terminationDate.Year, terminationDate.Month, lastDayOfMonth);
+                        Session["TenantServeNoticeSession"] = "Termination date must be the last day of the month (BR30). Did you mean " + correctedDate.ToString("dd MMMM yyyy") + "?";
+                        return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                    }
+
                     //Saving Termination reason
                     PropertyLeaseActionComments comments = new PropertyLeaseActionComments
                     {
@@ -12327,9 +12851,39 @@ Activating your billing account and debit order mandate is required before occup
                     _context.Entry(LeaseApplication).State = EntityState.Modified;
                     _context.SaveChanges();
 
-                    //Send e-mail and SMS notification
-                    int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice).Id;
-                    EmailHelper.CustomerEmailNotification(db, LeaseApplication.PropertyLeaseApplicationId, emailboodyId);
+                    // UC023-S1: Create/update the LeaseTermination record so downstream views have data
+                    var existingTermination = _context.LeaseTerminations
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId
+                                          && x.LeaseDetailsId == LeaseApplication.Id);
+                    if (existingTermination == null)
+                    {
+                        _context.LeaseTerminations.Add(new LeaseTermination
+                        {
+                            PropertyLeaseApplicationId = LeaseApplication.PropertyLeaseApplicationId,
+                            LeaseDetailsId             = LeaseApplication.Id,
+                            ReasonForTermination       = TerminationReason,
+                            TerminationDate            = terminationDate,
+                            LeaseReferenceNumber       = LeaseApplication.LeaseReferenceNo,
+                            CreatedDateTime            = DateTime.Now,
+                            IsDeleted                  = false,
+                            IsActive                   = true
+                        });
+                    }
+                    else
+                    {
+                        existingTermination.ReasonForTermination = TerminationReason;
+                        existingTermination.TerminationDate      = terminationDate;
+                        _context.Entry(existingTermination).State = EntityState.Modified;
+                    }
+                    _context.SaveChanges();
+
+                    // UC023-S1: Set status to Awaiting CSO Termination Review (new CSO review gate)
+                    MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingCSOTerminationReview).FirstOrDefault().Id, (int)LeaseApplication.Id);
+
+                    //Send e-mail and SMS notification to CSO (was previously going to LO)
+                    var emailContent = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice);
+                    if (emailContent != null)
+                        EmailHelper.CustomerEmailNotification(db, LeaseApplication.PropertyLeaseApplicationId, emailContent.Id);
 
                     
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault();
@@ -12346,7 +12900,9 @@ Activating your billing account and debit order mandate is required before occup
                 }
                 catch (Exception Io)
                 {
-                    return RedirectToAction("Login", "propertyLeaseApplication");
+                    EventLogHelper.LogSystemError(Io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    Session["TenantServeNoticeSession"] = "An error occurred: " + Io.Message;
+                    return RedirectToAction("ServeNotice", "propertyLeaseApplication");
                 }
             }
         }
@@ -12379,6 +12935,45 @@ Activating your billing account and debit order mandate is required before occup
                 ViewBag.LeaseTerminationLOSession = value;
             }
             Session["LeaseTerminationLOSession"] = null;
+
+            using (var _context = new eServicesDbContext())
+            {
+                var closedKey = PaymentTransgressionStatusKeys.Closed;
+                var activeTransgressions = _context.PaymentTransgressions
+                    .Where(pt => pt.IsActive && !pt.IsDeleted && pt.Status.Key != closedKey)
+                    .Select(pt => new { pt.OfficialNumber, pt.TenancyReferenceNumber, pt.CaseReferenceNumber })
+                    .ToList();
+
+                var today = DateTime.Today;
+                var activeStatus = StatusKeys.ActiveLease;
+                var activeLeases = _context.LeaseDetails
+                    .Where(x => !x.IsDeleted && x.IsNew && x.Status.Key == activeStatus)
+                    .Include(x => x.Status)
+                    .Include(x => x.PurchaserType)
+                    .ToList();
+
+                var flaggedLeases = new List<FlaggedLeaseViewModel>();
+
+                foreach (var lease in activeLeases)
+                {
+                    bool isNoticePassed = lease.TerminationNotice != null && lease.TerminationNotice <= today;
+                    var transgression = activeTransgressions.FirstOrDefault(t => 
+                        (!string.IsNullOrEmpty(t.TenancyReferenceNumber) && t.TenancyReferenceNumber == lease.LeaseReferenceNo) ||
+                        (!string.IsNullOrEmpty(t.OfficialNumber) && t.OfficialNumber == lease.IDNo)
+                    );
+
+                    if (isNoticePassed || transgression != null)
+                    {
+                        string reason = isNoticePassed ? "Notice Date Passed" : $"Payment Transgression: {transgression.CaseReferenceNumber}";
+                        flaggedLeases.Add(new FlaggedLeaseViewModel
+                        {
+                            Lease = lease,
+                            FlaggedReason = reason
+                        });
+                    }
+                }
+                ViewBag.FlaggedLeases = flaggedLeases;
+            }
 
             var vm = new DepartmentsApprovalViewModel();
             LeaseDetails leaseDetails = new LeaseDetails();
@@ -12914,7 +13509,7 @@ Activating your billing account and debit order mandate is required before occup
             else
             {
 
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected || x.Key == RCSActionTypeKeys.LegalReferral).OrderBy(x => x.Name), "Key", "Name");
 
             }
             try
@@ -13000,6 +13595,11 @@ Activating your billing account and debit order mandate is required before occup
                 var returnUrl = "";
                 MatchingHelper.DocumentPropertyEvictionValidation(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, returnUrl, rcsApps.Id, IsUpload);
 
+                // Load Proof of Banking Details document
+                DocumentsViewModel bankingDvm = new DocumentsViewModel();
+                MatchingHelper.DocumentUploadBakingDetailsProof(bankingDvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
+                ViewBag.BankingDetailsDvm = bankingDvm;
+
                 var ratesRebateProperty = new RatesRebateProperty();
                 var incentivePolicyProperty = new IncentivePolicyProperty();
 
@@ -13032,12 +13632,8 @@ Activating your billing account and debit order mandate is required before occup
             }
             return View(rcsApps);
         }
-        #endregion
-
-        #region Property Eviction Validation
-        [DecryptParameter]
         [HttpPost]
-        public ActionResult PropertyEvictionValidation(int? id, string ApprovalStatusddl, string RejectComment)
+        public ActionResult PropertyEvictionValidation(int? id, string ApprovalStatusddl, string RejectComment, string OfficialNumber, string hdnSignatureBlob)
         {
 
             using (var _context = new eServicesDbContext())
@@ -13045,7 +13641,7 @@ Activating your billing account and debit order mandate is required before occup
                 Initialise();
                 var userID = Customer;
                 var Keys = _context.Status;
-                var LeaseApplication = _context.LeaseDetails.Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                var LeaseApplication = _context.LeaseDetails.Include(x => x.Status).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
 
                 PropertyLeaseActionComments comments = new PropertyLeaseActionComments
                 {
@@ -13057,33 +13653,304 @@ Activating your billing account and debit order mandate is required before occup
                 _context.SaveChanges();
 
                 var LeaseId = id;
+                var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                // Save signature and official number if provided
+                var termination = _context.LeaseTerminations.OrderByDescending(x => x.Id)
+                    .FirstOrDefault(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId);
+                if (termination != null)
+                {
+                    if (!string.IsNullOrEmpty(OfficialNumber))
+                    {
+                        termination.RevenueManagerOfficialNumber = OfficialNumber;
+                    }
+                    if (!string.IsNullOrEmpty(hdnSignatureBlob))
+                    {
+                        termination.RevenueManagerSignature = hdnSignatureBlob;
+                        termination.RevenueManagerSignDate = DateTime.Now;
+                    }
+                    _context.SaveChanges();
+                }
+
+                bool isVoluntaryTermination = LeaseApplication.Status != null && LeaseApplication.Status.Key == StatusKeys.AwaitingTerminationAppraisal;
+
                 if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
                 {
-                    MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingCommitteEviction).FirstOrDefault().Id, (int)LeaseId);
+                    if (isVoluntaryTermination)
+                    {
+                        // UC023-S3: RM Approved (Voluntary) → Awaiting Exit Inspection
+                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingExitInspection).FirstOrDefault().Id, (int)LeaseId);
 
-                    var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
-                    var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ProopertyEvictionAprove).Description.ToString();
-                    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
+                        var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationRMApproved)?.Description
+                            ?? "Revenue Manager approved lease termination";
+                        MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
+                    }
+                    else
+                    {
+                        // UC023-S3: RM Approved (Eviction) → UC025 Serve Eviction Notice
+                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingEvictionService).FirstOrDefault().Id, (int)LeaseId);
+
+                        var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ProopertyEvictionAprove).Description.ToString();
+                        MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
+                    }
+
+                    // Notify Tenant + CSO
+                    try
+                    {
+                        var emailBodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id;
+                        if (emailBodyId.HasValue)
+                            EmailHelper.CustomerEmailNotification(db, LeaseApplication.PropertyLeaseApplicationId, emailBodyId.Value);
+                    }
+                    catch { /* notification failure should not block the workflow */ }
                 }
                 else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
                 {
-                    MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingCommitteEviction).FirstOrDefault().Id, (int)LeaseId);
+                    if (isVoluntaryTermination)
+                    {
+                        // UC023-S3: Rejected (Voluntary) → Awaiting Termination Approval (back to CSO)
+                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingterminantionApproval).FirstOrDefault().Id, (int)LeaseId);
 
+                        var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationRMRejected)?.Description
+                            ?? "Revenue Manager rejected lease termination";
+                        MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage + ", Reason: " + RejectComment, custmusers.Id);
+                    }
+                    else
+                    {
+                        // UC023-S3: Rejected (Eviction) → Awaiting Committee Eviction Review
+                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingterminantionApproval).FirstOrDefault().Id, (int)LeaseId);
 
-                    var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
-                    var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ProopertyEvictionAprove).Description.ToString();
-                    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
+                        var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ProopertyEvictionAprove).Description.ToString();
+                        MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage + ", Reason: " + RejectComment, custmusers.Id);
+                    }
+
+                    // Notify Tenant + CSO of rejection
+                    try
+                    {
+                        var emailBodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id;
+                        if (emailBodyId.HasValue)
+                            EmailHelper.CustomerEmailNotification(db, LeaseApplication.PropertyLeaseApplicationId, emailBodyId.Value);
+                    }
+                    catch { /* notification failure should not block the workflow */ }
                 }
-                //MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.AwaitingTenantAccountBalanceReview).FirstOrDefault().Id, (int)LeaseId);
+                else if (ApprovalStatusddl == RCSActionTypeKeys.LegalReferral)
+                {
+                    // UC023-S3 → UC024-S1: Legal Referral → CEO Eviction Authorization
+                    MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.Where(x => x.Key == StatusKeys.LegalReferralPending).FirstOrDefault().Id, (int)LeaseId);
+
+                    // Generate Eviction Reference Number
+                    if (termination != null && string.IsNullOrEmpty(termination.EvictionReferenceNumber))
+                    {
+                        termination.EvictionReferenceNumber = MatchingHelper.GenerateEvictionReference(_context);
+                        _context.SaveChanges();
+                    }
+
+                    var ActivityTrackerMessage3 = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationRMReferredLegal)?.Description
+                        ?? "Revenue Manager referred termination to legal services";
+                    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage3 + ", Reason: " + RejectComment, custmusers.Id);
+
+                    // Notify Tenant + Legal
+                    try
+                    {
+                        var emailBodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id;
+                        if (emailBodyId.HasValue)
+                            EmailHelper.CustomerEmailNotification(db, LeaseApplication.PropertyLeaseApplicationId, emailBodyId.Value);
+                    }
+                    catch { /* notification failure should not block the workflow */ }
+                }
                 return RedirectToAction("PropertyLeaseApplicationTerminations");
 
             }
-
-
         }
         #endregion
 
 
+        #region UC023-S2a: CSO Termination Review Gate (NEW)
+
+        /// <summary>
+        /// UC023-S2a GET — Lists all leases with status AwaitingCSOTerminationReview assigned to CSO.
+        /// </summary>
+        [Authorize(Roles = "Client Services Officer")]
+        public ActionResult TerminationCSOReview()
+        {
+            using (var cxt = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    int UserId = Customer.Id;
+
+                    int AwaitingCSOReviewStatusId = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingCSOTerminationReview).Id;
+                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Terminations).FirstOrDefault().Id;
+                    int SubmittedId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.Submitted).Id;
+
+                    var rrq = cxt.RoundRobinQueues.Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
+                    var leaseIds = rrq.Select(x => x.LeaseDetailsId).ToList();
+
+                    var leases = db.LeaseDetails.Where(x => !x.IsDeleted && x.IsNew && x.StatusId == AwaitingCSOReviewStatusId && leaseIds.Contains(x.Id))
+                        .Include(r => r.Status).Include(r => r.PurchaserType).Include(r => r.CreatedBySystemUser).ToList();
+
+                    if (Session["CSOTerminationReviewSession"] != null)
+                    {
+                        ViewBag.CSOTerminationReviewSession = Session["CSOTerminationReviewSession"].ToString();
+                        Session["CSOTerminationReviewSession"] = null;
+                    }
+
+                    return View(leases);
+                }
+                catch (Exception io)
+                {
+                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
+                return RedirectToAction("Login", "Account");
+            }
+        }
+
+        /// <summary>
+        /// UC023-S2a Detail GET — Shows lease + application info for CSO review.
+        /// </summary>
+        [DecryptParameter]
+        [Authorize(Roles = "Client Services Officer")]
+        public ActionResult TerminationCSOReviewDetails(int? id)
+        {
+            try
+            {
+                Initialise();
+                var lease = db.LeaseDetails.OrderByDescending(x => x.Id).Where(x => !x.IsDeleted && x.IsNew)
+                    .Include(r => r.Status).Include(r => r.PurchaserType).FirstOrDefault(x => x.Id == id);
+
+                var rcsApps = db.PropertyLeaseApplications.Include(r => r.Customer).Include(r => r.Status)
+                    .FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+
+                // Load any existing termination record for context
+                var termination = db.LeaseTerminations.OrderByDescending(x => x.Id)
+                    .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+
+                ViewBag.ApprovalStatus = new SelectList(
+                    db.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    LeaseDetails              = lease,
+                    PropertyLeaseApplications = rcsApps,
+                    LeaseTermination          = termination,
+                    Customer                  = rcsApps != null ? db.Customers.FirstOrDefault(x => x.Id == rcsApps.CustomerId) : null
+                };
+
+                ViewBag.TerminationDate   = termination != null ? termination.TerminationDate.ToString("dd MMMM yyyy") : "Not set";
+                ViewBag.TerminationReason = termination != null ? termination.ReasonForTermination : "Not captured";
+
+                return View(vm);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// UC023-S2a POST — CSO supports or does not support the termination notice.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Client Services Officer")]
+        public ActionResult TerminationCSOReviewDetails(int? id, string ApprovalStatusddl, string OfficialNumber, string RejectComment)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.Id == id && x.IsNew && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+
+                    // Save action comments
+                    PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+                    {
+                        PropertyLeaseApplicationId = rcsApps.Id,
+                        RejectReason = RejectComment ?? "",
+                        PropertyEvictionValidation = true // reuse existing flag for termination comments
+                    };
+                    _conx.propertyLeaseActionComments.Add(comments);
+                    _conx.SaveChanges();
+
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved) // "Supported"
+                    {
+                        // Generate Termination Reference Number
+                        var termination = _conx.LeaseTerminations.OrderByDescending(x => x.Id)
+                            .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                        if (termination != null && string.IsNullOrEmpty(termination.TerminationReferenceNumber))
+                        {
+                            termination.TerminationReferenceNumber = MatchingHelper.GenerateTerminationReference(_conx);
+                            termination.OfficialNumber = OfficialNumber;
+                            _conx.SaveChanges();
+                        }
+
+                        // Status → AwaitingTerminationAppraisal
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTerminationAppraisal).Id, (int)lease.Id);
+
+                        // Activity tracker
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationCSOReviewSupported)?.Description
+                            ?? "CSO supported termination notice";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo, custmusers.Id);
+
+                        // Archive CSO's RoundRobin job
+                        var responsibilityTypeId = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.Terminations).Id;
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, rcsApps.Id, null, responsibilityTypeId, custmusers.Id);
+
+                        // Route to Revenue Manager via TerminationValidation
+                        EHCWorkflowEngine.EHCRoundRobin(_conx, rcsApps.Id,
+                            false, false, false, false, false, false, false, false, false, false,
+                            false, true, false, false, false, false, false, false, false, false,
+                            false, false, false, 1, false, false, 1);
+
+                        // Notify tenant
+                        try
+                        {
+                            int emailId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id ?? 0;
+                            if (emailId > 0) EmailHelper.CustomerEmailNotification(_conx, rcsApps.Id, emailId);
+                        }
+                        catch { }
+
+                        Session["CSOTerminationReviewSession"] = $"Termination notice SUPPORTED for {lease.LeaseReferenceNo}. Routed to Revenue Manager.";
+                    }
+                    else // "Not Supported"
+                    {
+                        // Status → TerminationNotSupported
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.TerminationNotSupported).Id, (int)lease.Id);
+
+                        // Activity tracker
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationCSOReviewNotSupported)?.Description
+                            ?? "CSO did not support termination notice";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo + " Reason: " + RejectComment, custmusers.Id);
+
+                        // Archive CSO's RoundRobin job
+                        var responsibilityTypeId = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.Terminations).Id;
+                        MatchingHelper.RoundRobinMarkJobAsFinished(_conx, rcsApps.Id, null, responsibilityTypeId, custmusers.Id);
+
+                        // Notify tenant
+                        try
+                        {
+                            int emailId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id ?? 0;
+                            if (emailId > 0) EmailHelper.CustomerEmailNotification(_conx, rcsApps.Id, emailId);
+                        }
+                        catch { }
+
+                        Session["CSOTerminationReviewSession"] = $"Termination notice NOT SUPPORTED for {lease.LeaseReferenceNo}. Reason: {RejectComment}";
+                    }
+
+                    return RedirectToAction("TerminationCSOReview");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("TerminationCSOReview");
+                }
+            }
+        }
+
+        #endregion
 
 
         #region Eviction Committee OnLoad
@@ -13352,8 +14219,662 @@ Activating your billing account and debit order mandate is required before occup
         #endregion
 
 
+        #region UC024-S2: CEO Eviction Authorization (NEW)
+
+        /// <summary>
+        /// UC024-S2 GET — CEO reviews the eviction case and authorizes or rejects.
+        /// </summary>
+        [DecryptParameter]
+        [Authorize(Roles = "Director,Property Manager")]
+        public ActionResult EvictionCEOAuthorization(int? id)
+        {
+            try
+            {
+                Initialise();
+                var lease = db.LeaseDetails.Where(x => !x.IsDeleted).Include(r => r.Status).Include(r => r.PurchaserType)
+                    .FirstOrDefault(x => x.Id == id);
+
+                var rcsApps = db.PropertyLeaseApplications.Include(r => r.Customer).Include(r => r.Status)
+                    .FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+
+                var termination = db.LeaseTerminations.OrderByDescending(x => x.Id)
+                    .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+
+                ViewBag.ApprovalStatus = new SelectList(
+                    db.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.Approved || x.Key == RCSActionTypeKeys.Rejected).OrderBy(x => x.Name), "Key", "Name");
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    LeaseDetails = lease,
+                    PropertyLeaseApplications = rcsApps,
+                    LeaseTermination = termination
+                };
+
+                ViewBag.EvictionRef = termination?.EvictionReferenceNumber ?? "Not generated";
+                ViewBag.TerminationRef = termination?.TerminationReferenceNumber ?? "Not generated";
+                ViewBag.TerminationReason = termination?.ReasonForTermination ?? "Not captured";
+
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// UC024-S2 POST — CEO approves or rejects eviction authorization.
+        /// </summary>
+        [HttpPost]
+        [Authorize(Roles = "Director,Property Manager")]
+        public ActionResult EvictionCEOAuthorization(int? id, string ApprovalStatusddl, string RejectComment, string OfficialNumber, string hdnSignatureBlob)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+
+                    // Save action comments
+                    PropertyLeaseActionComments comments = new PropertyLeaseActionComments
+                    {
+                        PropertyLeaseApplicationId = rcsApps.Id,
+                        RejectReason = RejectComment ?? "",
+                        PropertyEvictionValidation = true
+                    };
+                    _conx.propertyLeaseActionComments.Add(comments);
+                    _conx.SaveChanges();
+
+                    // Save signature and official number if provided
+                    var termination = _conx.LeaseTerminations.OrderByDescending(x => x.Id)
+                        .FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                    if (termination != null)
+                    {
+                        if (!string.IsNullOrEmpty(OfficialNumber))
+                        {
+                            termination.CEOOfficialNumber = OfficialNumber;
+                        }
+                        if (!string.IsNullOrEmpty(hdnSignatureBlob))
+                        {
+                            termination.CEOSignature = hdnSignatureBlob;
+                            termination.CEOSignDate = DateTime.Now;
+                        }
+                        _conx.SaveChanges();
+                    }
+
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    {
+                        // CEO approved → UC025 Serve Eviction Notice
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingEvictionService).Id, (int)lease.Id);
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.EvictionCEOApproved)?.Description
+                            ?? "CEO approved eviction authorization";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo, custmusers.Id);
+
+                        // Notify
+                        try
+                        {
+                            int emailId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id ?? 0;
+                            if (emailId > 0) EmailHelper.CustomerEmailNotification(_conx, rcsApps.Id, emailId);
+                        }
+                        catch { }
+
+                        Session["BOAccountValidationSession"] = "Eviction approved successfully.\n\nSystem closes pop-up\nNotification sent to Tenant, Client Services Officer and Legal Services Agency\nNotice dispatched to Tenant and Legal Services Agency and service tracked\nCase and lease statuses updated\nStatus = Awaiting Exit Inspection";
+                    }
+                    else
+                    {
+                        // CEO rejected → back to AwaitingTerminationApproval
+                        MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingterminantionApproval).Id, (int)lease.Id);
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.EvictionCEORejected)?.Description
+                            ?? "CEO rejected eviction authorization";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo + " Reason: " + RejectComment, custmusers.Id);
+
+                        // Notify
+                        try
+                        {
+                            int emailId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id ?? 0;
+                            if (emailId > 0) EmailHelper.CustomerEmailNotification(_conx, rcsApps.Id, emailId);
+                        }
+                        catch { }
+
+                        Session["BOAccountValidationSession"] = "Eviction rejected.\n\nSystem closes pop-up\nCase and lease statuses updated\nReturned to Revenue Manager for review.";
+                    }
+
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+            }
+        }
+
+        #endregion
 
 
+        #region UC025 — Serve Eviction Notice & Proof of Service
+
+        [DecryptParameter]
+        public ActionResult ServeEvictionNotice(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (lease == null) return RedirectToAction("PropertyLeaseApplicationTerminations");
+
+                var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                var termination = _conx.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
+                var existingRecord = _conx.EvictionServiceRecords.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && !x.IsDeleted);
+
+                ViewBag.Application = rcsApps;
+                ViewBag.Lease = lease;
+                ViewBag.Termination = termination;
+                ViewBag.ExistingRecord = existingRecord;
+
+                var Message = Session["ServeEvictionNoticeSession"];
+                if (Message != null) { ViewBag.SessionMessage = Message.ToString(); Session["ServeEvictionNoticeSession"] = null; }
+
+                return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+            }
+        }
+
+        [HttpPost]
+        [DecryptParameter]
+        public ActionResult ServeEvictionNotice(int? id, string ApprovalStatusddl, string ServiceMethod, string ServiceDate, string OfficialNumber)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    DateTime? parsedDate = null;
+                    if (!string.IsNullOrEmpty(ServiceDate)) DateTime.TryParse(ServiceDate, out DateTime dt); parsedDate = DateTime.TryParse(ServiceDate, out DateTime dtParsed) ? dtParsed : (DateTime?)null;
+
+                    // Create EvictionServiceRecord
+                    var record = new EvictionServiceRecord
+                    {
+                        PropertyLeaseApplicationId = rcsApps.Id,
+                        LeaseDetailsId = lease.Id,
+                        EvictionReferenceNumber = MatchingHelper.GenerateTerminationReference(_conx),
+                        ServiceMethod = ServiceMethod,
+                        ServiceDate = parsedDate,
+                        OfficialNumber = OfficialNumber,
+                        NoticeServed = true,
+                        StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.EvictionNoticeServed)?.Id
+                    };
+                    _conx.EvictionServiceRecords.Add(record);
+                    _conx.SaveChanges();
+
+                    // Status → EvictionNoticeServed (awaiting proof of service)
+                    MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.EvictionNoticeServed).Id, (int)lease.Id);
+
+                    // Activity tracker
+                    var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.EvictionNoticeServed)?.Description
+                        ?? "Eviction notice served";
+                    MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo + " Method: " + ServiceMethod, custmusers.Id);
+
+                    // Email notification
+                    try
+                    {
+                        int emailId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ServeNotice)?.Id ?? 0;
+                        if (emailId > 0) EmailHelper.CustomerEmailNotification(_conx, rcsApps.Id, emailId);
+                    }
+                    catch { }
+
+                    Session["BOAccountValidationSession"] = $"Eviction notice served successfully for {lease.LeaseReferenceNo} via {ServiceMethod}. Case updated to Awaiting Proof of Service.";
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+            }
+        }
+
+        [DecryptParameter]
+        public ActionResult CaptureProofOfService(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (lease == null) return RedirectToAction("PropertyLeaseApplicationTerminations");
+
+                var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                var serviceRecord = _conx.EvictionServiceRecords.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && !x.IsDeleted);
+
+                ViewBag.Application = rcsApps;
+                ViewBag.Lease = lease;
+                ViewBag.ServiceRecord = serviceRecord;
+
+                var Message = Session["CaptureProofOfServiceSession"];
+                if (Message != null) { ViewBag.SessionMessage = Message.ToString(); Session["CaptureProofOfServiceSession"] = null; }
+
+                return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+            }
+        }
+
+        [HttpPost]
+        [DecryptParameter]
+        public ActionResult CaptureProofOfService(int? id, string ProofOfServiceType, string ProofServiceDate, string ProofComments, HttpPostedFileBase ProofFile)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    // Save uploaded document
+                    if (ProofFile != null && ProofFile.ContentLength > 0)
+                    {
+                        byte[] fileBytes = null;
+                        using (var binaryReader = new System.IO.BinaryReader(ProofFile.InputStream))
+                        {
+                            fileBytes = binaryReader.ReadBytes(ProofFile.ContentLength);
+                        }
+
+                        var file = new C8.eServices.Mvc.Models.File
+                        {
+                            FileName = $"{lease.LeaseReferenceNo}_ProofOfService" + System.IO.Path.GetExtension(ProofFile.FileName),
+                            ContentType = ProofFile.ContentType,
+                            FileSize = ProofFile.ContentLength,
+                            Content = fileBytes,
+                            IsActive = true,
+                            IsDeleted = false,
+                            CreatedBySystemUserId = SystemUser.Id,
+                            CreatedDateTime = DateTime.Now,
+                            ModifiedDateTime = DateTime.Now
+                        };
+                        _conx.Files.Add(file);
+                        _conx.SaveChanges();
+
+                        var docType = _conx.DocumentTypes.FirstOrDefault(x => x.Key == DocumentTypeKeys.PropertyEvictionDocument);
+                        var refType = _conx.ReferenceTypes.FirstOrDefault(x => x.Key == ReferenceTypeKeys.RCSUpload);
+                        var dcl = _conx.DocumentCheckLists.FirstOrDefault(x => x.DocumentTypeId == docType.Id && x.ReferenceTypeId == refType.Id);
+                        var dbLocationType = _conx.LocationTypes.FirstOrDefault(l => l.Key == LocationTypeKeys.Database);
+
+                        var document = new C8.eServices.Mvc.Models.Document
+                        {
+                            CustomerId = rcsApps.CustomerId,
+                            ReferenceId = rcsApps.Id,
+                            ReferenceTypeId = refType.Id,
+                            DocumentCheckListId = dcl != null ? dcl.Id : 0,
+                            LocationTypeId = dbLocationType != null ? dbLocationType.Id : 0,
+                            DocumentLocation = "eServicesDb",
+                            DocumentName = file.FileName,
+                            FileId = file.Id,
+                            PropertyLeaseApplicationId = rcsApps.Id,
+                            StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DocumentUploaded).Id,
+                            IsActive = true,
+                            IsDeleted = false,
+                            CreatedBySystemUserId = SystemUser.Id,
+                            CreatedDateTime = DateTime.Now,
+                            ModifiedDateTime = DateTime.Now
+                        };
+                        _conx.Documents.Add(document);
+                        _conx.SaveChanges();
+                    }
+
+                    // Update existing EvictionServiceRecord
+                    var record = _conx.EvictionServiceRecords.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && !x.IsDeleted);
+                    if (record != null)
+                    {
+                        record.ProofOfServiceType = ProofOfServiceType;
+                        record.ProofServiceDate = DateTime.TryParse(ProofServiceDate, out DateTime dtParsed) ? dtParsed : (DateTime?)null;
+                        record.ProofComments = ProofComments;
+                        record.ProofCaptured = true;
+                        record.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.ProofOfServiceCaptured)?.Id;
+                        _conx.SaveChanges();
+                    }
+
+                    // Status → AwaitingExitInspection (proof captured, move to inspection)
+                    MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection).Id, (int)lease.Id);
+
+                    // Activity tracker
+                    var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.ProofOfServiceCaptured)?.Description
+                        ?? "Proof of service captured";
+                    MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + lease.LeaseReferenceNo + " Type: " + ProofOfServiceType, custmusers.Id);
+
+                    Session["BOAccountValidationSession"] = $"Proof of service captured successfully for {lease.LeaseReferenceNo}. Case advanced to exit inspection.";
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+            }
+        }
+
+        #endregion
+
+
+        #region UC026 — Manage Disputes
+
+        public ActionResult LeaseDisputes()
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var disputes = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
+                    .Where(x => !x.IsDeleted).OrderByDescending(x => x.Id).ToList();
+
+                foreach (var d in disputes)
+                    d.Data = new AesCrypto().Encrypt(string.Format("id={0}", d.Id));
+
+                ViewBag.Disputes = disputes;
+
+                var Message = Session["LeaseDisputeSession"];
+                if (Message != null) { ViewBag.SessionMessage = Message.ToString(); Session["LeaseDisputeSession"] = null; }
+
+                return View();
+            }
+        }
+
+        public ActionResult RegisterLeaseDispute(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    if (id == null && Customer != null)
+                    {
+                        var activeLease = _conx.LeaseDetails.Include(r => r.Status)
+                            .FirstOrDefault(x => x.PropertyLeaseApplication.CustomerId == Customer.Id && x.IsActive && !x.IsDeleted);
+                        if (activeLease != null)
+                        {
+                            id = activeLease.Id;
+                        }
+                    }
+
+                    var lease = _conx.LeaseDetails.Include(r => r.Status).FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    if (lease == null) return RedirectToAction("LeaseDisputes");
+
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                    ViewBag.Application = rcsApps;
+                    ViewBag.Lease = lease;
+
+                    return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.ToString(), LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    throw;
+                }
+            }
+        }
+
+        [HttpPost]
+        public ActionResult RegisterLeaseDispute(int? id, string Category, string SubCategory, string Description,
+            string ReportedByName, string ContactNumber, string EmailAddress)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == lease.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    // Generate dispute reference number
+                    string refNo = "EHC_DISP_" + (_conx.LeaseDisputes.Count() + 1).ToString("D3") + "_" + DateTime.Now.Year;
+
+                    var dispute = new LeaseDispute
+                    {
+                        PropertyLeaseApplicationId = rcsApps.Id,
+                        LeaseDetailsId = lease.Id,
+                        DisputeReferenceNumber = refNo,
+                        ReportedByName = ReportedByName,
+                        ContactNumber = ContactNumber,
+                        EmailAddress = EmailAddress,
+                        Category = Category,
+                        SubCategory = SubCategory,
+                        Description = Description,
+                        StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeOpenAwaitingReview)?.Id
+                    };
+                    _conx.LeaseDisputes.Add(dispute);
+                    _conx.SaveChanges();
+
+                    // Activity tracker
+                    var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeRegistered)?.Description
+                        ?? "Lease dispute registered";
+                    MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + refNo + " Category: " + Category, custmusers.Id);
+
+                    Session["LeaseDisputeSession"] = $"Dispute {refNo} registered for {lease.LeaseReferenceNo}. Awaiting review.";
+                    return RedirectToAction("LeaseDisputes");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("LeaseDisputes");
+                }
+            }
+        }
+
+        [DecryptParameter]
+        public ActionResult ReviewLeaseDispute(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var dispute = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
+                    .FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (dispute == null) return RedirectToAction("LeaseDisputes");
+
+                var rcsApps = dispute.PropertyLeaseApplication;
+                var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == dispute.LeaseDetailsId && !x.IsDeleted);
+                ViewBag.Application = rcsApps;
+                ViewBag.Lease = lease;
+                ViewBag.Dispute = dispute;
+
+                return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+            }
+        }
+
+        [HttpPost]
+        [DecryptParameter]
+        public ActionResult ReviewLeaseDispute(int? id, string ApprovalStatusddl, string RiskClassification,
+            string ReviewComment, string OfficialNumber)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var dispute = _conx.LeaseDisputes.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == dispute.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    dispute.RiskClassification = RiskClassification;
+                    dispute.ReviewComment = ReviewComment;
+                    dispute.OfficialNumber = OfficialNumber;
+                    dispute.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeReferred)?.Id;
+                    _conx.SaveChanges();
+
+                    var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeReviewed)?.Description
+                        ?? "Dispute reviewed";
+                    MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + dispute.DisputeReferenceNumber + " Risk: " + RiskClassification, custmusers.Id);
+
+                    Session["LeaseDisputeSession"] = $"Dispute {dispute.DisputeReferenceNumber} reviewed. Risk: {RiskClassification}.";
+                    return RedirectToAction("LeaseDisputes");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("LeaseDisputes");
+                }
+            }
+        }
+
+        [DecryptParameter]
+        public ActionResult ResolveLeaseDispute(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var dispute = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
+                    .FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (dispute == null) return RedirectToAction("LeaseDisputes");
+
+                var rcsApps = dispute.PropertyLeaseApplication;
+                var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == dispute.LeaseDetailsId && !x.IsDeleted);
+                ViewBag.Application = rcsApps;
+                ViewBag.Lease = lease;
+                ViewBag.Dispute = dispute;
+
+                return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+            }
+        }
+
+        [HttpPost]
+        [DecryptParameter]
+        public ActionResult ResolveLeaseDispute(int? id, string ApprovalStatusddl, string ResolutionOutcomeType,
+            string ResolutionSummary, string NotResolvedReason, string RevenueManagerSignature)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var dispute = _conx.LeaseDisputes.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == dispute.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    {
+                        dispute.IsResolved = true;
+                        dispute.ResolutionOutcomeType = ResolutionOutcomeType;
+                        dispute.ResolutionSummary = ResolutionSummary;
+                        dispute.RevenueManagerSignature = RevenueManagerSignature;
+                        dispute.RevenueManagerSignDate = DateTime.Now;
+                        dispute.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeResolved)?.Id;
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeResolved)?.Description ?? "Dispute resolved";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + dispute.DisputeReferenceNumber, custmusers.Id);
+                        Session["LeaseDisputeSession"] = $"Dispute {dispute.DisputeReferenceNumber} resolved. Awaiting CEO closure.";
+                    }
+                    else
+                    {
+                        dispute.IsResolved = false;
+                        dispute.NotResolvedReason = NotResolvedReason;
+                        dispute.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeReferred)?.Id;
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeNotResolved)?.Description ?? "Dispute not resolved";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + dispute.DisputeReferenceNumber + " Reason: " + NotResolvedReason, custmusers.Id);
+                        Session["LeaseDisputeSession"] = $"Dispute {dispute.DisputeReferenceNumber} not resolved. Returned to review.";
+                    }
+
+                    _conx.SaveChanges();
+                    return RedirectToAction("LeaseDisputes");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("LeaseDisputes");
+                }
+            }
+        }
+
+        [DecryptParameter]
+        public ActionResult CloseLeaseDispute(int? id)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                Initialise();
+                var dispute = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
+                    .FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (dispute == null) return RedirectToAction("LeaseDisputes");
+
+                var rcsApps = dispute.PropertyLeaseApplication;
+                var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == dispute.LeaseDetailsId && !x.IsDeleted);
+                ViewBag.Application = rcsApps;
+                ViewBag.Lease = lease;
+                ViewBag.Dispute = dispute;
+
+                return View(new DepartmentsApprovalViewModel { PropertyLeaseApplication = rcsApps, LeaseDetails = lease });
+            }
+        }
+
+        [HttpPost]
+        [DecryptParameter]
+        public ActionResult CloseLeaseDispute(int? id, string ApprovalStatusddl, string ClosureOutcome,
+            string ClosureSummary, string RejectionOption, string RejectionReason, string CEOSignature)
+        {
+            using (var _conx = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var dispute = _conx.LeaseDisputes.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                    var rcsApps = _conx.PropertyLeaseApplications.Include(r => r.Customer).FirstOrDefault(x => x.Id == dispute.PropertyLeaseApplicationId);
+                    var custmusers = _conx.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    {
+                        dispute.IsClosed = true;
+                        dispute.ClosureOutcome = ClosureOutcome;
+                        dispute.ClosureSummary = ClosureSummary;
+                        dispute.CEOSignature = CEOSignature;
+                        dispute.CEOSignDate = DateTime.Now;
+                        dispute.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeClosed)?.Id;
+
+                        // Transition Lease Details status to Awaiting Exit Inspection per business requirements
+                        var lease = _conx.LeaseDetails.FirstOrDefault(x => x.Id == dispute.LeaseDetailsId && !x.IsDeleted);
+                        if (lease != null)
+                        {
+                            var awaitingInspectionStatus = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection);
+                            if (awaitingInspectionStatus != null)
+                            {
+                                lease.StatusId = awaitingInspectionStatus.Id;
+                            }
+                        }
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeClosedCEO)?.Description ?? "Dispute closed by CEO";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + dispute.DisputeReferenceNumber, custmusers.Id);
+                        Session["LeaseDisputeSession"] = $"Dispute {dispute.DisputeReferenceNumber} closed by CEO.";
+                    }
+                    else
+                    {
+                        dispute.IsClosed = false;
+                        dispute.RejectionOption = RejectionOption;
+                        dispute.RejectionReason = RejectionReason;
+                        dispute.StatusId = _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.DisputeReferred)?.Id;
+
+                        var atMsg = _conx.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.DisputeRejectedCEO)?.Description ?? "Dispute rejected by CEO";
+                        MatchingHelper.ActivityTrackerAudit(_conx, rcsApps.Id, atMsg + " : " + dispute.DisputeReferenceNumber + " Reason: " + RejectionReason, custmusers.Id);
+                        Session["LeaseDisputeSession"] = $"Dispute {dispute.DisputeReferenceNumber} rejected by CEO. Returned to Revenue Manager.";
+                    }
+
+                    _conx.SaveChanges();
+                    return RedirectToAction("LeaseDisputes");
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    return RedirectToAction("LeaseDisputes");
+                }
+            }
+        }
+
+        #endregion
 
 
 
@@ -13466,6 +14987,16 @@ Activating your billing account and debit order mandate is required before occup
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Vacated)
                     {
+                        var LeaseTermination = _context.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
+                        if (LeaseTermination != null)
+                        {
+                            LeaseTermination.AccessCardNumber = vm.LeaseTermination.AccessCardNumber;
+                            LeaseTermination.KeyNumber = vm.LeaseTermination.KeyNumber;
+                            LeaseTermination.OtherPossessions = vm.LeaseTermination.OtherPossessions;
+                            _context.Entry(LeaseTermination).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+
                         MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantVacated).Id, (int)LeaseApplication.Id);
                         //MatchingHelper.ChangeApplicationStatus(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantVacated).Id, (int)LeaseApplication.PropertyLeaseApplicationId);
                         MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
@@ -15598,14 +17129,17 @@ Activating your billing account and debit order mandate is required before occup
                 MatchingHelper.DocumentUploadBakingDetailsProof(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, true);
                 MatchingHelper.DocumentDepositRefunds(refundDocs, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
 
+                var termination = db.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
+
                 var vm = new DepartmentsApprovalViewModel
                 {
                     PropertyLeaseApplications = rcsApps,
+                    LeaseDetails = LeaseApplication,
+                    LeaseTermination = termination,
                     DocumentsViewModel = dvm,
                     DocumentsViewModelRefundDeposits = refundDocs
                 };
                 vm.Customer = customer;
-                vm.PropertyLeaseApplications = rcsApps;
                 ViewBag.ApplicationId = application.Id;
                 return View(vm);
             }
@@ -15618,7 +17152,7 @@ Activating your billing account and debit order mandate is required before occup
 
         [DecryptParameter]
         [HttpPost]
-        public ActionResult StartRefundProcess(int? id, string comment)
+        public ActionResult StartRefundProcess(DepartmentsApprovalViewModel vm, int? id)
         {
 
             using (var _context = new eServicesDbContext())
@@ -15627,7 +17161,19 @@ Activating your billing account and debit order mandate is required before occup
                 {
                     Initialise();
                     var userID = Customer;
-                    var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                    var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == vm.LeaseDetails.Id && x.IsDeleted == false).FirstOrDefault();
+                    var LeaseTermination = _context.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
+                    if (LeaseTermination != null)
+                    {
+                        LeaseTermination.MaintenanceCost = vm.LeaseTermination.MaintenanceCost;
+                        LeaseTermination.ApprovedDeductions = vm.LeaseTermination.ApprovedDeductions;
+                        LeaseTermination.NettRefundAmount = vm.LeaseTermination.NettRefundAmount;
+                        LeaseTermination.FinancialOfficerOfficialNumber = vm.LeaseTermination.FinancialOfficerOfficialNumber;
+                        LeaseTermination.DepositRefundRecommended = vm.LeaseTermination.DepositRefundRecommended;
+                        LeaseTermination.FinancialOfficerReason = vm.LeaseTermination.FinancialOfficerReason;
+                        _context.Entry(LeaseTermination).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
                     PropertyLeaseApplication rcsApps = null;
                     rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
                       .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
@@ -15797,13 +17343,16 @@ Activating your billing account and debit order mandate is required before occup
                 MatchingHelper.DocumentUploadBakingDetailsProof(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, true);
                 MatchingHelper.DocumentDepositRefunds(refundDocs, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
                 
-                ViewBag.ApprovalStatus = new SelectList(context.RCSActionTypes.Where(x => x.Key == RCSActionTypeKeys.RefundDue || x.Key == RCSActionTypeKeys.NoRefundDue).OrderBy(x => x.Name), "Key", "Name");
+                var leaseTermination = context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsDeleted == false);
 
                 var vm = new DepartmentsApprovalViewModel
                 {
                     PropertyLeaseApplications = rcsApps,
                     DocumentsViewModel = dvm,
-                    DocumentsViewModelRefundDeposits = refundDocs
+                    DocumentsViewModelRefundDeposits = refundDocs,
+                    LeaseTermination = leaseTermination,
+                    LeaseDetails = LeaseApplication,
+                    Customer = customer
                 };
                 vm.Customer = customer;
                 vm.PropertyLeaseApplications = rcsApps;
@@ -15818,57 +17367,297 @@ Activating your billing account and debit order mandate is required before occup
         }
         [DecryptParameter]
         [HttpPost]
-        public ActionResult UpdateResponseForRefund(int? id, string ApprovalStatusddl,string Comment)
+        public ActionResult UpdateResponseForRefund(int? id, string RevenueManagerRefundOfficialNumber, string RevenueManagerRefundSupport, string Comment)
         {
-
             using (var _context = new eServicesDbContext())
             {
                 try
                 {
                     Initialise();
                     var userID = Customer;
-                    var LeaseApplication = db.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                    var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
                     PropertyLeaseApplication rcsApps = null;
-                    rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+                    rcsApps = _context.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
                       .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
                       .Include(r => r.HumanEHCOptions).Include(r => r.Status)
                       .Where(x => x.Id == LeaseApplication.PropertyLeaseApplicationId).FirstOrDefault();
 
                     var UserId = Customer.Id;
                     var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
-                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
-                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
-                    if ((ApprovalStatusddl == RCSActionTypeKeys.RefundDue)) 
-                    {
-                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.RefundReadyForCollection).Id, (int)LeaseApplication.Id);
-                        
-                        //sending email
-                        int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UpdateRefundResponseRefundDue).Id;
-                        EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                    }
-                    else if (ApprovalStatusddl == RCSActionTypeKeys.NoRefundDue) 
-                    {
-                        MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.RefundRejected).Id, (int)LeaseApplication.Id);
 
-                        //sending email
-                        int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UpdateRefundResponseNoRefundDue).Id;
-                        EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId,null, Comment);
+                    var leaseTermination = _context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsDeleted == false);
+                    if (leaseTermination == null)
+                    {
+                        throw new Exception("Lease termination record not found.");
                     }
+
+                    // Save RM inputs
+                    leaseTermination.RevenueManagerRefundOfficialNumber = RevenueManagerRefundOfficialNumber;
+                    bool isSupported = (RevenueManagerRefundSupport == "True" || RevenueManagerRefundSupport == "true");
+                    leaseTermination.RevenueManagerRefundSupport = isSupported;
+                    leaseTermination.RevenueManagerRefundReason = Comment;
+                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedDateTime = DateTime.Now;
+
+                    var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
+                    MatchingHelper.RoundRobinMarkJobAsFinished(_context, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
+
+                    if (isSupported)
+                    {
+                        // Transition status to awaiting refund authorization (s_awaiting_refund_authorisation)
+                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundAuthorisation);
+                        if (status != null)
+                        {
+                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
+                        }
+
+                        // Send to CEO
+                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1, null, null, true);
+                    }
+                    else
+                    {
+                        // Transition status back to awaiting refund response (s_awaiting_refund_response)
+                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse);
+                        if (status != null)
+                        {
+                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
+                        }
+
+                        // Send back to Financial Officer
+                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
+                    }
+
+                    _context.SaveChanges();
 
                     //ActivityTrackerAudit
-                    var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UpdateRefundResponse).Description.ToString();
-                    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
+                    var ActivityTrackerMessage = _context.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UpdateRefundResponse).Description.ToString();
+                    MatchingHelper.ActivityTrackerAudit(_context, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
 
                     Session["UpdateResponseForRefundSession"] = string.Format($"Refund response updated successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
                     return RedirectToAction("UpdateRefundResponse", "PropertyLeaseApplication");
                 }
                 catch (Exception e)
                 {
-
                     throw;
                 }
             }
+        }
 
+        public ActionResult RefundAuthorisation()
+        {
+            using (var cxt = new eServicesDbContext())
+            { 
+                try
+                {
+                    Initialise();
+                    var Keys = cxt.Status;
+                    int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
+                    int UserId = Customer.Id;
+                    List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
+
+                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault().Id;
+
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
+
+                    var list = rrq.Select(x => x.LeaseDetailsId).ToList();
+
+                    int AwaitingRefundAuthorisation = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundAuthorisation).Id;
+
+                    var rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == AwaitingRefundAuthorisation))
+                        .Include(r => r.CreatedBySystemUser)
+                        .Include(r => r.PurchaserType)
+                        .Include(r => r.ModifiedBySystemUser)
+                        .Include(r => r.Status).ToList();
+
+                    foreach (var item in rCSApplicationStatus)
+                    {
+                        item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
+                    }
+                    if (Session["RefundAuthorisationSession"] != null)
+                    {
+                        var value = Session["RefundAuthorisationSession"].ToString();
+                        Session["RefundAuthorisationSession"] = null;
+                        ViewBag.RefundAuthorisationSession = value;
+                    }
+                    Session["RefundAuthorisationSession"] = null;
+                    return View(rCSApplicationStatus);
+                }
+                catch (Exception io)
+                {
+                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
+
+                return RedirectToAction("Login", "Account");
+            }
+        }
+
+        [DecryptParameter]
+        public ActionResult AuthorizeRefund(int? id)
+        {
+            eServicesDbContext context = new eServicesDbContext();
+            Initialise();
+            var userID = Customer.Id;
+
+            var LeaseApplication = db.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+            PropertyLeaseApplication rcsApps = null;
+
+            rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+              .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
+              .Include(r => r.HumanEHCOptions).Include(r => r.Status)
+              .Where(x => x.Id == LeaseApplication.PropertyLeaseApplicationId).FirstOrDefault();
+
+            try
+            {
+                var customer = context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
+                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == rcsApps.CustomerId);
+                if (customer == null) throw new Exception("Invalid Customer");
+
+                var application = context.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
+                if (application == null) throw new Exception(string.Format("Invalid/ missing application key {0}", ApplicationKeys.RatesClearanceSystem));
+                var referenceType = context.ReferenceTypes.FirstOrDefault(a => a.Key.Equals(ReferenceTypeKeys.RCSUpload));
+                if (referenceType == null) throw new Exception("Invalid reference type.");
+
+                DocumentsViewModel dvm = new DocumentsViewModel();
+                DocumentsViewModel refundDocs = new DocumentsViewModel();
+
+                MatchingHelper.DocumentUploadBakingDetailsProof(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, true);
+                MatchingHelper.DocumentDepositRefunds(refundDocs, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
+                
+                var leaseTermination = context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsDeleted == false);
+
+                var vm = new DepartmentsApprovalViewModel
+                {
+                    PropertyLeaseApplications = rcsApps,
+                    DocumentsViewModel = dvm,
+                    DocumentsViewModelRefundDeposits = refundDocs,
+                    LeaseTermination = leaseTermination,
+                    LeaseDetails = LeaseApplication,
+                    Customer = customer
+                };
+                vm.Customer = customer;
+                vm.PropertyLeaseApplications = rcsApps;
+                ViewBag.ApplicationId = application.Id;
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                throw;
+            }
+        }
+
+        [DecryptParameter]
+        [HttpPost]
+        public ActionResult AuthorizeRefund(int? id, string CEORefundOfficialNumber, string CEORefundResponse, string CEORefundSignature, string Comment)
+        {
+            using (var _context = new eServicesDbContext())
+            {
+                try
+                {
+                    Initialise();
+                    var userID = Customer;
+                    var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                    PropertyLeaseApplication rcsApps = null;
+                    rcsApps = _context.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
+                      .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
+                      .Include(r => r.HumanEHCOptions).Include(r => r.Status)
+                      .Where(x => x.Id == LeaseApplication.PropertyLeaseApplicationId).FirstOrDefault();
+
+                    var UserId = Customer.Id;
+                    var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
+
+                    var leaseTermination = _context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsDeleted == false);
+                    if (leaseTermination == null)
+                    {
+                        throw new Exception("Lease termination record not found.");
+                    }
+
+                    // Save CEO inputs
+                    leaseTermination.CEORefundResponse = CEORefundResponse;
+                    leaseTermination.CEORefundOfficialNumber = CEORefundOfficialNumber;
+                    leaseTermination.CEORefundSignature = CEORefundSignature;
+                    leaseTermination.CEORefundSignDate = DateTime.Now;
+                    leaseTermination.CEORefundReason = Comment;
+                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedDateTime = DateTime.Now;
+
+                    var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault();
+                    MatchingHelper.RoundRobinMarkJobAsFinished(_context, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
+
+                    if (CEORefundResponse == "Reject")
+                    {
+                        // Rejection: Send back to Financial Officer for recalculation
+                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse);
+                        if (status != null)
+                        {
+                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
+                        }
+
+                        // Send back to Financial Officer
+                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
+                    }
+                    else
+                    {
+                        // Approval (Approve Full, Approve Partial, No Refund): Close/terminate the lease
+                        var statusTerminated = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.TerminatedLease);
+                        if (statusTerminated != null)
+                        {
+                            MatchingHelper.ChangeLeaseStatusII(_context, (int)statusTerminated.Id, (int)LeaseApplication.Id);
+                        }
+
+                        // Also update the PropertyLeaseApplication status if appropriate
+                        var applicationStatusClosed = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.TerminatedLease);
+                        if (applicationStatusClosed != null)
+                        {
+                            rcsApps.StatusId = applicationStatusClosed.Id;
+                            rcsApps.ModifiedBySystemUserId = Customer.Id;
+                            rcsApps.ModifiedDateTime = DateTime.Now;
+                        }
+
+                        // Set Customer Status to Former Tenant
+                        var customer = _context.Customers.FirstOrDefault(x => x.Id == rcsApps.CustomerId);
+                        if (customer != null)
+                        {
+                            var formerTenantStatus = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.FormerTenant);
+                            if (formerTenantStatus != null)
+                            {
+                                customer.StatusId = formerTenantStatus.Id;
+                                customer.ModifiedBySystemUserId = Customer.Id;
+                                customer.ModifiedDateTime = DateTime.Now;
+                            }
+                        }
+
+                        // Send email to customer
+                        try
+                        {
+                            int emailBodyId = 0;
+                            if (CEORefundResponse == "No Refund")
+                            {
+                                emailBodyId = _context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UpdateRefundResponseNoRefundDue).Id;
+                            }
+                            else
+                            {
+                                emailBodyId = _context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UpdateRefundResponseRefundDue).Id;
+                            }
+                            EmailHelper.CustomerEmailNotification(_context, rcsApps.Id, emailBodyId, null, Comment);
+                        }
+                        catch (Exception emailEx)
+                        {
+                            // Log email failure but don't block workflow
+                            EventLogHelper.LogSystemError(emailEx.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                        }
+                    }
+
+                    _context.SaveChanges();
+
+                    Session["RefundAuthorisationSession"] = string.Format($"Refund authorization processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
+                    return RedirectToAction("RefundAuthorisation", "PropertyLeaseApplication");
+                }
+                catch (Exception e)
+                {
+                    throw;
+                }
+            }
         }
 
         //Manual Process

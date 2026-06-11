@@ -33,7 +33,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         // GET: Complaints/Index
-        [Authorize(Roles = "Client Services Officer,Customers")]
+        [Authorize(Roles = "Client Services Officer,Customers,Back Office System Administrator,Super Administrators")]
         public ActionResult Index()
         {
             var systemUser = identityManager.CurrentUser(User);
@@ -54,11 +54,19 @@ namespace C8.eServices.Mvc.Controllers
                     .Include(t => t.ComplaintCategory)
                     .Include(t => t.ComplaintType)
                     .Include(t => t.Status)
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Investigations)
                     .Where(t => t.IsActive && !t.IsDeleted)
                     .OrderByDescending(t => t.DateSubmitted);
             }
             else
             {
+                if (customer == null)
+                {
+                    TempData["ErrorMessage"] = "Unable to identify your account. Please log in again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
                 // Get tenant's allocated units in memory (anonymous type - fine here)
                 var tenantUnits = db.MatchedUnits
                     .Where(mu => mu.CustomerId == customer.Id && mu.ApplicationAllocatedPropertyId != null)
@@ -91,18 +99,23 @@ namespace C8.eServices.Mvc.Controllers
                     .Include(t => t.ComplaintCategory)
                     .Include(t => t.ComplaintType)
                     .Include(t => t.Status)
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Investigations)
                     .Where(t => t.IsActive && !t.IsDeleted &&
                                (t.SubmittedByCustomerId == customer.Id ||
                                 respondentComplaintIds.Contains(t.Id)))
                     .OrderByDescending(t => t.DateSubmitted);
             }
 
+            // Check SLA breaches — after 7 calendar days, escalate to Revenue Manager
+            slaEngine.CheckAndEscalateOverdueComplaints();
+
             ViewBag.SLAStats = slaEngine.GetSLAStatistics();
             return View(complaints.ToList());
         }
 
         // GET: Complaints/Create
-        [Authorize(Roles = "Client Services Officer,Customers")]
+        [Authorize(Roles = "Client Services Officer,Customers,Back Office System Administrator,Super Administrators")]
         public ActionResult Create()
         {
             ViewBag.ComplaintCategoryId = new SelectList(db.ComplaintCategories.Where(x => x.IsActive), "Id", "Name");
@@ -113,7 +126,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: Complaints/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client Services Officer,Customers")]
+        [Authorize(Roles = "Client Services Officer,Customers,Back Office System Administrator,Super Administrators")]
         public ActionResult Create(TenantComplaint complaint, HttpPostedFileBase[] evidenceFiles)
         {
             try
@@ -177,7 +190,7 @@ namespace C8.eServices.Mvc.Controllers
 
         // GET: Complaints/Details/5
         [DecryptParameter]
-        [Authorize(Roles = "Client Services Officer,Customers")]
+        [Authorize(Roles = "Client Services Officer,Customers,Back Office System Administrator,Super Administrators")]
         public ActionResult Details(int id)
         {
             var complaint = db.TenantComplaints
@@ -186,6 +199,7 @@ namespace C8.eServices.Mvc.Controllers
                 .Include(t => t.ComplaintCategory)
                 .Include(t => t.ComplaintType)
                 .Include(t => t.Status)
+                .Include(t => t.AssignedTo)
                 .Include(t => t.Evidence)
                 .Include(t => t.Investigations)
                 .Include(t => t.AuditLogs)
@@ -206,6 +220,12 @@ namespace C8.eServices.Mvc.Controllers
 
             if (!User.IsInRole("Client Services Officer"))
             {
+                if (customer == null)
+                {
+                    TempData["ErrorMessage"] = "Unable to identify your account. Please log in again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
                 var tenantUnits = db.MatchedUnits
                     .Where(mu => mu.CustomerId == customer.Id && mu.ApplicationAllocatedPropertyId != null)
                     .Select(mu => mu.ApplicationAllocatedProperty)
@@ -238,26 +258,13 @@ namespace C8.eServices.Mvc.Controllers
 
         // GET: Complaints/ScheduleAppointment/5
         [DecryptParameter]
-        [Authorize(Roles = "Client Services Officer")]
+        [Authorize(Roles = "Client Services Officer,Back Office System Administrator,Super Administrators")]
         public ActionResult ScheduleAppointment(int id)
         {
-            var complaint = db.TenantComplaints
-                .Include(t => t.Investigations)
-                .FirstOrDefault(t => t.Id == id);
+            var complaint = db.TenantComplaints.Find(id);
+            if (complaint == null) return HttpNotFound();
 
-            if (complaint == null)
-            {
-                return HttpNotFound();
-            }
-
-            var investigation = complaint.Investigations.FirstOrDefault() ?? new ComplaintInvestigation
-            {
-                TenantComplaintId = id
-            };
-
-            ViewBag.ComplaintCaseNumber = complaint.CaseReferenceNumber;
-            ViewBag.Complaint = complaint;
-            return View(investigation);
+            return RedirectToAction("ManageSchedule", "Scheduling", new { q = new AesCrypto().Encrypt("referenceId=" + id + "&referenceType=Complaint") });
         }
 
         // POST: Complaints/ScheduleAppointment
@@ -324,11 +331,14 @@ namespace C8.eServices.Mvc.Controllers
 
         // GET: Complaints/ConfirmAppointment/5
         [DecryptParameter]
-        [Authorize(Roles = "Customers")]
+        [Authorize(Roles = "Customers,Back Office System Administrator,Super Administrators")]
         public ActionResult ConfirmAppointment(int id)
         {
             var complaint = db.TenantComplaints
                 .Include(t => t.Investigations)
+                .Include(t => t.ComplaintCategory)
+                .Include(t => t.ComplaintType)
+                .Include(t => t.Status)
                 .FirstOrDefault(t => t.Id == id);
 
             if (complaint == null)
@@ -342,15 +352,23 @@ namespace C8.eServices.Mvc.Controllers
                 return HttpNotFound();
             }
 
+            var schedules = db.InspectionSchedules
+                .Include(s => s.DateToSchedule)
+                .Include(s => s.TimeSlot)
+                .Where(s => s.TenantComplaintId == complaint.Id && !s.IsDeleted)
+                .ToList();
+            ViewBag.Schedules = schedules;
+
             ViewBag.ComplaintCaseNumber = complaint.CaseReferenceNumber;
+            ViewBag.Complaint = complaint;
             return View(investigation);
         }
 
         // POST: Complaints/ConfirmAppointment
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Customers")]
-        public ActionResult ConfirmAppointment(int id, string action, DateTime? alternativeDate, TimeSpan? alternativeTime, string alternativeReason)
+        [Authorize(Roles = "Customers,Back Office System Administrator,Super Administrators")]
+        public ActionResult ConfirmAppointment(int id, string action, int? selectedScheduleId, DateTime? alternativeDate, TimeSpan? alternativeTime, string alternativeReason)
         {
             try
             {
@@ -370,12 +388,38 @@ namespace C8.eServices.Mvc.Controllers
 
                 if (action == "accept")
                 {
+                    if (selectedScheduleId.HasValue)
+                    {
+                        var selectedSchedule = db.InspectionSchedules
+                            .Include(s => s.DateToSchedule)
+                            .Include(s => s.TimeSlot)
+                            .FirstOrDefault(s => s.Id == selectedScheduleId.Value);
+
+                        if (selectedSchedule != null)
+                        {
+                            investigation.AppointmentDate = selectedSchedule.DateToSchedule?.ShecduleDate;
+                            
+                            TimeSpan parsedTime;
+                            if (TimeSpan.TryParse(selectedSchedule.TimeSlot?.Name, out parsedTime))
+                            {
+                                investigation.AppointmentTime = parsedTime;
+                            }
+                            else if (DateTime.TryParse(selectedSchedule.TimeSlot?.Name, out DateTime parsedDateTime))
+                            {
+                                investigation.AppointmentTime = parsedDateTime.TimeOfDay;
+                            }
+                        }
+                    }
+
                     investigation.RespondentConfirmed = true;
                     investigation.DateConfirmed = DateTime.Now;
                     investigation.ModifiedDateTime = DateTime.Now;
                     investigation.AlternativeApproved = null;
 
                     db.SaveChanges();
+
+                    // Re-assign back to CSO to capture outcome
+                    workflowEngine.RoundRobinComplaints(investigation.TenantComplaintId, ResponsibilityTypeKeys.ComplaintInvestigation);
 
                     notificationEngine.SendAppointmentConfirmationToCSO(investigation);
                     workflowEngine.LogAuditTrail(investigation.TenantComplaintId, "Appointment Confirmed", 
@@ -415,7 +459,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: Complaints/ApproveAlternativeDate
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client Services Officer")]
+        [Authorize(Roles = "Client Services Officer,Back Office System Administrator,Super Administrators")]
         public ActionResult ApproveAlternativeDate(int id, bool approve)
         {
             try
@@ -461,12 +505,14 @@ namespace C8.eServices.Mvc.Controllers
 
         // GET: Complaints/CaptureOutcome/5
         [DecryptParameter]
-        [Authorize(Roles = "Client Services Officer")]
+        [Authorize(Roles = "Client Services Officer,Back Office System Administrator,Super Administrators")]
         public ActionResult CaptureOutcome(int id)
         {
             var complaint = db.TenantComplaints
                 .Include(t => t.Investigations)
+                .Include(t => t.ComplaintCategory)
                 .Include(t => t.ComplaintType)
+                .Include(t => t.Status)
                 .FirstOrDefault(t => t.Id == id);
 
             if (complaint == null)
@@ -481,6 +527,7 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             ViewBag.ComplaintCaseNumber = complaint.CaseReferenceNumber;
+            ViewBag.Complaint = complaint;
             ViewBag.WarningLetterCount = complaint.WarningLetterCount;
             ViewBag.IsSubLetting = workflowEngine.IsSubLettingComplaint(complaint);
             ViewBag.OutcomeOptions = new SelectList(new[]
@@ -615,7 +662,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 if (customer != null)
                 {
-                    workflowEngine.RoundRobinMarkFinished(customer.Id, ResponsibilityTypeKeys.ComplaintInvestigation);
+                    workflowEngine.RoundRobinMarkFinished(customer.Id, ResponsibilityTypeKeys.ComplaintInvestigation, complaint.Id);
                 }
 
                 ViewBag.MessageTitle = "Success";

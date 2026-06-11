@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -105,12 +105,12 @@ namespace C8.eServices.Mvc.Models.Audits
 
         [Display(Name = "Address")]
         [Column(Order = 35)]
-        [StringLength(50)]
+        [StringLength(500)]
         public string ResAddress { get; set; }
 
         [Display(Name = "Suburb")]
         [Column(Order = 36)]
-        [StringLength(50)]
+        [StringLength(250)]
         public string ResSuburb { get; set; }
 
         [Display(Name = "Postal Code")]

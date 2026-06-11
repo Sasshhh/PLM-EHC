@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.DataAccessLayer;
+using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.ViewModels;
@@ -53,20 +53,31 @@ namespace C8.eServices.Mvc.Helpers
             }
         }
 
-        public static void FinishAllPreviousWork(int ApplicationId)
+        public static void FinishAllPreviousWork(int ApplicationId, int ResponsibilityTypeId)
         {
             try
             {
                 var core = new eServicesDbContext();
-                var workundone = core.RoundRobinQueues.Where(a => a.HumanSettlementApplicationId == ApplicationId && a.EndTaskDateTime == null).ToList();
+                var archivedStatus = core.Status.FirstOrDefault(d => d.Key == StatusKeys.Archived);
+                if (archivedStatus == null) return;
+
+                // IMPORTANT: only archive entries for THIS responsibility type.
+                // An application can have multiple parallel flows (e.g. maintenance running
+                // alongside the main lease flow), so we must never touch other types.
+                var workundone = core.RoundRobinQueues
+                    .Where(a => a.HumanSettlementApplicationId == ApplicationId
+                             && a.ResponsibilityTypeId == ResponsibilityTypeId
+                             && a.EndTaskDateTime == null)
+                    .ToList();
+
                 if (workundone.Count > 0)
                     foreach (var work in workundone)
                     {
                         work.EndTaskDateTime = DateTime.Now;
-                        work.StatusId = core.Status.FirstOrDefault(d => d.Key == StatusKeys.Archived).Id;
+                        work.StatusId = archivedStatus.Id;
                         core.Entry(work).State = EntityState.Modified;
-                        core.SaveChanges();
                     }
+                core.SaveChanges();
             }
             catch (Exception IO)
             {
@@ -143,7 +154,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -167,7 +178,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -191,7 +202,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -215,7 +226,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -239,7 +250,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -280,7 +291,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -304,7 +315,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -328,7 +339,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -352,7 +363,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -376,7 +387,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -400,7 +411,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -441,7 +452,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -465,7 +476,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -489,7 +500,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -529,7 +540,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -553,7 +564,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }
@@ -577,7 +588,7 @@ namespace C8.eServices.Mvc.Helpers
                         roundRobinQueue.ClerkId = WorkAllocationUser;
                         roundRobinQueue.StatusId = StatusId;
                         core.RoundRobinQueues.Add(roundRobinQueue);
-                        FinishAllPreviousWork(RcsApplication.Id);
+                        FinishAllPreviousWork(RcsApplication.Id, ResponsibilityTypeId.Id);
                         core.SaveChanges();
                         BackOfficeNotification(RcsApplication.Id, WorkAllocationUser, ResponsibilityTypeId.Name);
                     }

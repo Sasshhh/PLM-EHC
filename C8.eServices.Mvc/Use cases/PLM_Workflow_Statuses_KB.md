@@ -60,3 +60,91 @@ A: Ensure the application status is exactly `s_rcs_pending_assessment_payment_va
 
 **Q: What happens if an image is missing in the Pre-Tenancy Training?**
 A: Check that the `ImagePath` in the database starts with `~/` or `/`. The system now dynamically resolves these paths relative to the application root.
+
+---
+
+## 5. UC018 - Lease Renewal Workflow (EHC)
+
+### Trigger
+`MatchingHelper.RenewalNotificationAtEndOfTime()` runs on a schedule. Any lease where `RenewalNotice <= today` is flagged and a CSO is assigned via Round Robin (`LeaseRenewals` responsibility).
+
+### EHC Lease Lifecycle: Renewals
+- **No new `LeaseDetails` row is created on renewal.** The same row is updated in place.
+- `IsNew = true` on the active lease throughout the renewal process.
+- `LeaseDetails.EndDate`, `RenewalNotice`, and `TerminationNotice` are updated **ONLY** when the tenant accepts the offer (final step).
+
+### Staging Record: `PropertyLeaseRenewalOffer`
+Holds all proposed terms and approval trail without touching `LeaseDetails`:
+
+| Field | Purpose |
+|---|---|
+| `MonthsOffer` | Proposed renewal duration (12 or 24 months) |
+| `ProposedEndDate` | Calculated new EndDate (not yet applied) |
+| `ProposedRenewalNotice` | Calculated new RenewalNotice |
+| `ProposedTerminationNotice` | Calculated new TerminationNotice |
+| `CSO_Outcome / Comment / Date` | CSO decision trail |
+| `RM_Outcome / Comment / Date` | Revenue Manager trail |
+| `CEO_Outcome / Comment / Date` | Director/CEO trail |
+| `IsAccepted` | Set true on tenant acceptance |
+| `CustomerDeclineReason` | Set if tenant declines |
+
+### Status Flow
+
+| Step | Actor | Action | LeaseDetails Status After | LeaseDetails Dates Changed? |
+|---|---|---|---|---|
+| **1. Scanner** | System | `RenewalNotificationAtEndOfTime()` | `Application Up For Renewal At Three Months` | No |
+| **2. CSO Reviews** | CSO | `RecommendForRenewal` POST | `Awaiting Renewal Review Outcome` | **No** - writes to `PropertyLeaseRenewalOffer` only |
+| **3. CSO Not Renew** | CSO | Selects "Not Renew" | `Lease Renewal Rejected` | No |
+| **4. RM Reviews** | Revenue Manager | `RevenueManagerRenewalReview` POST - Approve | `Awaiting Renewal Outcome` | No |
+| **5. RM Rejects** | Revenue Manager | `RevenueManagerRenewalReview` POST - Reject | `Lease Renewal Rejected` | No |
+| **6. CEO Decides** | Director | `CEORenewalDecision` POST - Approve | `Awaiting Lease Renewal Agreement Conclusion` | No |
+| **7. CEO Rejects** | Director | `CEORenewalDecision` POST - Reject | `Lease Renewal Rejected` | No |
+| **8. CSO Concludes** | CSO | `ConcludeRenewalAgreement` POST | `Lease Renewal Agreement Concluded` | **No** - sends offer to tenant only |
+| **9. Tenant Accepts** | Tenant | `LeaseOfferValidation` POST - Approved | `Awaiting Renewal Documents` | **YES - only here** |
+| **10. Tenant Declines** | Tenant | `LeaseOfferValidation` POST - Rejected | `Terminate At End Of Period` | No |
+
+### Key Responsibility Queue Mappings (Round Robin)
+
+| Responsibility Key | Used At | Role |
+|---|---|---|
+| `LeaseRenewals` | Scanner assigns to CSO | CSO |
+| `LeaseRenewalRevenue` | After CSO recommends | Revenue Manager |
+| `LeaseRenewalCEOApproval` | After RM approves | Director/CEO (Property Manager) |
+| `LeaseRenewals` | After CEO approves (re-assigned to CSO) | CSO (conclude agreement) |
+
+### Key Action Type Keys (`RCSActionTypeKeys`)
+
+| Key | Meaning |
+|---|---|
+| `Approve12Months` | CSO recommends 12-month renewal |
+| `Approve24Months` | CSO recommends 24-month renewal |
+| `NotRenew` | CSO recommends not renewing |
+| `Approved` | RM/CEO approves |
+| `Rejected` | RM/CEO rejects |
+
+### Key Status Keys (`StatusKeys`)
+
+| Key | Status Name |
+|---|---|
+| `LeaseRenewalRejected` | Lease Renewal Rejected |
+| `AwaitingRenewalReviewOutcome` | Awaiting Renewal Review Outcome |
+| `AwaitingRenewalOutcome` | Awaiting Renewal Outcome |
+| `LeaseRenewalApproved` | Lease Renewal Approved |
+| `AwaitingLeaseRenewalAgreementConclusion` | Awaiting Lease Renewal Agreement Conclusion |
+| `LeaseRenewalAgreementConcluded` | Lease Renewal Agreement Concluded |
+| `AwaitingRenewalDocuments` | Awaiting Renewal Documents |
+| `TerminateAtEndOfPeriod` | Terminate At End Of Period |
+
+### Architecture Note: `LeaseRenewalService.cs`
+All renewal processing logic is centralised in `Helpers/LeaseRenewalService.cs`:
+- `CreateOrUpdateOffer()` - CSO step, writes to `PropertyLeaseRenewalOffer`
+- `RecordRMDecision()` - Revenue Manager trail
+- `RecordCEODecision()` - Director/CEO trail
+- `RecordCustomerDecline()` - Customer decline trail
+
+`MatchingHelper.UpdatePropertyLeaseDates()` remains the **single, authorised** method for modifying `LeaseDetails` dates and is called only from `LeaseOfferValidation` POST.
+
+
+### Future Enhancements
+- **Tenant Renewal Rejection**: Currently routes to s_lease_renewal_rejected and drops back into the CSO's renewals inbox. Will be enhanced to automatically trigger the termination workflow.
+

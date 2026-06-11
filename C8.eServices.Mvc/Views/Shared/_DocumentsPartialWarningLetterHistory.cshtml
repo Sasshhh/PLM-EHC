@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Web
 
 <style>
@@ -123,7 +123,7 @@
                                                         <td>
                                                             <dd class="ddAlign">
                                                                 <div id="@("docDetails_" + doc1.Id)" class="docDetails">
-                                                                    @Html.Raw(d != null ? string.Format("<a href='{0}'>{1}</a> {2}</br>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document")
+                                                                    @Html.Raw(d != null ? string.Format("<a href='{0}' target='_blank' rel='noopener noreferrer'>{1}</a> {2}</br>", @Url.Action("GetDocument", "File", new { q = d.File.Data }), d.DocumentName, (d.CreatedDateTime == null) ? string.Empty : string.Format("Uploaded On {0:yyyy-MM-dd HH:mm:ss} ", d.File.CreatedDateTime)) : "No Document")
                                                                     @Html.Raw(doc.DocumentType.Description)
                                                                 </div>
                                                             </dd>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -1017,6 +1017,19 @@
     <Content Include="Content\Training Slides\slide-09.jpg" />
     <Content Include="Content\Training Slides\slide-10.jpg" />
     <Content Include="Content\Training Slides\slide-11.jpg" />
+    <Content Include="Content\Training Slides\slide-12.jpg" />
+    <Content Include="Content\Training Slides\slide-13.jpg" />
+    <Content Include="Content\Training Slides\slide-14.jpg" />
+    <Content Include="Content\Training Slides\slide-15.jpg" />
+    <Content Include="Content\Training Slides\slide-16.jpg" />
+    <Content Include="Content\Training Slides\slide-17.jpg" />
+    <Content Include="Content\Training Slides\slide-18.jpg" />
+    <Content Include="Content\Training Slides\slide-19.jpg" />
+    <Content Include="Content\Training Slides\slide-20.jpg" />
+    <Content Include="Content\Training Slides\slide-21.jpg" />
+    <Content Include="Content\Training Slides\slide-22.jpg" />
+    <Content Include="Content\Training Slides\slide-23.jpg" />
+    <Content Include="Content\Training Slides\slide-24.jpg" />
     <Content Include="DataAccessLayer\IntergrationDbContext.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>IntergrationDbContext1.cs</LastGenOutput>
@@ -1027,7 +1040,11 @@
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="MasterData\PaymentTransgressionsMasterData.sql" />
+    <Content Include="MasterData\ServiceRequestsMasterData.sql" />
     <Content Include="Rotativa\wkhtmltopdf.exe" />
+    <Content Include="RunScanner.aspx" />
+    <Content Include="Scripts\02_tenant_training_schedule_test_run.sql" />
     <Content Include="Scripts\1.js" />
     <Content Include="Scripts\2.js" />
     <Content Include="Scripts\3.js" />
@@ -1036,6 +1053,35 @@
     <Content Include="Scripts\6.js" />
     <Content Include="Scripts\8.js" />
     <Content Include="Scripts\7.js" />
+    <Content Include="Scripts\add_cso_role.sql" />
+    <Content Include="Scripts\add_deposit_payment_email_template.sql" />
+    <Content Include="Scripts\add_facilities_manager_responsibility_type.sql" />
+    <Content Include="Scripts\add_maintenance_document_checklists.sql" />
+    <Content Include="Scripts\add_maintenance_job_card_document_types.sql" />
+    <Content Include="Scripts\add_maintenance_manager_appsettings.sql" />
+    <Content Include="Scripts\add_maintenance_manager_columns.sql" />
+    <Content Include="Scripts\add_property_facilities_manager_appsetting.sql" />
+    <Content Include="Scripts\add_tenant_signature_columns.sql" />
+    <Content Include="Scripts\add_witness1_columns.sql" />
+    <Content Include="Scripts\Apply_Banking_Details_Migration.sql" />
+    <Content Include="Scripts\Apply_Lease_Agreement_Enhancements_Migration.sql" />
+    <Content Include="Scripts\assign_cso_user.sql" />
+    <Content Include="Scripts\backfill_lease_details_for_application.sql" />
+    <Content Include="Scripts\backfill_maintenance_managers.sql" />
+    <Content Include="Scripts\check_5216_status.sql" />
+    <Content Include="Scripts\check_and_create_schedule_slots_rrq_5218.sql" />
+    <Content Include="Scripts\check_app_status.sql" />
+    <Content Include="Scripts\check_current_state_5218.sql" />
+    <Content Include="Scripts\Check_Existing_Columns.sql" />
+    <Content Include="Scripts\check_facilities_manager_queue_5218.sql" />
+    <Content Include="Scripts\check_latest_maintenance_rrq.sql" />
+    <Content Include="Scripts\Check_MigrationHistory_Status.sql" />
+    <Content Include="Scripts\check_signature_status_EHC2026020600001.sql" />
+    <Content Include="Scripts\check_status_99_and_rrq_11578.sql" />
+    <Content Include="Scripts\check_witness_columns.sql" />
+    <Content Include="Scripts\Cleanup_MigrationHistory.sql" />
+    <Content Include="Scripts\ClearComplaintTestData.sql" />
+    <Content Include="Scripts\create_maintenance_roles_and_users.sql" />
     <Content Include="Scripts\DataTablesButtons.js" />
     <Content Include="Scripts\bootbox.min.js" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
@@ -1084,6 +1130,10 @@
     <Content Include="Manuals\PLM H-Senior Housing Specialist Manual.pdf" />
     <Content Include="Content\Images\Ekurhuleni.xcf" />
     <Content Include="ClearTempFiles.ps1" />
+    <Content Include="COMPLAINTS_MODULE_IMPLEMENTATION_STATUS.md" />
+    <Content Include="Content\Pre-inspection Form v2.pdf" />
+    <Content Include="AUTO_MATCHING_CEO_APPROVAL.md" />
+    <Content Include="CODE_QUALITY_IMPROVEMENT_HOUSING_SUPERVISOR.md" />
     <None Include="Content\RcsStyles\Scripts\jquery-1.10.2.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery-3.3.1.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery.validate-vsdoc.js" />
@@ -1101,9 +1151,64 @@
     <Content Include="FINAL_VERIFICATION_CHECKLIST.md" />
     <Content Include="EXAMRESULTS_ALL_FIXES.md" />
     <Content Include="FIX_CLIENTTRAINING_REMOVE_INSPECTION.md" />
+    <Content Include="PDFTemplates\Agreement_PDF.pdf" />
+    <Content Include="PDFTemplates\CA_Agreement_UPD.pdf" />
+    <Content Include="PDFTemplates\DO_AuthorityForm.pdf" />
+    <Content Include="PDFTemplates\HS_AgreementOfLease.pdf" />
+    <Content Include="PDFTemplates\LA_Template.pdf" />
+    <Content Include="PDFTemplates\LA_Template_backup_20260306.pdf" />
+    <Content Include="PDFTemplates\Revised Lease Agreement_.pdf" />
+    <Content Include="PDFTemplates\Revised Lease Agreement_v1.pdf" />
+    <Content Include="PDFTemplates\Revised_Lease_Agreement_v1_Field_Analysis.md" />
+    <Content Include="PDFTemplates\DEFERRED_FIELDS_TRACKER.md" />
+    <Content Include="PDFTemplates\IMPLEMENTATION_PLAN_Revised_Lease_v1.md" />
+    <Content Include="PDFTemplates\IMPLEMENTATION_SUMMARY_REVISED_LEASE_V1.md" />
+    <Content Include="PDFTemplates\FONT_SIZE_UPDATE_SUMMARY.md" />
+    <Content Include="PDFTemplates\WITNESS_SIGNATURE_IMPLEMENTATION_GUIDE.md" />
+    <Content Include="PDFTemplates\DUAL_SIGNATURE_IMPLEMENTATION_STATUS.md" />
+    <Content Include="PDFTemplates\MANAGER_SIGNATURE_IMPLEMENTATION_STATUS.md" />
+    <Content Include="HOUSING_SUPERVISOR_ASSIGNMENT_CHANGE.md" />
+    <Content Include="INSPECTION_ASSIGNMENT_LOGIC.md" />
+    <Content Include="MAINTENANCE_DEFECT_WORKFLOW_IMPLEMENTATION.md" />
+    <Content Include="DATABASE_SETUP_COMPLETION_SUMMARY.md" />
+    <Content Include="PRODUCTION_DEPLOYMENT_CHECKLIST.md" />
+    <Content Include="PRODUCTION_DEPLOYMENT_PACKAGE.md" />
+    <Content Include="MAINTENANCE_WORKFLOW_README.md" />
+    <Content Include="DEV_SETUP_COMPLETE.md" />
+    <Content Include="MAINTENANCE_JOB_CARD_ENHANCEMENT.md" />
+    <Content Include="HASDSTV_NULLABLE_FIX_SUMMARY.md" />
+    <Content Include="HASDSTV_MIGRATION_CONFLICT_RESOLUTION.md" />
+    <Content Include="PENDING_CHANGES_FIX_GUIDE.md" />
+    <Content Include="FINAL_FIX_MISSING_MIGRATIONS.md" />
+    <Content Include="CONTEXTKEY_MISMATCH_FIX.md" />
+    <Content Include="MIGRATION_RESOLUTION_COMPLETE.md" />
+    <Content Include="MODAL_VISUAL_COMPARISON.md" />
+    <Content Include="HOUSING_SUPERVISOR_FIX_COMPLETE.md" />
+    <Content Include="MAINTENANCE_MANAGER_ASSIGNMENT_FIX.md" />
+    <Content Include="LEGACY_APPROVAL_FORM_REMOVAL.md" />
+    <Content Include="Content\review webconfig\Web.config" />
+    <Content Include="MasterData\COMPLAINTS_MODULE_README.md" />
+    <Content Include="MasterData\PAYMENT_TRANSGRESSIONS_README.md" />
+    <Content Include="MasterData\SERVICE_REQUESTS_README.md" />
+    <Content Include="MasterData\ENCRYPTION_PATTERN_README.md" />
+    <Content Include="PDFTemplates\Maintenance Job Sheet Template.pdf" />
+    <Content Include="PDFTemplates\Revised Lease Agreement_v2.pdf" />
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
     <Content Include="QUICKSTART_SASH38.md" />
     <Content Include="README_SASH38.md" />
+    <Content Include="ROLES_CONSOLIDATION_PLAN.md" />
+    <Content Include="Scripts\Delete_Problematic_Migrations.sql" />
+    <Content Include="Scripts\DEV_SETUP_MAINTENANCE_USERS.sql" />
+    <Content Include="Scripts\diagnose_maintenance_records.sql" />
+    <Content Include="Scripts\diagnose_users_and_roles.sql" />
+    <Content Include="Scripts\dump_pdf_fields.ps1" />
+    <Content Include="Scripts\Fix_ContextKey_Mismatch.sql" />
+    <Content Include="Scripts\Fix_GZip_Model_Corruption.sql" />
+    <Content Include="Scripts\Fix_GZip_Model_Corruption_v2.sql" />
+    <Content Include="Scripts\Fix_HasDSTV_Migration.ps1" />
+    <Content Include="QUICK_REF_MODAL_FIX.md" />
+    <Content Include="ROLLBACK_SUCCESS_5218.md" />
+    <Content Include="QUICK_FIX_SUMMARY.md" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\c3.min.js" />
     <Content Include="Scripts\d3.min.js" />
@@ -1216,6 +1321,7 @@
     <Content Include="Scripts\datepicker\locales\bootstrap-datepicker.vi.js" />
     <Content Include="Scripts\datepicker\locales\bootstrap-datepicker.zh-CN.js" />
     <Content Include="Scripts\datepicker\locales\bootstrap-datepicker.zh-TW.js" />
+    <Content Include="Scripts\debug_master_4204.sql" />
     <Content Include="Scripts\ellipsis.js" />
     <Content Include="Scripts\bootstrap-table.js" />
     <EntityDeploy Include="DataAccessLayer\eBilling6Months\eBilling6Months.edmx">
@@ -1242,8 +1348,14 @@
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
     <Content Include="Scripts\Chart.js" />
     <Content Include="Scripts\f4f8b79905.js" />
+    <Content Include="Scripts\find_inspection_slot_scheduler.sql" />
+    <Content Include="Scripts\Fix_HasDSTV_Migration_Conflict.sql" />
+    <Content Include="Scripts\Fix_Missing_Migrations_FINAL.sql" />
+    <Content Include="Scripts\Force_Mark_Migrations_Applied.sql" />
     <Content Include="Scripts\HoldOn.min.js" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
+    <Content Include="Scripts\insert_airport_park_2bed_unit.sql" />
+    <Content Include="Scripts\insert_risk_assessment_rrq.sql" />
     <Content Include="Scripts\jqplot.barRenderer.js" />
     <Content Include="Scripts\jqplot.canvasAxisLabelRenderer.js" />
     <Content Include="Scripts\jqplot.canvasAxisTickRenderer.js" />
@@ -1265,20 +1377,60 @@
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\manual_set_manager_appsettings.sql" />
+    <Content Include="Scripts\MASTER_SETUP_MAINTENANCE_WORKFLOW.sql" />
+    <Content Include="Scripts\MASTER_SETUP_UC012_UC013.sql" />
     <Content Include="Scripts\moment.js" />
     <Content Include="Scripts\moment.min.js" />
     <Content Include="Scripts\multiple-emails.js" />
     <Content Include="Scripts\prefixfree.min.js" />
+    <Content Include="Scripts\PRODUCTION_DEPLOYMENT.sql" />
+    <Content Include="Scripts\PRODUCTION_ROLLBACK.sql" />
+    <Content Include="Scripts\query_complex_assignments.sql" />
     <Content Include="Scripts\RCSScripts\sweetalert.min.js" />
     <Content Include="Scripts\readonly.js" />
+    <Content Include="Scripts\reset_5216_to_risk_assessment.sql" />
+    <Content Include="Scripts\reset_ashkay_password.sql" />
+    <Content Include="Scripts\reset_maintenance_signature_for_retest.sql" />
+    <Content Include="Scripts\reset_manager_signatures_EHC2026020600001.sql" />
     <Content Include="Scripts\ResponsiveDataTables.min.js" />
+    <Content Include="Scripts\rollback_5218_to_schedule_inspection.sql" />
+    <Content Include="Scripts\rollback_unit_acceptance.sql" />
+    <Content Include="Scripts\seed_complaint_lookup_data.sql" />
+    <Content Include="Scripts\seed_test_ehc_application.sql" />
     <Content Include="Scripts\sidPopup.min.js" />
+    <Content Include="Scripts\simple_maintenance_rrq_check.sql" />
+    <Content Include="Scripts\switch_ashkay_to_cso.sql" />
+    <Content Include="Scripts\TC_UpdateLeaseDetails_seed_and_reset.sql" />
+    <Content Include="Scripts\TC_UpdateLeaseDetails_verify_state.sql" />
+    <Content Include="Scripts\test_maintenance_document_config.sql" />
+    <Content Include="Scripts\update_airport_park_ashkay.sql" />
+    <Content Include="Scripts\verify_auto_matching.sql" />
+    <Content Include="Scripts\verify_housing_supervisor_assignment_5218.sql" />
+    <Content Include="Scripts\verify_rollback_5218.sql" />
+    <Content Include="Scripts\verify_uc012_uc013_setup.sql" />
+    <Content Include="Scripts\view_lease_pdf_EHC2026020600001.txt" />
+    <Content Include="Scripts\_generate_masterdata_sync.sql" />
     <Content Include="Service References\CorrespondenceSoapService\C8.eServices.Mvc.CorrespondenceSoapService.CaseStartOffline_Response.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Content>
     <Content Include="Service References\CorrespondenceSoapService\C8.eServices.Mvc.CorrespondenceSoapService.CaseStart_OfflineForm_OperationResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Content>
+    <Content Include="Scripts\TEST_CASES_README.md" />
+    <Content Include="Scripts\update_setfield_with_fontsize.ps1" />
+    <Content Include="Scripts\Run-MaintenanceWorkflowSetup.ps1" />
+    <Content Include="Scripts\UC012_Setup_Guide.ps1" />
+    <Content Include="Scripts\UC012_Final_Setup.ps1" />
+    <Content Include="Scripts\Run_Migration_Fixes.ps1" />
+    <Content Include="Scripts\Nuclear_Option_Auto_Migration.ps1" />
+    <Content Include="Scripts\Rollback-UnitAcceptance.ps1" />
+    <Content Include="Scripts\Verify_Template_Fix.ps1" />
+    <Content Include="Scripts\Setup-MaintenanceDocuments.ps1" />
+    <Content Include="Scripts\Run_MASTER_SETUP.ps1" />
+    <Content Include="Scripts\MASTER_SETUP_FIXED_README.md" />
+    <Content Include="Scripts\NO_USERS_FOUND_QUICK_FIX.md" />
+    <Content Include="Scripts\_build_PROD_MASTER_SEED.ps1" />
     <None Include="Service References\CorrespondenceSoapService\configuration91.svcinfo" />
     <None Include="Service References\CorrespondenceSoapService\configuration.svcinfo" />
     <None Include="Service References\CorrespondenceSoapService\Reference.svcmap">
@@ -1293,6 +1445,7 @@
     <Content Include="SQL Scripts\QuickTest_Training.sql" />
     <Content Include="SQL Scripts\Verify_SlideCount.sql" />
     <Content Include="SQL Scripts\Verify_Training_Setup.sql" />
+    <Content Include="Use cases\Usecase summary.txt" />
     <Content Include="Views\HumanSettlementApplication\AcceptanceLetter.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AddProperty.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AffectedDepart.cshtml" />
@@ -1660,6 +1813,57 @@
     <Content Include="Views\TenantTraining\MyTraining.cshtml" />
     <Content Include="TRAININGPROGRAMME_FIXED.md" />
     <Content Include="TODO_TRAINING_WORKFLOW_FIXES.md" />
+    <Content Include="Use cases\Dev Use Cases_V.0.1 %281%29.docx" />
+    <Content Include="Use cases\Dev Use Cases_V.0.2.docx" />
+    <Content Include="Use cases\Dev Use Cases_V.0.3.docx" />
+    <Content Include="Views\TenantTraining\ScheduleTraining.cshtml" />
+    <Content Include="Views\TenantTraining\MyScheduledTraining.cshtml" />
+    <Content Include="Views\Scheduling\ManageSchedule.cshtml" />
+    <Content Include="Views\Complaints\Index.cshtml" />
+    <Content Include="Views\Complaints\Create.cshtml" />
+    <Content Include="Views\Complaints\Details.cshtml" />
+    <Content Include="Views\Complaints\ScheduleAppointment.cshtml" />
+    <Content Include="Views\Complaints\ConfirmAppointment.cshtml" />
+    <Content Include="Views\Complaints\CaptureOutcome.cshtml" />
+    <Content Include="Views\ServiceRequests\Index.cshtml" />
+    <Content Include="Views\ServiceRequests\Create.cshtml" />
+    <Content Include="Views\ServiceRequests\Details.cshtml" />
+    <Content Include="Views\ServiceRequests\Edit.cshtml" />
+    <Content Include="UNIT_OFFER_ACCEPTANCE_IMPLEMENTATION.md" />
+    <Content Include="UNIT_INSPECTION_ASSIGNMENT_SUMMARY.md" />
+    <Content Include="UC012_IMPLEMENTATION_COMPLETE.md" />
+    <Content Include="UC012_FINAL_SETUP_STATUS.md" />
+    <Content Include="UC012_IMPLEMENTATION_SUCCESS.md" />
+    <Content Include="UNIT_ACCEPTANCE_MODAL_FIX.md" />
+    <Content Include="UNIT_ACCEPTANCE_MODAL_FIX_SUMMARY.md" />
+    <Content Include="TEMPLATE_DOWNLOAD_FIX.md" />
+    <Content Include="TEMPLATE_DOWNLOAD_FIX_COMPLETE.md" />
+    <Content Include="Views\PropertyLeaseApplication\PropertyFacilitiesMaintenanceReviews.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\PropertyMaintenanceOverview.cshtml" />
+    <Content Include="UC012_TO_UC013_WORKFLOW_FIX.md" />
+    <Content Include="UC012_UC013_DATABASE_SETUP_REQUIRED.md" />
+    <Content Include="Views\PropertyLeaseApplication\PropertyFacilitiesManagerReview.cshtml" />
+    <Content Include="Views\PaymentTransgressions\Index.cshtml" />
+    <Content Include="Views\PaymentTransgressions\Create.cshtml" />
+    <Content Include="Views\PaymentTransgressions\Details.cshtml" />
+    <Content Include="Views\PaymentTransgressions\GenerateLetter.cshtml" />
+    <Content Include="Views\LeaseDetails\RecommendForRenewal.cshtml" />
+    <Content Include="Views\LeaseDetails\RevenueManagerRenewalReview.cshtml" />
+    <Content Include="Views\LeaseDetails\CEORenewalDecision.cshtml" />
+    <Content Include="Views\LeaseDetails\ConcludeRenewalAgreement.cshtml" />
+    <Content Include="Views\TestingTools\Dashboard.cshtml" />
+    <Content Include="Views\TestingTools\LeaseBackdate.cshtml" />
+    <Content Include="Views\TestingTools\WaitingListBackdate.cshtml" />
+    <Content Include="Views\Shared\_RenewalEvaluationPanels.cshtml" />
+    <Content Include="Views\Shared\_WorkflowHistory.cshtml" />
+    <Content Include="Views\Shared\_DocumentsPartialDark.cshtml" />
+    <Content Include="Views\LeaseDetails\RenewalLeaseAgreementValidation.cshtml" />
+    <Content Include="Views\LeaseDetails\RenewalPropertyManagerValidation.cshtml" />
+    <Content Include="Views\LeaseDetails\RenewalRevenueManagerValidation.cshtml" />
+    <Content Include="Views\LeaseDetails\CaptureRenewalLeaseDetails.cshtml" />
+    <Content Include="Views\Units\AddUnit.cshtml" />
+    <Content Include="Views\TestingTools\LeaseSigningExpiry.cshtml" />
+    <Content Include="Views\TestingTools\UnitOfferExpiry.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1678,6 +1882,8 @@
     <Compile Include="ApiServices\MunicpalServiceDetailsApi.cs" />
     <Compile Include="ApiServices\LimsApi.cs" />
     <Compile Include="ApiServices\PaymentDetailsApi.cs" />
+    <Compile Include="Controllers\TestingToolsController.cs" />
+    <Compile Include="Helpers\EHCWorkflowEngine.cs" />
     <Compile Include="ApiServices\PropertyOwnerDetailsApi.cs" />
     <Compile Include="ApiServices\RCSAttorneyApi.cs" />
     <Compile Include="ApiServices\ReturnStandUnitNumber.cs" />
@@ -1731,7 +1937,9 @@
     <Compile Include="Controllers\LeaseDetailsController.cs" />
     <Compile Include="Controllers\MatchedUnitsController.cs" />
     <Compile Include="Controllers\OpenLinksController.cs" />
+    <Compile Include="Controllers\PaymentTransgressionsController.cs" />
     <Compile Include="Controllers\PropertyLeaseApplicationController.cs" />
+    <Compile Include="Controllers\PropertyLeaseApplicationController_RevisedLeaseV1_Methods.cs" />
     <Compile Include="Controllers\RCSApplicationController.cs" />
     <Compile Include="Controllers\RCSController.cs" />
     <Compile Include="Controllers\PLMReportController.cs" />
@@ -1741,6 +1949,7 @@
     <Compile Include="Controllers\RecommendationsController.cs" />
     <Compile Include="Controllers\RefundApplicationsController.cs" />
     <Compile Include="Controllers\RiskAssessmentOutcomesController.cs" />
+    <Compile Include="Controllers\ServiceRequestsController.cs" />
     <Compile Include="Controllers\SmartBillEFTController.cs" />
     <Compile Include="Controllers\DownloadPDFController.cs" />
     <Compile Include="Controllers\eBillingDashBoardController.cs" />
@@ -1775,6 +1984,9 @@
     <Compile Include="Controllers\SweetController.cs" />
     <Compile Include="Controllers\SystemRoleController.cs" />
     <Compile Include="Controllers\SystemUserTypeController.cs" />
+    <Compile Include="Controllers\SchedulingController.cs" />
+    <Compile Include="Controllers\ComplaintsController.cs" />
+    <Compile Include="Controllers\ServiceRequestsController.cs" />
     <Compile Include="Controllers\TenantTrainingController.cs" />
     <Compile Include="Controllers\TitleTypeController.cs" />
     <Compile Include="Controllers\UnitsController.cs" />
@@ -1840,6 +2052,13 @@
       <DependentUpon>IntergrationDbContext.tt</DependentUpon>
     </Compile>
     <Compile Include="DataAccessLayer\ValueAssistDbContext.cs" />
+    <Compile Include="Engines\ComplaintSLAEngine.cs" />
+    <Compile Include="Engines\ServiceRequestEngine.cs" />
+    <Compile Include="Engines\ComplaintWorkflowEngine.cs" />
+    <Compile Include="Engines\NotificationEngine.cs" />
+    <Compile Include="Engines\PaymentTransgressionEngine.cs" />
+    <Compile Include="Engines\PaymentTransgressionLetterEngine.cs" />
+    <Compile Include="Engines\ServiceRequestEngine.cs" />
     <Compile Include="Filters\BasicAuthenticationAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContextExtensions.cs" />
     <Compile Include="Filters\IdentityBasicAuthenticationAttribute.cs" />
@@ -1863,6 +2082,7 @@
     <Compile Include="Helpers\EventLogHelper.cs" />
     <Compile Include="Helpers\GlobalUtility.cs" />
     <Compile Include="Helpers\HashHelper.cs" />
+    <Compile Include="Helpers\LeaseRenewalService.cs" />
     <Compile Include="Helpers\LibraryManager.cs" />
     <Compile Include="Helpers\LIMSHelper.cs" />
     <Compile Include="Helpers\LinkedAccountHelper.cs" />
@@ -1901,6 +2121,7 @@
     <Compile Include="Keys\CCCTypeKeys.cs" />
     <Compile Include="Keys\CommunicationTypeKeys.cs" />
     <Compile Include="Keys\CompanyTypeKeys.cs" />
+    <Compile Include="Keys\ComplaintCategoryKeys.cs" />
     <Compile Include="Keys\CountryKeys.cs" />
     <Compile Include="Keys\CustomerTypeKeys.cs" />
     <Compile Include="Keys\DocumentTypeKeys.cs" />
@@ -1923,6 +2144,7 @@
     <Compile Include="Keys\NoteTypeKeys.cs" />
     <Compile Include="Keys\NotificationTypeKeys.cs" />
     <Compile Include="Keys\PaymentGatewayKeys.cs" />
+    <Compile Include="Keys\PaymentTransgressionKeys.cs" />
     <Compile Include="Keys\PrefferedComplexKeys.cs" />
     <Compile Include="Keys\PurchaserTypeKeys.cs" />
     <Compile Include="Keys\PurchaseTypeKeys.cs" />
@@ -1942,6 +2164,7 @@
     <Compile Include="Keys\Section49Keys.cs" />
     <Compile Include="Keys\SectionTypeKeys.cs" />
     <Compile Include="Keys\ServiceCodeKeys.cs" />
+    <Compile Include="Keys\ServiceRequestKeys.cs" />
     <Compile Include="Keys\ServiceUnitCodeKeys.cs" />
     <Compile Include="Keys\StatusKeys.cs" />
     <Compile Include="Keys\StatusTypeKeys.cs" />
@@ -1949,21 +2172,9 @@
     <Compile Include="Keys\TransferTypeKeys.cs" />
     <Compile Include="Keys\UnitCategoryKeys.cs" />
     <Compile Include="Keys\ViewCodeKeys.cs" />
-    <Compile Include="Migrations\202511260550587_initmig2.cs" />
-    <Compile Include="Migrations\202511260550587_initmig2.Designer.cs">
-      <DependentUpon>202511260550587_initmig2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202512050721339_initmig3.cs" />
-    <Compile Include="Migrations\202512050721339_initmig3.Designer.cs">
-      <DependentUpon>202512050721339_initmig3.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202512050804436_initmig4.cs" />
-    <Compile Include="Migrations\202512050804436_initmig4.Designer.cs">
-      <DependentUpon>202512050804436_initmig4.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202601300510359_initmig.cs" />
-    <Compile Include="Migrations\202601300510359_initmig.Designer.cs">
-      <DependentUpon>202601300510359_initmig.cs</DependentUpon>
+    <Compile Include="Migrations\202605220446274_initmig34.cs" />
+    <Compile Include="Migrations\202605220446274_initmig34.Designer.cs">
+      <DependentUpon>202605220446274_initmig34.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Account.cs" />
@@ -1980,6 +2191,13 @@
     <Compile Include="Models\Audits\TenantExamAnswerAudit.cs" />
     <Compile Include="Models\Audits\TenantTrainingAudit.cs" />
     <Compile Include="Models\Audits\TrainingSlideAudit.cs" />
+    <Compile Include="Models\ComplaintAuditLog.cs" />
+    <Compile Include="Models\ComplaintCategory.cs" />
+    <Compile Include="Models\ComplaintEvidence.cs" />
+    <Compile Include="Models\ComplaintExternalReferral.cs" />
+    <Compile Include="Models\ComplaintInvestigation.cs" />
+    <Compile Include="Models\ComplaintInvestigationDocument.cs" />
+    <Compile Include="Models\ComplaintType.cs" />
     <Compile Include="Models\ExaminationQuestion.cs" />
     <Compile Include="Models\LeaseReviewComment.cs" />
     <Compile Include="Models\AllocatedUnitMaintenance.cs" />
@@ -2242,6 +2460,8 @@
     <Compile Include="Models\LeaseDetails.cs" />
     <Compile Include="Models\LeaseForm.cs" />
     <Compile Include="Models\LeaseTermination.cs" />
+    <Compile Include="Models\EvictionServiceRecord.cs" />
+    <Compile Include="Models\LeaseDispute.cs" />
     <Compile Include="Models\LimsPayload.cs" />
     <Compile Include="Models\LinkedAccount.cs" />
     <Compile Include="Models\LinkedAccountType.cs" />
@@ -2250,6 +2470,8 @@
     <Compile Include="Models\LocationType.cs" />
     <Compile Include="Models\Log.cs" />
     <Compile Include="Models\LogType.cs" />
+    <Compile Include="Models\MaintenanceJobCardSignature.cs" />
+    <Compile Include="Models\MaintenanceJobCardTask.cs" />
     <Compile Include="Models\MasterpassRequest.cs" />
     <Compile Include="Models\MasterpassTransaction.cs" />
     <Compile Include="Models\MatchedUnits.cs" />
@@ -2273,6 +2495,12 @@
     <Compile Include="Models\PaymentDetails.cs" />
     <Compile Include="Models\PaymentDetailsList.cs" />
     <Compile Include="Models\PaymentHistory.cs" />
+    <Compile Include="Models\PaymentTransgression.cs" />
+    <Compile Include="Models\PaymentTransgressionAuditLog.cs" />
+    <Compile Include="Models\PaymentTransgressionCategory.cs" />
+    <Compile Include="Models\PaymentTransgressionDocument.cs" />
+    <Compile Include="Models\PaymentTransgressionSeverity.cs" />
+    <Compile Include="Models\PaymentTransgressionType.cs" />
     <Compile Include="Models\PLMApplicationHistortyLog.cs" />
     <Compile Include="Models\PlmManualApplication.cs" />
     <Compile Include="Models\PlmManualDataApplication.cs" />
@@ -2329,6 +2557,11 @@
     <Compile Include="Models\Section49Type.cs" />
     <Compile Include="Models\SellerInformation.cs" />
     <Compile Include="Models\SellerInformationAudit.cs" />
+    <Compile Include="Models\ServiceRequest.cs" />
+    <Compile Include="Models\ServiceRequestAuditLog.cs" />
+    <Compile Include="Models\ServiceRequestCategory.cs" />
+    <Compile Include="Models\ServiceRequestDocument.cs" />
+    <Compile Include="Models\ServiceRequestPriority.cs" />
     <Compile Include="Models\SessionModel.cs" />
     <Compile Include="Models\SidEftTransaction.cs" />
     <Compile Include="Models\SmsAccounts.cs" />
@@ -2348,6 +2581,12 @@
     <Compile Include="Models\SystemUserLogTime.cs" />
     <Compile Include="Models\SystemUserType.cs" />
     <Compile Include="Models\TemporaryDisplayModel.cs" />
+    <Compile Include="Models\TenantComplaint.cs" />
+    <Compile Include="Models\ServiceRequest.cs" />
+    <Compile Include="Models\ServiceRequestAuditLog.cs" />
+    <Compile Include="Models\ServiceRequestCategory.cs" />
+    <Compile Include="Models\ServiceRequestDocument.cs" />
+    <Compile Include="Models\ServiceRequestPriority.cs" />
     <Compile Include="Models\TenantExamAnswer.cs" />
     <Compile Include="Models\TenantTraining.cs" />
     <Compile Include="Models\TimeSlot.cs" />
@@ -2394,6 +2633,7 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Compile Include="Startup.cs" />
+    <Compile Include="ViewModels\GenericSchedulingViewModel.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\ActivateViewModel.cs" />
     <Compile Include="ViewModels\ApplicationDetailsViewModel.cs" />
@@ -2408,6 +2648,7 @@
     <Compile Include="ViewModels\DebitOrderStatusViewModel.cs" />
     <Compile Include="ViewModels\DebitOrderViewModel.cs" />
     <Compile Include="ViewModels\DepartmentsApprovalViewModel.cs" />
+    <Compile Include="ViewModels\FlaggedLeaseViewModel.cs" />
     <Compile Include="ViewModels\DocumentsViewModel.cs" />
     <Compile Include="ViewModels\EDRMSViewModel.cs" />
     <Compile Include="ViewModels\EmailBillViewModel.cs" />
@@ -2912,17 +3153,8 @@
     <WCFMetadataStorage Include="Service References\CorrespondenceSoapService\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202511260550587_initmig2.resx">
-      <DependentUpon>202511260550587_initmig2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202512050721339_initmig3.resx">
-      <DependentUpon>202512050721339_initmig3.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202512050804436_initmig4.resx">
-      <DependentUpon>202512050804436_initmig4.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202601300510359_initmig.resx">
-      <DependentUpon>202601300510359_initmig.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202605220446274_initmig34.resx">
+      <DependentUpon>202605220446274_initmig34.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

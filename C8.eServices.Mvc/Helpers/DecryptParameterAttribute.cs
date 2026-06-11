@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -17,7 +17,6 @@ namespace C8.eServices.Mvc.Helpers
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {  
-            var cc = new C8.eServices.Mvc.Controllers.HumanSettlementApplicationController();
             Dictionary<string, object> decryptedParameters = new Dictionary<string, object>();
 
             if (HttpContext.Current.Request.QueryString.Get("q") != null)
@@ -34,8 +33,8 @@ namespace C8.eServices.Mvc.Helpers
                 }
                 catch (Exception x)
                 {
-                    cc.ReturnError();
-                    throw new Exception("Malicious Activity", x);
+                    filterContext.Result = new ViewResult { ViewName = "_Error" };
+                    return;
                 }
 
                 string[] delimiter = { "&" };
@@ -63,8 +62,8 @@ namespace C8.eServices.Mvc.Helpers
             }
             else
             {
-                cc.ReturnError();
-                throw new Exception("Malicious Activity");
+                filterContext.Result = new ViewResult { ViewName = "_Error" };
+                return;
             }
               
 

@@ -1,0 +1,160 @@
+@model List<C8.eServices.Mvc.Models.LeaseDetails>
+@{
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    ViewBag.Title = "Active Lease Backdater";
+}
+
+<style>
+    .tool-badge-active   { background: #d1e7dd; color: #0f5132; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-expiring { background: #fff3cd; color: #664d03; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .tool-badge-expired  { background: #f8d7da; color: #842029; font-size: 12px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+    .btn-backdate  { background: #e63946; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn-backdate:hover  { background: #c1121f; color: white; }
+    .btn-run-scanner     { background: #1a472a; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .btn-run-scanner:hover { background: #2d6a4f; color: white; }
+    .tool-alert-warning  { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px 18px; margin-bottom: 15px; }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background:#1a472a; color:white; padding:14px 18px;">
+                <h4 style="margin:0; font-size:16px;">
+                    <i class="ion ion-calendar"></i>&nbsp; Active Lease Backdater &nbsp;
+                    <small style="font-size:12px; opacity:0.8;">Testing tool — backdate active lease end date to simulate lease expiry and trigger renewal scanning</small>
+                </h4>
+            </div>
+
+            <div class="panel-body">
+
+                @* ── Alerts ── *@
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Success!</strong> @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Error:</strong> @TempData["Error"]
+                    </div>
+                }
+
+                @* ── Collapsible How It Works ── *@
+                <div class="panel panel-default" style="margin-bottom:15px;">
+                    <div class="panel-heading" style="cursor:pointer; padding:8px 15px;" data-toggle="collapse" data-target="#howItWorks">
+                        <strong><i class="ion ion-information-circled"></i> How This Tool Works</strong>
+                        <span class="pull-right"><i class="ion ion-chevron-down"></i></span>
+                    </div>
+                    <div id="howItWorks" class="collapse">
+                        <div class="panel-body" style="font-size:13px; color:#444;">
+                            <ol style="margin-bottom:8px;">
+                                <li><strong>Backdate Lease</strong> — Sets the lease <code>EndDate</code> to today and <code>RenewalNotice</code> to 91 days ago. This makes the lease look like it has just expired and is overdue for a renewal decision.</li>
+                                <li><strong>Run Renewal Scanner</strong> — Calls <code>MatchingHelper.RenewalNotificationAtEndOfTime</code> which scans all active leases. Any lease where <code>RenewalNotice &lt;= now</code> gets flagged with status <strong>Application Up For Renewal At Three Months</strong> and the CSO is notified via Round Robin queue.</li>
+                            </ol>
+                            <p style="margin:0;" class="text-muted"><strong>[EXPIRING]</strong> = EndDate within 90 days — will trigger on next scanner run after backdating.</p>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── Run Scanner Action Bar ── *@
+                <div class="tool-alert-warning" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong><i class="ion ion-refresh"></i> Run Renewal Scanner</strong><br />
+                        <small style="color:#664d03;">Scans all active leases. Any lease with RenewalNotice &lt;= today will be flagged for renewal and the assigned CSO notified.</small>
+                    </div>
+                    @using (Html.BeginForm("RunRenewalScanner", "TestingTools", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-run-scanner" onclick="return confirm('Run the lease renewal scanner for ALL eligible leases?')">
+                            <i class="ion ion-refresh"></i> Run Lease Renewal Scanner
+                        </button>
+                    }
+                </div>
+
+                @* ── DataTable ── *@
+                <table id="tblLeaseBackdate" class="table table-bordered table-hover table-striped" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>App Reference</th>
+                            <th>Tenant</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Renewal Notice Date</th>
+                            <th>Days to Expiry</th>
+                            <th>Status</th>
+                            <th style="min-width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            double daysToExpiry = item.EndDate.HasValue ? (item.EndDate.Value - DateTime.Now).TotalDays : 9999;
+                            string bClass = daysToExpiry < 0 ? "tool-badge-expired"
+                                          : daysToExpiry <= 90 ? "tool-badge-expiring"
+                                          : "tool-badge-active";
+                            string bLabel = daysToExpiry < 0 ? "EXPIRED " + (int)Math.Abs(daysToExpiry) + "d ago"
+                                          : daysToExpiry <= 90 ? "Expiring in " + (int)daysToExpiry + "d"
+                                          : (int)daysToExpiry + "d remaining";
+                            string appRef = item.leaseApplicationRef ?? ("Lease #" + item.Id);
+                            string fullName = item.FirstNames + " " + item.LastName;
+
+                            <tr>
+                                <td><strong>@appRef</strong></td>
+                                <td>@fullName</td>
+                                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td>@(item.RenewalNotice.HasValue ? item.RenewalNotice.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td><span class="@bClass">@bLabel</span></td>
+                                <td>@(item.Status != null ? item.Status.Name : "-")</td>
+                                <td>
+                                    @using (Html.BeginForm("BackdateLeaseExpiry", "TestingTools", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="leaseId" value="@item.Id" />
+                                        <button type="submit" class="btn-backdate" onclick="return confirm('Backdate this lease EndDate to today and RenewalNotice to 91 days ago?')">
+                                            <i class="ion ion-clock"></i> Backdate to Expiry
+                                        </button>
+                                    }
+                                    &nbsp;
+                                    @using (Html.BeginForm("BuildRenewalHistory", "TestingTools", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="leaseId" value="@item.Id" />
+                                        <button type="submit" style="background:#0369a1; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;" onclick="return confirm('Seed demo service requests, payment transgressions and complaints for this lease?')">
+                                            <i class="ion ion-hammer"></i> Build History
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="ion ion-information-circled"></i> No active leases found with a set end date. Leases must be <strong>Completed</strong> and have an active status to appear here.
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#tblLeaseBackdate').DataTable({
+            responsive: true,
+            pageLength: 25,
+            order: [[5, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: [7] }
+            ]
+        });
+    });
+</script>

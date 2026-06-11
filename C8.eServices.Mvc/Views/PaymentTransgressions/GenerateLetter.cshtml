@@ -7,28 +7,34 @@
 
 <div class="panel panel-default">
     <div class="panel-heading" align="center">
-        <i class="ion ion-document-text"></i> Generate Warning Letter — @Model.CaseReferenceNumber
+        <i class="ion ion-document-text"></i> Generate Warning Letter - @Model.CaseReferenceNumber
     </div>
     <div class="panel-body">
 
         <!-- Case Summary -->
-        <div class="panel panel-info">
-            <div class="panel-heading">Case Summary</div>
-            <div class="panel-body">
+        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 25px;">
+            <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 12px 20px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; text-transform: uppercase;">
+                <i class="ion ion-ios-information-outline" style="margin-right: 8px; font-size: 18px; vertical-align: middle;"></i> Case Summary
+            </div>
+            <div style="padding: 20px;">
                 <div class="row">
-                    <div class="col-md-4">
-                        <strong>Tenant:</strong> @Model.TenantName @Model.TenantSurname<br />
-                        <strong>Official #:</strong> @Model.OfficialNumber<br />
-                        <strong>Tenancy Ref:</strong> @Model.TenancyReferenceNumber
+                    <div class="col-md-4" style="border-right: 1px solid #f1f5f9;">
+                        <p style="margin-bottom: 5px; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: bold;">Tenant Details</p>
+                        <strong style="color: #1e293b; font-size: 15px;">@Model.TenantName @Model.TenantSurname</strong><br />
+                        <span style="color: #475569; font-size: 13px;">Official #: @Model.OfficialNumber</span><br />
+                        <span style="color: #475569; font-size: 13px;">Tenancy Ref: @Model.TenancyReferenceNumber</span>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Property:</strong> @(Model.Complex != null ? Model.Complex.Name : "—") — Block @Model.BlockNumber, Unit @Model.UnitNumber<br />
-                        <strong>Account:</strong> @Model.AccountNumber
+                    <div class="col-md-4" style="border-right: 1px solid #f1f5f9; padding-left: 20px;">
+                        <p style="margin-bottom: 5px; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: bold;">Property Details</p>
+                        <strong style="color: #1e293b; font-size: 14px;">@(Model.Complex != null ? Model.Complex.Name : "—")</strong><br />
+                        <span style="color: #475569; font-size: 13px;">Block @Model.BlockNumber, Unit @Model.UnitNumber</span><br />
+                        <span style="color: #475569; font-size: 13px;">Account: @Model.AccountNumber</span>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Category:</strong> @(Model.Category != null ? Model.Category.Name : "—")<br />
-                        <strong>Severity:</strong> @(Model.Severity != null ? Model.Severity.Name : "—")<br />
-                        <strong class="text-danger">Total Due: R @Model.TotalAmountDue.ToString("N2")</strong>
+                    <div class="col-md-4" style="padding-left: 20px;">
+                        <p style="margin-bottom: 5px; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: bold;">Transgression</p>
+                        <span style="color: #475569; font-size: 13px;">Category: @(Model.Category != null ? Model.Category.Name : "—")</span><br />
+                        <span style="color: #475569; font-size: 13px;">Severity: @(Model.Severity != null ? Model.Severity.Name : "—")</span><br />
+                        <strong style="color: #ef4444; font-size: 16px; display: inline-block; margin-top: 5px;">Total Due: R @Model.TotalAmountDue.ToString("N2")</strong>
                     </div>
                 </div>
             </div>
@@ -74,35 +80,28 @@
         }
 
         <!-- Letter type guidance -->
-        <div class="panel panel-default" style="margin-top:20px;">
-            <div class="panel-heading">Letter Type Guide</div>
-            <div class="panel-body">
+        <div class="panel panel-default" style="margin-top:20px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 12px; overflow: hidden;">
+            <div class="panel-heading" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border-bottom: none; padding: 15px 25px;">
+                <i class="ion ion-information-circled"></i> Letter Type Guide
+            </div>
+            <div class="panel-body" style="background: #f8fafc; padding: 25px;">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="panel panel-info">
-                            <div class="panel-heading"><strong>Payment Transgression Notice</strong></div>
-                            <div class="panel-body" style="font-size:0.9em;">
-                                First contact. Informs the tenant of the outstanding amount and requires action within 7 working days.
-                                Suitable for first-time or minor transgressions.
-                            </div>
+                        <div class="premium-guide-card" style="background: white; border-top: 5px solid #3b82f6; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
+                            <h4 style="color: #1e293b; font-weight: 700; margin-top: 0; font-size: 16px;">Payment Transgression Notice</h4>
+                            <p style="color: #64748b; font-size: 14px; margin-bottom: 0; line-height: 1.5;">First contact. Informs the tenant of the outstanding amount and requires action within 7 working days. Suitable for first-time or minor transgressions.</p>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="panel panel-warning">
-                            <div class="panel-heading"><strong>Written Warning Letter</strong></div>
-                            <div class="panel-body" style="font-size:0.9em;">
-                                Formal warning placed on the tenant's record. Issued when the tenant has not addressed a prior notice
-                                or has a pattern of non-compliance.
-                            </div>
+                        <div class="premium-guide-card" style="background: white; border-top: 5px solid #eab308; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
+                            <h4 style="color: #1e293b; font-weight: 700; margin-top: 0; font-size: 16px;">Written Warning Letter</h4>
+                            <p style="color: #64748b; font-size: 14px; margin-bottom: 0; line-height: 1.5;">Formal warning placed on the tenant's record. Issued when the tenant has not addressed a prior notice or has a pattern of non-compliance.</p>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="panel panel-danger">
-                            <div class="panel-heading"><strong>Final Written Warning Letter</strong></div>
-                            <div class="panel-body" style="font-size:0.9em;">
-                                Final warning before lease termination proceedings. Issued when 3+ transgressions have been recorded.
-                                Triggers automatic lease termination check.
-                            </div>
+                        <div class="premium-guide-card" style="background: white; border-top: 5px solid #ef4444; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
+                            <h4 style="color: #1e293b; font-weight: 700; margin-top: 0; font-size: 16px;">Final Written Warning Letter</h4>
+                            <p style="color: #64748b; font-size: 14px; margin-bottom: 0; line-height: 1.5;">Final warning before lease termination proceedings. Issued when 3+ transgressions have been recorded. Triggers automatic lease termination check.</p>
                         </div>
                     </div>
                 </div>
@@ -115,9 +114,9 @@
 @section Scripts{
     <script type="text/javascript">
         var descriptions = {
-            '@PaymentTransgressionLetterTypes.PaymentTransgressionNotice':   '<div class="alert alert-info">First notice — informs tenant of outstanding balance. Action required within 7 working days.</div>',
-            '@PaymentTransgressionLetterTypes.WrittenWarningLetter':         '<div class="alert alert-warning"><strong>Warning:</strong> This letter will be placed on the tenant\'s official record.</div>',
-            '@PaymentTransgressionLetterTypes.FinalWrittenWarningLetter':    '<div class="alert alert-danger"><strong>Final Warning:</strong> This will trigger a lease termination check if 3+ transgressions are recorded.</div>'
+            '@PaymentTransgressionLetterTypes.PaymentTransgressionNotice':   '<div class="alert alert-info" style="border-radius: 8px; border-left: 4px solid #3b82f6;"><i class="ion ion-information-circled"></i> First notice — informs tenant of outstanding balance. Action required within 7 working days.</div>',
+            '@PaymentTransgressionLetterTypes.WrittenWarningLetter':         '<div class="alert alert-warning" style="border-radius: 8px; border-left: 4px solid #eab308;"><i class="ion ion-alert-circled"></i> <strong>Warning:</strong> This letter will be placed on the tenant\'s official record.</div>',
+            '@PaymentTransgressionLetterTypes.FinalWrittenWarningLetter':    '<div class="alert alert-danger" style="border-radius: 8px; border-left: 4px solid #ef4444;"><i class="ion ion-close-circled"></i> <strong>Final Warning:</strong> This will trigger a lease termination check if 3+ transgressions are recorded.</div>'
         };
         $('#letterType').change(function () {
             $('#letterDesc').html(descriptions[$(this).val()] || '');

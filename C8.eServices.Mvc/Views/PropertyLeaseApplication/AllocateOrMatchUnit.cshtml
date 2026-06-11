@@ -1,4 +1,4 @@
-﻿
+
 @model C8.eServices.Mvc.ViewModels.CaptureViewModel
 @using C8.eServices.Mvc.Models
 @{
@@ -235,7 +235,7 @@
                     <div class="step-app">
                         <ul class="step-steps">
 
-                            <li style="text-align:center;"><a href="#step3">Allocate Available Unit<span class=""></span></a></li>
+                            <li style="text-align:center;"><a href="#step3">Return Application to Waiting List<span class=""></span></a></li>
                         </ul>
 
                     </div>
@@ -247,7 +247,7 @@
                                     @Html.Hidden("Id")
                                     @Html.HiddenFor(model => model.PropertyLeaseApplication.Id, new { htmlAttributes = new { @class = "form-control", @Style = "display:none;", @Name = "Id" } })
                                     @Html.HiddenFor(model => model.LeaseDetails.Id, new { htmlAttributes = new { @class = "form-control", @Style = "display:none;" } })
-                                    <div id="AllocateSpaceUnitDiv" style="display:block;">
+                                    <div id="AllocateSpaceUnitDiv" style="display:none;">
                                         <div class="form-group">
                                             @Html.LabelFor(model => model.PropertyLeaseApplication.HumanEHCOptions.Name, "Unit Bed Type", htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
@@ -285,77 +285,77 @@
                                         <br />
                                         <br />
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SpaceUnitNumber, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SpaceUnitNumber, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SpaceUnitNumber, new { htmlAttributes = new { @class = "form-control", @required = "required", @Id = "SpaceUnitNumber", @onfocusout = "ValidateUnit()" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SpaceUnitNumber, new { htmlAttributes = new { @class = "form-control", @Id = "SpaceUnitNumber", @onfocusout = "ValidateUnit()" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.SpaceUnitNumber, "", new { @class = "text-danger" })
                                             </div>
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SpaceUnitSize, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SpaceUnitSize, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SpaceUnitSize, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SpaceUnitSize, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.SpaceUnitSize, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SolarReference, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.SolarReference, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SolarReference, new { htmlAttributes = new { @class = "form-control", @required = "required", @Id = "SolarReference", @onfocusout = "ValidateUnit()" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.SolarReference, new { htmlAttributes = new { @class = "form-control", @Id = "SolarReference", @onfocusout = "ValidateUnit()" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.SolarReference, "", new { @class = "text-danger" })
                                             </div>
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.MonthlyRentalAmount, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.MonthlyRentalAmount, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.MonthlyRentalAmount, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.MonthlyRentalAmount, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.MonthlyRentalAmount, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.NumOfBeds, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.NumOfBeds, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.NumOfBeds, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.NumOfBeds, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.NumOfBeds, "", new { @class = "text-danger" })
                                             </div>
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.RequiedDepositAmount, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.RequiedDepositAmount, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.RequiedDepositAmount, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.RequiedDepositAmount, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.RequiedDepositAmount, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.StreetName, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.StreetName, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.StreetName, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.StreetName, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.StreetName, "", new { @class = "text-danger" })
                                             </div>
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Shower, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Shower, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Shower, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Shower, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.Shower, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
 
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Township, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Township, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Township, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Township, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.Township, "", new { @class = "text-danger" })
                                             </div>
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Postal, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.Postal, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Postal, new { htmlAttributes = new { @class = "form-control", @required = "required" } })
+                                                @Html.EditorFor(model => model.ApplicationAllocatedProperties.Postal, new { htmlAttributes = new { @class = "form-control" } })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.Postal, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.OfferedComplexId, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.OfferedComplexId, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-3">
-                                                @Html.DropDownListFor(model => model.ApplicationAllocatedProperties.OfferedComplexId, (SelectList)ViewBag.HumanEHCOption, "-- select option -- ", new { @class = "form-control", @required = "required" })
+                                                @Html.DropDownListFor(model => model.ApplicationAllocatedProperties.OfferedComplexId, (SelectList)ViewBag.HumanEHCOption, "-- select option -- ", new { @class = "form-control" })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.OfferedComplexId, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.LettingRequirements, htmlAttributes: new { @class = "control-label col-md-2 require" })
+                                            @Html.LabelFor(model => model.ApplicationAllocatedProperties.LettingRequirements, htmlAttributes: new { @class = "control-label col-md-2" })
                                             <div class="col-md-8">
-                                                @Html.TextAreaFor(model => model.ApplicationAllocatedProperties.LettingRequirements, new { @class = "form-control", @required = "required" })
+                                                @Html.TextAreaFor(model => model.ApplicationAllocatedProperties.LettingRequirements, new { @class = "form-control" })
                                                 @Html.ValidationMessageFor(model => model.ApplicationAllocatedProperties.LettingRequirements, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
@@ -377,8 +377,8 @@
                             <input type="button" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")'" name="btnApprovalStatus" class="button1" />
 
                             @*<button class="button1" value="Cancel" onclick="location.href='@Url.Action("ApplicantRiskAssessment", "PropertyLeaseApplication")'">Cancel</button>*@
-                            <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
-                            <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
+                            <input type="button" value="Return to Waiting List" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                            <input type="submit" value="Return to Waiting List" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
                             <br />
                             <br />
                             <br />
@@ -436,7 +436,7 @@
     function clickSubmit() {
         swal({
             icon: "info",
-            title: "Are you sure you want to allocate this unit?",
+            title: "Are you sure you want to return this application to the bottom of the waiting list?",
             buttons: [
                 'No!',
                 'Yes, I am sure!'

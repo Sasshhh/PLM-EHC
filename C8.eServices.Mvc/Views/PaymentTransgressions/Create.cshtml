@@ -8,6 +8,178 @@
     .form-section     { margin-bottom: 30px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
     .required-field::after { content: " *"; color: red; }
     .auto-filled      { background-color: #f0fff0 !important; }
+
+    /* ===== PREMIUM TENANT SELECTOR ===== */
+    .tenant-selected-display {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 2px dashed rgba(99, 102, 241, 0.4);
+        border-radius: 16px;
+        padding: 40px 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .tenant-selected-display:hover {
+        border-color: rgba(99, 102, 241, 0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
+    }
+    .tenant-selected-display::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        animation: pulse-bg 4s ease-in-out infinite;
+    }
+    @@keyframes pulse-bg {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+    .tenant-placeholder-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 16px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: white;
+        animation: float 3s ease-in-out infinite;
+    }
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .tenant-placeholder-text {
+        color: #94a3b8;
+        font-size: 16px;
+        position: relative;
+        z-index: 1;
+    }
+    .tenant-placeholder-text strong {
+        color: #e2e8f0;
+        display: block;
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+    .tenant-change-btn {
+        display: inline-block;
+        margin-top: 14px;
+        padding: 10px 28px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff !important;
+        border: none;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+    .tenant-change-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+    .tenant-selected-display.has-selection {
+        border: 2px solid #22c55e;
+        background: linear-gradient(135deg, #052e16 0%, #14532d 100%);
+    }
+    .tenant-selected-display.has-selection .tenant-placeholder-icon {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+    .tenant-selected-display.has-selection .tenant-placeholder-text strong {
+        color: #bbf7d0;
+    }
+
+    /* ===== MODAL ===== */
+    .tenant-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .tenant-modal-overlay.active { display: flex; }
+    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .tenant-modal {
+        background: linear-gradient(170deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 24px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 120px rgba(99, 102, 241, 0.08);
+        animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    @@keyframes modalSlideUp { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .tenant-modal-header { padding: 32px 32px 20px; text-align: center; position: relative; }
+    .tenant-modal-close {
+        position: absolute; top: 20px; right: 24px; width: 36px; height: 36px; border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #94a3b8;
+        font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .tenant-modal-close:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #ef4444; }
+    .tenant-modal-title { font-size: 24px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+    
+    .search-box {
+        position: relative;
+        margin: 0 32px 24px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 16px 24px 16px 50px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        color: white;
+        font-size: 16px;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .search-box i {
+        position: absolute;
+        left: 20px;
+        top: 18px;
+        color: #94a3b8;
+        font-size: 20px;
+    }
+    .tenant-slots-container {
+        padding: 0 32px 32px;
+    }
+    
+    /* Table inside modal */
+    .premium-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .premium-table th { color: #94a3b8; font-weight: 600; padding: 0 16px 8px; text-align: left; }
+    .premium-table td { background: rgba(255,255,255,0.03); padding: 16px; color: #e2e8f0; }
+    .premium-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .premium-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .premium-table tr:hover td { background: rgba(255,255,255,0.06); }
+    .btn-select-tenant {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none; border-radius: 8px; color: white; padding: 6px 16px; font-weight: 600;
+    }
+    .btn-select-tenant:hover { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); transform: translateY(-1px); }
 </style>
 
 <div class="panel panel-default">
@@ -20,26 +192,39 @@
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-            <!-- Tenant Lookup -->
-            <div class="form-section">
-                <div class="section-header"><i class="ion ion-search"></i> Tenant Lookup</div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label col-md-4 required-field">Official Number</label>
-                            <div class="col-md-6">
-                                @Html.TextBoxFor(m => m.OfficialNumber, new { @class = "form-control", id = "OfficialNumber", placeholder = "Enter ID / Official Number" })
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" id="btnLookup" class="btn btn-info">Lookup</button>
-                            </div>
-                        </div>
+            <!-- Premium Tenant Selector -->
+            <div class="tenant-selected-display" id="tenantSelectorTrigger" onclick="openTenantModal()">
+                <div class="tenant-placeholder-icon">
+                    <i class="ion ion-ios-person"></i>
+                </div>
+                <div class="tenant-no-selection" id="tenantNoSelection">
+                    <div class="tenant-placeholder-text">
+                        <strong>No Tenant Selected</strong>
+                        Click to search and select a tenant with an active lease
                     </div>
-                    <div class="col-md-6">
-                        <div id="lookupStatus"></div>
+                    <span class="tenant-change-btn">
+                        <i class="ion ion-search"></i> Search Tenant
+                    </span>
+                </div>
+                <div class="tenant-selected-info" id="tenantHasSelection" style="display:none;">
+                    <div class="tenant-placeholder-text">
+                        <span style="color: #86efac; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Selected Tenant</span>
                     </div>
+                    <div style="font-size: 28px; font-weight: 800; color: #fff; margin-top: 8px;" id="displayTenantName"></div>
+                    <div style="display: inline-block; margin-top: 8px; padding: 6px 20px; background: rgba(255,255,255,0.15); border-radius: 20px; color: #d1fae5; font-size: 16px; font-weight: 600;" id="displayTenantRef"></div>
+                    <br/>
+                    <span class="tenant-change-btn" style="margin-top: 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="ion ion-ios-compose-outline"></i> Change Tenant
+                    </span>
                 </div>
             </div>
+
+            <!-- Hidden field for lookup logic -->
+            <div style="display:none;">
+                @Html.TextBoxFor(m => m.OfficialNumber, new { @class = "form-control", id = "OfficialNumber" })
+                <button type="button" id="btnLookup">Hidden Lookup</button>
+            </div>
+            <div id="lookupStatus" style="font-weight: 600; padding: 10px 0;"></div>
 
             <!-- Tenant Details -->
             <div class="form-section">
@@ -213,7 +398,7 @@
                 <div class="section-header"><i class="ion ion-document"></i> Supporting Documents (Optional)</div>
                 <div class="row">
                     <div class="col-md-12">
-                        <input type="file" name="documents" multiple class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
+                        <input type="file" name="uploadedFiles" multiple class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
                         <small class="text-muted">Accepted: PDF, Word, JPG, PNG. Max 10MB per file.</small>
                     </div>
                 </div>
@@ -229,17 +414,135 @@
     </div>
 </div>
 
+<!-- ===== TENANT MODAL ===== -->
+<div class="tenant-modal-overlay" id="tenantModal">
+    <div class="tenant-modal">
+        <div class="tenant-modal-header">
+            <button type="button" class="tenant-modal-close" onclick="closeTenantModal()">&times;</button>
+            <div class="tenant-placeholder-icon" style="width: 60px; height: 60px; font-size: 28px;">
+                <i class="ion ion-search"></i>
+            </div>
+            <div class="tenant-modal-title">Search Active Tenants</div>
+        </div>
+
+        <div class="search-box">
+            <i class="ion ion-ios-search-strong"></i>
+            <input type="text" id="tenantSearchInput" placeholder="Search by ID, Name, Surname, or Ref Number..." autocomplete="off" />
+        </div>
+
+        <div class="tenant-slots-container">
+            <div id="tenantSearchResults" style="text-align: center; color: #94a3b8; padding: 20px 0;">
+                <i class="ion ion-load-c ion-spin" style="font-size: 32px;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts{
     <script type="text/javascript">
-        // Tenant auto-populate
-        $('#btnLookup').click(function () {
+        var searchTimer;
+
+        function openTenantModal() {
+            $('#tenantModal').addClass('active');
+            $('body').css('overflow', 'hidden');
+            $('#tenantSearchInput').val('').focus();
+            
+            // Auto-load top 10 active tenants
+            performTenantSearch('');
+        }
+
+        function closeTenantModal() {
+            $('#tenantModal').removeClass('active');
+            $('body').css('overflow', '');
+            $('#tenantSearchInput').val('');
+            $('#tenantSearchResults').html('');
+        }
+
+        function performTenantSearch(query) {
+            $('#tenantSearchResults').html('<div style="text-align: center; color: #6366f1; padding: 20px 0;"><i class="ion ion-load-c ion-spin" style="font-size: 32px;"></i></div>');
+
+            $.ajax({
+                url: '@Url.Action("SearchTenants", "PaymentTransgressions")',
+                data: { query: query },
+                type: 'GET',
+                cache: false
+            })
+            .done(function (res) {
+                if (res.success && res.data && res.data.length > 0) {
+                    var html = '<table class="premium-table"><thead><tr><th>ID Number</th><th>Name</th><th>Tenancy Ref</th><th>Complex</th><th>Action</th></tr></thead><tbody>';
+                    $.each(res.data, function (i, t) {
+                        html += '<tr>';
+                        html += '<td>' + (t.OfficialNumber || '') + '</td>';
+                        html += '<td>' + (t.Name || '') + ' ' + (t.Surname || '') + '</td>';
+                        html += '<td>' + (t.TenancyRef || '') + '</td>';
+                        html += '<td>' + (t.Complex || '') + '</td>';
+                        
+                        var safeName = ((t.Name || '') + ' ' + (t.Surname || '')).replace(/'/g, "\\'");
+                        var safeRef = (t.TenancyRef || '').replace(/'/g, "\\'");
+                        html += '<td><button type="button" class="btn-select-tenant" onclick="selectTenant(\'' + (t.OfficialNumber || '') + '\', \'' + safeName + '\', \'' + safeRef + '\')">Select</button></td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                    $('#tenantSearchResults').html(html);
+                } else if (res.success === false && res.message) {
+                    $('#tenantSearchResults').html('<div style="text-align: center; color: #ef4444; padding: 20px 0;">Error: ' + res.message + '</div>');
+                } else {
+                    $('#tenantSearchResults').html('<div style="text-align: center; color: #ef4444; padding: 20px 0;">No active tenants found matching your search.</div>');
+                }
+            })
+            .fail(function (xhr, status, error) {
+                $('#tenantSearchResults').html('<div style="text-align: center; color: #ef4444; padding: 20px 0;">AJAX Error: ' + error + ' (Status: ' + xhr.status + ')</div>');
+            });
+        }
+
+        // Search logic
+        $(document).on('input', '#tenantSearchInput', function () {
+            var q = $(this).val().trim();
+            clearTimeout(searchTimer);
+            
+            searchTimer = setTimeout(function () {
+                performTenantSearch(q);
+            }, 400);
+        });
+
+        // Select from modal
+        function selectTenant(officialNum, fullName, refNum) {
+            closeTenantModal();
+            $('#OfficialNumber').val(officialNum);
+            
+            // Update display
+            $('#tenantNoSelection').hide();
+            $('#tenantHasSelection').show();
+            $('#tenantSelectorTrigger').addClass('has-selection');
+            $('#displayTenantName').text(fullName);
+            $('#displayTenantRef').html('<i class="ion ion-ios-book-outline"></i> ' + refNum);
+            
+            // Trigger auto-population directly
+            populateTenantDetails();
+        }
+
+        // Close modal on overlay click or Escape
+        $(document).on('click', '.tenant-modal-overlay', function (e) {
+            if ($(e.target).hasClass('tenant-modal-overlay')) closeTenantModal();
+        });
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeTenantModal();
+        });
+
+        // Tenant auto-populate logic
+        function populateTenantDetails() {
             var officialNumber = $('#OfficialNumber').val().trim();
-            if (!officialNumber) {
-                $('#lookupStatus').html('<span class="text-warning">Please enter an Official Number.</span>');
-                return;
-            }
-            $('#lookupStatus').html('<span class="text-muted"><i class="ion ion-load-a"></i> Looking up tenant...</span>');
-            $.get('@Url.Action("GetTenantDetails", "PaymentTransgressions")', { officialNumber: officialNumber }, function (res) {
+            if (!officialNumber) return;
+            
+            $('#lookupStatus').html('<span class="text-muted" style="color: #6366f1;"><i class="ion ion-load-c ion-spin"></i> Loading tenant data...</span>');
+            
+            $.ajax({
+                url: '@Url.Action("GetTenantDetails", "PaymentTransgressions")',
+                data: { officialNumber: officialNumber },
+                type: 'GET',
+                cache: false
+            })
+            .done(function (res) {
                 if (res.success) {
                     var d = res.data;
                     $('#TenancyReferenceNumber').val(d.tenancyReferenceNumber);
@@ -254,28 +557,46 @@
                     if (d.lastPaymentDate)   $('#LastPaymentDate').val(d.lastPaymentDate);
                     if (d.totalAmountDue)    $('[name="TotalAmountDue"]').val(d.totalAmountDue);
                     if (d.complexId > 0)     $('#ComplexId').val(d.complexId);
-                    $('#lookupStatus').html('<span class="text-success"><i class="ion ion-checkmark-circled"></i> Tenant found.</span>');
+                    
+                    $('#lookupStatus').html('<span class="text-success"><i class="ion ion-checkmark-circled"></i> Tenant details loaded successfully.</span>');
+                    setTimeout(function() { $('#lookupStatus').html(''); }, 3000);
                 } else {
-                    $('#lookupStatus').html('<span class="text-danger"><i class="ion ion-close-circled"></i> ' + res.message + '</span>');
+                    $('#lookupStatus').html('<span class="text-danger"><i class="ion ion-close-circled"></i> Error: ' + res.message + '</span>');
                 }
+            })
+            .fail(function (xhr, status, error) {
+                $('#lookupStatus').html('<span class="text-danger"><i class="ion ion-close-circled"></i> AJAX Error: ' + error + ' (Status: ' + xhr.status + ')</span>');
             });
-        });
+        }
 
         // Cascading Category → Type dropdown
-        $('#PaymentTransgressionCategoryId').change(function () {
+        $(document).on('change', '#PaymentTransgressionCategoryId', function () {
             var catId = $(this).val();
             var typeSelect = $('#PaymentTransgressionTypeId');
-            typeSelect.html('<option value="">-- Loading... --</option>');
+            
             if (!catId) {
                 typeSelect.html('<option value="">-- Select Category First --</option>');
                 return;
             }
-            $.get('@Url.Action("GetTypesByCategory", "PaymentTransgressions")', { categoryId: catId }, function (types) {
+            
+            typeSelect.html('<option value="">-- Loading... --</option>');
+            $.get('@Url.Action("GetTypesByCategory", "PaymentTransgressions")', { categoryId: catId })
+            .done(function (types) {
                 typeSelect.html('<option value="">-- Select Type --</option>');
                 $.each(types, function (i, t) {
                     typeSelect.append('<option value="' + t.Id + '">' + t.Name + '</option>');
                 });
+            })
+            .fail(function() {
+                typeSelect.html('<option value="">-- Error Loading Types --</option>');
             });
+        });
+
+        // Trigger change on load in case of validation failure reload
+        $(function() {
+            if ($('#PaymentTransgressionCategoryId').val()) {
+                $('#PaymentTransgressionCategoryId').trigger('change');
+            }
         });
     </script>
 }
