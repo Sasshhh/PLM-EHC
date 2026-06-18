@@ -112,6 +112,24 @@
             <br />
         }
 
+        @* ═════ Notice to Vacate Document Review ═════ *@
+        <div class="panel-heading">Notice to Vacate Document</div>
+        <div style="width:90%;margin:0 auto;">
+            <br />
+            <table class="table table-bordered table-hover table-striped panel panel-default display">
+                <thead><tr><th>Document Name</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td>Notice to Vacate / Eviction Notice (System Generated)</td>
+                        <td>
+                            @Html.ActionLink("Download / View Notice", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + (app != null ? app.Id.ToString() : "0")) }, new { @class = "btn btn-info btn-sm", @target = "_blank" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+
         @* ═════ SECTION 4: Action Form ═════ *@
         <div class="panel-heading">Serve Eviction Notice</div>
         <div style="width:90%;margin:0 auto;">

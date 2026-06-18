@@ -394,6 +394,231 @@ namespace C8.eServices.Mvc.Controllers
 
         #endregion
 
+        #region Termination and Eviction PDF Generation
+
+        /// <summary>
+        /// Generates PDF for the Cancellation of Lease Agreement (UC023)
+        /// </summary>
+        [DecryptParameter]
+        public void GenerateCancellationOfLease(int? id)
+        {
+            if (id == null) throw new Exception("Invalid parameter ID.");
+
+            // Resolve application using either application ID or lease ID
+            var application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
+            if (application == null)
+            {
+                var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (leaseRecord != null)
+                {
+                    application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
+                }
+            }
+
+            if (application == null) throw new Exception("Application not found.");
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && !x.IsDeleted);
+            if (lease == null) throw new Exception("Lease not found.");
+
+            var termination = db.LeaseTerminations.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id);
+            if (termination == null) throw new Exception("Termination record not found.");
+
+            // Hardcoded template path as requested (avoid app settings / config tables)
+            string pdfTemplate = Server.MapPath("~/PDFTemplates/Cancellation_Lease_Template.pdf");
+
+            var timestamp = DateTime.Now.ToString("ddMMyyyyHHmmss");
+            string folderName = Server.MapPath("~/Templates");
+            System.IO.Directory.CreateDirectory(folderName);
+
+            string newFile = Path.Combine(folderName, string.Format("{0}_{1}_CancellationOfLease.pdf", timestamp, application.IDNo));
+            var filename = string.Format("{0}_CancellationOfLease.pdf", application.ApplicationReferenceNumber);
+
+            PdfReader pdfReader = new PdfReader(pdfTemplate);
+            using (PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(newFile, FileMode.Create)))
+            {
+                AcroFields fields = pdfStamper.AcroFields;
+                pdfStamper.AcroFields.GenerateAppearances = true;
+
+                string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+                SetFieldWithFontSize(fields, "Date", currentDate, 10.0f);
+                SetFieldWithFontSize(fields, "TenantFullName", application.Customer != null ? application.Customer.FullName : (application.FirstName + " " + application.LastName), 10.0f);
+                SetFieldWithFontSize(fields, "IdentityNumber", application.Customer != null ? application.Customer.IdentificationNumber : application.IDNo, 10.0f);
+                SetFieldWithFontSize(fields, "Complex", GetBuildingName(application.Id), 10.0f);
+                SetFieldWithFontSize(fields, "TerminationDate", termination.TerminationDate.ToString("yyyy-MM-dd"), 10.0f);
+
+                string formattedBalance = termination.ApprovedDeductions.HasValue ? termination.ApprovedDeductions.Value.ToString("C") : "R 0.00";
+                SetFieldWithFontSize(fields, "OutstandingBalance", formattedBalance, 10.0f);
+
+                // Revenue Manager Details
+                string rmName = "";
+                if (!string.IsNullOrEmpty(termination.RevenueManagerOfficialNumber))
+                {
+                    var rmUser = db.SystemUsers.FirstOrDefault(x => x.ServiceNo == termination.RevenueManagerOfficialNumber);
+                    if (rmUser != null)
+                    {
+                        rmName = rmUser.FirstName + " " + rmUser.LastName;
+                    }
+                    else
+                    {
+                        rmName = termination.RevenueManagerOfficialNumber;
+                    }
+                }
+                SetFieldWithFontSize(fields, "RMName", rmName, 10.0f);
+                SetFieldWithFontSize(fields, "RMOfficialNumber", termination.RevenueManagerOfficialNumber ?? "", 10.0f);
+                SetFieldWithFontSize(fields, "RMSignDate", termination.RevenueManagerSignDate.HasValue ? termination.RevenueManagerSignDate.Value.ToString("yyyy-MM-dd HH:mm") : "", 10.0f);
+
+                // Revenue Manager Signature overlay
+                if (!string.IsNullOrEmpty(termination.RevenueManagerSignature) && termination.RevenueManagerSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = termination.RevenueManagerSignature.Substring(termination.RevenueManagerSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = fields.GetFieldPositions("RevenueManagerSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to render RM signature: {0}", ex.Message));
+                    }
+                }
+
+                pdfStamper.FormFlattening = true;
+            }
+
+            pdfReader.Close();
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(newFile);
+            Response.Clear();
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", filename));
+            Response.BinaryWrite(fileBytes);
+            Response.End();
+        }
+
+        /// <summary>
+        /// Generates PDF for the Notice to Vacate / Eviction Notice (UC024/UC025)
+        /// </summary>
+        [DecryptParameter]
+        public void GenerateNoticeToVacate(int? id)
+        {
+            if (id == null) throw new Exception("Invalid parameter ID.");
+
+            // Resolve application using either application ID or lease ID
+            var application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
+            if (application == null)
+            {
+                var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+                if (leaseRecord != null)
+                {
+                    application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
+                }
+            }
+
+            if (application == null) throw new Exception("Application not found.");
+
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id && !x.IsDeleted);
+            if (lease == null) throw new Exception("Lease not found.");
+
+            var termination = db.LeaseTerminations.OrderByDescending(x => x.Id)
+                .FirstOrDefault(x => x.PropertyLeaseApplicationId == application.Id);
+            if (termination == null) throw new Exception("Termination record not found.");
+
+            // Hardcoded template path as requested (avoid app settings / config tables)
+            string pdfTemplate = Server.MapPath("~/PDFTemplates/Notice_To_Vacate_Template.pdf");
+
+            var timestamp = DateTime.Now.ToString("ddMMyyyyHHmmss");
+            string folderName = Server.MapPath("~/Templates");
+            System.IO.Directory.CreateDirectory(folderName);
+
+            string newFile = Path.Combine(folderName, string.Format("{0}_{1}_NoticeToVacate.pdf", timestamp, application.IDNo));
+            var filename = string.Format("{0}_NoticeToVacate.pdf", application.ApplicationReferenceNumber);
+
+            PdfReader pdfReader = new PdfReader(pdfTemplate);
+            using (PdfStamper pdfStamper = new PdfStamper(pdfReader, new FileStream(newFile, FileMode.Create)))
+            {
+                AcroFields fields = pdfStamper.AcroFields;
+                pdfStamper.AcroFields.GenerateAppearances = true;
+
+                string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+                SetFieldWithFontSize(fields, "Date", currentDate, 10.0f);
+                SetFieldWithFontSize(fields, "TenantFullName", application.Customer != null ? application.Customer.FullName : (application.FirstName + " " + application.LastName), 10.0f);
+                SetFieldWithFontSize(fields, "IdentityNumber", application.Customer != null ? application.Customer.IdentificationNumber : application.IDNo, 10.0f);
+                SetFieldWithFontSize(fields, "Complex", GetBuildingName(application.Id), 10.0f);
+                SetFieldWithFontSize(fields, "VacateDate", termination.TerminationDate.ToString("yyyy-MM-dd"), 10.0f);
+
+                // CEO Details
+                string ceoName = "";
+                if (!string.IsNullOrEmpty(termination.CEOOfficialNumber))
+                {
+                    var ceoUser = db.SystemUsers.FirstOrDefault(x => x.ServiceNo == termination.CEOOfficialNumber);
+                    if (ceoUser != null)
+                    {
+                        ceoName = ceoUser.FirstName + " " + ceoUser.LastName;
+                    }
+                    else
+                    {
+                        ceoName = termination.CEOOfficialNumber;
+                    }
+                }
+                SetFieldWithFontSize(fields, "CEOName", ceoName, 10.0f);
+                SetFieldWithFontSize(fields, "CEOOfficialNumber", termination.CEOOfficialNumber ?? "", 10.0f);
+                SetFieldWithFontSize(fields, "CEOSignDate", termination.CEOSignDate.HasValue ? termination.CEOSignDate.Value.ToString("yyyy-MM-dd HH:mm") : "", 10.0f);
+
+                // CEO Signature overlay
+                if (!string.IsNullOrEmpty(termination.CEOSignature) && termination.CEOSignature.Contains(","))
+                {
+                    try
+                    {
+                        string base64Data = termination.CEOSignature.Substring(termination.CEOSignature.IndexOf(',') + 1);
+                        byte[] sigBytes = Convert.FromBase64String(base64Data);
+                        iTextSharp.text.Image sigImage = iTextSharp.text.Image.GetInstance(sigBytes);
+
+                        var positions = fields.GetFieldPositions("CEOSignature");
+                        if (positions != null && positions.Count > 0)
+                        {
+                            var sigPos = positions[0];
+                            iTextSharp.text.Rectangle rect = sigPos.position;
+                            sigImage.ScaleAbsolute(120, 40);
+                            sigImage.SetAbsolutePosition(rect.Left, rect.Bottom);
+                            PdfContentByte cb = pdfStamper.GetOverContent(sigPos.page);
+                            cb.AddImage(sigImage);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to render CEO signature: {0}", ex.Message));
+                    }
+                }
+
+                pdfStamper.FormFlattening = true;
+            }
+
+            pdfReader.Close();
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(newFile);
+            Response.Clear();
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-disposition", string.Format("attachment;filename={0}", filename));
+            Response.BinaryWrite(fileBytes);
+            Response.End();
+        }
+
+        #endregion
+
         #region Revised Lease Agreement v1 PDF Generation
 
         /// <summary>1
