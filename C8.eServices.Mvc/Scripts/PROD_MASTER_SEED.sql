@@ -1,0 +1,307 @@
+﻿
+    -- ==========================================================================
+    -- SECTION 14: COMPLAINT MODULE DATA
+    -- Status entries, ComplaintCategories, ComplaintTypes
+    -- ==========================================================================
+    PRINT ''
+    PRINT '--- SECTION 14: Complaint Module Data ---'
+
+    -- Complaint Statuses
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_submitted')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_submitted', 'Submitted', 1, 0, GETDATE())
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_awaiting_appointment')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_awaiting_appointment', 'Awaiting Appointment', 1, 0, GETDATE())
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_awaiting_investigation')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_awaiting_investigation', 'Awaiting Investigation', 1, 0, GETDATE())
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_resolved')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_resolved', 'Resolved', 1, 0, GETDATE())
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_referred')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_referred', 'Referred', 1, 0, GETDATE())
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.[Status] WHERE [Key] = 'complaint_status_unresolved')
+        INSERT INTO dbo.[Status] ([Key], [Status], [IsActive], [IsDeleted], [CreatedDateTime])
+        VALUES ('complaint_status_unresolved', 'Unresolved', 1, 0, GETDATE())
+
+    PRINT '  + Complaint statuses done'
+
+    -- Complaint Categories + Types
+    DECLARE @CatId INT
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'Administration')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Administration','Administration','Administrative complaints including subletting and rule violations',1,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Sub-letting','SubLetting','Tenant subletting the unit to another party',1,1,0,GETDATE()),
+            (@CatId,'In violation of Complex Rules','ViolationOfRules','Violation of complex rules and regulations',2,1,0,GETDATE())
+        PRINT '  + Added category: Administration (2 types)'
+    END
+    ELSE PRINT '  . Already exists: Administration'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'NuisanceAndBehavioural')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Nuisance and Behavioural','NuisanceAndBehavioural','Complaints about noise, odors, and behavioral issues',2,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Noise Disturbance','NoiseDisturbance','Excessive noise from neighboring unit',1,1,0,GETDATE()),
+            (@CatId,'Odors and Fumes','OdorsAndFumes','Unpleasant odors or harmful fumes',2,1,0,GETDATE()),
+            (@CatId,'Aggressive Behaviour','AggressiveBehaviour','Threatening or aggressive behavior by tenant',3,1,0,GETDATE()),
+            (@CatId,'Children','Children','Issues related to unsupervised children',4,1,0,GETDATE())
+        PRINT '  + Added category: Nuisance and Behavioural (4 types)'
+    END
+    ELSE PRINT '  . Already exists: NuisanceAndBehavioural'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'ParkingAndVehicle')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Parking and Vehicle','ParkingAndVehicle','Complaints about parking violations and vehicle issues',3,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Obstructive Parking','ObstructiveParking','Vehicle blocking access or parking improperly',1,1,0,GETDATE()),
+            (@CatId,'Unauthorised Parking','UnauthorisedParking','Parking in unauthorized areas',2,1,0,GETDATE()),
+            (@CatId,'Car Wash','CarWash','Washing vehicles in unauthorized areas',3,1,0,GETDATE())
+        PRINT '  + Added category: Parking and Vehicle (3 types)'
+    END
+    ELSE PRINT '  . Already exists: ParkingAndVehicle'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'PetAndAnimals')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Pet and Animals','PetAndAnimals','Complaints about pets and animal-related issues',4,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Nuisance Pets','NuisancePets','Pets causing disturbance (barking, aggression)',1,1,0,GETDATE()),
+            (@CatId,'Unapproved Pets','UnapprovedPets','Keeping pets without approval',2,1,0,GETDATE())
+        PRINT '  + Added category: Pet and Animals (2 types)'
+    END
+    ELSE PRINT '  . Already exists: PetAndAnimals'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'PropertyUsage')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Property Usage','PropertyUsage','Complaints about improper property usage and maintenance',5,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Untidy Areas','UntidyAreas','Common areas or unit kept in untidy condition',1,1,0,GETDATE()),
+            (@CatId,'Neglected Property','Neglected','Property not maintained properly',2,1,0,GETDATE()),
+            (@CatId,'Unapproved Alterations','UnapprovedAlterations','Unauthorized modifications to property',3,1,0,GETDATE()),
+            (@CatId,'Misuse of Property','Misuse','Using property for unauthorized purposes',4,1,0,GETDATE())
+        PRINT '  + Added category: Property Usage (4 types)'
+    END
+    ELSE PRINT '  . Already exists: PropertyUsage'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'SafetyAndSecurity')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Safety & Security','SafetyAndSecurity','Complaints about safety and security violations',6,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Neglecting Security Rules','NeglectingSecurityRules','Not following security protocols',1,1,0,GETDATE()),
+            (@CatId,'Other Safety Concerns','OtherSafety','Other safety-related issues',2,1,0,GETDATE())
+        PRINT '  + Added category: Safety and Security (2 types)'
+    END
+    ELSE PRINT '  . Already exists: SafetyAndSecurity'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.ComplaintCategories WHERE [Key] = 'Other')
+    BEGIN
+        INSERT INTO dbo.ComplaintCategories ([Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES ('Other','Other','Other complaints not covered by specific categories',7,1,0,GETDATE())
+        SET @CatId = SCOPE_IDENTITY()
+        INSERT INTO dbo.ComplaintTypes ([ComplaintCategoryId],[Name],[Key],[Description],[DisplayOrder],[IsActive],[IsDeleted],[CreatedDateTime])
+        VALUES
+            (@CatId,'Other (please specify)','OtherType','Other complaint not categorized',1,1,0,GETDATE())
+        PRINT '  + Added category: Other (1 type)'
+    END
+    ELSE PRINT '  . Already exists: Other'
+
+    PRINT '  SECTION 14 complete.'
+
+    -- ==========================================================================
+    -- SECTION 10-ADDENDUM: NEW APPSETTINGS (MANAGER ROLE USER IDs)
+    -- Values are '0' placeholder â€” update with actual Customer IDs post-deploy
+    -- ==========================================================================
+    PRINT ''
+    PRINT '--- SECTION 10-ADDENDUM: New AppSettings (Manager IDs) ---'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = 'u_maintenance_manager')
+    BEGIN
+        INSERT INTO dbo.AppSettings ([Key],[Value],[Description],IsActive,IsDeleted,CapturedDateTime,ModifiedDateTime)
+        VALUES (
+            'u_maintenance_manager', '0',
+            'System-wide fallback Maintenance Manager customer ID. Update with actual ID post-deployment.',
+            1, 0, GETDATE(), GETDATE()
+        )
+        PRINT '  + Added AppSetting: u_maintenance_manager (value=0 placeholder)'
+    END
+    ELSE PRINT '  . Already exists: u_maintenance_manager'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = 'u_property_facilities_manager')
+    BEGIN
+        INSERT INTO dbo.AppSettings ([Key],[Value],[Description],IsActive,IsDeleted,CapturedDateTime,ModifiedDateTime)
+        VALUES (
+            'u_property_facilities_manager', '0',
+            'System-wide Property & Facilities Manager customer ID. Update with actual ID post-deployment.',
+            1, 0, GETDATE(), GETDATE()
+        )
+        PRINT '  + Added AppSetting: u_property_facilities_manager (value=0 placeholder)'
+    END
+    ELSE PRINT '  . Already exists: u_property_facilities_manager'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = 'PropertyFacilitiesManagerId')
+    BEGIN
+        INSERT INTO dbo.AppSettings ([Key],[Value],[Description],IsActive,IsDeleted,CreatedDateTime,ModifiedDateTime)
+        VALUES (
+            'PropertyFacilitiesManagerId', '0',
+            'Default Property & Facilities Manager for UC013 maintenance approval workflow. Update with actual ID post-deployment.',
+            1, 0, GETDATE(), GETDATE()
+        )
+        PRINT '  + Added AppSetting: PropertyFacilitiesManagerId (value=0 placeholder)'
+    END
+    ELSE PRINT '  . Already exists: PropertyFacilitiesManagerId'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = 'MaintenanceManagerId')
+    BEGIN
+        INSERT INTO dbo.AppSettings ([Key],[Value],[Description],IsActive,IsDeleted,CreatedDateTime,ModifiedDateTime)
+        VALUES (
+            'MaintenanceManagerId', '0',
+            'Fallback Maintenance Manager ID for UC012 workflow. Update with actual ID post-deployment.',
+            1, 0, GETDATE(), GETDATE()
+        )
+        PRINT '  + Added AppSetting: MaintenanceManagerId (value=0 placeholder)'
+    END
+    ELSE PRINT '  . Already exists: MaintenanceManagerId'
+
+    PRINT '  SECTION 10-ADDENDUM complete.'
+
+    -- ==========================================================================
+    -- SECTION 15: ROLES (AspNetRoles)
+    -- ==========================================================================
+    PRINT ''
+    PRINT '--- SECTION 15: Roles (AspNetRoles) ---'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = 'Maintenance Manager')
+    BEGIN
+        INSERT INTO dbo.AspNetRoles (Id, Name) VALUES (NEWID(), 'Maintenance Manager')
+        PRINT '  + Added role: Maintenance Manager'
+    END
+    ELSE PRINT '  . Already exists: Maintenance Manager'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = 'Property & Facilities Manager')
+    BEGIN
+        INSERT INTO dbo.AspNetRoles (Id, Name) VALUES (NEWID(), 'Property & Facilities Manager')
+        PRINT '  + Added role: Property & Facilities Manager'
+    END
+    ELSE PRINT '  . Already exists: Property & Facilities Manager'
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = 'Client Services Officer')
+    BEGIN
+        INSERT INTO dbo.AspNetRoles (Id, Name) VALUES (NEWID(), 'Client Services Officer')
+        PRINT '  + Added role: Client Services Officer'
+    END
+    ELSE PRINT '  . Already exists: Client Services Officer'
+
+    PRINT '  SECTION 15 complete.'
+
+    -- ==========================================================================
+    -- ALL DONE
+    -- ==========================================================================
+    PRINT ''
+    PRINT '============================================================'
+    PRINT 'PROD_MASTER_SEED: All sections complete. Committing...'
+    PRINT '============================================================'
+
+    COMMIT TRANSACTION
+    PRINT 'SUCCESS: Transaction committed.'
+
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION
+    PRINT ''
+    PRINT '==== ROLLBACK: An error occurred ===='
+    PRINT 'Error Number  : ' + CAST(ERROR_NUMBER()   AS VARCHAR(10))
+    PRINT 'Error Severity: ' + CAST(ERROR_SEVERITY() AS VARCHAR(10))
+    PRINT 'Error State   : ' + CAST(ERROR_STATE()    AS VARCHAR(10))
+    PRINT 'Error Line    : ' + CAST(ERROR_LINE()     AS VARCHAR(10))
+    PRINT 'Error Message : ' + ERROR_MESSAGE()
+    PRINT '====================================='
+    PRINT 'Transaction has been ROLLED BACK. No changes were saved.'
+    PRINT 'Fix the error above, then re-run the script.'
+END CATCH
+GO
+
+-- =============================================================================
+-- POST-DEPLOYMENT CHECKLIST  (manual steps â€” NOT part of the transaction above)
+-- Complete these after the script runs successfully:
+-- =============================================================================
+--
+-- STEP A: Update Manager AppSetting values
+--   Run this query to find available users and their Customer IDs:
+--
+--     SELECT c.Id AS CustomerId, c.FirstName + ' ' + c.LastName AS FullName,
+--            r.Name AS Role
+--     FROM Customers c
+--     JOIN AspNetUsers u  ON CAST(c.Id AS NVARCHAR(128)) = u.Id
+--     JOIN AspNetUserRoles ur ON u.Id = ur.UserId
+--     JOIN AspNetRoles r ON ur.RoleId = r.Id
+--     WHERE r.Name IN ('Maintenance Manager','Property & Facilities Manager','Housing Supervisor')
+--       AND c.IsActive = 1 AND c.IsDeleted = 0
+--     ORDER BY r.Name, c.LastName
+--
+--   Then update AppSettings with the correct Customer IDs:
+--
+--     UPDATE dbo.AppSettings SET Value = '<CustomerId>' WHERE [Key] = 'u_maintenance_manager'
+--     UPDATE dbo.AppSettings SET Value = '<CustomerId>' WHERE [Key] = 'u_property_facilities_manager'
+--     UPDATE dbo.AppSettings SET Value = '<CustomerId>' WHERE [Key] = 'PropertyFacilitiesManagerId'
+--     UPDATE dbo.AppSettings SET Value = '<CustomerId>' WHERE [Key] = 'MaintenanceManagerId'
+--
+-- STEP B: Create user accounts for the new roles (if not done via UI already)
+--   Use the application's internal user registration page to create:
+--     - A user with role: Maintenance Manager
+--     - A user with role: Property & Facilities Manager
+--   Then re-run the UPDATE statements in STEP A.
+--
+-- STEP C: Assign Maintenance Managers to complexes
+--   After creating the Maintenance Manager user, run:
+--
+--     UPDATE dbo.PreferredComplexAreas
+--     SET MaintenanceManagerId = <CustomerId>, ModifiedDateTime = GETDATE()
+--     WHERE IsActive = 1 AND IsDeleted = 0
+--
+-- STEP D: Verify the deployment
+--   Run the following to confirm key records are in place:
+--
+--     SELECT 'ResponsibilityTypes' AS TableName, [Key], [Name] FROM dbo.ResponsibilityTypes
+--     WHERE [Key] IN ('r_property_facilities_manager_review','r_maintanance_job_sheet')
+--     UNION ALL
+--     SELECT 'EmailContentTypes', [Key], [Name] FROM dbo.EmailContentTypes
+--     WHERE [Key] = 'plm_unit_accepted_deposit_payment_details'
+--     UNION ALL
+--     SELECT 'DocumentTypes', [Key], [Name] FROM dbo.DocumentTypes
+--     WHERE [Key] IN ('dt_maintenance_task_document','dt_maintenance_before_image','dt_maintenance_after_image')
+--     UNION ALL
+--     SELECT 'AppSettings', [Key], [Value] FROM dbo.AppSettings
+--     WHERE [Key] IN ('u_maintenance_manager','u_property_facilities_manager',
+--                     'PropertyFacilitiesManagerId','MaintenanceManagerId')
+--     UNION ALL
+--     SELECT 'AspNetRoles', Name, Name FROM dbo.AspNetRoles
+--     WHERE Name IN ('Maintenance Manager','Property & Facilities Manager','Client Services Officer')
+--     ORDER BY 1, 2
+--
+-- =============================================================================
