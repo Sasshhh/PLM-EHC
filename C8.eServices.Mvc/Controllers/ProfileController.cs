@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
@@ -436,19 +436,20 @@ namespace C8.eServices.Mvc.Controllers
                         if (isEntityAgent != null)
                             customerVm.Entity = context.Entities.Find(isEntityAgent.EntityId);
 
-                        return RedirectToAction("Inbox", "PropertyLeaseApplication");
                         if (DepartmentKey == Entities.FirstOrDefault(x => x.Key == ApplicationEntityKeys.EkurhuleniHousingCompany).Key)
                         {
                             return RedirectToAction("Inbox", "PropertyLeaseApplication");
                         }
-                        else if(DepartmentKey == Entities.FirstOrDefault(x => x.Key == ApplicationEntityKeys.HumanSettlmentDevelopment).Key)
+                        else if (DepartmentKey == Entities.FirstOrDefault(x => x.Key == ApplicationEntityKeys.HumanSettlmentDevelopment).Key)
                         {
                             return RedirectToAction("Inbox", "HumanSettlementApplication");
                         }
                         else if (DepartmentKey == Entities.FirstOrDefault(x => x.Key == ApplicationEntityKeys.RealEstateDevelopment).Key)
                         {
-                            return RedirectToAction("Inbox", "PropertyLeaseApplication");
+                            return RedirectToAction("Inbox", "RealEstate");
                         }
+
+                        return RedirectToAction("Inbox", "PropertyLeaseApplication");
 
                         return View("Index", "RCSApplication");
                         return View("IndexAgent", customerVm);

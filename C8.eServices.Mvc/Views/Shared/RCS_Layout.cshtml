@@ -2536,6 +2536,24 @@
                                 </ul>
                             </li>
                         }
+                        else if (SecurityHelper.UserDepartment().Equals(ApplicationEntityKeys.RealEstateDevelopment))
+                        {
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="ion ion-ios-chatboxes-outline"></i>
+                                    <span class="text">Real Estate Applications</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
+                                    <li>
+                                        <a href="~/RealEstate/Inbox">
+                                            <i class="ion ion-android-notifications" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Inbox</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
                     }
                     else if (Request.IsAuthenticated && User.IsInRole("Clerks"))
                     {

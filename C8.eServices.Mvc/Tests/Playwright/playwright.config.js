@@ -14,8 +14,8 @@ module.exports = defineConfig({
     baseURL: 'http://localhost:3450/',
     trace: 'retain-on-failure', // Pro feature: Keeps a DOM snapshot trace if test fails
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure', // Pro feature: Records video automatically
-    actionTimeout: 15000,
+    video: 'on', // Pro feature: Records video automatically
+    actionTimeout: 30000,
     navigationTimeout: 30000,
   },
   projects: [

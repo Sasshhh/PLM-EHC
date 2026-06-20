@@ -1,0 +1,21 @@
+@model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Real Estate Inbox";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none;">
+    <div class="panel-heading" style="background-color: #2c3e50; color: white; font-size: 18px; font-weight: bold; border-top-left-radius: 8px; border-top-right-radius: 8px; padding: 15px;" align="center">
+        Real Estate Development Dashboard
+    </div>
+    <div class="panel-body" style="padding: 30px; text-align: center;">
+        <div style="margin: 40px auto; max-width: 500px;">
+            <i class="ion ion-ios-filing-outline" style="font-size: 80px; color: #bdc3c7; display: block; margin-bottom: 20px;"></i>
+            <h3 style="color: #2c3e50; font-weight: 600; margin-bottom: 10px;">No Applications Found</h3>
+            <p style="color: #7f8c8d; font-size: 15px; line-height: 1.6;">
+                You currently do not have any active Real Estate applications in your inbox. Once you submit a new application, it will appear here.
+            </p>
+        </div>
+    </div>
+</div>

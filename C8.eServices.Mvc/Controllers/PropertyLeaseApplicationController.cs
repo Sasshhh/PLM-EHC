@@ -404,15 +404,16 @@ namespace C8.eServices.Mvc.Controllers
         {
             if (id == null) throw new Exception("Invalid parameter ID.");
 
-            // Resolve application using either application ID or lease ID
-            var application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
+            // Resolve application using either lease ID (first check) or application ID directly
+            PropertyLeaseApplication application = null;
+            var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+            if (leaseRecord != null)
+            {
+                application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
+            }
             if (application == null)
             {
-                var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-                if (leaseRecord != null)
-                {
-                    application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
-                }
+                application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
             }
 
             if (application == null) throw new Exception("Application not found.");
@@ -516,15 +517,16 @@ namespace C8.eServices.Mvc.Controllers
         {
             if (id == null) throw new Exception("Invalid parameter ID.");
 
-            // Resolve application using either application ID or lease ID
-            var application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
+            // Resolve application using either lease ID (first check) or application ID directly
+            PropertyLeaseApplication application = null;
+            var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+            if (leaseRecord != null)
+            {
+                application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
+            }
             if (application == null)
             {
-                var leaseRecord = db.LeaseDetails.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-                if (leaseRecord != null)
-                {
-                    application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == leaseRecord.PropertyLeaseApplicationId);
-                }
+                application = db.PropertyLeaseApplications.Include(x => x.Customer).FirstOrDefault(x => x.Id == id);
             }
 
             if (application == null) throw new Exception("Application not found.");

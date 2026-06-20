@@ -1942,6 +1942,7 @@
     <Compile Include="Controllers\PropertyLeaseApplicationController_RevisedLeaseV1_Methods.cs" />
     <Compile Include="Controllers\RCSApplicationController.cs" />
     <Compile Include="Controllers\RCSController.cs" />
+    <Compile Include="Controllers\RealEstateController.cs" />
     <Compile Include="Controllers\PLMReportController.cs" />
     <Compile Include="Controllers\RCSReportController.cs" />
     <Compile Include="Controllers\RCSUserMessagesController.cs" />
