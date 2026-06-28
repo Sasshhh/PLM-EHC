@@ -3858,15 +3858,61 @@ namespace C8.eServices.Mvc.Helpers
         {
             try
             {
+                bool isRealEstate = core.RE_Applications.Any(x => x.Id == applicationId);
+                int validUserId = 1;
+
+                if (clerkId.HasValue && core.Customers.Any(c => c.Id == clerkId.Value))
+                {
+                    validUserId = clerkId.Value;
+                }
+                else
+                {
+                    if (isRealEstate)
+                    {
+                        var reApp = core.RE_Applications.FirstOrDefault(x => x.Id == applicationId);
+                        if (reApp != null) validUserId = reApp.CustomerId;
+                    }
+                    else
+                    {
+                        var hsApp = core.HumanSettlementApplications.FirstOrDefault(x => x.Id == applicationId);
+                        if (hsApp != null)
+                        {
+                            validUserId = hsApp.CustomerId;
+                        }
+                        else
+                        {
+                            var plApp = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == applicationId);
+                            if (plApp != null) validUserId = plApp.CustomerId;
+                        }
+                    }
+                }
+
                 var log = new PLMApplicationHistortyLog
                 {
-                    PropertyLeaseApplicationId = applicationId,
-                    UserId = clerkId ?? 1,
+                    UserId = validUserId,
                     AuditAction = actionMessage,
                     IsActive = true,
                     IsDeleted = false,
                     CreatedDateTime = DateTime.Now
                 };
+
+                if (isRealEstate)
+                {
+                    log.RealEstateApplicationId = applicationId;
+                }
+                else
+                {
+                    bool isHumanSettlement = core.HumanSettlementApplications.Any(x => x.Id == applicationId);
+                    if (isHumanSettlement)
+                    {
+                        log.HumanSettlementApplicationId = applicationId;
+                    }
+                    else
+                    {
+                        log.PropertyLeaseApplicationId = applicationId;
+                    }
+                }
+
                 core.PLMApplicationHistortyLogs.Add(log);
                 core.SaveChanges();
             }

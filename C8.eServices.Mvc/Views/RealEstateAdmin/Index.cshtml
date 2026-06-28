@@ -1,0 +1,769 @@
+@model dynamic
+@{
+    ViewBag.Title = "Real Estate Facility Management";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var categories = (IEnumerable<C8.eServices.Mvc.Models.RE_FacilityCategory>)ViewBag.Categories;
+    var facilities = (IEnumerable<C8.eServices.Mvc.Models.RE_Facility>)ViewBag.Facilities;
+    var units = (IEnumerable<C8.eServices.Mvc.Models.RE_FacilityUnit>)ViewBag.Units;
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+        font-size: 15px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    /* KPI Summary Panel */
+    .kpi-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .kpi-card {
+        flex: 1;
+        min-width: 220px;
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--re-gold);
+    }
+
+    .kpi-icon {
+        font-size: 28px;
+        color: var(--re-gold);
+        background: var(--re-gold-light);
+        width: 54px;
+        height: 54px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .kpi-details h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .kpi-details p {
+        margin: 0;
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+
+    /* Custom Premium Tabs */
+    .admin-tabs {
+        display: flex;
+        border-bottom: 2px solid var(--re-border-color);
+        margin-bottom: 25px;
+        gap: 20px;
+    }
+
+    .admin-tab-item {
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .admin-tab-item:hover {
+        color: var(--re-gold);
+    }
+
+    .admin-tab-item.active {
+        color: var(--re-gold);
+        border-bottom-color: var(--re-gold);
+    }
+
+    .admin-tab-content {
+        display: none;
+    }
+
+    .admin-tab-content.active {
+        display: block;
+    }
+
+    .admin-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-table th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 14px 18px !important;
+        border-bottom: 2px solid var(--re-border-color) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .admin-table td {
+        padding: 14px 18px !important;
+        border-bottom: 1px solid var(--re-border-color) !important;
+        font-size: 14px !important;
+        color: #334155;
+        vertical-align: middle !important;
+    }
+
+    .admin-table tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    .badge-gold {
+        background-color: var(--re-gold-light);
+        color: var(--re-gold);
+        font-weight: 600;
+        border: 1px solid rgba(197, 155, 39, 0.2);
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-size: 12px;
+    }
+
+    .btn-edit {
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-edit:hover {
+        background-color: var(--re-gold-light);
+        color: var(--re-gold);
+        border-color: var(--re-gold);
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background-color: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #e11d48;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-block;
+        margin-left: 5px;
+    }
+
+    .btn-delete:hover {
+        background-color: #ffe4e6;
+        border-color: #fda4af;
+        color: #be123c;
+    }
+
+    .btn-add-gold {
+        background-color: var(--re-gold) !important;
+        border-color: var(--re-gold) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease;
+    }
+
+    .btn-add-gold:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+    }
+
+    .tab-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" style="border-radius: 8px; margin-bottom: 25px;">
+            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" style="border-radius: 8px; margin-bottom: 25px;">
+            <i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 class="admin-title">Real Estate Master Data Management</h1>
+        <p class="admin-subtitle">Configure available Customer Care Areas, physical facilities, unit sizes, and square-meter tariffs.</p>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fa fa-building"></i></div>
+            <div class="kpi-details">
+                <h3>@ViewBag.TotalProperties</h3>
+                <p>Total Properties</p>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fa fa-cube"></i></div>
+            <div class="kpi-details">
+                <h3>@ViewBag.TotalConfiguredUnits</h3>
+                <p>Configured Unit Slots</p>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fa fa-key"></i></div>
+            <div class="kpi-details">
+                <h3>@ViewBag.LeasedUnitsCount</h3>
+                <p>Units Leased</p>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="fa fa-money"></i></div>
+            <div class="kpi-details">
+                <h3>R @(((decimal)ViewBag.AverageTariff).ToString("F2"))</h3>
+                <p>Average Tariff / m²</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-tabs">
+            <div class="admin-tab-item active" data-target="#tab-tariffs">Tariff Matrix</div>
+            <div class="admin-tab-item" data-target="#tab-facilities">Facilities</div>
+            <div class="admin-tab-item" data-target="#tab-units">Unit Configurations</div>
+        </div>
+
+        <!-- Tab 1: Tariff Rates -->
+        <div class="admin-tab-content active" id="tab-tariffs">
+            <div class="tab-header-flex">
+                <h4 style="font-weight: 600; margin: 0;">Economic Development Category Tariffs</h4>
+                <button type="button" class="btn btn-add-gold" data-toggle="modal" data-target="#addCategoryModal">
+                    <i class="fa fa-plus"></i> Add Category
+                </button>
+            </div>
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th>Category Key</th>
+                        <th>Category Name</th>
+                        <th>Tariff Per Square Meter (VAT incl.)</th>
+                        <th style="width: 250px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in categories)
+                    {
+                        <tr>
+                            <td><code style="font-size: 13px;">@cat.Key</code></td>
+                            <td style="font-weight: 600;">@cat.Name</td>
+                            <td><span class="badge-gold">R @cat.TariffPerSqm.ToString("F2") / m²</span></td>
+                            <td style="text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+                                <button type="button" class="btn btn-edit edit-category-btn" 
+                                        data-id="@cat.Id" 
+                                        data-name="@cat.Name" 
+                                        data-tariff="@cat.TariffPerSqm">
+                                    <i class="fa fa-pencil"></i> Edit
+                                </button>
+                                @using (Html.BeginForm("DeleteCategory", "RealEstateAdmin", FormMethod.Post, new { style = "margin: 0;", onsubmit = "return confirm('Are you sure you want to delete this category? All linked units will be affected.');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@cat.Id" />
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab 2: Facilities -->
+        <div class="admin-tab-content" id="tab-facilities">
+            <div class="tab-header-flex">
+                <h4 style="font-weight: 600; margin: 0;">Registered Physical Properties</h4>
+                <button type="button" class="btn btn-add-gold" data-toggle="modal" data-target="#addFacilityModal">
+                    <i class="fa fa-plus"></i> Add Property
+                </button>
+            </div>
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Property Name</th>
+                        <th>Customer Care Centre (CCC)</th>
+                        <th>Street Address</th>
+                        <th style="width: 220px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fac in facilities)
+                    {
+                        <tr>
+                            <td>@fac.Id</td>
+                            <td style="font-weight: 600; color: #1e293b;">@fac.Name</td>
+                            <td>@(fac.CCC != null ? fac.CCC.CCCName : "N/A")</td>
+                            <td>@(string.IsNullOrEmpty(fac.Address) ? "N/A" : fac.Address)</td>
+                            <td style="text-align: right;">
+                                <button type="button" class="btn btn-edit edit-facility-btn" 
+                                        data-id="@fac.Id" 
+                                        data-name="@fac.Name" 
+                                        data-cccid="@fac.CCCId" 
+                                        data-address="@fac.Address">
+                                    <i class="fa fa-pencil"></i> Edit
+                                </button>
+                                @using (Html.BeginForm("DeleteFacility", "RealEstateAdmin", FormMethod.Post, new { style = "display:inline; margin: 0;", onsubmit = "return confirm('Are you sure you want to delete this physical property?');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@fac.Id" />
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab 3: Units -->
+        <div class="admin-tab-content" id="tab-units">
+            <div class="tab-header-flex">
+                <h4 style="font-weight: 600; margin: 0;">Specific Let-space Units & Constraints</h4>
+                <button type="button" class="btn btn-add-gold" data-toggle="modal" data-target="#addUnitModal">
+                    <i class="fa fa-plus"></i> Add Unit Space
+                </button>
+            </div>
+            <table class="table admin-table" id="unitsTable">
+                <thead>
+                    <tr>
+                        <th>Facility Name</th>
+                        <th>Unit Type / Description</th>
+                        <th>Category / Grade</th>
+                        <th>Unit Size</th>
+                        <th>Monthly Base Rate</th>
+                        <th>Occupancy Availability</th>
+                        <th style="width: 220px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in units)
+                    {
+                        var monthlyRental = u.UnitSize * (u.FacilityCategory != null ? u.FacilityCategory.TariffPerSqm : 0);
+                        <tr>
+                            <td style="font-weight: 600; color: #1e293b;">@(u.Facility != null ? u.Facility.Name : "N/A")</td>
+                            <td>@u.UnitType</td>
+                            <td>@(u.FacilityCategory != null ? u.FacilityCategory.Name : "N/A")</td>
+                            <td>@u.UnitSize m²</td>
+                            <td style="font-weight: 600; color: #16a34a;">R @monthlyRental.ToString("F2")</td>
+                            <td>
+                                @{
+                                    int leasedCount = 0;
+                                    if (ViewBag.OccupancyMap != null && ((System.Collections.Generic.Dictionary<int, int>)ViewBag.OccupancyMap).ContainsKey(u.Id))
+                                    {
+                                        leasedCount = ((System.Collections.Generic.Dictionary<int, int>)ViewBag.OccupancyMap)[u.Id];
+                                    }
+                                    var occupancyPct = u.MaxUnits > 0 ? (leasedCount * 100) / u.MaxUnits : 0;
+                                    string progressClass = "progress-bar-success";
+                                    if (occupancyPct >= 100) { progressClass = "progress-bar-danger"; }
+                                    else if (occupancyPct >= 75) { progressClass = "progress-bar-warning"; }
+                                }
+                                <div style="margin-bottom: 5px; font-size: 12px; font-weight: 600;">
+                                    @leasedCount / @u.MaxUnits Slots Leased
+                                </div>
+                                <div class="progress" style="height: 6px; margin-bottom: 0; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; box-shadow: none;">
+                                    <div class="progress-bar @progressClass" role="progressbar" style="width: @occupancyPct%; box-shadow: none;"></div>
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="btn btn-edit edit-unit-btn" 
+                                        data-id="@u.Id" 
+                                        data-facility="@(u.Facility != null ? u.Facility.Name : "N/A")" 
+                                        data-categoryid="@u.FacilityCategoryId" 
+                                        data-unittype="@u.UnitType" 
+                                        data-unitsize="@u.UnitSize" 
+                                        data-maxunits="@u.MaxUnits">
+                                    <i class="fa fa-pencil"></i> Edit
+                                </button>
+                                @using (Html.BeginForm("DeleteUnit", "RealEstateAdmin", FormMethod.Post, new { style = "display:inline; margin: 0;", onsubmit = "return confirm('Are you sure you want to delete this unit configuration?');" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODALS SECTION                             -->
+<!-- ========================================== -->
+
+<!-- Modal: Add Category -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addCategoryLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-plus" style="color: var(--re-gold); margin-right: 8px;"></i>Add New Category Tariff</h4>
+            </div>
+            @using (Html.BeginForm("AddCategory", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Category Key (lowercase, unique)</label>
+                        <input type="text" name="key" class="form-control" placeholder="e.g. township_business_hubs" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Display Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Township Business Hubs" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff per Square Meter (R)</label>
+                        <input type="number" step="0.01" name="tariffPerSqm" class="form-control" placeholder="e.g. 57.00" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Create Category</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Category -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editCategoryLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-pencil" style="color: var(--re-gold); margin-right: 8px;"></i>Edit Category details</h4>
+            </div>
+            @using (Html.BeginForm("EditCategory", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" />
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Display Name</label>
+                        <input type="text" name="name" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff per Square Meter (R)</label>
+                        <input type="number" step="0.01" name="tariffPerSqm" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Save Changes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Facility -->
+<div class="modal fade" id="addFacilityModal" tabindex="-1" role="dialog" aria-labelledby="addFacilityLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addFacilityLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-plus" style="color: var(--re-gold); margin-right: 8px;"></i>Add New Physical Property</h4>
+            </div>
+            @using (Html.BeginForm("AddFacility", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Property / Facility Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Tokoza Traders Market" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Customer Care Area (CCC)</label>
+                        @Html.DropDownList("cccId", (IEnumerable<SelectListItem>)ViewBag.CCCList, new { @class = "form-control", style = "border-radius: 8px; height: 42px; border-color: #cbd5e1;" })
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Street Address</label>
+                        <input type="text" name="address" class="form-control" placeholder="e.g. 123 Madiba Street, Tokoza" style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Create Property</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Facility -->
+<div class="modal fade" id="editFacilityModal" tabindex="-1" role="dialog" aria-labelledby="editFacilityLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editFacilityLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-pencil" style="color: var(--re-gold); margin-right: 8px;"></i>Edit Property Details</h4>
+            </div>
+            @using (Html.BeginForm("EditFacility", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" />
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Property / Facility Name</label>
+                        <input type="text" name="name" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Customer Care Area (CCC)</label>
+                        @Html.DropDownList("cccId", (IEnumerable<SelectListItem>)ViewBag.CCCList, new { @class = "form-control", style = "border-radius: 8px; height: 42px; border-color: #cbd5e1;" })
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Street Address</label>
+                        <input type="text" name="address" class="form-control" style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Save Changes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Unit Configuration -->
+<div class="modal fade" id="addUnitModal" tabindex="-1" role="dialog" aria-labelledby="addUnitLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addUnitLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-plus" style="color: var(--re-gold); margin-right: 8px;"></i>Add Unit Let-Space Configuration</h4>
+            </div>
+            @using (Html.BeginForm("AddUnit", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Physical Property / Facility</label>
+                        @Html.DropDownList("facilityId", (IEnumerable<SelectListItem>)ViewBag.FacilityList, new { @class = "form-control", style = "border-radius: 8px; height: 42px; border-color: #cbd5e1;" })
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff Category (Grade)</label>
+                        @Html.DropDownList("facilityCategoryId", (IEnumerable<SelectListItem>)ViewBag.CategoryList, new { @class = "form-control", style = "border-radius: 8px; height: 42px; border-color: #cbd5e1;" })
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Unit Type / Description</label>
+                        <input type="text" name="unitType" class="form-control" placeholder="e.g. Indoor Retail Shop Unit" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Unit Size (Square Meters)</label>
+                        <input type="number" step="0.01" name="unitSize" class="form-control" placeholder="e.g. 65.00" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Maximum Available Units of this type</label>
+                        <input type="number" name="maxUnits" class="form-control" placeholder="e.g. 4" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Create Unit</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Unit Configuration -->
+<div class="modal fade" id="editUnitModal" tabindex="-1" role="dialog" aria-labelledby="editUnitLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--re-gold-light); border-bottom: 1px solid var(--re-border-color);">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editUnitLabel" style="font-weight: 600; color: #1e293b;"><i class="fa fa-pencil" style="color: var(--re-gold); margin-right: 8px;"></i>Edit Unit space details</h4>
+            </div>
+            @using (Html.BeginForm("EditUnit", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" />
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Physical Property / Facility</label>
+                        <div id="editUnitFacilityName" style="background-color: #f8fafc; border: 1px solid var(--re-border-color); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-weight: 500; color: #64748b;">
+                            Springs Civic Centre
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff Category (Grade)</label>
+                        @Html.DropDownList("FacilityCategoryId", (IEnumerable<SelectListItem>)ViewBag.CategoryList, new { @class = "form-control", style = "border-radius: 8px; height: 42px; border-color: #cbd5e1;" })
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Unit Type / Description</label>
+                        <input type="text" name="UnitType" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Unit Size (Square Meters)</label>
+                        <input type="number" step="0.01" name="UnitSize" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Maximum Available Units</label>
+                        <input type="number" name="MaxUnits" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
+                    <button type="submit" class="btn btn-add-gold" style="padding: 8px 22px;">Save Changes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Interactive Tab Toggles
+            $(".admin-tab-item").click(function () {
+                var target = $(this).attr("data-target");
+
+                $(".admin-tab-item").removeClass("active");
+                $(this).addClass("active");
+
+                $(".admin-tab-content").removeClass("active");
+                $(target).addClass("active");
+            });
+
+            // Edit Category Trigger
+            $(".edit-category-btn").click(function () {
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+                var tariff = $(this).data("tariff");
+
+                $("#editCategoryModal [name='id']").val(id);
+                $("#editCategoryModal [name='name']").val(name);
+                $("#editCategoryModal [name='tariffPerSqm']").val(tariff);
+
+                $("#editCategoryModal").modal("show");
+            });
+
+            // Edit Facility Trigger
+            $(".edit-facility-btn").click(function () {
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+                var cccid = $(this).data("cccid");
+                var address = $(this).data("address");
+
+                $("#editFacilityModal [name='id']").val(id);
+                $("#editFacilityModal [name='name']").val(name);
+                $("#editFacilityModal [name='cccId']").val(cccid);
+                $("#editFacilityModal [name='address']").val(address);
+
+                $("#editFacilityModal").modal("show");
+            });
+
+            // Edit Unit Trigger
+            $(".edit-unit-btn").click(function () {
+                var id = $(this).data("id");
+                var facility = $(this).data("facility");
+                var categoryid = $(this).data("categoryid");
+                var unittype = $(this).data("unittype");
+                var unitsize = $(this).data("unitsize");
+                var maxunits = $(this).data("maxunits");
+
+                $("#editUnitModal [name='Id']").val(id);
+                $("#editUnitModal #editUnitFacilityName").text(facility);
+                $("#editUnitModal [name='FacilityCategoryId']").val(categoryid);
+                $("#editUnitModal [name='UnitType']").val(unittype);
+                $("#editUnitModal [name='UnitSize']").val(unitsize);
+                $("#editUnitModal [name='MaxUnits']").val(maxunits);
+
+                $("#editUnitModal").modal("show");
+            });
+        });
+    </script>
+}

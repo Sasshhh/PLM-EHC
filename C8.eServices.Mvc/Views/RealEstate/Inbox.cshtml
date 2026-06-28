@@ -1,21 +1,239 @@
-@model IEnumerable<C8.eServices.Mvc.Models.PropertyLeaseApplication>
-@using C8.eServices.Mvc.Keys;
+@model IEnumerable<C8.eServices.Mvc.Models.RE_Application>
 @{
     ViewBag.Title = "Real Estate Inbox";
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
 }
 
-<div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none;">
-    <div class="panel-heading" style="background-color: #2c3e50; color: white; font-size: 18px; font-weight: bold; border-top-left-radius: 8px; border-top-right-radius: 8px; padding: 15px;" align="center">
-        Real Estate Development Dashboard
-    </div>
-    <div class="panel-body" style="padding: 30px; text-align: center;">
-        <div style="margin: 40px auto; max-width: 500px;">
-            <i class="ion ion-ios-filing-outline" style="font-size: 80px; color: #bdc3c7; display: block; margin-bottom: 20px;"></i>
-            <h3 style="color: #2c3e50; font-weight: 600; margin-bottom: 10px;">No Applications Found</h3>
-            <p style="color: #7f8c8d; font-size: 15px; line-height: 1.6;">
-                You currently do not have any active Real Estate applications in your inbox. Once you submit a new application, it will appear here.
-            </p>
+<style>
+    /* Premium Real Estate Theme */
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .re-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .re-header-card {
+        background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .re-header-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .re-header-subtitle {
+        font-size: 15px;
+        color: #94a3b8;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .re-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .re-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .re-table th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 16px 20px !important;
+        border-bottom: 2px solid var(--re-border-color) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .re-table td {
+        padding: 16px 20px !important;
+        border-bottom: 1px solid var(--re-border-color) !important;
+        font-size: 14px !important;
+        color: #334155;
+        vertical-align: middle !important;
+    }
+
+    .re-table tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    .re-table tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    .ref-badge {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 700;
+        color: #1e293b;
+        background-color: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-submitted {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-inprogress {
+        background-color: #dbeafe;
+        color: #2563eb;
+    }
+
+    .status-query {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .status-default {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+    .action-btn {
+        background: none;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-btn:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+</style>
+
+<div class="re-container">
+    <div class="re-header-card">
+        <div>
+            <h1 class="re-header-title">Real Estate Application Inbox</h1>
+            <p class="re-header-subtitle">Pending tasks and applications awaiting your review or action.</p>
         </div>
+    </div>
+
+    <div class="re-card">
+        @if (Model == null || !Model.Any())
+        {
+            <div style="padding: 40px; text-align: center; color: #64748b;">
+                <i class="fa fa-envelope-open-o" style="font-size: 48px; margin-bottom: 16px; color: #cbd5e1;"></i>
+                <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Your Inbox is Clean!</p>
+                <p style="font-size: 14px; margin-bottom: 0;">No active action items or queried lease applications were found at this time.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table re-table">
+                <thead>
+                    <tr>
+                        <th>Reference Number</th>
+                        <th>Applicant Details</th>
+                        <th>Purpose of Lease</th>
+                        <th>Submitted Date</th>
+                        <th>Status / Active Action</th>
+                        <th style="width: 120px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        var statusClass = "status-default";
+                        if (app.Status != null)
+                        {
+                            switch (app.Status.Key.ToLower())
+                            {
+                                case "s_rcs_submitted":
+                                case "submitted":
+                                    statusClass = "status-submitted";
+                                    break;
+                                case "inprogress":
+                                case "in_progress":
+                                    statusClass = "status-inprogress";
+                                    break;
+                                case "query":
+                                    statusClass = "status-query";
+                                    break;
+                            }
+                        }
+
+                        <tr>
+                            <td><span class="ref-badge">@app.ApplicationReferenceNumber</span></td>
+                            <td>
+                                <div style="font-weight: 600;">@app.EntityName</div>
+                                <div style="font-size: 12px; color: #64748b;">@app.ApplicantType</div>
+                            </td>
+                            <td>@app.PurposeOfLease</td>
+                            <td>@(app.CreatedDateTime.HasValue ? app.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                            <td>
+                                <span class="status-pill @statusClass">
+                                    <i class="fa fa-circle" style="font-size: 8px;"></i>
+                                    @(app.Status != null ? app.Status.Name : "Pending")
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                @if (app.Status != null && app.Status.Key == "Query")
+                                {
+                                    <a href="@Url.Action("Capture", new { id = app.Id })" class="action-btn" style="color: #dc2626; border-color: #fca5a5;">
+                                        <i class="fa fa-edit"></i> Respond
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size: 13px; font-style: italic;">Awaiting Back Office</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>

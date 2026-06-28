@@ -1,0 +1,216 @@
+@model IEnumerable<C8.eServices.Mvc.Models.RE_Application>
+@{
+    ViewBag.Title = "Technician Allocation Queue";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--re-border-color);
+    }
+
+    .admin-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--re-border-color);
+        font-size: 13px;
+    }
+
+    .btn-re-gold {
+        background-color: var(--re-gold);
+        color: #ffffff;
+        border: 1px solid var(--re-gold);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 12px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .btn-re-gold:hover {
+        background-color: var(--re-gold-hover);
+        color: #ffffff;
+    }
+
+    .btn-re-danger {
+        background-color: #dc2626;
+        color: #ffffff;
+        border: 1px solid #dc2626;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 12px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .btn-re-danger:hover {
+        background-color: #b91c1c;
+        color: #ffffff;
+    }
+
+    .badge-status {
+        padding: 4px 8px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .status-inprogress { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+</style>
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 style="margin:0 0 5px 0; font-size:24px; font-weight:700;">Technician Allocation Inbox</h1>
+        <p style="margin:0; font-size:14px; color:#cbd5e1;">Review assigned maintenance jobs, accept tasks, and update progress (UC 17).</p>
+    </div>
+
+    <div class="admin-card">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>WO Number</th>
+                    <th>Defect Description</th>
+                    <th>Priority</th>
+                    <th>Assigned Tech</th>
+                    <th>WO Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#64748b; font-style:italic; padding:30px;">
+                            No pending allocations found for technicians.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var app in Model)
+                    {
+                        <tr>
+                            <td style="font-weight:700; color:var(--re-slate-black);">@app.WorkOrderNumber</td>
+                            <td>@app.WorkOrderIssueDescription</td>
+                            <td>@app.WorkOrderPriority</td>
+                            <td>@app.WorkOrderTechnicianName</td>
+                            <td>
+                                <span class="badge-status status-inprogress">@app.WorkOrderStatus</span>
+                            </td>
+                            <td style="text-align:right; display:flex; justify-content:flex-end; gap:8px;">
+                                @using (Html.BeginForm("AcceptAllocation", "RealEstateAdmin", new { id = app.Id }, FormMethod.Post, new { style = "display:inline-block;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="decision" value="Accept" />
+                                    <button type="submit" class="btn-re-gold" id="btn-accept-wo-@app.Id">
+                                        <i class="fa fa-check"></i> Accept Job
+                                    </button>
+                                }
+
+                                <button class="btn-re-danger" onclick="openRejectModal(@app.Id, '@app.WorkOrderNumber')" id="btn-reject-wo-@app.Id">
+                                    <i class="fa fa-times"></i> Reject
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true" style="margin-top: 10%;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: 2px solid #dc2626;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); color:#ffffff; border-bottom: 2px solid #dc2626;">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:0.8;">&times;</button>
+                <h4 class="modal-title" id="rejectModalLabel" style="font-weight: 700;">Reject Work Order Allocation</h4>
+            </div>
+            @using (Html.BeginForm("AcceptAllocation", "RealEstateAdmin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="rejectWoId" />
+                <input type="hidden" name="decision" value="Reject" />
+
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="font-weight:600; font-size:14px; margin-bottom:15px; color:#1e293b;">
+                        Rejection reason for: <span id="rejectWoName" style="color:#dc2626;"></span>
+                    </p>
+
+                    <div class="form-group">
+                        <label style="font-weight:600; color:#475569;">Please specify why you are rejecting this task *</label>
+                        <textarea name="reason" class="form-control" rows="4" required="required" placeholder="E.g. Conflict in schedule, specialized equipment missing..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding:15px 20px; display:flex; justify-content:flex-end; gap:10px; border-top: 1px solid var(--re-border-color);">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger" style="font-weight:600;">Reject Allocation</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openRejectModal(id, woNum) {
+            $('#rejectWoId').val(id);
+            $('#rejectWoName').text(woNum);
+            $('#rejectModal').modal('show');
+        }
+    </script>
+}

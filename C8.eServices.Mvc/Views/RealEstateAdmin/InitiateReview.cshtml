@@ -1,0 +1,317 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Initiate Departmental Review";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var departments = (IEnumerable<C8.eServices.Mvc.Models.DepartmentsCoE>)ViewBag.Departments;
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .admin-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: var(--re-slate-black);
+        border-bottom: 2px solid var(--re-gold);
+        padding-bottom: 6px;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #f1f5f9;
+        font-size: 13px;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .dept-list-container {
+        margin-top: 15px;
+    }
+
+    .dept-card {
+        border: 1px solid var(--re-border-color);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        background-color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dept-name {
+        font-weight: 600;
+        font-size: 14px;
+        color: #334155;
+    }
+
+    .dept-rep {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .btn-action {
+        padding: 10px 24px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background-color: var(--re-gold);
+        border: 1px solid var(--re-gold);
+        color: #ffffff;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+    }
+
+    .btn-cancel {
+        background-color: transparent;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .modal-content-gold {
+        border-radius: 12px;
+        border: 2px solid var(--re-gold);
+        background: #ffffff;
+    }
+
+    .modal-header-gold {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom: 2px solid var(--re-gold);
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible" role="alert" style="border-radius: 8px; border-left: 4px solid #dc2626;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-exclamation-circle" style="margin-right: 8px;"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 class="admin-title">Initiate Departmental Review</h1>
+        <p class="admin-subtitle">Route application @Model.ApplicationReferenceNumber to all active departments for evaluation comments.</p>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+        <div class="info-card">
+            <h4>Application Details</h4>
+            <div class="info-item">
+                <span class="info-label">Reference Number:</span>
+                <span class="info-value" style="font-weight: 700;">@Model.ApplicationReferenceNumber</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Applicant Name:</span>
+                <span class="info-value">@(Model.Customer != null ? Model.Customer.FullName : "N/A")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Applicant Type:</span>
+                <span class="info-value">@Model.ApplicantType</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Purpose of Lease:</span>
+                <span class="info-value">@Model.PurposeOfLease</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4>Risk Assessment Outcome</h4>
+            <div class="info-item">
+                <span class="info-label">Recommendation:</span>
+                <span class="info-value" style="color: #15803d; font-weight: 700;">@Model.RiskAssessmentRecommendation</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Reason:</span>
+                <span class="info-value" style="font-style: italic;">@Model.RiskAssessmentReason</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Credit Check:</span>
+                <span class="info-value">@Model.CreditBureauResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Deeds Registry:</span>
+                <span class="info-value">@Model.DeedsResult</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departments Circulation Card -->
+    <div class="info-card" style="margin-bottom: 30px;">
+        <h4>Reviewing Departments Configured</h4>
+        
+        @if (departments == null || !departments.Any())
+        {
+            <div class="alert alert-warning" role="alert" style="margin-top: 15px; border-radius: 8px; border-left: 4px solid #d97706;">
+                <i class="fa fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                <strong>Please configure reviewing departments.</strong> No active reviewing departments/officials were found in the database.
+            </div>
+        }
+        else
+        {
+            <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">
+                The application will be circulated and notifications sent to the representatives of the following active departments:
+            </p>
+
+            <div class="dept-list-container">
+                @foreach (var dept in departments)
+                {
+                    <div class="dept-card">
+                        <div>
+                            <span class="dept-name">@dept.DepartmentName</span>
+                        </div>
+                        <div>
+                            <span class="dept-rep">
+                                <i class="fa fa-user-circle-o"></i> Representative: 
+                                <strong>@(string.IsNullOrEmpty(dept.RepresentedBy) ? "Not Configured" : dept.RepresentedBy)</strong>
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @using (Html.BeginForm("InitiateReview", "RealEstateAdmin", new { id = Model.Id }, FormMethod.Post, new { id = "initiateForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div style="display:flex; gap:12px; justify-content: flex-start; align-items: center; margin-top: 30px; border-top: 1px solid var(--re-border-color); padding-top: 20px;">
+                @if (departments != null && departments.Any())
+                {
+                    <button type="button" class="btn-action btn-submit" id="btn-send-review" onclick="showConfirmModal()">
+                        <i class="fa fa-share-alt"></i> Send for Review
+                    </button>
+                }
+                <a href="@Url.Action("DepartmentalReviews", "RealEstateAdmin")" class="btn-action btn-cancel">
+                    Cancel
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" style="margin-top: 10%;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-content-gold">
+            <div class="modal-header modal-header-gold">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.8;"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="confirmModalLabel" style="font-weight: 700; display:flex; align-items:center; gap:8px;">
+                    <i class="fa fa-exclamation-triangle" style="color: var(--re-gold);"></i> Confirm Circulation
+                </h4>
+            </div>
+            <div class="modal-body" style="padding: 24px; font-size: 15px; color: var(--re-text-dark); font-weight: 500;">
+                <p>Are you sure you want to submit the application for departmental review?</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 15px 24px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; font-weight:600; padding:8px 16px;">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitConfirmed()" style="background-color: var(--re-gold); border-color: var(--re-gold); font-weight:600; border-radius: 6px; padding:8px 20px;">Yes, I am sure</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showConfirmModal() {
+            $('#confirmModal').modal('show');
+        }
+
+        function submitConfirmed() {
+            $('#confirmModal').modal('hide');
+            $('#initiateForm').submit();
+        }
+    </script>
+}

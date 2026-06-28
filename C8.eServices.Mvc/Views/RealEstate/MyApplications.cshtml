@@ -1,0 +1,670 @@
+@model IEnumerable<C8.eServices.Mvc.Models.RE_Application>
+@{
+    ViewBag.Title = "My Real Estate Applications";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /* Premium Real Estate Theme */
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .re-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .re-header-card {
+        background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .re-header-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .re-header-subtitle {
+        font-size: 15px;
+        color: #94a3b8;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .re-btn-primary {
+        background-color: var(--re-gold) !important;
+        border-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .re-btn-primary:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+    }
+
+    .re-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .re-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .re-table th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 16px 20px !important;
+        border-bottom: 2px solid var(--re-border-color) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .re-table td {
+        padding: 16px 20px !important;
+        border-bottom: 1px solid var(--re-border-color) !important;
+        font-size: 14px !important;
+        color: #334155;
+        vertical-align: middle !important;
+    }
+
+    .re-table tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    .re-table tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    .ref-badge {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 700;
+        color: #1e293b;
+        background-color: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-submitted {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-inprogress {
+        background-color: #dbeafe;
+        color: #2563eb;
+    }
+
+    .status-approved {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .status-query {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .status-default {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+    .action-btn {
+        background: none;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-btn:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+
+    /* Modal Styling */
+    .re-modal-content {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .re-modal-header {
+        background-color: var(--re-gold-light);
+        border-bottom: 1px solid var(--re-border-color);
+        padding: 16px 24px !important;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .re-modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .re-modal-body {
+        padding: 24px !important;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .detail-section {
+        margin-bottom: 24px;
+    }
+
+    .detail-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--re-border-color);
+        padding-bottom: 6px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    @@media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .detail-item {
+        font-size: 13px;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+
+    .detail-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .detail-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .detail-checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .detail-checkbox-item i {
+        color: #16a34a;
+    }
+</style>
+
+<div class="re-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" style="border-radius: 8px; margin-bottom: 25px;">
+            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="re-header-card">
+        <div>
+            <h1 class="re-header-title">My Real Estate Applications</h1>
+            <p class="re-header-subtitle">Track the status of your submitted lease applications for letting space.</p>
+        </div>
+        <a href="@Url.Action("Capture")" class="re-btn-primary">
+            <i class="fa fa-plus-circle"></i> Create New Application
+        </a>
+    </div>
+
+    <div class="re-card">
+        @if (Model == null || !Model.Any())
+        {
+            <div style="padding: 40px; text-align: center; color: #64748b;">
+                <i class="fa fa-folder-open-o" style="font-size: 48px; margin-bottom: 16px; color: #cbd5e1;"></i>
+                <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">No Applications Found</p>
+                <p style="font-size: 14px; margin-bottom: 0;">You have not submitted any lease applications yet. Click "Create New Application" above to begin.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table re-table">
+                <thead>
+                    <tr>
+                        <th>Reference Number</th>
+                        <th>Applicant Details</th>
+                        <th>CCC Area</th>
+                        <th>Purpose of Lease</th>
+                        <th>Submitted Date</th>
+                        <th>Status</th>
+                        <th style="width: 100px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        var statusClass = "status-default";
+                        if (app.Status != null)
+                        {
+                            switch (app.Status.Key.ToLower())
+                            {
+                                case "s_rcs_submitted":
+                                case "submitted":
+                                    statusClass = "status-submitted";
+                                    break;
+                                case "inprogress":
+                                case "in_progress":
+                                    statusClass = "status-inprogress";
+                                    break;
+                                case "approved":
+                                case "active":
+                                    statusClass = "status-approved";
+                                    break;
+                                case "query":
+                                    statusClass = "status-query";
+                                    break;
+                            }
+                        }
+
+                        <tr>
+                            <td><span class="ref-badge">@app.ApplicationReferenceNumber</span></td>
+                            <td>
+                                <div style="font-weight: 600;">@app.EntityName</div>
+                                <div style="font-size: 12px; color: #64748b;">@app.ApplicantType</div>
+                            </td>
+                            <td>@(app.CCC != null ? app.CCC.CCCName : "N/A")</td>
+                            <td>@app.PurposeOfLease</td>
+                            <td>@(app.CreatedDateTime.HasValue ? app.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                            <td>
+                                <span class="status-pill @statusClass">
+                                    <i class="fa fa-circle" style="font-size: 8px;"></i>
+                                    @(app.Status != null ? app.Status.Name : "Submitted")
+                                </span>
+                            </td>
+                            <td style="text-align: center; display: flex; gap: 6px; justify-content: center; align-items: center; border-bottom: 1px solid var(--re-border-color) !important;">
+                                <button type="button" class="action-btn btn-view-details" data-app-id="@app.Id" id="btn-view-@app.Id">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                                @if (app.Status != null && app.Status.Key == "re_awaiting_inspection" && app.InspectionStatus == "Scheduled")
+                                {
+                                    <a href="@Url.Action("SelectInspectionSlot", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-select-slot-@app.Id">
+                                        <i class="fa fa-calendar"></i> Select Slot
+                                    </a>
+                                }
+                                @if (app.Status != null && (app.Status.Key == "re_concluded_approved" || app.Status.Key == "re_awaiting_inspection" || app.Status.Key == "re_awaiting_agreement_conclusion") && string.IsNullOrEmpty(app.PtoReferenceNumber))
+                                {
+                                    <a href="@Url.Action("RequestPto", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-request-pto-@app.Id">
+                                        <i class="fa fa-key"></i> Request PTO
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content re-modal-content">
+            <div class="modal-header re-modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #64748b; font-size: 24px; opacity: 0.8; outline: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title re-modal-title" id="detailsModalLabel">Lease Application Details: <span id="modalRefNo" style="font-family: monospace; font-weight: 700; color: var(--re-gold);"></span></h4>
+            </div>
+            <div class="modal-body re-modal-body">
+                <!-- Data will be populated dynamically -->
+                <div id="modalLoading" style="text-align: center; padding: 40px 0;">
+                    <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--re-gold); margin-bottom: 12px;"></i>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">Loading application details...</p>
+                </div>
+                
+                <div id="modalContent" style="display: none;">
+                    <!-- Section 1: Profile -->
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">Applicant Profile</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Applicant Type</div>
+                                <div class="detail-value" id="valApplicantType"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label" id="lblModalEntityName">Entity/Business Name</div>
+                                <div class="detail-value" id="valEntityName"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label" id="lblModalRegNo">Company Registration Number</div>
+                                <div class="detail-value" id="valRegNo"></div>
+                            </div>
+                            <div class="detail-item" id="divModalVat">
+                                <div class="detail-label">VAT Registration Number</div>
+                                <div class="detail-value" id="valVatNo"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Tax Reference Number</div>
+                                <div class="detail-value" id="valTaxNo"></div>
+                            </div>
+                            <div class="detail-item" id="divModalRep">
+                                <div class="detail-label">Authorized Representative</div>
+                                <div class="detail-value" id="valRep"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Contact Info -->
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">Contact & Addresses</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Registered/Residential Address</div>
+                                <div class="detail-value" id="valAddress"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Postal Code</div>
+                                <div class="detail-value" id="valPostalCode"></div>
+                            </div>
+                            <div class="detail-item" id="divModalTel">
+                                <div class="detail-label">Telephone</div>
+                                <div class="detail-value" id="valTel"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Mobile Number</div>
+                                <div class="detail-value" id="valMobile"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email Address</div>
+                                <div class="detail-value" id="valEmail"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Banking -->
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">Banking Details</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Bank Name</div>
+                                <div class="detail-value" id="valBankName"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Account Type</div>
+                                <div class="detail-value" id="valAccountType"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Account Holder Name</div>
+                                <div class="detail-value" id="valAccountHolder"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Account Number</div>
+                                <div class="detail-value" id="valAccountNumber"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Branch Code</div>
+                                <div class="detail-value" id="valBranchCode"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Lease Specifications -->
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">Space & Lease Specifications</h4>
+                        <div class="detail-grid" style="margin-bottom: 16px;">
+                            <div class="detail-item">
+                                <div class="detail-label">Purpose of Lease</div>
+                                <div class="detail-value" id="valPurposeOfLease"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">CCC Area</div>
+                                <div class="detail-value" id="valCccArea"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Erf / Farm Number</div>
+                                <div class="detail-value" id="valErfNumber"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Property Address</div>
+                                <div class="detail-value" id="valPropertyAddress"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Township / Suburb / Farm</div>
+                                <div class="detail-value" id="valPropertyTownship"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Postal Code</div>
+                                <div class="detail-value" id="valPropertyPostal"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-label" style="margin-top: 15px; margin-bottom: 8px; font-weight: 700; color: #1e293b;">Selected Facility & Unit Specification:</div>
+                        <div id="modalUnitDetails" style="background: var(--re-gold-light); border: 1px solid rgba(197, 155, 39, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px; display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                                <div class="detail-item">
+                                    <div class="detail-label">Selected Facility Name</div>
+                                    <div class="detail-value" id="valSelectedFacilityName">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Unit Type / Specification</div>
+                                    <div class="detail-value" id="valSelectedUnitType">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Unit Size</div>
+                                    <div class="detail-value" id="valSelectedUnitSize">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Base Tariff</div>
+                                    <div class="detail-value" id="valSelectedUnitTariff">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Quantity Requested</div>
+                                    <div class="detail-value" id="valSelectedUnitCount">-</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px dashed rgba(197, 155, 39, 0.3); padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 13px; font-weight: 600; color: #475569;">Calculated Monthly Rental:</span>
+                                <span id="valCalculatedMonthlyRental" style="font-size: 18px; font-weight: 800; color: var(--re-gold);">-</span>
+                            </div>
+                        </div>
+
+                        <div id="modalFacilitiesWrapper" style="display: none; margin-top: 15px;">
+                            <div class="detail-label" style="margin-bottom: 8px; font-weight: 700; color: #1e293b;">Letting Space Facilities Selected (Legacy):</div>
+                            <div class="detail-checkbox-grid" id="modalFacilities">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 16px 24px;">
+                <button type="button" class="btn re-btn-secondary" data-dismiss="modal" style="padding: 8px 20px !important;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // View Details button handler
+            $(".btn-view-details").click(function () {
+                var appId = $(this).attr("data-app-id");
+                
+                // Reset and show modal
+                $("#modalLoading").show();
+                $("#modalContent").hide();
+                $("#detailsModal").modal("show");
+
+                // Fetch details using AJAX
+                $.ajax({
+                    url: '@Url.Action("GetApplicationDetails", "RealEstate")',
+                    type: 'GET',
+                    data: { id: appId },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            var app = data.data;
+                            
+                            // Set Reference Header
+                            $("#modalRefNo").text(app.ApplicationReferenceNumber);
+                            
+                            // Profile Fields
+                            $("#valApplicantType").text(app.ApplicantType);
+                            $("#valEntityName").text(app.EntityName || "N/A");
+                            $("#valRegNo").text(app.CompanyRegistrationNumber || "N/A");
+                            $("#valVatNo").text(app.VatRegistrationNumber || "N/A");
+                            $("#valTaxNo").text(app.TaxReferenceNumber || "N/A");
+                            
+                            var isIndividual = (app.ApplicantType === "Individual");
+                            if (isIndividual) {
+                                $("#lblModalEntityName").text("Full Name");
+                                $("#lblModalRegNo").text("Identity (ID) Number");
+                                $("#divModalVat, #divModalRep, #divModalTel").hide();
+                            } else {
+                                $("#lblModalEntityName").text("Entity/Business Name");
+                                $("#lblModalRegNo").text("Company Registration Number");
+                                $("#divModalVat, #divModalRep, #divModalTel").show();
+                                $("#valRep").text((app.AuthorizedRepresentativeName || "N/A") + " (" + (app.AuthorizedRepresentativeCapacity || "N/A") + ")");
+                            }
+
+                            // Contact Fields
+                            $("#valAddress").text(app.EntityRegisteredAddress || "N/A");
+                            $("#valPostalCode").text(app.EntityRegisteredPostalCode || "N/A");
+                            $("#valTel").text(app.EntityTelephone || "N/A");
+                            $("#valMobile").text(app.EntityMobile || "N/A");
+                            $("#valEmail").text(app.EntityEmail || "N/A");
+
+                            // Banking Fields
+                            $("#valBankName").text(app.BankName);
+                            $("#valAccountType").text(app.BankAccountType);
+                            $("#valAccountHolder").text(app.BankAccountName);
+                            $("#valAccountNumber").text(app.BankAccountNumber);
+                            $("#valBranchCode").text(app.BankBranchCode);
+
+                            // Lease Fields
+                            $("#valPurposeOfLease").text(app.PurposeOfLease);
+                            $("#valCccArea").text(app.CCCName || "N/A");
+                            $("#valErfNumber").text(app.ErfFarmNumber);
+                            $("#valPropertyAddress").text(app.PropertyAddress);
+                            $("#valPropertyTownship").text(app.TownshipSuburbFarmName);
+                            $("#valPropertyPostal").text(app.PropertyPostalCode);
+
+                            // Populate new unit details if SelectedFacilityId is present
+                            if (app.SelectedFacilityId) {
+                                $("#valSelectedFacilityName").text(app.SelectedFacilityName || "N/A");
+                                $("#valSelectedUnitType").text(app.SelectedUnitType || "N/A");
+                                $("#valSelectedUnitSize").text((app.SelectedUnitSize || 0) + " m²");
+                                $("#valSelectedUnitTariff").text("R" + (app.SelectedUnitTariff || 0).toFixed(2));
+                                $("#valSelectedUnitCount").text(app.SelectedUnitCount || 0);
+                                $("#valCalculatedMonthlyRental").text("R" + (app.CalculatedMonthlyRental || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                $("#modalUnitDetails").show();
+                            } else {
+                                $("#modalUnitDetails").hide();
+                            }
+
+                            // Render checkboxes
+                            var facHtml = "";
+                            var hasLegacyFac = false;
+                            if (app.FacilityOutdoorAdvertising) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Outdoor Advertising</div>'; hasLegacyFac = true; }
+                            if (app.FacilityTelecommunications) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Telecommunications</div>'; hasLegacyFac = true; }
+                            if (app.FacilityInformalTrading) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Informal Trading</div>'; hasLegacyFac = true; }
+                            if (app.FacilityTaxiRankTrading) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Taxi Rank Trading</div>'; hasLegacyFac = true; }
+                            if (app.FacilityVocationalSkills) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Vocational Skills</div>'; hasLegacyFac = true; }
+                            if (app.FacilityComputerTraining) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Computer Training</div>'; hasLegacyFac = true; }
+                            if (app.FacilityIndustrialPark) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Industrial Park</div>'; hasLegacyFac = true; }
+                            if (app.FacilityBusinessHub) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Business Hub</div>'; hasLegacyFac = true; }
+                            if (app.FacilityAutomotiveHub) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Automotive Hub</div>'; hasLegacyFac = true; }
+                            if (app.FacilityAgriPark) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Agri-Park</div>'; hasLegacyFac = true; }
+                            if (app.FacilityIncubationFarm) { facHtml += '<div class="detail-checkbox-item"><i class="fa fa-check-square-o"></i> Incubation Farm</div>'; hasLegacyFac = true; }
+
+                            if (hasLegacyFac) {
+                                $("#modalFacilities").html(facHtml);
+                                $("#modalFacilitiesWrapper").show();
+                            } else {
+                                $("#modalFacilitiesWrapper").hide();
+                            }
+
+                            $("#modalLoading").hide();
+                            $("#modalContent").fadeIn(200);
+                        } else {
+                            swal("Error", data.message || "Failed to load application details.", "error");
+                            $("#detailsModal").modal("hide");
+                        }
+                    },
+                    error: function () {
+                        swal("Error", "An unexpected error occurred while fetching application details.", "error");
+                        $("#detailsModal").modal("hide");
+                    }
+                });
+            });
+        });
+    </script>
+}

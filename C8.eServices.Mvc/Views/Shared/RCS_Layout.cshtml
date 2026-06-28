@@ -858,7 +858,49 @@
 
                     @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
                     {
-
+                        <!-- Real Estate Back-Office Actions (UC 06 - 08) -->
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-cash"></i>
+                                <span class="text">Financials</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/RealEstateAdmin/ApplicationFeePayments">
+                                        <i class="ion ion-social-usd" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Application Fee Payments</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-android-apps"></i>
+                                <span class="text">Assessment</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/RealEstateAdmin/RiskAssessments">
+                                        <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Risk Assessment</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/RealEstateAdmin/DepartmentalReviews">
+                                        <i class="ion ion-loop" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Departmental Reviews</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/RealEstateAdmin/Index">
+                                        <i class="ion ion-gear-b" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Unit Configurations</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
                         <li>
                             <a href="javascript:;">
@@ -2546,9 +2588,21 @@
                                 </a>
                                 <ul class="inner-drop list-unstyled">
                                     <li>
+                                        <a href="~/RealEstate/Capture">
+                                            <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Capture</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a href="~/RealEstate/Inbox">
                                             <i class="ion ion-android-notifications" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                             <span class="text">Inbox</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/RealEstate/MyApplications">
+                                            <i class="ion ion-ios-chatboxes" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">My Applications</span>
                                         </a>
                                     </li>
                                 </ul>

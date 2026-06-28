@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.RegisterViewModel
+@model C8.eServices.Mvc.ViewModels.RegisterViewModel
 @{
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
     ViewBag.Title = "Register";
@@ -135,6 +135,13 @@
                 <div class="panel-body">
 
                     <div class="form-group">
+                        <span> @Html.LabelFor(m => m.DepartmentId, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-4">
+                            @Html.DropDownListFor(m => m.DepartmentId, (IEnumerable<SelectListItem>)ViewBag.Departments, "Select Department", new { @class = "form-control", @required = true, @id = "ddlDepartment" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <span> @Html.LabelFor(m => m.FirstName, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
                         <div class="col-md-4">
                             @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", @required = true })
@@ -153,6 +160,14 @@
                             @Html.ValidationMessageFor(m => m.IdentificationNumber, "", new { @class = "text-danger", @id = "txtIdNumberErr" })
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <span> @Html.LabelFor(m => m.NotificationTypeId, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
+                        <div class="col-md-4">
+                            @Html.DropDownListFor(m => m.NotificationTypeId, (IEnumerable<SelectListItem>)ViewBag.NotificationTypes, "Select Preferred Method of Communication", new { @class = "form-control", @required = true, @id = "ddlNotificationType" })
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <span>   @Html.LabelFor(m => m.UserName, new { @class = "col-md-2 control-label" })<b style="color:red; font-size:x-large;">*</b></span>
                         <div class="col-md-4">

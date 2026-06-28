@@ -1,4 +1,4 @@
-﻿using C8.eServices.Mvc.Models;
+using C8.eServices.Mvc.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
@@ -129,6 +129,14 @@ namespace C8.eServices.Mvc.ViewModels
         
         [Display( Name = "Status" )]
         public string StatusId { get; set; }
+
+        [Required]
+        [Display(Name = "Department")]
+        public int DepartmentId { get; set; }
+
+        [Required]
+        [Display(Name = "Preferred Method of Communication")]
+        public int NotificationTypeId { get; set; }
     }
 
 

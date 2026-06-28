@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
@@ -10,6 +10,11 @@ namespace C8.eServices.Mvc.DataAccessLayer
 {
     public class CesarDbContext : DbContext
     {
+        static CesarDbContext()
+        {
+            Database.SetInitializer<CesarDbContext>(null);
+        }
+
         public CesarDbContext()
             : base("CesarDbContext")
         { }

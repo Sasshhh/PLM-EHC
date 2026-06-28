@@ -361,5 +361,29 @@ namespace C8.eServices.Mvc.Keys
         // UC030 — Refund approvals & Closure
         public const string AwaitingRefundAuthorisation = "s_awaiting_refund_authorisation";
         public const string FormerTenant = "s_former_tenant";
+
+        // Real Estate Use Cases (UC 06 to UC 08)
+        public const string RealEstateInCirculation = "re_in_circulation_for_evaluation";
+
+        // Real Estate Use Cases (UC 09 to UC 20)
+        public const string ReSupported = "re_supported";
+        public const string ReSupportedConditions = "re_supported_conditions";
+        public const string ReNotSupported = "re_not_supported";
+        public const string ReAdditionalInfoReq = "re_additional_info_req";
+        public const string RePendingCommitteeOutcome = "re_pending_committee_outcome";
+        public const string ReRecommended = "re_recommended";
+        public const string ReRecommendedConditions = "re_recommended_conditions";
+        public const string ReNotRecommended = "re_not_recommended";
+        public const string ReDeferred = "re_deferred";
+        public const string ReConcludedApproved = "re_concluded_approved";
+        public const string ReConcludedRejected = "re_concluded_rejected";
+        public const string ReAwaitingInspection = "re_awaiting_inspection";
+        public const string ReAwaitingAgreementConclusion = "re_awaiting_agreement_conclusion";
+        public const string ReAwaitingPtoReview = "re_awaiting_pto_review";
+        public const string ReAwaitingPtoApproval = "re_awaiting_pto_approval";
+        public const string RePtoApproved = "re_pto_approved";
+        public const string RePtoRejected = "re_pto_rejected";
+        public const string RePtoApprovedConditions = "re_pto_approved_conditions";
+        public const string RePtoAdditionalInfo = "re_pto_additional_info";
     }
 }

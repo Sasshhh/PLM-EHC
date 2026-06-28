@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Globalization;
@@ -210,10 +210,16 @@ namespace C8.eServices.Mvc.Controllers
                 var endDateTime = (string.IsNullOrEmpty(endDate)) ? DateTime.ParseExact(DateTime.Now.ToString("yyyyMMdd"), "yyyyMMdd", CultureInfo.InvariantCulture) : DateTime.ParseExact(endDate.Replace(@"/", ""), "yyyyMMdd", CultureInfo.InvariantCulture);
 
                 var customerModels = context.Customers.Include(c => c.CustomerType).Include(c => c.Status)
-                                     .Include(c => c.SystemUser)
+                                     .Include(c => c.SystemUser).Include(c => c.SystemUser.Department)
                                      .Where(c => c.SystemUserId != null
                                      && c.IsActive && !c.IsDeleted &&
                                     (DbFunctions.TruncateTime(c.CreatedDateTime) >= startDateTime && DbFunctions.TruncateTime(c.CreatedDateTime) <= endDateTime));
+
+                var currentUserDepartment = context.ApplicationEntities.Find(_base.SystemUser.DepartmentId)?.Key;
+                if (!string.IsNullOrEmpty(currentUserDepartment))
+                {
+                    customerModels = customerModels.Where(c => c.SystemUser.Department != null && c.SystemUser.Department.Key == currentUserDepartment);
+                }
 
                 var profilePendingApproval = context.Status.FirstOrDefault(s => s.Key == StatusKeys.CustomerPendingApproval);
                 var profilePendingDocuments = context.Status.FirstOrDefault(s => s.Key == StatusKeys.CustomerPendingDocuments);
@@ -433,7 +439,7 @@ namespace C8.eServices.Mvc.Controllers
                 var email = new Email();
                 try
                 {
-                    var customer = context.Customers.Include(s => s.SystemUser).FirstOrDefault(c => c.Id == customerId);
+                    var customer = context.Customers.Include(s => s.SystemUser.Department).FirstOrDefault(c => c.Id == customerId);
                     if (customer == null) throw new Exception("Invalid Customer");
                     var status = context.Status.FirstOrDefault(s => s.Key.Equals(StatusKeys.CustomerActive));
                     if (status == null) throw new Exception(string.Format("Invalid/ missing status key {0}", StatusKeys.CustomerActive));
@@ -448,8 +454,17 @@ namespace C8.eServices.Mvc.Controllers
                     DocumentHelper.VerifyDocuments(customer.Id, documentReferenceType);
 
                     //Notify customer
-                    const string body = "Your Profile has been activated on Property Lease Management System.";
-                    email.GenerateEmail(customer.SystemUser.EmailAddress, "Property Lease Management Customer Profile Activation", body, customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, customer.FullName);
+                    string subject = "Property Lease Management Customer Profile Activation";
+                    string body = "Your Profile has been activated on Property Lease Management System.";
+
+                    if (customer.SystemUser != null && customer.SystemUser.Department != null &&
+                        customer.SystemUser.Department.Key == ApplicationEntityKeys.RealEstateDevelopment)
+                    {
+                        subject = "Real Estate Development Profile Approved";
+                        body = "You have been granted access into Real Estate. Your profile has been approved, please login to the system.";
+                    }
+
+                    email.GenerateEmail(customer.SystemUser.EmailAddress, subject, body, customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, customer.FullName);
 
                     return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
                 }

@@ -1,0 +1,144 @@
+@model IEnumerable<C8.eServices.Mvc.Models.RE_Application>
+@{
+    ViewBag.Title = "Committee Review Queue";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--re-border-color);
+    }
+
+    .admin-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--re-border-color);
+        font-size: 13px;
+    }
+
+    .btn-re-gold {
+        background-color: var(--re-gold);
+        color: #ffffff;
+        border: 1px solid var(--re-gold);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 12px;
+    }
+
+    .btn-re-gold:hover {
+        background-color: var(--re-gold-hover);
+        color: #ffffff;
+    }
+
+    .badge-status {
+        padding: 4px 8px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .status-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+</style>
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 style="margin:0 0 5px 0; font-size:24px; font-weight:700;">Evaluation Committee Reviews</h1>
+        <p style="margin:0; font-size:14px; color:#cbd5e1;">Review compiled applications and capture committee resolutions (UC 11).</p>
+    </div>
+
+    <div class="admin-card">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Customer</th>
+                    <th>Premises Purpose</th>
+                    <th>Unit Type</th>
+                    <th>Current Status</th>
+                    <th style="text-align:right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#64748b; font-style:italic; padding:30px;">
+                            No applications currently pending Committee Review.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var app in Model)
+                    {
+                        <tr>
+                            <td style="font-weight:700; color:var(--re-slate-black);">@app.ApplicationReferenceNumber</td>
+                            <td>@(app.Customer != null ? app.Customer.FullName : "N/A")</td>
+                            <td>@app.PurposeOfLease</td>
+                            <td>@(app.SelectedFacilityUnit != null ? app.SelectedFacilityUnit.UnitType : "N/A")</td>
+                            <td>
+                                <span class="badge-status status-pending">@app.Status.Name</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <a href="@Url.Action("ReviewCommitteeItem", "RealEstateAdmin", new { id = app.Id })" class="btn-re-gold" id="btn-review-@app.Id">
+                                    <i class="fa fa-gavel"></i> Capture Outcome
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

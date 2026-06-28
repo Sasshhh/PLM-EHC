@@ -25,6 +25,11 @@ namespace C8.eServices.Mvc.DataAccessLayer
 {
     public class eServicesDbContext : IdentityDbContext<SystemIdentityUser>
     {
+        static eServicesDbContext()
+        {
+            Database.SetInitializer<eServicesDbContext>(null);
+        }
+
         public static eServicesDbContext Create()
         {
             return new eServicesDbContext();
@@ -35,6 +40,7 @@ namespace C8.eServices.Mvc.DataAccessLayer
             // TODO: JK.20160801a - Improve database availability check.
             //DbInterception.Add( new DbConextCommandInterceptor() );
         }
+
 
         public eServicesDbContext(SystemUser currentSystemUser)
             : base("eServicesDbContext")
@@ -125,7 +131,16 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<HumanSettlementApplication> HumanSettlementApplications { get; set; }
         public DbSet<HumanSettlementAgreementMaster> HumanSettlementAgreementMasters { get; set; }
         public DbSet<UserWorkAllocation> UserWorkAllocations { get; set; }
-
+        public DbSet<RE_Application> RE_Applications { get; set; }
+        public DbSet<RE_FacilityCategory> RE_FacilityCategories { get; set; }
+        public DbSet<RE_Facility> RE_Facilities { get; set; }
+        public DbSet<RE_FacilityUnit> RE_FacilityUnits { get; set; }
+        public DbSet<RE_DepartmentalComment> RE_DepartmentalComments { get; set; }
+        public DbSet<RE_ApplicationAudit> RE_ApplicationAudits { get; set; }
+        public DbSet<RE_FacilityAudit> RE_FacilityAudits { get; set; }
+        public DbSet<RE_FacilityCategoryAudit> RE_FacilityCategoryAudits { get; set; }
+        public DbSet<RE_FacilityUnitAudit> RE_FacilityUnitAudits { get; set; }
+        public DbSet<RE_DepartmentalCommentAudit> RE_DepartmentalCommentAudits { get; set; }
         //Audits 
         public DbSet<ScheduledInspectionAudit> ScheduledInspectionAudits { get; set; }
         public DbSet<UnitsEkurhuleniHousingCompanyAudit> UnitsEkurhuleniHousingCompanyAudits { get; set; }
@@ -735,6 +750,25 @@ namespace C8.eServices.Mvc.DataAccessLayer
                             break;
                         case "Application":
                             ApplicationAudits.Add((ApplicationAudit)audit);
+                            break;
+                        case "RE_Application":
+                            var reApp = (RE_Application)entry.Entity;
+                            var reAudit = (RE_ApplicationAudit)audit;
+                            reAudit.Id = 0;
+                            reAudit.RE_ApplicationId = reApp.Id;
+                            RE_ApplicationAudits.Add(reAudit);
+                            break;
+                        case "RE_Facility":
+                            RE_FacilityAudits.Add((RE_FacilityAudit)audit);
+                            break;
+                        case "RE_FacilityCategory":
+                            RE_FacilityCategoryAudits.Add((RE_FacilityCategoryAudit)audit);
+                            break;
+                        case "RE_FacilityUnit":
+                            RE_FacilityUnitAudits.Add((RE_FacilityUnitAudit)audit);
+                            break;
+                        case "RE_DepartmentalComment":
+                            RE_DepartmentalCommentAudits.Add((RE_DepartmentalCommentAudit)audit);
                             break;
                         case "ApplicationRole":
                             ApplicationRoleAudits.Add((ApplicationRoleAudit)audit);

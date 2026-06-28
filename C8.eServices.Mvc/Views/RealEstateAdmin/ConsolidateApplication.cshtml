@@ -1,0 +1,318 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Consolidate Application Reviews";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var comments = (IEnumerable<C8.eServices.Mvc.Models.RE_DepartmentalComment>)ViewBag.Comments;
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: var(--re-slate-black);
+        border-bottom: 2px solid var(--re-gold);
+        padding-bottom: 6px;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #f1f5f9;
+        font-size: 13px;
+    }
+
+    .comment-row {
+        background-color: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .btn-re-gold {
+        background-color: var(--re-gold);
+        color: #ffffff;
+        border: 1px solid var(--re-gold);
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-re-gold:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+    }
+
+    .btn-escalate {
+        background-color: #dc2626;
+        border: 1px solid #dc2626;
+        color: #ffffff;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-escalate:hover {
+        background-color: #b91c1c;
+        border-color: #b91c1c;
+    }
+
+    .btn-cancel {
+        background-color: transparent;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        text-decoration: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .btn-cancel:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .report-card {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 style="margin:0 0 5px 0; font-size:24px; font-weight:700;">Consolidate Review Feedback</h1>
+        <p style="margin:0; font-size:14px; color:#cbd5e1;">Review all comments, generate a consolidated summary, and route the application for Committee Review (UC 10).</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <h4>Application Details</h4>
+            <div class="info-item">
+                <span class="info-label">Reference Number:</span>
+                <span class="info-value" style="font-weight:700;">@Model.ApplicationReferenceNumber</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Applicant Name:</span>
+                <span class="info-value">@(Model.Customer != null ? Model.Customer.FullName : "N/A")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Application Status:</span>
+                <span class="info-value" style="color:var(--re-gold); font-weight:700;">@Model.Status.Name</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4>Lease Selection</h4>
+            <div class="info-item">
+                <span class="info-label">Facility / Property:</span>
+                <span class="info-value">@(Model.SelectedFacility != null ? Model.SelectedFacility.Name : "N/A")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Unit Type:</span>
+                <span class="info-value">@(Model.SelectedFacilityUnit != null ? Model.SelectedFacilityUnit.UnitType : "N/A")</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Calculated Rental:</span>
+                <span class="info-value">R @string.Format("{0:N2}", Model.CalculatedMonthlyRental) / month</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departmental Comments List -->
+    <div class="info-card" style="margin-bottom:25px;">
+        <h4>Departmental Comments & Decisions</h4>
+        @if (comments == null || !comments.Any())
+        {
+            <p style="color:#64748b; font-style:italic;">No departmental comments have been captured yet.</p>
+        }
+        else
+        {
+            foreach (var com in comments)
+            {
+                bool isSupported = com.Outcome == "Supported";
+                <div class="comment-row" style="border-left: 5px solid @(isSupported ? "#16a34a" : "#dc2626");">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-weight:700; color:var(--re-slate-black);">@com.DepartmentName</span>
+                        <span class="badge" style="background-color:@(isSupported ? "#dcfce7" : "#fef3c7"); color:@(isSupported ? "#15803d" : "#b45309"); font-weight:700; font-size:11px;">@com.Outcome</span>
+                    </div>
+                    <div style="font-size:13px; color:#475569; line-height:1.5;">
+                        @com.Comments
+                    </div>
+                    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#94a3b8;">
+                        <span>Representative: @com.RepresentativeName</span>
+                        <span>Date: @(com.DateStamp.HasValue ? com.DateStamp.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</span>
+                    </div>
+                    @if (com.SupportingDocumentFileId != null && com.SupportingDocumentFile != null)
+                    {
+                        <div style="margin-top:10px; border-top:1px solid #f1f5f9; padding-top:8px;">
+                            <a href="@Url.Action("GetDocument", "File", new { q = com.SupportingDocumentFile.Data })" class="btn btn-xs btn-default" target="_blank" style="font-size:11px; font-weight:600;">
+                                <i class="fa fa-paperclip"></i> View Attached Resolution Document
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Consolidated Report Section -->
+    <div class="info-card" style="margin-bottom:25px;">
+        <h4>Consolidated Review Report</h4>
+        <button type="button" class="btn btn-default" onclick="generateReport()" style="margin-bottom: 15px; font-weight: 600; font-size: 13px;">
+            <i class="fa fa-refresh"></i> Generate Consolidated Report
+        </button>
+
+        <div class="report-card" id="reportArea" style="display:none;">
+            <h5 style="margin-top:0; font-weight:700; font-size:14px; text-transform:uppercase; color:var(--re-slate-black); border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Consolidated Summary Report</h5>
+            <div id="reportText" style="font-size:13px; color:#334155; line-height:1.6; white-space: pre-wrap;"></div>
+        </div>
+
+        @using (Html.BeginForm("ConsolidateApplication", "RealEstateAdmin", new { id = Model.Id }, FormMethod.Post, new { id = "consolidateForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="decision" id="hidDecision" value="" />
+
+            <div style="display:flex; gap:12px;">
+                <button type="button" class="btn-re-gold" onclick="submitDecision('Submit')" id="btn-submit-committee">
+                    <i class="fa fa-share"></i> Submit for Committee Review
+                </button>
+                <button type="button" class="btn-escalate" onclick="submitDecision('Escalate')" id="btn-escalate">
+                    <i class="fa fa-exclamation-triangle"></i> Escalate to HoD
+                </button>
+                <a href="@Url.Action("ConsolidateFeedback", "RealEstateAdmin")" class="btn-cancel">
+                    Cancel / Back
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" style="margin-top: 10%;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: 2px solid var(--re-gold);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%); color:#ffffff; border-bottom: 2px solid var(--re-gold);">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:0.8;">&times;</button>
+                <h4 class="modal-title" id="confirmModalLabel" style="font-weight: 700;">Confirm Action</h4>
+            </div>
+            <div class="modal-body" style="padding: 20px; font-size:15px; font-weight:500;">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer" style="padding:15px 20px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitConfirmed()" style="background-color: var(--re-gold); border-color: var(--re-gold); font-weight:600;">Yes, I am sure</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedDecision = '';
+
+        function generateReport() {
+            let report = "PROPERTY LEASE APPLICATION CONSOLIDATED REVIEW REPORT\n";
+            report += "Reference Number: @Model.ApplicationReferenceNumber\n";
+            report += "Applicant: @(Model.Customer != null ? Model.Customer.FullName : "N/A")\n";
+            report += "Date of Consolidation: " + new Date().toLocaleDateString() + "\n";
+            report += "------------------------------------------------------------\n\n";
+            report += "DEPARTMENTAL INPUTS RECEIVED:\n";
+
+            let comCount = 0;
+            @if (comments != null)
+            {
+                foreach (var c in comments)
+                {
+                    <text>
+                    comCount++;
+                    report += comCount + ". Department: @c.DepartmentName | Outcome: @c.Outcome\n";
+                    report += "   Official: @c.RepresentativeName | Date: @(c.DateStamp.HasValue ? c.DateStamp.Value.ToString("yyyy-MM-dd") : "")\n";
+                    report += "   Comments: @c.Comments.Replace("\n", " ").Replace("\r", "")\n\n";
+                    </text>
+                }
+            }
+
+            if (comCount === 0) {
+                report += "No comments found. Vetting and feedback pending.\n";
+            }
+
+            $('#reportText').text(report);
+            $('#reportArea').slideDown();
+        }
+
+        function submitDecision(decision) {
+            selectedDecision = decision;
+            if (decision === 'Submit') {
+                $('#modal-message').text('Are you sure you want to submit the application for Committee review?');
+            } else {
+                $('#modal-message').text('Are you sure you want to escalate this conflicting departmental feedback to the Head of Department?');
+            }
+            $('#confirmModal').modal('show');
+        }
+
+        function submitConfirmed() {
+            $('#confirmModal').modal('hide');
+            $('#hidDecision').val(selectedDecision);
+            $('#consolidateForm').submit();
+        }
+    </script>
+}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.Entity;
 using System.Data.Linq;
 using System.Globalization;
@@ -483,6 +483,10 @@ namespace C8.eServices.Mvc.Controllers
                             if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
                             {
                                 await SignInAsync(user, model.RememberMe);
+                                if (user.UserName.Equals("re_property_officer", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return RedirectToAction("Index", "RealEstateAdmin");
+                                }
                                 return RedirectToAction("PropertyLeaseAgreements", "PropertyLeaseApplication");
                             }
                             if (UserManager.IsInRole(user.Id, "Revenue Officer"))
@@ -628,10 +632,23 @@ namespace C8.eServices.Mvc.Controllers
                 }
 
                 return RedirectToAction("Login");
-            }
+}
         }
-
         #endregion
+
+        private void PopulateRegistrationViewBags(eServicesDbContext context)
+        {
+            var departments = context.ApplicationEntities
+                .Where(e => e.Key == ApplicationEntityKeys.EkurhuleniHousingCompany || e.Key == ApplicationEntityKeys.RealEstateDevelopment)
+                .Select(e => new SelectListItem { Value = e.Id.ToString(), Text = e.Name })
+                .ToList();
+            ViewBag.Departments = departments;
+
+            var notificationTypes = context.NotificationTypes
+                .Select(n => new SelectListItem { Value = n.Id.ToString(), Text = n.Name })
+                .ToList();
+            ViewBag.NotificationTypes = notificationTypes;
+        }
 
         #region Account Register GET
         //
@@ -639,6 +656,10 @@ namespace C8.eServices.Mvc.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
+            using (var context = new eServicesDbContext())
+            {
+                PopulateRegistrationViewBags(context);
+            }
             return View();
         }
         #endregion
@@ -655,6 +676,7 @@ namespace C8.eServices.Mvc.Controllers
                 try
                 {
                     _base.Initialise(context);
+                    PopulateRegistrationViewBags(context);
 
                     var captchaHelper = new CaptchaHelper();
                     var captchaResponse = Request.Params["g-recaptcha-response"];
@@ -711,24 +733,7 @@ namespace C8.eServices.Mvc.Controllers
                             var identityManager = new IdentityManager();
                             // JK.20190620a - Code used for mobile users.
                             var code = PasswordGenerator.GeneratePassword(true, true, true, false, false, 6);
-                            var NotificationTypeID = 0;
-                            NotificationType SMSObj = context.NotificationTypes.FirstOrDefault(o => o.Key == NotificationTypeKeys.Sms);
-                            NotificationType EmailObj = context.NotificationTypes.FirstOrDefault(o => o.Key == NotificationTypeKeys.Email);
-                            NotificationType BothSMSEmail = context.NotificationTypes.FirstOrDefault(o => o.Key == NotificationTypeKeys.EmailSms);
-
-                            if (model.EmailAddress != null && model.MobileNumber != null)
-                            {
-                                NotificationTypeID = BothSMSEmail.Id;
-                            }
-                            else if (model.EmailAddress != null)
-                            {
-                                NotificationTypeID = EmailObj.Id;
-                            }
-                            else
-                            {
-                                NotificationTypeID = SMSObj.Id;
-                            }
-
+                            
                             // JK.20140724a - Custom profile information.
                             user.SystemUser = new SystemUser
                             {
@@ -747,8 +752,8 @@ namespace C8.eServices.Mvc.Controllers
                                 ModifiedDateTime = DateTime.Now,
                                 IsPasswordReset = true,
                                 Code = code,
-                                NotificationTypeId = NotificationTypeID,
-                                DepartmentId = Entity.FirstOrDefault(r => r.Key == ApplicationEntityKeys.EkurhuleniHousingCompany)?.Id
+                                NotificationTypeId = model.NotificationTypeId,
+                                DepartmentId = model.DepartmentId
                             };
 
                             var result = await UserManager.CreateAsync(user, model.Password);
@@ -778,7 +783,7 @@ namespace C8.eServices.Mvc.Controllers
                                         var cxt = new eServicesDbContext();
                                         var statusIdSms = cxt.Status.FirstOrDefault(o => o.Key == StatusKeys.SMSPending).Id;
                                         smsConfirmation.GenerateSMS(user.SystemUser.MobileNumber, string.Format("Welcome to the CoE Property Lease Management System, please confirm your account with the following code {0}.", code),
-   user.SystemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, user.SystemUser.FullName);
+                                            user.SystemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, user.SystemUser.FullName);
                                         //SmsHelper.Send(model.MobileNumber, string.Format("Welcome to Property Lease Management System, please confirm your account with the following code {0}.", code));
                                     }
                                     catch (Exception x)
@@ -2553,6 +2558,10 @@ systemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, systemUser.Fu
                                 if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
                                 {
                                     await SignInAsync(user, model.RememberMe);
+                                    if (user.UserName.Equals("re_property_officer", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return RedirectToAction("Index", "RealEstateAdmin");
+                                    }
                                     return RedirectToAction("PropertyLeaseAgreements", "PropertyLeaseApplication");
                                 }
                                 if (UserManager.IsInRole(user.Id, "Revenue Officer"))

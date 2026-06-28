@@ -1,4 +1,4 @@
-﻿@using System.Web.Optimization
+@using System.Web.Optimization
 @using C8.eServices.Mvc.DataAccessLayer
 @using C8.eServices.Mvc.Keys
 @using C8.eServices.Mvc.Helpers
@@ -316,7 +316,9 @@
 
                                     <div class="col-md-10">
                                         <div style="margin-left:0px">
-                                            <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Male", new { @id = "txtGenMale", @required = true }) Male</label>&nbsp;&nbsp;  <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Female", new { @id = "txtGenFemale" }) Female</label>
+                                            <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Male", new { @id = "txtGenMale", @required = true }) Male</label>&nbsp;&nbsp;  
+                                            <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Female", new { @id = "txtGenFemale" }) Female</label>&nbsp;&nbsp;
+                                            <label>@Html.RadioButtonFor(model => model.Customer.Gender, "Other", new { @id = "txtGenOther", @disabled = "disabled" }) Other</label>
                                         </div>
                                     </div>
                                 </div>
@@ -564,9 +566,13 @@
             $("#txtIdNumber").prop('readonly', true);
             $("#txtGenMale").prop('disabled', "disabled");
            $("#txtGenFemale").prop('disabled', "disabled");
+            $("#txtGenOther").prop('disabled', "disabled");
             var idNumberGen = $('#txtIdNumber').val();
             var genderCode = idNumberGen.substring(6, 10);
-            if (parseInt(genderCode) < 5000) {
+            if (customerDetails[0].gender === "Other") {
+                $("#txtGenOther").prop('checked', true);
+            }
+            else if (parseInt(genderCode) < 5000) {
                // $("#txtGenMale").prop('Checked', false);
                 $("#txtGenFemale").prop('checked', true);
 
@@ -631,11 +637,14 @@
             }
             $("#txtGenMale").prop('disabled', "disabled");
             $("#txtGenFemale").prop('disabled', "disabled");
+            $("#txtGenOther").prop('disabled', "disabled");
             $("#ddlIdentificationTypes").prop('selectedIndex', "1");
             $("#ddlIdentificationTypes").prop('disabled', "disabled");
         }
 
         $("#manageProfileForm").on('submit', function (evt) {
+            // Re-enable gender options so they are posted with the form
+            $("#txtGenMale, #txtGenFemale, #txtGenOther").prop('disabled', false);
             var cellNumber = $("#txtCellNumber");
             var homeNumber = $("#txtHomeNumber");
             //alert("Hi");

@@ -6053,6 +6053,12 @@ namespace C8.eServices.Mvc.Controllers
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
                     List<PropertyLeaseAgreementMaster> MasterApplication = new List<PropertyLeaseAgreementMaster>();
 
+                    if (Customer == null)
+                    {
+                        ViewBag.Message = "Please contact system administrator to get your account mapped to a Customer profile.";
+                        ViewBag.MessageTitle = "User Not Mapped to Customer";
+                        return View(rCSApplicationStatus);
+                    }
                     int UserId = Customer.Id;
                     var Keys = db.Status;
                     int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;

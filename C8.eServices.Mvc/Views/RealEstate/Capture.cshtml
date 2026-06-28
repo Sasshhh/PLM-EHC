@@ -1,0 +1,1169 @@
+@model C8.eServices.Mvc.ViewModels.RE_CaptureViewModel
+@{
+    ViewBag.Title = "Capture Lease Application";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    /* Premium Real Estate Gold/Amber Design Theme */
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .re-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .re-header-card {
+        background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .re-header-card::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(197, 155, 39, 0.15);
+        border-radius: 50%;
+        filter: blur(30px);
+    }
+
+    .re-header-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .re-header-subtitle {
+        font-size: 15px;
+        color: #94a3b8;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .re-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        margin-bottom: 30px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .re-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .re-card-header {
+        background-color: var(--re-gold-light);
+        border-bottom: 1px solid var(--re-border-color);
+        padding: 18px 24px;
+        border-top-left-radius: 11px;
+        border-top-right-radius: 11px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .re-card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .re-card-body {
+        padding: 24px;
+    }
+
+    .re-form-label {
+        font-weight: 600;
+        color: #334155;
+        font-size: 13px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .re-form-control {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 10px 14px !important;
+        height: auto !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: none !important;
+    }
+
+    .re-form-control:focus {
+        border-color: var(--re-gold) !important;
+        box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.15) !important;
+        outline: none !important;
+    }
+
+    .re-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    @@media (max-width: 768px) {
+        .re-grid-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Document upload grid */
+    .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    @@media (max-width: 992px) {
+        .doc-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .doc-upload-card {
+        border: 1px solid var(--re-border-color);
+        border-radius: 10px;
+        padding: 16px;
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .doc-upload-card:hover {
+        border-color: #cbd5e1;
+        background: #f1f5f9;
+    }
+
+    .doc-info {
+        margin-bottom: 12px;
+    }
+
+    .doc-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+
+    .doc-desc {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .doc-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .doc-file-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: #ffffff;
+        border: 1px dashed #cbd5e1;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        width: 100%;
+        color: #475569;
+    }
+
+    .doc-file-label:hover {
+        border-color: var(--re-gold);
+        color: var(--re-gold);
+        background-color: var(--re-gold-light);
+    }
+
+    .doc-file-input {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        height: 100%;
+        width: 100%;
+    }
+
+    .selected-filename {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #16a34a;
+        font-weight: 500;
+        display: none;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .required-badge {
+        color: #ef4444;
+        font-weight: bold;
+        margin-left: 2px;
+    }
+
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    @@media (max-width: 768px) {
+        .checkbox-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--re-border-color);
+        transition: all 0.2s ease;
+    }
+
+    .checkbox-item:hover {
+        border-color: #cbd5e1;
+        background: #f1f5f9;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        margin-top: 3px;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--re-gold);
+    }
+
+    .checkbox-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .re-btn-primary {
+        background-color: var(--re-gold) !important;
+        border-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 12px 28px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 6px -1px rgba(197, 155, 39, 0.2) !important;
+    }
+
+    .re-btn-primary:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+        box-shadow: 0 10px 15px -3px rgba(197, 155, 39, 0.3) !important;
+        transform: translateY(-1px);
+    }
+
+    .re-btn-secondary {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #475569 !important;
+        border-radius: 8px !important;
+        padding: 12px 28px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .re-btn-secondary:hover {
+        background-color: #e2e8f0 !important;
+        color: #1e293b !important;
+    }
+
+    .text-danger {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .alert-danger-custom {
+        background-color: #fef2f2;
+        border: 1px solid #fee2e2;
+        color: #991b1b;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 25px;
+    }
+
+    /* Tabs for Document Uploads Section */
+    .re-nav-tabs {
+        border-bottom: 2px solid var(--re-border-color) !important;
+        margin-bottom: 25px;
+        display: flex;
+        gap: 8px;
+        padding-left: 0;
+        list-style: none;
+    }
+    
+    .re-nav-tabs > li {
+        margin-bottom: -2px;
+    }
+    
+    .re-nav-tabs > li > a {
+        border: none !important;
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 20px;
+        border-radius: 0 !important;
+        border-bottom: 2px solid transparent !important;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .re-nav-tabs > li > a:hover {
+        color: var(--re-gold-hover) !important;
+        background-color: transparent !important;
+    }
+    
+    .re-nav-tabs > li.active > a {
+        color: var(--re-gold) !important;
+        border-bottom: 2px solid var(--re-gold) !important;
+        background: transparent !important;
+    }
+</style>
+
+<div class="re-container">
+    <div class="re-header-card">
+        <h1 class="re-header-title">Submit Lease Application</h1>
+        <p class="re-header-subtitle">
+            Real Estate Development (RED) Department. Complete the details below, specify your desired facility or letting space details, and upload the mandatory pre-qualification documents.
+        </p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger-custom">
+            <h4 style="margin-top: 0; font-weight: 600;"><i class="fa fa-exclamation-triangle"></i> Please correct the errors below:</h4>
+            @Html.ValidationSummary(false, "")
+        </div>
+    }
+
+    @using (Html.BeginForm("Capture", "RealEstate", null, FormMethod.Post, new { enctype = "multipart/form-data", id = "realEstateForm", @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Application.CustomerId)
+        @Html.HiddenFor(m => m.Application.SystemUserId)
+
+        <!-- Section 1: Applicant Profile -->
+        <div class="re-card">
+            <div class="re-card-header">
+                <i class="fa fa-user" style="color: var(--re-gold); font-size: 18px;"></i>
+                <h3 class="re-card-title">1. Applicant & Entity Details</h3>
+            </div>
+            <div class="re-card-body">
+                <div class="re-grid-2">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Applicant Type<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.ApplicantType, (IEnumerable<SelectListItem>)ViewBag.ApplicantTypes, new { @class = "form-control re-form-control", id = "ddlApplicantType" })
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--re-border-color); margin: 20px 0;" />
+
+                <!-- Dynamic section for Entity/Individual details -->
+                <div class="re-grid-2">
+                    <div class="form-group" style="margin: 0;" id="divEntityName">
+                        <label class="re-form-label" id="lblEntityName">Entity/Business Name<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.EntityName, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divRegNo">
+                        <label class="re-form-label" id="lblRegNo">Company Registration Number<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.CompanyRegistrationNumber, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divVatNo">
+                        <label class="re-form-label">VAT Registration Number</label>
+                        @Html.TextBoxFor(m => m.Application.VatRegistrationNumber, new { @class = "form-control re-form-control" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divTaxNo">
+                        <label class="re-form-label">SARS Tax Reference Number<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.TaxReferenceNumber, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divRepName">
+                        <label class="re-form-label">Authorized Representative Name<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.AuthorizedRepresentativeName, new { @class = "form-control re-form-control", id = "txtRepName" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divRepCapacity">
+                        <label class="re-form-label">Authorized Representative Capacity<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.AuthorizedRepresentativeCapacity, new { @class = "form-control re-form-control", id = "txtRepCapacity" })
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--re-border-color); margin: 20px 0;" />
+
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #1e293b;">Contact & Address Details</h4>
+                
+                <div class="re-grid-2">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label" id="lblAddress">Registered Address<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.EntityRegisteredAddress, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Postal Code<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.EntityRegisteredPostalCode, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divTel">
+                        <label class="re-form-label">Telephone Number</label>
+                        @Html.TextBoxFor(m => m.Application.EntityTelephone, new { @class = "form-control re-form-control" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label" id="lblMobile">Mobile Number<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.EntityMobile, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;" id="divFax">
+                        <label class="re-form-label">Fax Number</label>
+                        @Html.TextBoxFor(m => m.Application.EntityFax, new { @class = "form-control re-form-control" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label" id="lblEmail">Email Address<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.EntityEmail, new { @class = "form-control re-form-control", required = "required", type = "email" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Banking Details -->
+        <div class="re-card">
+            <div class="re-card-header">
+                <i class="fa fa-bank" style="color: var(--re-gold); font-size: 18px;"></i>
+                <h3 class="re-card-title">2. Banking Details</h3>
+            </div>
+            <div class="re-card-body">
+                <div class="re-grid-2">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Bank Name<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.BankName, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Account Type<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.BankAccountType, (IEnumerable<SelectListItem>)ViewBag.BankAccountTypes, new { @class = "form-control re-form-control" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Account Holder Name<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.BankAccountName, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Account Number<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.BankAccountNumber, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Branch Code<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.BankBranchCode, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Space / Lease Details -->
+        <div class="re-card">
+            <div class="re-card-header">
+                <i class="fa fa-building" style="color: var(--re-gold); font-size: 18px;"></i>
+                <h3 class="re-card-title">3. Space / Lease Specification</h3>
+            </div>
+            <div class="re-card-body">
+                <div class="re-grid-2">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Purpose of Lease<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.PurposeOfLease, (IEnumerable<SelectListItem>)ViewBag.PurposesOfLease, new { @class = "form-control re-form-control" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Customer Care Centre (CCC) Area<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.CCCId, (IEnumerable<SelectListItem>)ViewBag.CCCList, "Select CCC Area...", new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Erf / Farm Number<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.ErfFarmNumber, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Property Address<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.PropertyAddress, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Township / Suburb / Farm Name<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.TownshipSuburbFarmName, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Property Postal Code<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control re-form-control", required = "required" })
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--re-border-color); margin: 20px 0;" />
+
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #1e293b;">Facility & Letting Space Selection</h4>
+                
+                <div class="re-grid-2" style="margin-bottom: 20px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Select Letting Facility / Site<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.SelectedFacilityId, new List<SelectListItem>(), "Select a Facility...", new { @class = "form-control re-form-control", id = "ddlSelectedFacility", required = "required", disabled = "disabled" })
+                        @Html.ValidationMessageFor(m => m.Application.SelectedFacilityId, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Select Unit Type & Specification<span class="required-badge">*</span></label>
+                        @Html.DropDownListFor(m => m.Application.SelectedFacilityUnitId, new List<SelectListItem>(), "Select a Unit Type...", new { @class = "form-control re-form-control", id = "ddlSelectedUnit", required = "required", disabled = "disabled" })
+                        @Html.ValidationMessageFor(m => m.Application.SelectedFacilityUnitId, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="re-form-label">Number of Units (Max limit applies)<span class="required-badge">*</span></label>
+                        @Html.TextBoxFor(m => m.Application.SelectedUnitCount, new { @class = "form-control re-form-control", id = "txtUnitCount", type = "number", min = "1", max = "4", required = "required", disabled = "disabled", value = "1" })
+                        @Html.ValidationMessageFor(m => m.Application.SelectedUnitCount, "", new { @class = "text-danger" })
+                        <small id="lblMaxUnitsWarning" class="text-muted" style="font-size: 12px; display: block; margin-top: 4px;"></small>
+                    </div>
+                </div>
+
+                <!-- Live Pricing Summary Panel -->
+                <div id="pricingPanel" style="display: none; background: var(--re-gold-light); border: 1px solid rgba(197, 155, 39, 0.3); border-radius: 8px; padding: 20px; margin-top: 20px;">
+                    <h5 style="margin-top: 0; margin-bottom: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-calculator" style="color: var(--re-gold);"></i> Cost Calculation Summary
+                    </h5>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Unit Size (m²)</div>
+                            <div id="lblCalcUnitSize" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Category Base Tariff (per m²)</div>
+                            <div id="lblCalcTariff" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Quantity Selected</div>
+                            <div id="lblCalcQty" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px dashed rgba(197, 155, 39, 0.3); padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 14px; font-weight: 600; color: #475569;">Estimated Monthly Rental:</span>
+                        <span id="lblCalcTotal" style="font-size: 24px; font-weight: 800; color: var(--re-gold);">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Mandatory Document Uploads -->
+        <div class="re-card">
+            <div class="re-card-header">
+                <i class="fa fa-cloud-upload" style="color: var(--re-gold); font-size: 18px;"></i>
+                <h3 class="re-card-title">4. Pre-Qualification Documents</h3>
+            </div>
+            <div class="re-card-body">
+                <div class="alert alert-warning" style="border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
+                    <i class="fa fa-info-circle"></i> <strong>Mandatory Uploads:</strong> Please upload high-quality PDF/Scanned copies of the following documents. All files are mandatory unless noted as entity-only. Maximum file size per document is 5MB.
+                </div>
+
+                <!-- Tabs Header -->
+                <ul class="nav nav-tabs re-nav-tabs" role="tablist">
+                    <li class="active" role="presentation"><a href="#tab-mandatory" aria-controls="tab-mandatory" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Required Documents</a></li>
+                    <li role="presentation"><a href="#tab-other" aria-controls="tab-other" role="tab" data-toggle="tab"><i class="fa fa-folder-open-o"></i> Other Documents</a></li>
+                </ul>
+
+                <!-- Tabs Content -->
+                <div class="tab-content">
+                    <div class="tab-pane active fade in" id="tab-mandatory" role="tabpanel">
+                        <div class="doc-grid">
+                    <!-- Doc 1: ID -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Applicant ID Document<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Certified copy of ID Book / Smart Card (both sides) or Passport.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Id" for="file_Id">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Id" id="file_Id" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Id" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Id", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 2: Proof of Address -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Proof of Residential Address<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Recent municipal account, levy statement, or letter from counselor (not older than 3 months).</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Address" for="file_Address">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Address" id="file_Address" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Address" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Address", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 3: CIPC Compliance -->
+                    <div class="doc-upload-card" id="cardCipc">
+                        <div class="doc-info">
+                            <span class="doc-title">CIPC Registration/Compliance<span class="required-badge" id="reqCipc">*</span></span>
+                            <p class="doc-desc">Valid Cor14.3, CK1/CK2, Trust deed, or Constitution. (Mandatory for non-individuals)</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Cipc" for="file_Cipc">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Cipc" id="file_Cipc" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                            <span id="name_Cipc" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Cipc", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 4: SARS Tax Clearance -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">SARS Tax Clearance Certificate<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Valid copy of SARS tax clearance certificate or status PIN code printout.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Sars" for="file_Sars">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Sars" id="file_Sars" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Sars" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Sars", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 5: Company Profile -->
+                    <div class="doc-upload-card" id="cardProfile">
+                        <div class="doc-info">
+                            <span class="doc-title">Company/Entity Profile<span class="required-badge" id="reqProfile">*</span></span>
+                            <p class="doc-desc">Detailed company profile outlining core service capabilities. (Mandatory for non-individuals)</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Profile" for="file_Profile">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Profile" id="file_Profile" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                            <span id="name_Profile" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Profile", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 6: References -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Contactable References<span class="required-badge">*</span></span>
+                            <p class="doc-desc">List of three (3) contactable references or recommendation letters from previous landlords/projects.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_References" for="file_References">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_References" id="file_References" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_References" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_References", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 7: Supporting Letter -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Motivational / Proposal Letter<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Detailed letter/proposal describing the business activity and space layout requirements.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Letters" for="file_Letters">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Letters" id="file_Letters" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Letters" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Letters", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 8: Locality Plan -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Locality Plan of Property<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Drawing or map showing the physical positioning of the proposed site/space.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Locality" for="file_Locality">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Locality" id="file_Locality" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Locality" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Locality", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 9: Zoning Certificate -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Copy of Zoning Certificate<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Zoning certificate copy confirming allowable usage permissions on the site.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Zoning" for="file_Zoning">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Zoning" id="file_Zoning" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Zoning" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Zoning", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 10: Proof of Income -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Proof of Income / Financials<span class="required-badge">*</span></span>
+                            <p class="doc-desc">3 months recent bank statements, audited financials, or proof of funding confirmation.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Income" for="file_Income">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Income" id="file_Income" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Income" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Income", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <!-- Doc 11: Proof of Payment -->
+                    <div class="doc-upload-card">
+                        <div class="doc-info">
+                            <span class="doc-title">Application Fee Proof of Payment<span class="required-badge">*</span></span>
+                            <p class="doc-desc">Electronic Funds Transfer (EFT) receipt or deposit slip for the RED application fee.</p>
+                        </div>
+                        <div class="doc-input-wrapper">
+                            <label class="doc-file-label" id="lblFile_Fee" for="file_Fee">
+                                <i class="fa fa-file-pdf-o"></i> Select File
+                            </label>
+                            <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                            <span id="name_Fee" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                            @Html.ValidationMessage("file_Fee", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tab-other" role="tabpanel">
+                        <div class="alert alert-info" style="border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
+                            <i class="fa fa-info-circle"></i> <strong>Other Supporting Documents:</strong> If there are any other documents missing or required for your application, you can select and upload multiple files here.
+                        </div>
+                        <div class="doc-grid" style="grid-template-columns: 1fr;">
+                            <!-- Doc 12: Other Supporting Documents -->
+                            <div class="doc-upload-card" style="max-width: 600px; margin: 0 auto; width: 100%;">
+                                <div class="doc-info">
+                                    <span class="doc-title" style="font-size: 15px; font-weight: 700;">Other Supporting Documents</span>
+                                    <p class="doc-desc">Upload any other documents or files to support your application. You can select and upload multiple files.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Other" for="file_Other">
+                                        <i class="fa fa-files-o"></i> Select Files
+                                    </label>
+                                    <input type="file" name="file_Other" id="file_Other" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx" style="display: none;" multiple />
+                                    <span id="name_Other" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                                    @Html.ValidationMessage("file_Other", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Terms and Submit -->
+        <div class="re-card" style="border-top: 4px solid var(--re-gold);">
+            <div class="re-card-body text-center" style="padding: 30px;">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    By clicking submit, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to immediate rejection of the lease application.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <a href="@Url.Action("Inbox")" class="btn re-btn-secondary">Cancel</a>
+                    <button type="button" id="btnSubmitForm" class="btn re-btn-primary">Submit Application</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Function to handle the toggles of Applicant Type
+            function toggleApplicantType() {
+                var applicantType = $("#ddlApplicantType").val();
+                var isIndividual = (applicantType === "Individual");
+
+                if (isIndividual) {
+                    // Hide Representative Details
+                    $("#divRepName, #divRepCapacity, #divTel, #divFax").fadeOut(200);
+                    $("#txtRepName, #txtRepCapacity").removeAttr("required");
+                    
+                    // Show entity details but update labels for Individual context
+                    $("#lblEntityName").html("Full Name (Name & Surname)<span class='required-badge'>*</span>");
+                    $("#lblRegNo").html("Identity Number (ID Number)<span class='required-badge'>*</span>");
+                    $("#lblAddress").html("Residential Address<span class='required-badge'>*</span>");
+                    $("#lblMobile").html("Mobile Number<span class='required-badge'>*</span>");
+                    $("#lblEmail").html("Email Address<span class='required-badge'>*</span>");
+                    
+                    // Hide optional corporate VAT field
+                    $("#divVatNo").fadeOut(200);
+                    
+                    // Documents: CIPC & Profile are not required for Individual
+                    $("#cardCipc, #cardProfile").fadeOut(200);
+                    $("#file_Cipc, #file_Profile").removeAttr("required");
+                    $("#reqCipc, #reqProfile").hide();
+                } else {
+                    // Show Corporate / Representative Details
+                    $("#divRepName, #divRepCapacity, #divTel, #divFax, #divVatNo").fadeIn(200);
+                    $("#txtRepName, #txtRepCapacity").attr("required", "required");
+                    
+                    // Restore Entity labels
+                    $("#lblEntityName").html("Entity/Business Name<span class='required-badge'>*</span>");
+                    $("#lblRegNo").html("Company Registration Number<span class='required-badge'>*</span>");
+                    $("#lblAddress").html("Entity Registered Address<span class='required-badge'>*</span>");
+                    $("#lblMobile").html("Entity Mobile Number<span class='required-badge'>*</span>");
+                    $("#lblEmail").html("Entity Email Address<span class='required-badge'>*</span>");
+                    
+                    // Documents: CIPC & Profile are required for Entity
+                    $("#cardCipc, #cardProfile").fadeIn(200);
+                    $("#file_Cipc, #file_Profile").attr("required", "required");
+                    $("#reqCipc, #reqProfile").show();
+                }
+            }
+
+            // Bind change event
+            $("#ddlApplicantType").change(function () {
+                toggleApplicantType();
+            });
+
+            // Initialize toggle state on page load
+            toggleApplicantType();
+
+            // Set up dynamic filename display on file selection
+            $(".doc-file-input").change(function () {
+                var inputId = $(this).attr("id");
+                var nameSpanId = "#name_" + inputId.replace("file_", "");
+                var labelId = "#lblFile_" + inputId.replace("file_", "");
+                
+                if (this.files && this.files.length > 0) {
+                    var filename = this.files[0].name;
+                    if (this.files.length > 1) {
+                        filename = this.files.length + " files selected";
+                    } else if (filename.length > 25) {
+                        filename = filename.substring(0, 22) + "...";
+                    }
+                    $(nameSpanId + " span").text(filename);
+                    $(nameSpanId).css("display", "inline-flex");
+                    
+                    var changeHtml = (this.files.length > 1) ? "<i class='fa fa-refresh'></i> Change Files" : "<i class='fa fa-refresh'></i> Change File";
+                    $(labelId).html(changeHtml).css("border-color", "#16a34a").css("color", "#16a34a");
+                } else {
+                    $(nameSpanId).hide();
+                    var defaultHtml = (inputId === "file_Other") ? "<i class='fa fa-files-o'></i> Select Files" : "<i class='fa fa-file-pdf-o'></i> Select File";
+                    $(labelId).html(defaultHtml).css("border-color", "#cbd5e1").css("color", "#475569");
+                }
+            });
+
+            // Cascading Dropdowns & Live Calculator logic
+            var selectedUnitData = null;
+
+            function calculateRental() {
+                if (!selectedUnitData) {
+                    $("#pricingPanel").hide();
+                    return;
+                }
+
+                var qty = parseInt($("#txtUnitCount").val());
+                if (isNaN(qty) || qty < 1) {
+                    qty = 1;
+                }
+
+                // Enforce max quantity limit
+                if (qty > selectedUnitData.MaxUnits) {
+                    qty = selectedUnitData.MaxUnits;
+                    $("#txtUnitCount").val(qty);
+                }
+
+                var total = selectedUnitData.UnitSize * selectedUnitData.Tariff * qty;
+
+                // Format values for display
+                $("#lblCalcUnitSize").text(selectedUnitData.UnitSize + " m²");
+                $("#lblCalcTariff").text("R" + selectedUnitData.Tariff.toFixed(2));
+                $("#lblCalcQty").text(qty);
+                $("#lblCalcTotal").text("R" + total.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                
+                $("#pricingPanel").fadeIn(200);
+            }
+
+            $("#Application_CCCId").change(function () {
+                var cccId = $(this).val();
+                
+                // Reset child fields
+                $("#ddlSelectedFacility").empty().append('<option value="">Select a Facility...</option>').attr("disabled", "disabled");
+                $("#ddlSelectedUnit").empty().append('<option value="">Select a Unit Type...</option>').attr("disabled", "disabled");
+                $("#txtUnitCount").val("").attr("disabled", "disabled");
+                $("#lblMaxUnitsWarning").text("");
+                selectedUnitData = null;
+                calculateRental();
+
+                if (!cccId) return;
+
+                $.ajax({
+                    url: '@Url.Action("GetFacilitiesByCCC", "RealEstate")',
+                    type: 'GET',
+                    data: { cccId: cccId },
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function (index, item) {
+                                $("#ddlSelectedFacility").append($('<option>', {
+                                    value: item.Id,
+                                    text: item.Name
+                                }));
+                            });
+                            $("#ddlSelectedFacility").removeAttr("disabled");
+                        }
+                    },
+                    error: function () {
+                        swal("Error", "Failed to retrieve facilities for the selected CCC.", "error");
+                    }
+                });
+            });
+
+            $("#ddlSelectedFacility").change(function () {
+                var facilityId = $(this).val();
+                
+                // Reset child fields
+                $("#ddlSelectedUnit").empty().append('<option value="">Select a Unit Type...</option>').attr("disabled", "disabled");
+                $("#txtUnitCount").val("").attr("disabled", "disabled");
+                $("#lblMaxUnitsWarning").text("");
+                selectedUnitData = null;
+                calculateRental();
+
+                if (!facilityId) return;
+
+                $.ajax({
+                    url: '@Url.Action("GetUnitsByFacility", "RealEstate")',
+                    type: 'GET',
+                    data: { facilityId: facilityId },
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function (index, item) {
+                                var optionText = item.UnitType + " (" + item.UnitSize + " m² @@ R" + item.Tariff.toFixed(2) + "/m²)";
+                                var option = $('<option>', {
+                                    value: item.Id,
+                                    text: optionText
+                                });
+                                // Attach data parameters for easy retrieval
+                                option.data("size", item.UnitSize);
+                                option.data("tariff", item.Tariff);
+                                option.data("max", item.MaxUnits);
+                                $("#ddlSelectedUnit").append(option);
+                            });
+                            $("#ddlSelectedUnit").removeAttr("disabled");
+                        }
+                    },
+                    error: function () {
+                        swal("Error", "Failed to retrieve units for the selected facility.", "error");
+                    }
+                });
+            });
+
+            $("#ddlSelectedUnit").change(function () {
+                var selectedOption = $(this).find('option:selected');
+                var unitId = $(this).val();
+
+                if (!unitId) {
+                    $("#txtUnitCount").val("").attr("disabled", "disabled");
+                    $("#lblMaxUnitsWarning").text("");
+                    selectedUnitData = null;
+                    calculateRental();
+                    return;
+                }
+
+                selectedUnitData = {
+                    Id: unitId,
+                    UnitSize: parseFloat(selectedOption.data("size")),
+                    Tariff: parseFloat(selectedOption.data("tariff")),
+                    MaxUnits: parseInt(selectedOption.data("max"))
+                };
+
+                $("#txtUnitCount").attr("max", selectedUnitData.MaxUnits).removeAttr("disabled");
+                if (!$("#txtUnitCount").val() || parseInt($("#txtUnitCount").val()) < 1) {
+                    $("#txtUnitCount").val(1);
+                }
+                $("#lblMaxUnitsWarning").text("Maximum units allowed: " + selectedUnitData.MaxUnits);
+
+                calculateRental();
+            });
+
+            $("#txtUnitCount").on("input change keyup", function () {
+                calculateRental();
+            });
+
+            // Handle validation reload initialization
+            var initialCccId = $("#Application_CCCId").val();
+            var initialFacilityId = "@(Model.Application.SelectedFacilityId ?? 0)";
+            var initialUnitId = "@(Model.Application.SelectedFacilityUnitId ?? 0)";
+            var initialUnitCount = "@(Model.Application.SelectedUnitCount ?? 0)";
+
+            if (initialCccId && initialCccId !== "0") {
+                // Fetch facilities and select the initial one
+                $.ajax({
+                    url: '@Url.Action("GetFacilitiesByCCC", "RealEstate")',
+                    type: 'GET',
+                    data: { cccId: initialCccId },
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function (index, item) {
+                                var option = $('<option>', {
+                                    value: item.Id,
+                                    text: item.Name
+                                });
+                                if (item.Id.toString() === initialFacilityId) {
+                                    option.attr("selected", "selected");
+                                }
+                                $("#ddlSelectedFacility").append(option);
+                            });
+                            $("#ddlSelectedFacility").removeAttr("disabled");
+                            
+                            // If facility was selected, trigger unit fetch
+                            if (initialFacilityId && initialFacilityId !== "0") {
+                                $.ajax({
+                                    url: '@Url.Action("GetUnitsByFacility", "RealEstate")',
+                                    type: 'GET',
+                                    data: { facilityId: initialFacilityId },
+                                    success: function (unitsData) {
+                                        if (unitsData && unitsData.length > 0) {
+                                            $.each(unitsData, function (index, item) {
+                                                var optionText = item.UnitType + " (" + item.UnitSize + " m² @@ R" + item.Tariff.toFixed(2) + "/m²)";
+                                                var option = $('<option>', {
+                                                    value: item.Id,
+                                                    text: optionText
+                                                });
+                                                option.data("size", item.UnitSize);
+                                                option.data("tariff", item.Tariff);
+                                                option.data("max", item.MaxUnits);
+                                                if (item.Id.toString() === initialUnitId) {
+                                                    option.attr("selected", "selected");
+                                                    selectedUnitData = {
+                                                        Id: item.Id,
+                                                        UnitSize: item.UnitSize,
+                                                        Tariff: item.Tariff,
+                                                        MaxUnits: item.MaxUnits
+                                                    };
+                                                }
+                                                $("#ddlSelectedUnit").append(option);
+                                            });
+                                            $("#ddlSelectedUnit").removeAttr("disabled");
+                                            
+                                            if (initialUnitId && initialUnitId !== "0") {
+                                                $("#txtUnitCount").attr("max", selectedUnitData.MaxUnits).removeAttr("disabled");
+                                                if (initialUnitCount && initialUnitCount !== "0") {
+                                                    $("#txtUnitCount").val(initialUnitCount);
+                                                }
+                                                $("#lblMaxUnitsWarning").text("Maximum units allowed: " + selectedUnitData.MaxUnits);
+                                                calculateRental();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+
+            // SweetAlert submission confirmation
+            $("#btnSubmitForm").click(function () {
+                var form = $("#realEstateForm");
+                
+                // Form validation check
+                if (form[0].checkValidity()) {
+                    swal({
+                        title: "Submit Application?",
+                        text: "Are you sure you want to submit this Lease Application? You will not be able to edit these details once submitted.",
+                        icon: "warning",
+                        buttons: ["No, cancel", "Yes, submit it!"],
+                        dangerMode: true
+                    }).then((isConfirm) => {
+                        if (isConfirm) {
+                            HoldOn.open({
+                                theme: "sk-cube-grid",
+                                message: "Submitting application and uploading documents. Please wait...",
+                                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                                textColor: "white"
+                            });
+                            form.submit();
+                        }
+                    });
+                } else {
+                    // Trigger native browser validation UI
+                    form[0].reportValidity();
+                }
+            });
+        });
+    </script>
+}

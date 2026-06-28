@@ -106,18 +106,25 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult Index()
         {
             Initialise();
-            var CCCClerk = db.CCCs.Where(x => x.AreaManagerId == Customer.Id && x.IsDeleted == false).FirstOrDefault();
             List<ClerkRegistration> clerkRegistrations = new List<ClerkRegistration>();
-            if(CCCClerk != null)
-            {
-                clerkRegistrations = db.ClerkRegistrations.Where(x => x.Status.Key == StatusKeys.AccountPending && x.CCCId == CCCClerk.Id).Include(c => c.CCCType).Include(c => c.CreatedBySystemUser).Include(c => c.Status).Include(c => c.ModifiedBySystemUser).Include(c => c.NotificationType).ToList();
 
+            if (Customer == null)
+            {
+                ViewBag.Message = "Please contact system administrator to get your account mapped to a Customer profile.";
+                ViewBag.MessageTitle = "Area Manager Not Mapped to Customer";
             }
             else
             {
-
-                ViewBag.Message = "Please contact system administrator to get your account mapped to a CCC";
-                ViewBag.MessageTitle = "Area Manager Not Mapped to CCC";
+                var CCCClerk = db.CCCs.Where(x => x.AreaManagerId == Customer.Id && x.IsDeleted == false).FirstOrDefault();
+                if (CCCClerk != null)
+                {
+                    clerkRegistrations = db.ClerkRegistrations.Where(x => x.Status.Key == StatusKeys.AccountPending && x.CCCId == CCCClerk.Id).Include(c => c.CCCType).Include(c => c.CreatedBySystemUser).Include(c => c.Status).Include(c => c.ModifiedBySystemUser).Include(c => c.NotificationType).ToList();
+                }
+                else
+                {
+                    ViewBag.Message = "Please contact system administrator to get your account mapped to a CCC";
+                    ViewBag.MessageTitle = "Area Manager Not Mapped to CCC";
+                }
             }
             if (TempData["Message"] != null)
             {

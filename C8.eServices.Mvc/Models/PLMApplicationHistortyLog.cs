@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,7 +29,12 @@ namespace C8.eServices.Mvc.Models
         [Display(Name = "Human Settlement Application")]
         public int? HumanSettlementApplicationId { get; set; }
         [ForeignKey("HumanSettlementApplicationId")]
-        public HumanSettlementApplication HumanSettlementApplication { get; set; }
+        public virtual HumanSettlementApplication HumanSettlementApplication { get; set; }
 
+        [Column(Order = 14)]
+        [Display(Name = "Real Estate Application")]
+        public int? RealEstateApplicationId { get; set; }
+        [ForeignKey("RealEstateApplicationId")]
+        public virtual RE_Application RealEstateApplication { get; set; }
     }
 }

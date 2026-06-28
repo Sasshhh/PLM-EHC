@@ -1,0 +1,205 @@
+@model IEnumerable<C8.eServices.Mvc.Models.RE_Application>
+@{
+    ViewBag.Title = "Application Fee Payments";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .admin-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+        font-size: 15px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 10px;
+    }
+
+    .admin-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        padding: 14px 16px;
+        border-bottom: 2px solid var(--re-border-color);
+        text-align: left;
+    }
+
+    .admin-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--re-border-color);
+        font-size: 14px;
+        color: #334155;
+        vertical-align: middle;
+    }
+
+    .admin-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .admin-table tbody tr:hover {
+        background-color: #fafaf9;
+    }
+
+    .btn-re-gold {
+        background-color: var(--re-gold);
+        color: #ffffff;
+        font-weight: 600;
+        border: 1px solid var(--re-gold);
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    .btn-re-gold:hover, .btn-re-gold:focus {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .badge-status-submitted {
+        background-color: #fef3c7;
+        color: #d97706;
+        padding: 4px 8px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid #fde68a;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: #cbd5e1;
+        margin-bottom: 15px;
+        display: block;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" role="alert" style="border-radius: 8px; border-left: 4px solid #16a34a;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-check-circle" style="margin-right: 8px;"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 class="admin-title">Application Fee Payments</h1>
+        <p class="admin-subtitle">Validate uploaded proofs of payment for submitted Real Estate lease applications (UC 06).</p>
+    </div>
+
+    <div class="admin-card">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-weight: 700; color: var(--re-slate-black); font-size: 18px; border-bottom: 2px solid var(--re-gold); padding-bottom: 8px; display: inline-block;">
+            Awaiting Payment Validation
+        </h3>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fa fa-folder-open-o"></i>
+                <p style="font-size: 16px; font-weight: 500; margin-bottom: 5px;">No applications awaiting payment validation</p>
+                <p style="font-size: 13px;">All submitted applications have had their payments validated or rejected.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Reference Number</th>
+                            <th>Applicant</th>
+                            <th>Entity Name</th>
+                            <th>Purpose of Lease</th>
+                            <th>Unit Type</th>
+                            <th>Date Submitted</th>
+                            <th>Status</th>
+                            <th style="width: 150px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Model)
+                        {
+                            <tr>
+                                <td style="font-weight: 700; color: var(--re-slate-black);">@app.ApplicationReferenceNumber</td>
+                                <td>@(app.Customer != null ? app.Customer.FullName : "N/A")</td>
+                                <td>@(string.IsNullOrEmpty(app.EntityName) ? "Individual" : app.EntityName)</td>
+                                <td>@app.PurposeOfLease</td>
+                                <td>@(app.SelectedFacilityUnit != null ? app.SelectedFacilityUnit.UnitType : "N/A")</td>
+                                <td>@(app.CreatedDateTime.HasValue ? app.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                                <td>
+                                    <span class="badge-status-submitted">@app.Status.Name</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="@Url.Action("VerifyPayment", "RealEstateAdmin", new { id = app.Id })" class="btn-re-gold" id="btn-verify-@app.Id">
+                                        <i class="fa fa-eye"></i> Verify Payment
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
