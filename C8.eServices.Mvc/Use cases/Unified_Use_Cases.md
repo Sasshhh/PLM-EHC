@@ -1108,6 +1108,25 @@ CONFIRM VACATED (UC-35 — unchanged)
 
 ---
 
+### UC027: System Audit Trail (Real Estate & EHC)
+- **Roles:** Super Administrators, Back Office System Administrators, Area Managers (filtered by Department)
+- **Controllers:** `AuditTrailController.cs`, `AccountController.cs` (hooks), `ApplicationUserRoleController.cs` (hooks)
+- **Views:**
+  - `ActiveUsers.cshtml` — active users and login history
+  - `ActivityLog.cshtml` — all user activities / transactions
+  - `AdminActivityLog.cshtml` — admin-specific action log (with Controller/Action details)
+  - `PasswordResets.cshtml` — password reset tracking history
+  - `RoleModifications.cshtml` — user access role changes (before/after states)
+- **Workflow / Instantiation:**
+  - Integrated via global MVC action filter `AuditTrailActionFilter` and static helper hooks in `AuditTrailHelper.cs`.
+  - Enforces department-level data isolation: EHC managers only see EHC data; Real Estate managers only see Real Estate data; Super Admins have a system-wide view.
+  - Avoids transaction recursion by using `SaveChangesWithoutAudit()` when persisting log entries.
+- **POST / Export Behaviour:**
+  - Each report supports CSV data export via dedicated action endpoints (`ExportActiveUsers`, `ExportActivityLog`, etc.).
+  - Clicking the export button downloads the file dynamically and triggers an audit activity log entry indicating who exported what report.
+
+---
+
 ### PLM-001 · Renewal Document Types & Checklists
 **Script file:** `Scripts/add_renewal_document_types.sql`  
 **Date added:** 2026-05-17  
@@ -1198,3 +1217,69 @@ PRINT 'PLM-001 complete.'
 SET NOCOUNT OFF
 GO
 ```
+
+---
+
+## 🏛️ REAL ESTATE DEVELOPMENT (RED / DPRE) UNIFIED WORKFLOWS & SPECIFICATIONS
+
+### 📌 Architectural & Domain Isolation Standard
+1. **Database Schema**: All entities operate exclusively on `RE_*` tables (`RE_Applications`, `RE_Facilities`, `RE_FacilityCategories`, `RE_FacilityUnits`).
+2. **Controllers & Views**: Customer interactions are handled in `RealEstateController.cs` (`Views/RealEstate/`), and back-office / admin operations in `RealEstateAdminController.cs` (`Views/RealEstateAdmin/`).
+3. **Visual Design**: Uses local Onyx Obsidian gold theme CSS tokens (`var(--re-gold)`, `#c59b27`, `#d2930b`) without altering shared global layout files.
+
+---
+
+### RE_UC001 — RE_UC005: Property Onboarding & Dynamic Lease Application Capture
+- **Actors:** Applicant, Real Estate Officer
+- **Controllers:** `RealEstateController.cs`
+- **Views:** `Capture.cshtml`, `Inbox.cshtml`, `MyApplications.cshtml`
+- **Key Features:**
+  - Cascading dropdowns: Customer Care Centre (CCC Area) $\rightarrow$ Facility Site $\rightarrow$ Unit Let-Space.
+  - Multi-unit selection grid (`#tblSelectedUnits`) allowing applicants to stack multiple unit types per application.
+  - Dynamic estimated rental total calculation: $\text{Monthly Rental} = \text{Size (m}^2\text{)} \times \text{Tariff (R/m}^2\text{)} \times \text{Quantity}$.
+  - Pre-qualification document inline uploads (11 mandatory + optional docs).
+
+---
+
+### RE_UC021 — RE_UC025: Lease Administration & User Agreement Execution
+- **Actors:** Property Officer, HOD (Development Planning & Real Estate), Tenant
+- **Controllers:** `RealEstateAdminController.cs`, `RealEstateController.cs`
+- **Views:** `PtoApprovals.cshtml`, `PtoSignatureQueue.cshtml`, `ActivePto.cshtml`, `GenerateLeaseAgreement.cshtml`, `SignLeaseAgreement.cshtml`, `LeaseAgreementApprovals.cshtml`, `Allocations.cshtml`, `ActiveOccupancy.cshtml`
+- **Workflow Steps:**
+  - **RE_UC021**: Draft Permission to Occupy (PTO) Certificate & HOD Signature Canvas.
+  - **RE_UC022**: Revoke / Terminate Active PTO with reason & evidence upload.
+  - **RE_UC023**: Generate Standard Lease, Live Parameter Review (Rental, Deposit, Duration, Escalation, Special Clauses), `#paperDraft` preview sheet, Tenant PDF Upload, & HOD Sign-off with confirmation modals (`#modalConfirmSubmit`, `#modalTenantConfirm`, `#modalHodConfirm`).
+  - **RE_UC024**: Unit Let-Space Allocation.
+  - **RE_UC025**: Capture Detailed Lease Classification & Unique Tenancy Reference (`LSE-*`).
+
+---
+
+### RE_UC026 (NEW): Evaluation Criteria Navigation & Working Committee Screening Tool
+- **Actors:** Client Services Officer, Working Committee, Evaluation Committee
+- **Controllers:** `RealEstateAdminController.cs` (`EvaluationCriteria` action)
+- **Views:** `Views/RealEstateAdmin/EvaluationCriteria.cshtml`, `Views/Shared/RCS_Layout.cshtml`
+- **Navigation Location:** New top-level navigation panel menu item: **"Evaluation Criteria"** containing 3 sub-tabs:
+  1. **Tab 1 — Pre-Qualification Documents**: Guidelines for 12 mandatory applicant uploads (Business Plan, Company Profile, Tax Clearance/BEE, MBD 4 Declaration, CSD Registration, 3 Years Audited Financials, Proof of Location, Certified ID, Facilities Management Experience, Funding Letter, Strategic Partnerships, Ownership/Job Creation structure).
+  2. **Tab 2 — Pre-Qualification Evaluation (Scoring Matrix)**:
+     - **Track Record / Experience** (15 pts max): 11+ yrs = 15 pts, 6-10 yrs = 13 pts, 3-5 yrs = 5 pts, No submission = 0 pts. Requires 3 yrs financials & 3 testimonial letters.
+     - **Financial Stability** (20 pts max): R1.5M+ = 20 pts, R1M+ = 15 pts, R750k+ = 12 pts, R500k+ = 10 pts, No funding = 0 pts. Requires bank statement/intent letter/guarantee.
+     - **Business Case** (25 pts max): Strategic Plan = 10 pts, Sector Analysis = 5 pts, Financial Model = 10 pts (Funding Mix 5 pts, Projected Revenue 5 pts).
+     - **Marketing Plan** (20 pts max): Marketing Methods = 10 pts, Strategic Partnerships = 10 pts.
+     - **Operations Plan** (10 pts max): Enterprise Development = 5 pts, Facility Management = 5 pts.
+  3. **Tab 3 — Checklist for Committee Evaluations (Screening & Adjudication)**:
+     - **Screening Committee**: Interactive compliance checklist (Attached / Not attached) for 11 compliance documents, screening officer name, date, signature, and Declined (Yes/No) toggle.
+     - **Evaluation Committee**: Job Creation scoring scale (15+ jobs = 50 pts, 10-14 jobs = 40 pts, 5-13 jobs = 30 pts, 2-12 jobs = 20 pts).
+
+---
+
+### RE_UC027 (NEW): PDF User Agreement Generation for Municipal Property Leases
+- **Actors:** Property Officer, System Automated PDF Engine
+- **Controllers:** `RealEstateAdminController.cs` (`DownloadUserAgreement` action), `Helpers/RealEstateUserAgreementHelper.cs`
+- **Templates Touched:**
+  - `PDFTemplates/RealEstate/URC User Agreement_Latest.doc` (Economic Development / Standard Municipal Template)
+  - `PDFTemplates/RealEstate/Updated User Agreement.doc` (Development Planning & Real Estate / CoE Updated Template)
+- **PDF Data Population Mapping:**
+  - **Lessor / Municipality Representation**: Head of Department: Development Planning & Real Estate.
+  * **Tenant / User Data**: Full Name, ID Number, Residential Address, Entity Name, Registration Number, VAT Number, Tax Number, Representative Name & Capacity, Resolution Date.
+  * **Premises & Lease Specifications**: Property Name, CCC Area, Address, Erf/Farm Number, Unit Type (Kiosk, Stall, Workshop, Office), Unit Size ($m^2$), Gazetted Tariff Rate ($R/m^2$), Calculated Monthly Rental, Deposit Amount, Lease Duration (months), Commencement Date, Escalation Rate, and Special Clauses.
+

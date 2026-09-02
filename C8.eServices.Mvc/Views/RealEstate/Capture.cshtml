@@ -419,17 +419,17 @@
 
                     <div class="form-group" style="margin: 0;" id="divRegNo">
                         <label class="re-form-label" id="lblRegNo">Company Registration Number<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.CompanyRegistrationNumber, new { @class = "form-control re-form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.Application.CompanyRegistrationNumber, new { @class = "form-control re-form-control", required = "required", pattern = @"\d{4}/\d{6}/\d{2}", title = "Format must be YYYY/NNNNNN/NN (as per CIPC Standard)", placeholder = "e.g. 2026/123456/07", maxlength = "14" })
                     </div>
 
                     <div class="form-group" style="margin: 0;" id="divVatNo">
                         <label class="re-form-label">VAT Registration Number</label>
-                        @Html.TextBoxFor(m => m.Application.VatRegistrationNumber, new { @class = "form-control re-form-control" })
+                        @Html.TextBoxFor(m => m.Application.VatRegistrationNumber, new { @class = "form-control re-form-control", pattern = @"4\d{9}", title = "VAT Registration Number must be a 10 digit number starting with 4", placeholder = "e.g. 4123456789", maxlength = "10" })
                     </div>
 
                     <div class="form-group" style="margin: 0;" id="divTaxNo">
                         <label class="re-form-label">SARS Tax Reference Number<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.TaxReferenceNumber, new { @class = "form-control re-form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.Application.TaxReferenceNumber, new { @class = "form-control re-form-control", required = "required", pattern = @"\d{10}", title = "SARS Tax Reference Number must be exactly 10 digits", placeholder = "e.g. 1234567890", maxlength = "10" })
                     </div>
 
                     <div class="form-group" style="margin: 0;" id="divRepName">
@@ -455,22 +455,22 @@
 
                     <div class="form-group" style="margin: 0;">
                         <label class="re-form-label">Postal Code<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.EntityRegisteredPostalCode, new { @class = "form-control re-form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.Application.EntityRegisteredPostalCode, new { @class = "form-control re-form-control", required = "required", pattern = @"\d{4}", title = "Postal Code must be exactly 4 digits", placeholder = "e.g. 1401", maxlength = "4" })
                     </div>
 
                     <div class="form-group" style="margin: 0;" id="divTel">
                         <label class="re-form-label">Telephone Number</label>
-                        @Html.TextBoxFor(m => m.Application.EntityTelephone, new { @class = "form-control re-form-control" })
+                        @Html.TextBoxFor(m => m.Application.EntityTelephone, new { @class = "form-control re-form-control", pattern = @"0\d{9}", title = "Telephone Number must be exactly 10 digits starting with 0", placeholder = "e.g. 0119991234", maxlength = "10" })
                     </div>
 
                     <div class="form-group" style="margin: 0;">
                         <label class="re-form-label" id="lblMobile">Mobile Number<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.EntityMobile, new { @class = "form-control re-form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.Application.EntityMobile, new { @class = "form-control re-form-control", required = "required", pattern = @"0\d{9}", title = "Mobile/Cell Number must be exactly 10 digits starting with 0", placeholder = "e.g. 0829991234", maxlength = "10" })
                     </div>
 
                     <div class="form-group" style="margin: 0;" id="divFax">
                         <label class="re-form-label">Fax Number</label>
-                        @Html.TextBoxFor(m => m.Application.EntityFax, new { @class = "form-control re-form-control" })
+                        @Html.TextBoxFor(m => m.Application.EntityFax, new { @class = "form-control re-form-control", pattern = @"0\d{9}", title = "Fax Number must be exactly 10 digits starting with 0", placeholder = "e.g. 0119991235", maxlength = "10" })
                     </div>
 
                     <div class="form-group" style="margin: 0;">
@@ -481,47 +481,11 @@
             </div>
         </div>
 
-        <!-- Section 2: Banking Details -->
-        <div class="re-card">
-            <div class="re-card-header">
-                <i class="fa fa-bank" style="color: var(--re-gold); font-size: 18px;"></i>
-                <h3 class="re-card-title">2. Banking Details</h3>
-            </div>
-            <div class="re-card-body">
-                <div class="re-grid-2">
-                    <div class="form-group" style="margin: 0;">
-                        <label class="re-form-label">Bank Name<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.BankName, new { @class = "form-control re-form-control", required = "required" })
-                    </div>
-
-                    <div class="form-group" style="margin: 0;">
-                        <label class="re-form-label">Account Type<span class="required-badge">*</span></label>
-                        @Html.DropDownListFor(m => m.Application.BankAccountType, (IEnumerable<SelectListItem>)ViewBag.BankAccountTypes, new { @class = "form-control re-form-control" })
-                    </div>
-
-                    <div class="form-group" style="margin: 0;">
-                        <label class="re-form-label">Account Holder Name<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.BankAccountName, new { @class = "form-control re-form-control", required = "required" })
-                    </div>
-
-                    <div class="form-group" style="margin: 0;">
-                        <label class="re-form-label">Account Number<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.BankAccountNumber, new { @class = "form-control re-form-control", required = "required" })
-                    </div>
-
-                    <div class="form-group" style="margin: 0;">
-                        <label class="re-form-label">Branch Code<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.BankBranchCode, new { @class = "form-control re-form-control", required = "required" })
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 3: Space / Lease Details -->
+        <!-- Section 2: Space / Lease Details -->
         <div class="re-card">
             <div class="re-card-header">
                 <i class="fa fa-building" style="color: var(--re-gold); font-size: 18px;"></i>
-                <h3 class="re-card-title">3. Space / Lease Specification</h3>
+                <h3 class="re-card-title">2. Space / Lease Specification</h3>
             </div>
             <div class="re-card-body">
                 <div class="re-grid-2">
@@ -552,7 +516,7 @@
 
                     <div class="form-group" style="margin: 0;">
                         <label class="re-form-label">Property Postal Code<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control re-form-control", required = "required" })
+                        @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control re-form-control", required = "required", pattern = @"\d{4}", title = "Property Postal Code must be exactly 4 digits", placeholder = "e.g. 1401", maxlength = "4" })
                     </div>
                 </div>
 
@@ -560,63 +524,76 @@
 
                 <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #1e293b;">Facility & Letting Space Selection</h4>
                 
+                @Html.HiddenFor(m => m.Application.SelectedUnitsJson, new { id = "hfSelectedUnitsJson" })
+
                 <div class="re-grid-2" style="margin-bottom: 20px;">
                     <div class="form-group" style="margin: 0;">
                         <label class="re-form-label">Select Letting Facility / Site<span class="required-badge">*</span></label>
-                        @Html.DropDownListFor(m => m.Application.SelectedFacilityId, new List<SelectListItem>(), "Select a Facility...", new { @class = "form-control re-form-control", id = "ddlSelectedFacility", required = "required", disabled = "disabled" })
-                        @Html.ValidationMessageFor(m => m.Application.SelectedFacilityId, "", new { @class = "text-danger" })
+                        @Html.DropDownListFor(m => m.Application.SelectedFacilityId, new List<SelectListItem>(), "Select a Facility...", new { @class = "form-control re-form-control", id = "ddlSelectedFacility", disabled = "disabled" })
                     </div>
 
                     <div class="form-group" style="margin: 0;">
                         <label class="re-form-label">Select Unit Type & Specification<span class="required-badge">*</span></label>
-                        @Html.DropDownListFor(m => m.Application.SelectedFacilityUnitId, new List<SelectListItem>(), "Select a Unit Type...", new { @class = "form-control re-form-control", id = "ddlSelectedUnit", required = "required", disabled = "disabled" })
-                        @Html.ValidationMessageFor(m => m.Application.SelectedFacilityUnitId, "", new { @class = "text-danger" })
+                        @Html.DropDownListFor(m => m.Application.SelectedFacilityUnitId, new List<SelectListItem>(), "Select a Unit Type...", new { @class = "form-control re-form-control", id = "ddlSelectedUnit", disabled = "disabled" })
                     </div>
 
-                    <div class="form-group" style="margin: 0;">
+                    <div class="form-group" style="margin: 0; position: relative;">
                         <label class="re-form-label">Number of Units (Max limit applies)<span class="required-badge">*</span></label>
-                        @Html.TextBoxFor(m => m.Application.SelectedUnitCount, new { @class = "form-control re-form-control", id = "txtUnitCount", type = "number", min = "1", max = "4", required = "required", disabled = "disabled", value = "1" })
-                        @Html.ValidationMessageFor(m => m.Application.SelectedUnitCount, "", new { @class = "text-danger" })
-                        <small id="lblMaxUnitsWarning" class="text-muted" style="font-size: 12px; display: block; margin-top: 4px;"></small>
+                        @Html.TextBoxFor(m => m.Application.SelectedUnitCount, new { @class = "form-control re-form-control", id = "txtUnitCount", type = "number", min = "1", max = "4", disabled = "disabled", value = "1" })
+                        <small id="lblMaxUnitsWarning" class="text-muted" style="font-size: 12px; display: block; position: absolute; bottom: -20px; left: 0; margin: 0;"></small>
+                    </div>
+
+                    <div class="form-group" style="margin: 0; display: flex; flex-direction: column; justify-content: flex-end; height: 100%;">
+                        <label class="re-form-label" style="visibility: hidden;">&nbsp;</label>
+                        <button type="button" id="btnAddUnit" class="btn re-btn-primary" style="width: 100%; height: 42px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0;">
+                            <i class="fa fa-plus-circle"></i> Add Unit to Selection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Selection Grid -->
+                <div id="selectionGridWrapper" style="display: none; margin-top: 25px;">
+                    <h5 style="margin-top: 0; margin-bottom: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-th-list" style="color: var(--re-gold);"></i> Selected letting units & spaces
+                    </h5>
+                    <div class="table-responsive" style="border: 1px solid var(--re-border-color); border-radius: 8px; overflow: hidden; background: #ffffff; margin-bottom: 20px;">
+                        <table class="table table-striped table-hover" id="tblSelectedUnits" style="margin: 0;">
+                            <thead>
+                                <tr style="background: #f8fafc; border-bottom: 2px solid var(--re-border-color);">
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569;">Facility</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569;">Unit Type</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569; text-align: right;">Size</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569; text-align: right;">Tariff / m²</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569; text-align: center;">Qty</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569; text-align: right;">Monthly Rental</th>
+                                    <th style="font-weight: 600; padding: 12px; font-size: 13px; color: #475569; text-align: center; width: 80px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <!-- Live Pricing Summary Panel -->
                 <div id="pricingPanel" style="display: none; background: var(--re-gold-light); border: 1px solid rgba(197, 155, 39, 0.3); border-radius: 8px; padding: 20px; margin-top: 20px;">
-                    <h5 style="margin-top: 0; margin-bottom: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa fa-calculator" style="color: var(--re-gold);"></i> Cost Calculation Summary
-                    </h5>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
-                        <div>
-                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Unit Size (m²)</div>
-                            <div id="lblCalcUnitSize" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Category Base Tariff (per m²)</div>
-                            <div id="lblCalcTariff" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">Quantity Selected</div>
-                            <div id="lblCalcQty" style="font-size: 18px; font-weight: 700; color: #1e293b;">-</div>
-                        </div>
-                    </div>
-                    <div style="border-top: 1px dashed rgba(197, 155, 39, 0.3); padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 14px; font-weight: 600; color: #475569;">Estimated Monthly Rental:</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 14px; font-weight: 600; color: #475569;">Estimated Total Monthly Rental:</span>
                         <span id="lblCalcTotal" style="font-size: 24px; font-weight: 800; color: var(--re-gold);">-</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Section 4: Mandatory Document Uploads -->
+        <!-- Section 3: Mandatory Document Uploads -->
         <div class="re-card">
             <div class="re-card-header">
                 <i class="fa fa-cloud-upload" style="color: var(--re-gold); font-size: 18px;"></i>
-                <h3 class="re-card-title">4. Pre-Qualification Documents</h3>
+                <h3 class="re-card-title">3. Pre-Qualification Documents</h3>
             </div>
             <div class="re-card-body">
                 <div class="alert alert-warning" style="border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
-                    <i class="fa fa-info-circle"></i> <strong>Mandatory Uploads:</strong> Please upload high-quality PDF/Scanned copies of the following documents. All files are mandatory unless noted as entity-only. Maximum file size per document is 5MB.
+                    <i class="fa fa-info-circle"></i> <strong>Mandatory Uploads:</strong> Please upload high-quality PDF/Scanned copies of the following documents. All files are mandatory unless noted as entity-only or optional. Maximum file size per document is 5MB.
                 </div>
 
                 <!-- Tabs Header -->
@@ -629,182 +606,271 @@
                 <div class="tab-content">
                     <div class="tab-pane active fade in" id="tab-mandatory" role="tabpanel">
                         <div class="doc-grid">
-                    <!-- Doc 1: ID -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Applicant ID Document<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Certified copy of ID Book / Smart Card (both sides) or Passport.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Id" for="file_Id">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Id" id="file_Id" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Id" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Id", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 1: ID -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Applicant ID Document<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Certified copy of ID Book / Smart Card (both sides) or Passport (not older than 6 months).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Id" for="file_Id">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Id" id="file_Id" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Id" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Id" id="remove_Id" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Id", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 2: Proof of Address -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Proof of Residential Address<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Recent municipal account, levy statement, or letter from counselor (not older than 3 months).</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Address" for="file_Address">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Address" id="file_Address" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Address" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Address", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 2: Proof of Address -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Proof of Residential Address<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Recent municipal account, levy statement, or letter from counselor (not older than 3 months).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Address" for="file_Address">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Address" id="file_Address" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Address" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Address" id="remove_Address" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Address", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 3: CIPC Compliance -->
-                    <div class="doc-upload-card" id="cardCipc">
-                        <div class="doc-info">
-                            <span class="doc-title">CIPC Registration/Compliance<span class="required-badge" id="reqCipc">*</span></span>
-                            <p class="doc-desc">Valid Cor14.3, CK1/CK2, Trust deed, or Constitution. (Mandatory for non-individuals)</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Cipc" for="file_Cipc">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Cipc" id="file_Cipc" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
-                            <span id="name_Cipc" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Cipc", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 3: CIPC Compliance -->
+                            <div class="doc-upload-card" id="cardCipc">
+                                <div class="doc-info">
+                                    <span class="doc-title">CIPC Registration/Compliance<span class="required-badge" id="reqCipc">*</span></span>
+                                    <p class="doc-desc">Valid Cor14.3, CK1/CK2, Trust deed, or Constitution. (Mandatory for non-individuals)</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Cipc" for="file_Cipc">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Cipc" id="file_Cipc" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Cipc" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Cipc" id="remove_Cipc" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Cipc", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 4: SARS Tax Clearance -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">SARS Tax Clearance Certificate<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Valid copy of SARS tax clearance certificate or status PIN code printout.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Sars" for="file_Sars">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Sars" id="file_Sars" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Sars" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Sars", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 4: SARS Tax Clearance -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">SARS Tax Clearance Certificate<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Valid copy of SARS tax clearance certificate or status PIN code printout.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Sars" for="file_Sars">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Sars" id="file_Sars" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Sars" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Sars" id="remove_Sars" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Sars", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 5: Company Profile -->
-                    <div class="doc-upload-card" id="cardProfile">
-                        <div class="doc-info">
-                            <span class="doc-title">Company/Entity Profile<span class="required-badge" id="reqProfile">*</span></span>
-                            <p class="doc-desc">Detailed company profile outlining core service capabilities. (Mandatory for non-individuals)</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Profile" for="file_Profile">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Profile" id="file_Profile" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
-                            <span id="name_Profile" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Profile", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 5: Company Profile -->
+                            <div class="doc-upload-card" id="cardProfile">
+                                <div class="doc-info">
+                                    <span class="doc-title">Company/Entity Profile<span class="required-badge" id="reqProfile">*</span></span>
+                                    <p class="doc-desc">Company Profile including Directorship/Ownership structure, Management Experience, job creation count, Empowerment Plan, and Social Benefits. (Mandatory for non-individuals)</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Profile" for="file_Profile">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Profile" id="file_Profile" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Profile" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Profile" id="remove_Profile" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Profile", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 6: References -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Contactable References<span class="required-badge">*</span></span>
-                            <p class="doc-desc">List of three (3) contactable references or recommendation letters from previous landlords/projects.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_References" for="file_References">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_References" id="file_References" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_References" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_References", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 6: Experience -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Facilities Management Experience<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Detailed description of Facilities Management Experience and/or professional accreditation.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Experience" for="file_Experience">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Experience" id="file_Experience" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Experience" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Experience" id="remove_Experience" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Experience", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 7: Supporting Letter -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Motivational / Proposal Letter<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Detailed letter/proposal describing the business activity and space layout requirements.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Letters" for="file_Letters">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Letters" id="file_Letters" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Letters" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Letters", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 7: References -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Contactable References<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">List of three (3) contactable references or recommendation letters from previous landlords/projects.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_References" for="file_References">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_References" id="file_References" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_References" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_References" id="remove_References" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_References", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 8: Locality Plan -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Locality Plan of Property<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Drawing or map showing the physical positioning of the proposed site/space.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Locality" for="file_Locality">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Locality" id="file_Locality" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Locality" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Locality", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 8: Supporting Letter -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Motivational / Proposal Letter<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Detailed letter/proposal describing the business activity and space layout requirements.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Letters" for="file_Letters">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Letters" id="file_Letters" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Letters" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Letters" id="remove_Letters" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Letters", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 9: Zoning Certificate -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Copy of Zoning Certificate<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Zoning certificate copy confirming allowable usage permissions on the site.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Zoning" for="file_Zoning">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Zoning" id="file_Zoning" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Zoning" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Zoning", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 9: Locality Plan (Optional) -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Locality Plan of Property</span>
+                                    <p class="doc-desc">Drawing or map showing the physical positioning of the proposed site/space (Optional).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Locality" for="file_Locality">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Locality" id="file_Locality" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Locality" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Locality" id="remove_Locality" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Locality", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 10: Proof of Income -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Proof of Income / Financials<span class="required-badge">*</span></span>
-                            <p class="doc-desc">3 months recent bank statements, audited financials, or proof of funding confirmation.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Income" for="file_Income">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Income" id="file_Income" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Income" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Income", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 10: Zoning Certificate (Optional) -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Copy of Zoning Certificate</span>
+                                    <p class="doc-desc">Zoning certificate copy confirming allowable usage permissions on the site (Optional).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Zoning" for="file_Zoning">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Zoning" id="file_Zoning" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Zoning" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Zoning" id="remove_Zoning" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Zoning", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
-                    <!-- Doc 11: Proof of Payment -->
-                    <div class="doc-upload-card">
-                        <div class="doc-info">
-                            <span class="doc-title">Application Fee Proof of Payment<span class="required-badge">*</span></span>
-                            <p class="doc-desc">Electronic Funds Transfer (EFT) receipt or deposit slip for the RED application fee.</p>
-                        </div>
-                        <div class="doc-input-wrapper">
-                            <label class="doc-file-label" id="lblFile_Fee" for="file_Fee">
-                                <i class="fa fa-file-pdf-o"></i> Select File
-                            </label>
-                            <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
-                            <span id="name_Fee" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
-                            @Html.ValidationMessage("file_Fee", "", new { @class = "text-danger" })
-                        </div>
-                    </div>
+                            <!-- Doc 11: 3-years Audited Financial Statements -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">3-Years Audited Financials<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">3-years Audited Financial Statements (or Letter of Funding / Proof of Income / 3 months Bank Statements / Management Accounts / Affidavit).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Financials" for="file_Financials">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Financials" id="file_Financials" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Financials" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Financials" id="remove_Financials" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Financials", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
 
+                            <!-- Doc 12: Business Plan -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Business Plan<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Detailed business plan outlining operational strategy, target market, and financial projections.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_BusinessPlan" for="file_BusinessPlan">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_BusinessPlan" id="file_BusinessPlan" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_BusinessPlan" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_BusinessPlan" id="remove_BusinessPlan" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_BusinessPlan", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <!-- Doc 13: Declaration of Interest MBD 4 -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Declaration of Interest (MBD 4)<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Completed and signed Declaration of Interest (Form MBD 4).</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Mbd4" for="file_Mbd4">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Mbd4" id="file_Mbd4" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Mbd4" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Mbd4" id="remove_Mbd4" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Mbd4", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <!-- Doc 14: Proof of Payment -->
+                            <div class="doc-upload-card">
+                                <div class="doc-info">
+                                    <span class="doc-title">Application Fee Proof of Payment<span class="required-badge">*</span></span>
+                                    <p class="doc-desc">Electronic Funds Transfer (EFT) receipt or deposit slip for the RED application fee.</p>
+                                </div>
+                                <div class="doc-input-wrapper">
+                                    <label class="doc-file-label" id="lblFile_Fee" for="file_Fee">
+                                        <i class="fa fa-file-pdf-o"></i> Select File
+                                    </label>
+                                    <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Fee" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Fee" id="remove_Fee" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
+                                    @Html.ValidationMessage("file_Fee", "", new { @class = "text-danger" })
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="tab-other" role="tabpanel">
@@ -823,7 +889,10 @@
                                         <i class="fa fa-files-o"></i> Select Files
                                     </label>
                                     <input type="file" name="file_Other" id="file_Other" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx" style="display: none;" multiple />
-                                    <span id="name_Other" class="selected-filename"><i class="fa fa-check"></i> <span></span></span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
+                                        <span id="name_Other" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
+                                        <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Other" id="remove_Other" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
+                                    </div>
                                     @Html.ValidationMessage("file_Other", "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -905,8 +974,10 @@
             // Set up dynamic filename display on file selection
             $(".doc-file-input").change(function () {
                 var inputId = $(this).attr("id");
-                var nameSpanId = "#name_" + inputId.replace("file_", "");
-                var labelId = "#lblFile_" + inputId.replace("file_", "");
+                var cleanId = inputId.replace("file_", "");
+                var nameSpanId = "#name_" + cleanId;
+                var labelId = "#lblFile_" + cleanId;
+                var removeBtnId = "#remove_" + cleanId;
                 
                 if (this.files && this.files.length > 0) {
                     var filename = this.files[0].name;
@@ -917,46 +988,142 @@
                     }
                     $(nameSpanId + " span").text(filename);
                     $(nameSpanId).css("display", "inline-flex");
+                    $(removeBtnId).fadeIn(150);
                     
                     var changeHtml = (this.files.length > 1) ? "<i class='fa fa-refresh'></i> Change Files" : "<i class='fa fa-refresh'></i> Change File";
                     $(labelId).html(changeHtml).css("border-color", "#16a34a").css("color", "#16a34a");
                 } else {
                     $(nameSpanId).hide();
+                    $(removeBtnId).hide();
                     var defaultHtml = (inputId === "file_Other") ? "<i class='fa fa-files-o'></i> Select Files" : "<i class='fa fa-file-pdf-o'></i> Select File";
                     $(labelId).html(defaultHtml).css("border-color", "#cbd5e1").css("color", "#475569");
                 }
             });
 
-            // Cascading Dropdowns & Live Calculator logic
+            // Handle file removal / deletion click event
+            $(document).on("click", ".btn-remove-file", function () {
+                var inputId = $(this).data("input-id");
+                var cleanId = inputId.replace("file_", "");
+                
+                // Clear file input
+                $("#" + inputId).val("");
+                
+                // Hide filename span and remove button
+                $("#name_" + cleanId).hide().find("span").text("");
+                $(this).hide();
+                
+                // Reset label
+                var defaultHtml = (inputId === "file_Other") ? "<i class='fa fa-files-o'></i> Select Files" : "<i class='fa fa-file-pdf-o'></i> Select File";
+                $("#lblFile_" + cleanId).html(defaultHtml).css("border-color", "#cbd5e1").css("color", "#475569");
+            });
+
+            // Cascading Dropdowns & Multiple Units logic
+            var selectedUnits = [];
             var selectedUnitData = null;
 
-            function calculateRental() {
-                if (!selectedUnitData) {
+            function renderSelectedUnits() {
+                var tbody = $("#tblSelectedUnits tbody");
+                tbody.empty();
+
+                if (selectedUnits.length === 0) {
+                    $("#selectionGridWrapper").hide();
                     $("#pricingPanel").hide();
+                    $("#hfSelectedUnitsJson").val("");
+                    return;
+                }
+
+                var totalRental = 0;
+                $.each(selectedUnits, function (index, item) {
+                    var monthlyRental = item.Size * item.Tariff * item.Qty;
+                    totalRental += monthlyRental;
+
+                    var row = $("<tr>");
+                    row.append($("<td>").text(item.FacilityName).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").text(item.UnitType).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").text(item.Size + " m²").css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").text("R" + item.Tariff.toFixed(2)).css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").text(item.Qty).css("padding", "12px").css("font-size", "13px").css("text-align", "center"));
+                    row.append($("<td>").text("R" + monthlyRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).css("padding", "12px").css("font-size", "13px").css("font-weight", "600").css("text-align", "right"));
+                    
+                    var removeBtn = $("<button>").attr("type", "button").addClass("btn btn-danger btn-xs").html("<i class='fa fa-trash'></i>").click(function () {
+                        removeSelectedUnit(index);
+                    });
+                    row.append($("<td>").css("text-align", "center").append(removeBtn));
+
+                    tbody.append(row);
+                });
+
+                $("#lblCalcTotal").text("R" + totalRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                $("#hfSelectedUnitsJson").val(JSON.stringify(selectedUnits));
+
+                $("#selectionGridWrapper").fadeIn(200);
+                $("#pricingPanel").fadeIn(200);
+            }
+
+            function addSelectedUnit(unit) {
+                var existingIndex = -1;
+                $.each(selectedUnits, function (index, item) {
+                    if (item.UnitId === unit.UnitId) {
+                        existingIndex = index;
+                        return false;
+                    }
+                });
+
+                if (existingIndex > -1) {
+                    var newQty = selectedUnits[existingIndex].Qty + unit.Qty;
+                    if (newQty > unit.MaxUnits) {
+                        swal("Limit Exceeded", "The combined quantity exceeds the limit of " + unit.MaxUnits + " for this unit type.", "warning");
+                        selectedUnits[existingIndex].Qty = unit.MaxUnits;
+                    } else {
+                        selectedUnits[existingIndex].Qty = newQty;
+                    }
+                } else {
+                    selectedUnits.push(unit);
+                }
+
+                renderSelectedUnits();
+            }
+
+            function removeSelectedUnit(index) {
+                selectedUnits.splice(index, 1);
+                renderSelectedUnits();
+            }
+
+            $("#btnAddUnit").click(function () {
+                var facilityId = $("#ddlSelectedFacility").val();
+                var facilityName = $("#ddlSelectedFacility option:selected").text();
+                var unitId = $("#ddlSelectedUnit").val();
+                var unitOption = $("#ddlSelectedUnit option:selected");
+
+                if (!facilityId || !unitId || !selectedUnitData) {
+                    swal("Selection Required", "Please select a Facility and Unit Type.", "warning");
                     return;
                 }
 
                 var qty = parseInt($("#txtUnitCount").val());
-                if (isNaN(qty) || qty < 1) {
-                    qty = 1;
+                if (isNaN(qty) || qty < 1 || qty > selectedUnitData.MaxUnits) {
+                    swal("Invalid Quantity", "Please specify a valid quantity (1 - " + selectedUnitData.MaxUnits + ").", "warning");
+                    return;
                 }
 
-                // Enforce max quantity limit
-                if (qty > selectedUnitData.MaxUnits) {
-                    qty = selectedUnitData.MaxUnits;
-                    $("#txtUnitCount").val(qty);
-                }
+                var unit = {
+                    UnitId: parseInt(unitId),
+                    FacilityName: facilityName,
+                    UnitType: selectedUnitData.UnitType,
+                    Size: selectedUnitData.UnitSize,
+                    Tariff: selectedUnitData.Tariff,
+                    Qty: qty,
+                    MaxUnits: selectedUnitData.MaxUnits
+                };
 
-                var total = selectedUnitData.UnitSize * selectedUnitData.Tariff * qty;
+                addSelectedUnit(unit);
 
-                // Format values for display
-                $("#lblCalcUnitSize").text(selectedUnitData.UnitSize + " m²");
-                $("#lblCalcTariff").text("R" + selectedUnitData.Tariff.toFixed(2));
-                $("#lblCalcQty").text(qty);
-                $("#lblCalcTotal").text("R" + total.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-                
-                $("#pricingPanel").fadeIn(200);
-            }
+                // Reset inputs for next selection
+                $("#ddlSelectedUnit").val("");
+                $("#txtUnitCount").val("").attr("disabled", "disabled");
+                $("#lblMaxUnitsWarning").text("");
+                selectedUnitData = null;
+            });
 
             $("#Application_CCCId").change(function () {
                 var cccId = $(this).val();
@@ -967,7 +1134,6 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
-                calculateRental();
 
                 if (!cccId) return;
 
@@ -1000,7 +1166,6 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
-                calculateRental();
 
                 if (!facilityId) return;
 
@@ -1016,7 +1181,7 @@
                                     value: item.Id,
                                     text: optionText
                                 });
-                                // Attach data parameters for easy retrieval
+                                option.data("type", item.UnitType);
                                 option.data("size", item.UnitSize);
                                 option.data("tariff", item.Tariff);
                                 option.data("max", item.MaxUnits);
@@ -1039,12 +1204,12 @@
                     $("#txtUnitCount").val("").attr("disabled", "disabled");
                     $("#lblMaxUnitsWarning").text("");
                     selectedUnitData = null;
-                    calculateRental();
                     return;
                 }
 
                 selectedUnitData = {
                     Id: unitId,
+                    UnitType: selectedOption.data("type"),
                     UnitSize: parseFloat(selectedOption.data("size")),
                     Tariff: parseFloat(selectedOption.data("tariff")),
                     MaxUnits: parseInt(selectedOption.data("max"))
@@ -1055,22 +1220,26 @@
                     $("#txtUnitCount").val(1);
                 }
                 $("#lblMaxUnitsWarning").text("Maximum units allowed: " + selectedUnitData.MaxUnits);
-
-                calculateRental();
             });
 
-            $("#txtUnitCount").on("input change keyup", function () {
-                calculateRental();
-            });
+            // Load initial units from hidden input on reload
+            var initialJson = $("#hfSelectedUnitsJson").val();
+            if (initialJson) {
+                try {
+                    selectedUnits = JSON.parse(initialJson);
+                    renderSelectedUnits();
+                } catch (e) {
+                    console.error("Failed to parse initial SelectedUnitsJson", e);
+                }
+            }
 
-            // Handle validation reload initialization
+            // Bind facilities change triggers for reloading old models if applicable
             var initialCccId = $("#Application_CCCId").val();
             var initialFacilityId = "@(Model.Application.SelectedFacilityId ?? 0)";
             var initialUnitId = "@(Model.Application.SelectedFacilityUnitId ?? 0)";
             var initialUnitCount = "@(Model.Application.SelectedUnitCount ?? 0)";
 
-            if (initialCccId && initialCccId !== "0") {
-                // Fetch facilities and select the initial one
+            if (initialCccId && initialCccId !== "0" && selectedUnits.length === 0) {
                 $.ajax({
                     url: '@Url.Action("GetFacilitiesByCCC", "RealEstate")',
                     type: 'GET',
@@ -1089,7 +1258,6 @@
                             });
                             $("#ddlSelectedFacility").removeAttr("disabled");
                             
-                            // If facility was selected, trigger unit fetch
                             if (initialFacilityId && initialFacilityId !== "0") {
                                 $.ajax({
                                     url: '@Url.Action("GetUnitsByFacility", "RealEstate")',
@@ -1103,6 +1271,7 @@
                                                     value: item.Id,
                                                     text: optionText
                                                 });
+                                                option.data("type", item.UnitType);
                                                 option.data("size", item.UnitSize);
                                                 option.data("tariff", item.Tariff);
                                                 option.data("max", item.MaxUnits);
@@ -1110,6 +1279,7 @@
                                                     option.attr("selected", "selected");
                                                     selectedUnitData = {
                                                         Id: item.Id,
+                                                        UnitType: item.UnitType,
                                                         UnitSize: item.UnitSize,
                                                         Tariff: item.Tariff,
                                                         MaxUnits: item.MaxUnits
@@ -1125,7 +1295,20 @@
                                                     $("#txtUnitCount").val(initialUnitCount);
                                                 }
                                                 $("#lblMaxUnitsWarning").text("Maximum units allowed: " + selectedUnitData.MaxUnits);
-                                                calculateRental();
+                                                
+                                                // Pre-populate table with the single selection
+                                                var facilityName = $("#ddlSelectedFacility option:selected").text();
+                                                var unit = {
+                                                    UnitId: parseInt(initialUnitId),
+                                                    FacilityName: facilityName,
+                                                    UnitType: selectedUnitData.UnitType,
+                                                    Size: selectedUnitData.UnitSize,
+                                                    Tariff: selectedUnitData.Tariff,
+                                                    Qty: parseInt(initialUnitCount),
+                                                    MaxUnits: selectedUnitData.MaxUnits
+                                                };
+                                                selectedUnits.push(unit);
+                                                renderSelectedUnits();
                                             }
                                         }
                                     }
@@ -1142,6 +1325,10 @@
                 
                 // Form validation check
                 if (form[0].checkValidity()) {
+                    if (selectedUnits.length === 0) {
+                        swal("Selection Required", "Please add at least one unit/space to your selection before submitting.", "error");
+                        return;
+                    }
                     swal({
                         title: "Submit Application?",
                         text: "Are you sure you want to submit this Lease Application? You will not be able to edit these details once submitted.",

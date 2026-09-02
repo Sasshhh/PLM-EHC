@@ -88,5 +88,12 @@ namespace C8.eServices.Mvc.Keys
         public const string DisputeReview = "r_dispute_review";
         public const string DisputeResolution = "r_dispute_resolution";
         public const string DisputeClosure = "r_dispute_closure";
+
+        // Real Estate use cases
+        public const string RealEstateVerifyPayment = "re_verify_payment";
+        public const string RealEstateRiskAssessment = "re_risk_assessment";
+        public const string RealEstateDepartmentalReview = "re_departmental_review";
+        public const string RealEstateCommitteeReview = "re_committee_review";
+        public const string RealEstateHODAuthorisation = "re_hod_authorisation";
     }
 }

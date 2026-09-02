@@ -53,3 +53,13 @@ When modifying files shared by all departments:
   * Always verify that the current user belongs to the Real Estate department (`DepartmentId = 2`) before displaying data or processing forms.
 * **Master Data Isolation:**
   * Do not query or modify `ApplicationEntityKeys` belonging to `EkurhuleniHousingCompany` or `HumanSettlmentDevelopment`. Keep all operations strictly aligned to the `RealEstateDevelopment` key.
+
+---
+
+## 4. Single Source of Truth for Use Cases (RED)
+
+* **Reference Document:** [Unified_Use_Cases_Real_Estate.md](file:///C:/REPO/PLM%20V1/PLM-EHC/C8.eServices.Mvc/Use%20cases/Real%20Estate/Unified_Use_Cases_Real_Estate.md) is the authoritative Single Source of Truth for all Real Estate workflows (`RE_UC001` through `RE_UC020`).
+* **Recent Changes (Capture - RE_UC005):**
+  * **Banking Details Removed:** No banking details are captured in the client-facing UI or forms. They are initialized to empty/default strings and saved directly in the database.
+  * **Updated Pre-Qualification List:** The pre-qualification document checklist contains 14 documents in total. Refer to `Unified_Use_Cases_Real_Estate.md` Section 5 for the exact checklist.
+* **Testing Guidelines:** Do not run Playwright E2E tests from the project root; they must be run from `C8.eServices.Mvc/Tests/Playwright/` to avoid import conflicts. Set viewport to 4K (`3840x2160`) and zoom to `1.75` for visual clarity.

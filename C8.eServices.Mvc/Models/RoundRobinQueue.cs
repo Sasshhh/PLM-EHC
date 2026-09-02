@@ -87,5 +87,10 @@ namespace C8.eServices.Mvc.Models
         [ForeignKey("ServiceRequestId")]
         public ServiceRequest ServiceRequest { get; set; }
 
+        [Column(Order = 23)]
+        [Display(Name = "RealEstateApplication Id")]
+        public int? RealEstateApplicationId { get; set; }
+        [ForeignKey("RealEstateApplicationId")]
+        public virtual RE_Application RealEstateApplication { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -95,5 +95,11 @@ namespace C8.eServices.Mvc.Models.Audits
         public int? AllocatedUnitMaintenanceEHCId { get; set; }
         [ForeignKey("AllocatedUnitMaintenanceEHCId")]
         public AllocatedUnitMaintenanceEHC AllocatedUnitMaintenanceEHC { get; set; }
+
+        [Column(Order = 27)]
+        [Display(Name = "Real Estate Application")]
+        public int? RealEstateApplicationId { get; set; }
+        [ForeignKey("RealEstateApplicationId")]
+        public virtual RE_Application RealEstateApplication { get; set; }
     }
 }

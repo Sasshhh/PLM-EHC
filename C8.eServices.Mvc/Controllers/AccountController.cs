@@ -335,6 +335,9 @@ namespace C8.eServices.Mvc.Controllers
                             // SmsHelper.Send(systemUser.MobileNumber, "Property Lease Management System login notification on " + String.Format("{0:F}", DateTime.Now));
 
                             context.SystemUserLogTimes.Add(systemUserLogTime);
+
+                            // Audit Trail: Log successful login
+                            AuditTrailHelper.LogLogin(user.SystemUserId, true);
                             try
                             {
                                 var identityManager = new IdentityManager();
@@ -539,6 +542,18 @@ namespace C8.eServices.Mvc.Controllers
 
                         error = "Invalid username/email or password";
                         ModelState.AddModelError("", "Invalid username/email or password.");
+
+                        // Audit Trail: Log failed login attempt
+                        try
+                        {
+                            using (var auditDb = new eServicesDbContext())
+                            {
+                                var failedUser = auditDb.SystemUsers.FirstOrDefault(u => u.UserName == model.UserName.Trim());
+                                if (failedUser != null)
+                                    AuditTrailHelper.LogLogin(failedUser.Id, false, "Invalid username or password");
+                            }
+                        }
+                        catch { }
                     }
                 }
 
@@ -1815,6 +1830,10 @@ systemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, systemUser.Fu
 
                             context.Entry(user).State = EntityState.Modified;
                             context.SaveChanges();
+
+                            // Audit Trail: Log password reset (self-service)
+                            AuditTrailHelper.LogPasswordReset(user.Id, user.Id, "SelfReset");
+
                             var resetPasswordEmail = new Email();
 
 
@@ -1926,6 +1945,9 @@ systemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, systemUser.Fu
                 }
 
                 AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie, DefaultAuthenticationTypes.ExternalCookie, DefaultAuthenticationTypes.ExternalBearer);
+
+                // Audit Trail: Log logout
+                try { AuditTrailHelper.LogLogout(_base.SystemUser != null ? _base.SystemUser.Id : 0); } catch { }
                 Session.Abandon();
                 Session.Clear();
                 AuthenticationManager.SignOut();

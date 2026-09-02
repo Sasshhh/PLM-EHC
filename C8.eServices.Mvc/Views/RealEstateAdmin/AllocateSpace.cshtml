@@ -1,0 +1,157 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Allocate Space/Unit";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .btn-submit {
+        background-color: var(--re-gold);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--re-gold-hover);
+        color: white;
+    }
+
+    .check-list-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background-color: #f8fafc;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .check-list-item i {
+        color: #16a34a;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-card">
+        <h2 style="margin-top:0; margin-bottom:20px; font-weight:700; color: var(--re-gold);"><i class="fa fa-map-marker"></i> Space & Unit Allocation</h2>
+
+        @using (Html.BeginForm("AllocateSpace", "RealEstateAdmin", FormMethod.Post, new { id = "allocateForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-group">
+                <label>Lessee Details</label>
+                <input type="text" class="form-control" value="@Model.EntityName (@Model.ApplicantType)" readonly />
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="font-weight:700; display:block; margin-bottom:10px;">Pre-Occupation Checklist</label>
+                <div class="check-list-item">
+                    <i class="fa fa-check-circle"></i> Confirm Lease/PTO Approval is active
+                </div>
+                <div class="check-list-item">
+                    <i class="fa fa-check-circle"></i> Confirm signed Lease/User Agreement is uploaded
+                </div>
+                <div class="check-list-item">
+                    <i class="fa fa-check-circle"></i> Confirm Receipt of Required Deposit & Initial Rental Payment
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Allocation Action *</label>
+                @Html.DropDownList("decision", new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Approve", Text = "Approve and Allocate Unit" },
+                    new SelectListItem { Value = "Stop", Text = "Stop / Delay Allocation" }
+                }, "-- Select Option --", new { @class = "form-control", id = "ddlDecision", required = "required" })
+            </div>
+
+            <div class="form-group" id="divUnitSelect">
+                <label>Select Letting Space / Unit to Assign *</label>
+                <select name="selectedUnitId" id="ddlUnit" class="form-control">
+                    <option value="">-- Select Available Unit --</option>
+                    @if (ViewBag.AvailableUnits != null)
+                    {
+                        foreach (var u in (List<C8.eServices.Mvc.Models.RE_FacilityUnit>)ViewBag.AvailableUnits)
+                        {
+                            <option value="@u.Id">@u.UnitType - @u.Facility.Name (@u.FacilityCategory.Name)</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group" id="divReason" style="display:none;">
+                <label>Reason for Delaying Allocation (Mandatory) *</label>
+                <textarea name="reason" id="txtReason" class="form-control" rows="3" placeholder="Provide delay justification..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--re-border-color); padding-top: 20px; margin-top: 30px;">
+                <a href="@Url.Action("Allocations")" class="btn btn-default">Cancel</a>
+                <button type="submit" class="btn-submit" id="btnSubmitAllocation">Submit Allocation</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.getElementById('ddlDecision').addEventListener('change', function () {
+        var decision = this.value;
+        if (decision === 'Approve') {
+            document.getElementById('divUnitSelect').style.display = 'block';
+            document.getElementById('ddlUnit').setAttribute('required', 'required');
+            document.getElementById('divReason').style.display = 'none';
+            document.getElementById('txtReason').removeAttribute('required');
+        } else if (decision === 'Stop') {
+            document.getElementById('divUnitSelect').style.display = 'none';
+            document.getElementById('ddlUnit').removeAttribute('required');
+            document.getElementById('divReason').style.display = 'block';
+            document.getElementById('txtReason').setAttribute('required', 'required');
+        }
+    });
+</script>

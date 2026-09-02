@@ -1,0 +1,120 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Draft PTO Certificate";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+        color: var(--re-text-dark);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .btn-submit {
+        background-color: var(--re-gold);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--re-gold-hover);
+        color: white;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-card">
+        <h2 style="margin-top:0; margin-bottom:20px; font-weight:700; color: var(--re-gold);"><i class="fa fa-file-text-o"></i> Draft Permission to Occupy Certificate</h2>
+
+        @using (Html.BeginForm("GeneratePtoCertificate", "RealEstateAdmin", FormMethod.Post, new { id = "ptoForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-group">
+                <label>Applicant Details</label>
+                <input type="text" class="form-control" value="@Model.EntityName" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Property Leased</label>
+                <input type="text" class="form-control" value="@Model.PropertyAddress, @Model.TownshipSuburbFarmName" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>PTO Purpose of Occupation <span class="text-danger">*</span></label>
+                <textarea name="ptoPurpose" class="form-control" rows="3" required>@Model.PtoPurposeOfOccupation</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>PTO Start Date <span class="text-danger">*</span></label>
+                    <input type="date" name="ptoStartDate" id="ptoStartDate" class="form-control" value="@(Model.PtoStartDate.HasValue ? Model.PtoStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))" required />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>PTO End Date <span class="text-danger">*</span></label>
+                    <input type="date" name="ptoEndDate" id="ptoEndDate" class="form-control" value="@(Model.PtoEndDate.HasValue ? Model.PtoEndDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.AddMonths(6).ToString("yyyy-MM-dd"))" required />
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--re-border-color); padding-top: 20px; margin-top: 30px;">
+                <a href="@Url.Action("PtoApprovals")" class="btn btn-default">Cancel</a>
+                <button type="submit" class="btn-submit" id="btnSubmitPtoDraft">Submit for Signature</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.getElementById('ptoForm').addEventListener('submit', function (e) {
+        var start = new Date(document.getElementById('ptoStartDate').value);
+        var end = new Date(document.getElementById('ptoEndDate').value);
+        var diffTime = Math.abs(end - start);
+        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 366) {
+            e.preventDefault();
+            alert('PTO duration cannot exceed 12 months (365 days).');
+        }
+    });
+</script>

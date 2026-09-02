@@ -43,7 +43,7 @@ function runQuery(query) {
   try {
     const tempFile = path.join(__dirname, 'temp_query_e2e.sql');
     fs.writeFileSync(tempFile, query, 'utf8');
-    const cmd = `sqlcmd -S localhost -E -d CRMPLMDEV_2025 -i "${tempFile}" -W`;
+    const cmd = `sqlcmd -S localhost -E -d PropertyLeaseManagementRealEstate -i "${tempFile}" -W`;
     const output = execSync(cmd, { encoding: 'utf8' });
     try { fs.unlinkSync(tempFile); } catch (e) {}
     return output.trim();
@@ -78,7 +78,8 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     'id.pdf', 'address.pdf', 'cipc.pdf', 'sars.pdf', 'profile.pdf',
     'references.pdf', 'letter.pdf', 'locality.pdf', 'zoning.pdf',
     'income.pdf', 'fee.pdf', 'evidence.pdf', 'resolution.pdf',
-    'inspection.pdf', 'jobsheet.pdf', 'insurance.pdf', 'fitout.pdf', 'safety.pdf'
+    'inspection.pdf', 'jobsheet.pdf', 'insurance.pdf', 'fitout.pdf', 'safety.pdf',
+    'experience.pdf', 'financials.pdf', 'bizplan.pdf', 'mbd4.pdf'
   ];
   const filePaths = {};
   for (const name of fileNames) {
@@ -138,13 +139,7 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     await page.locator('input[name="Application.EntityEmail"]').fill('sasha@siyakhokhatech.gov.za');
     await delay(1500);
 
-    console.log('STEP 4: Filling banking details...');
-    await page.locator('input[name="Application.BankName"]').fill('Nedbank');
-    await page.locator('select[name="Application.BankAccountType"]').selectOption({ label: 'Cheque / Current Account' });
-    await page.locator('input[name="Application.BankAccountName"]').fill('Siyakhokha Tech Services');
-    await page.locator('input[name="Application.BankAccountNumber"]').fill('19876543210');
-    await page.locator('input[name="Application.BankBranchCode"]').fill('198765');
-    await delay(1500);
+
 
     console.log('STEP 5: Specifying premises details...');
     await page.locator('select[name="Application.PurposeOfLease"]').selectOption({ label: 'Offices/Professional Units' });
@@ -175,11 +170,14 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     await page.setInputFiles('input[name="file_Cipc"]', filePaths['cipc.pdf']);
     await page.setInputFiles('input[name="file_Sars"]', filePaths['sars.pdf']);
     await page.setInputFiles('input[name="file_Profile"]', filePaths['profile.pdf']);
+    await page.setInputFiles('input[name="file_Experience"]', filePaths['experience.pdf']);
     await page.setInputFiles('input[name="file_References"]', filePaths['references.pdf']);
     await page.setInputFiles('input[name="file_Letters"]', filePaths['letter.pdf']);
     await page.setInputFiles('input[name="file_Locality"]', filePaths['locality.pdf']);
     await page.setInputFiles('input[name="file_Zoning"]', filePaths['zoning.pdf']);
-    await page.setInputFiles('input[name="file_Income"]', filePaths['income.pdf']);
+    await page.setInputFiles('input[name="file_Financials"]', filePaths['financials.pdf']);
+    await page.setInputFiles('input[name="file_BusinessPlan"]', filePaths['bizplan.pdf']);
+    await page.setInputFiles('input[name="file_Mbd4"]', filePaths['mbd4.pdf']);
     await page.setInputFiles('input[name="file_Fee"]', filePaths['fee.pdf']);
     await delay(3000);
 

@@ -42,7 +42,7 @@ test('Submit Real Estate Lease Application (UC 05) - Slow Visual Submission', as
   const fileNames = [
     'id.pdf', 'address.pdf', 'cipc.pdf', 'sars.pdf', 'profile.pdf',
     'references.pdf', 'letter.pdf', 'locality.pdf', 'zoning.pdf',
-    'income.pdf', 'fee.pdf'
+    'income.pdf', 'fee.pdf', 'experience.pdf', 'financials.pdf', 'bizplan.pdf', 'mbd4.pdf'
   ];
   const filePaths = {};
   for (const name of fileNames) {
@@ -174,32 +174,7 @@ test('Submit Real Estate Lease Application (UC 05) - Slow Visual Submission', as
     await page.locator('input[name="Application.EntityEmail"]').fill('sasha@acmecorporate.co.za');
     await delay(2000);
 
-    // STEP 4: Banking details
-    console.log('STEP 4: Filling banking details...');
-    await page.locator('input[name="Application.BankName"]').click();
-    await delay(800);
-    await page.locator('input[name="Application.BankName"]').fill('Standard Bank');
-    await delay(1500);
 
-    await page.locator('select[name="Application.BankAccountType"]').click();
-    await delay(800);
-    await page.locator('select[name="Application.BankAccountType"]').selectOption({ label: 'Cheque / Current Account' });
-    await delay(1500);
-
-    await page.locator('input[name="Application.BankAccountName"]').click();
-    await delay(800);
-    await page.locator('input[name="Application.BankAccountName"]').fill('Acme Corporate Solutions');
-    await delay(1500);
-
-    await page.locator('input[name="Application.BankAccountNumber"]').click();
-    await delay(800);
-    await page.locator('input[name="Application.BankAccountNumber"]').fill('1029384756');
-    await delay(1500);
-
-    await page.locator('input[name="Application.BankBranchCode"]').click();
-    await delay(800);
-    await page.locator('input[name="Application.BankBranchCode"]').fill('051001');
-    await delay(2000);
 
     // STEP 5: Space/Lease Details
     console.log('STEP 5: Space/Lease specifications...');
@@ -268,11 +243,14 @@ test('Submit Real Estate Lease Application (UC 05) - Slow Visual Submission', as
     await uploadHelper('#lblFile_Cipc', 'file_Cipc', 'cipc.pdf');
     await uploadHelper('#lblFile_Sars', 'file_Sars', 'sars.pdf');
     await uploadHelper('#lblFile_Profile', 'file_Profile', 'profile.pdf');
+    await uploadHelper('#lblFile_Experience', 'file_Experience', 'experience.pdf');
     await uploadHelper('#lblFile_References', 'file_References', 'references.pdf');
     await uploadHelper('#lblFile_Letters', 'file_Letters', 'letter.pdf');
     await uploadHelper('#lblFile_Locality', 'file_Locality', 'locality.pdf');
     await uploadHelper('#lblFile_Zoning', 'file_Zoning', 'zoning.pdf');
-    await uploadHelper('#lblFile_Income', 'file_Income', 'income.pdf');
+    await uploadHelper('#lblFile_Financials', 'file_Financials', 'financials.pdf');
+    await uploadHelper('#lblFile_BusinessPlan', 'file_BusinessPlan', 'bizplan.pdf');
+    await uploadHelper('#lblFile_Mbd4', 'file_Mbd4', 'mbd4.pdf');
     await uploadHelper('#lblFile_Fee', 'file_Fee', 'fee.pdf');
 
     await delay(3000); // Visual pause to verify all 11 files are uploaded in the list

@@ -552,7 +552,7 @@
                             </li>
                         }
                     }
-                    @if (Request.IsAuthenticated && User.IsInRole("Area Manager"))
+                    @if (Request.IsAuthenticated && User.IsInRole("Area Manager") && SecurityHelper.UserDepartment().Equals(ApplicationEntityKeys.EkurhuleniHousingCompany))
                     {
 
 
@@ -856,9 +856,9 @@
                         </li>
                     }
 
-                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
+                    <!-- UC 06: Financials (Finance Officer/Admin) -->
+                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
                     {
-                        <!-- Real Estate Back-Office Actions (UC 06 - 08) -->
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-cash"></i>
@@ -874,33 +874,324 @@
                                 </li>
                             </ul>
                         </li>
+                    }
+
+                    <!-- Back-office Applications Menu -->
+                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
+                    {
                         <li>
                             <a href="javascript:;">
-                                <i class="ion ion-android-apps"></i>
-                                <span class="text">Assessment</span>
+                                <i class="ion ion-ios-list-outline"></i>
+                                <span class="text">Applications</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <!-- Option: Assessment (UC 07, 08, 09, 10, 11) -->
+                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative"))
+                                {
+                                    <li>
+                                        <a href="javascript:;">
+                                            <i class="ion ion-android-apps" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Assessment</span>
+                                            <i class="arrow ion-chevron-left"></i>
+                                        </a>
+                                        <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            {
+                                                <li>
+                                                    <a href="~/RealEstateAdmin/RiskAssessments">
+                                                        <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                        <span class="text">Risk Assessment</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="~/RealEstateAdmin/DepartmentalReviews">
+                                                        <i class="ion ion-android-share" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                        <span class="text">Departmental Reviews</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Departmental Representative") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            {
+                                                <li>
+                                                    <a href="~/RealEstateAdmin/DepartmentalQueue">
+                                                        <i class="ion ion-loop" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                        <span class="text">Departmental Reviews</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            {
+                                                <li>
+                                                    <a href="~/RealEstateAdmin/ConsolidateFeedback">
+                                                        <i class="ion ion-ios-compose" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                        <span class="text">Review Outcomes</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            {
+                                                <li>
+                                                    <a href="~/RealEstateAdmin/CommitteeReviews">
+                                                        <i class="ion ion-ios-people" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                        <span class="text">Committee Reviews</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li>
+                                                <a href="~/RealEstateAdmin/EvaluationCriteria">
+                                                    <i class="ion ion-ios-checkmark-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Evaluation Criteria</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+
+                                <!-- Option: Lease Agreements (UC 18, 19) -->
+                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="javascript:;">
+                                            <i class="ion ion-ios-paper" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Lease Agreements</span>
+                                            <i class="arrow ion-chevron-left"></i>
+                                        </a>
+                                        <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                            <li>
+                                                <a href="~/RealEstateAdmin/PtoReviews">
+                                                    <i class="ion ion-ios-paper-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">PTO Reviews</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/PtoApprovals">
+                                                    <i class="ion ion-document-text" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Draft PTO Certificate</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/PtoSignatureQueue">
+                                                    <i class="ion ion-edit" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Sign PTO Certificate</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/ActivePto">
+                                                    <i class="ion ion-close-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Revoke PTO</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/NewLeases">
+                                                    <i class="ion ion-clipboard" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Generate Lease Agreement</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/LeaseAgreementApprovals">
+                                                    <i class="ion ion-compose" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Sign Lease Agreement</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/Allocations">
+                                                    <i class="ion ion-location" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Allocate Space</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/ActiveOccupancy">
+                                                    <i class="ion ion-ios-color-filter" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Capture Lease Details</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+
+                                <!-- Option: Worklists (UC 12, UC 20) -->
+                                @if (User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="~/RealEstateAdmin/FinalAuthorisation">
+                                            <i class="ion ion-ios-checkmark-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Worklists</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/RealEstateAdmin/PtoAuthorisations">
+                                            <i class="ion ion-ios-briefcase-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Worklists</span>
+                                        </a>
+                                    </li>
+                                }
+                                
+                                <!-- Maintenance options that belong here -->
+                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="~/RealEstateAdmin/Index">
+                                            <i class="ion ion-gear-b" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Unit Configurations</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/RealEstateAdmin/ManageWorkflow">
+                                            <i class="ion ion-network" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Manage Workflow</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Inspections (UC 13, 14) -->
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-search"></i>
+                                <span class="text">Inspections</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             <ul class="inner-drop list-unstyled">
                                 <li>
-                                    <a href="~/RealEstateAdmin/RiskAssessments">
-                                        <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Risk Assessment</span>
+                                    <a href="javascript:;">
+                                        <i class="ion ion-ios-calendar-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Schedule Inspection</span>
+                                        <i class="arrow ion-chevron-left"></i>
                                     </a>
+                                    <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                        <li>
+                                            <a href="~/RealEstateAdmin/InspectionSchedules">
+                                                <i class="ion ion-clock" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                <span class="text">Pre-Occupation Inspection</span>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                                 <li>
-                                    <a href="~/RealEstateAdmin/DepartmentalReviews">
-                                        <i class="ion ion-loop" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Departmental Reviews</span>
+                                    <a href="javascript:;">
+                                        <i class="ion ion-ios-checkmark-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Inspection</span>
+                                        <i class="arrow ion-chevron-left"></i>
                                     </a>
-                                </li>
-                                <li>
-                                    <a href="~/RealEstateAdmin/Index">
-                                        <i class="ion ion-gear-b" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Unit Configurations</span>
-                                    </a>
+                                    <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                        <li>
+                                            <a href="~/RealEstateAdmin/ConductInspections">
+                                                <i class="ion ion-android-exit" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                <span class="text">Entry Inspection</span>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
+                    }
+
+                    <!-- Maintenance & Works Orders (UC 15, 16, 17) -->
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property & Facilities Manager") || User.IsInRole("Caretaker") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-wrench"></i>
+                                <span class="text">Maintenance</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <!-- Option: Maintenance Work Orders (UC 15, UC 17) -->
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="ion ion-hammer" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Maintenance Work Orders</span>
+                                        <i class="arrow ion-chevron-left"></i>
+                                    </a>
+                                    <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                        @if (User.IsInRole("Property & Facilities Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                        {
+                                            <li>
+                                                <a href="~/RealEstateAdmin/WorkOrders">
+                                                    <i class="ion ion-android-checkbox-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Authorise and Assign Works Order Request</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:;">
+                                                    <i class="ion ion-android-person-add" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Assignment</span>
+                                                    <i class="arrow ion-chevron-left"></i>
+                                                </a>
+                                                <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                                    <li>
+                                                        <a href="~/RealEstateAdmin/WorkOrders?tab=internal">
+                                                            <span class="text">Internally Assigned</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="~/RealEstateAdmin/WorkOrders?tab=external">
+                                                            <span class="text">Externally Assigned</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/WorkOrders?tab=closure">
+                                                    <i class="ion ion-ios-close-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Work Orders Pending Closure</span>
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (User.IsInRole("Caretaker") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                        {
+                                            <li>
+                                                <a href="~/RealEstateAdmin/TechnicianAllocation">
+                                                    <i class="ion ion-android-notifications-none" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Allocation Requests</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/TechnicianAllocation?tab=accepted">
+                                                    <i class="ion ion-checkmark" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Accepted Work Orders</span>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+
+                                <!-- Option: Maintenance Planning (UC 16, UC 17) -->
+                                @if (User.IsInRole("Property & Facilities Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="javascript:;">
+                                            <i class="ion ion-ios-calendar" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Maintenance Planning</span>
+                                            <i class="arrow ion-chevron-left"></i>
+                                        </a>
+                                        <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                            <li>
+                                                <a href="~/RealEstateAdmin/MaintenancePlanning">
+                                                    <i class="ion ion-ios-calendar-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Create Maintenance Schedule</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/WorkOrders">
+                                                    <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Maintenance Request</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+
+                    @if (Request.IsAuthenticated && (User.IsInRole("Area Manager") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin")))
+                    {
 
                         <li>
                             <a href="javascript:;">
@@ -966,6 +1257,50 @@
                         </li>
 
                     }
+                    @* ==================== AUDIT TRAIL REPORTS ==================== *@
+                    @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Support Admin")))
+                    {
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-ios-list"></i>
+                                <span class="text">Audit Trail</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/AuditTrail/ActiveUsers">
+                                        <i class="ion ion-ios-people" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Active Users & Login History</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/AuditTrail/ActivityLog">
+                                        <i class="ion ion-ios-pulse" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Activities / Transactions</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/AuditTrail/AdminActivityLog">
+                                        <i class="ion ion-ios-locked" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Admin Activities</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/AuditTrail/PasswordResets">
+                                        <i class="ion ion-ios-unlocked" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Password Reset Trail</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/AuditTrail/RoleModifications">
+                                        <i class="ion ion-android-person-add" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Role Modifications</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
                     @if (Request.IsAuthenticated && (User.IsInRole("Back Office System Administrator")) || (User.IsInRole("Super Administrators")))
 
                     {
@@ -2583,14 +2918,14 @@
                             <li>
                                 <a href="javascript:;">
                                     <i class="ion ion-ios-chatboxes-outline"></i>
-                                    <span class="text">Real Estate Applications</span>
+                                    <span class="text">Applications</span>
                                     <i class="arrow ion-chevron-left"></i>
                                 </a>
                                 <ul class="inner-drop list-unstyled">
                                     <li>
                                         <a href="~/RealEstate/Capture">
                                             <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                            <span class="text">Capture</span>
+                                            <span class="text">Lease Application Screen</span>
                                         </a>
                                     </li>
                                     <li>
@@ -2603,6 +2938,12 @@
                                         <a href="~/RealEstate/MyApplications">
                                             <i class="ion ion-ios-chatboxes" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
                                             <span class="text">My Applications</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/RealEstate/LeaseAgreements">
+                                            <i class="ion ion-ios-paper" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Lease Agreements</span>
                                         </a>
                                     </li>
                                 </ul>

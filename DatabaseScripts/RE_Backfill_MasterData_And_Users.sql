@@ -412,3 +412,187 @@ BEGIN
     INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@AspNetUserId, @Role_Technician);
 END
 GO
+
+-- ====================================================================================
+-- Additional Setup: Vetting Departments, Roles, Representative Users and Mappings
+-- ====================================================================================
+
+-- A. Ensure Real Estate Roles exist in AspNetRoles
+PRINT 'Checking and inserting AspNetRoles...';
+DECLARE @roles TABLE (Id NVARCHAR(128), Name NVARCHAR(256))
+INSERT INTO @roles (Id, Name) VALUES
+('r_finance_admin', 'Finance Administrator'),
+('r_property_manager', 'Property Manager'),
+('r_area_manager', 'Area Manager'),
+('r_bo_sys_admin', 'Back Office System Administrator'),
+('r_prop_fac_manager', 'Property & Facilities Manager'),
+('r_caretaker', 'Caretaker'),
+('r_dept_rep', 'Departmental Representative')
+
+INSERT INTO dbo.AspNetRoles (Id, Name)
+SELECT r.Id, r.Name
+FROM @roles r
+WHERE NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = r.Name);
+
+-- B. Define Representative Users variables
+DECLARE @PasswordHash NVARCHAR(MAX) = 'AIrxMxCDw+uPXdvWWYzwF1kac9gt2e5G/AF83mz1RjdyStI81NRJ18bVFq1ZGkxoCA=='; -- Arsenal5@
+DECLARE @SecurityStamp NVARCHAR(MAX) = 'd3a4b64b-b0b3-46d5-86f7-c57388df2cb1';
+
+-- Table to hold user definitions
+DECLARE @users TABLE (
+    UserName NVARCHAR(256),
+    Email NVARCHAR(256),
+    FirstName NVARCHAR(100),
+    LastName NVARCHAR(100),
+    RoleName NVARCHAR(256)
+)
+
+-- Seed individual department representative users (Assigned Departmental Representative role)
+INSERT INTO @users (UserName, Email, FirstName, LastName, RoleName) VALUES
+('re_city_planning', 're_planning@ekurhuleni.gov.za', 'City Planning', 'Representative', 'Departmental Representative'),
+('re_legal', 're_legal@ekurhuleni.gov.za', 'Legal Services', 'Representative', 'Departmental Representative'),
+('re_disaster', 're_disaster@ekurhuleni.gov.za', 'Disaster Management', 'Representative', 'Departmental Representative'),
+('re_economic', 're_economic@ekurhuleni.gov.za', 'Economic Dev', 'Representative', 'Departmental Representative'),
+('re_empd', 're_empd@ekurhuleni.gov.za', 'EMPD', 'Representative', 'Departmental Representative'),
+('re_energy', 're_energy@ekurhuleni.gov.za', 'Energy', 'Representative', 'Departmental Representative'),
+('re_environmental', 're_environmental@ekurhuleni.gov.za', 'Environmental', 'Representative', 'Departmental Representative'),
+('re_health', 're_health@ekurhuleni.gov.za', 'Health Dev', 'Representative', 'Departmental Representative'),
+('re_human_settlements', 're_human_settlements@ekurhuleni.gov.za', 'Human Settlements', 'Representative', 'Departmental Representative'),
+('re_ict', 're_ict@ekurhuleni.gov.za', 'ICT', 'Representative', 'Departmental Representative'),
+('re_roads', 're_roads@ekurhuleni.gov.za', 'Roads & Stormwater', 'Representative', 'Departmental Representative'),
+('re_sports', 're_sports@ekurhuleni.gov.za', 'Sports & Rec', 'Representative', 'Departmental Representative'),
+('re_transport', 're_transport@ekurhuleni.gov.za', 'Transport Planning', 'Representative', 'Departmental Representative');
+
+-- Loop through and setup each user
+DECLARE @usrName NVARCHAR(256), @email NVARCHAR(256), @fName NVARCHAR(100), @lName NVARCHAR(100), @roleName NVARCHAR(256)
+DECLARE @aspNetId NVARCHAR(128), @systemUserId INT, @customerId INT, @roleId NVARCHAR(128)
+
+DECLARE user_cursor CURSOR FOR 
+SELECT UserName, Email, FirstName, LastName, RoleName FROM @users
+
+OPEN user_cursor
+FETCH NEXT FROM user_cursor INTO @usrName, @email, @fName, @lName, @roleName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT 'Setting up user: ' + @usrName;
+
+    -- 1. Insert SystemUsers first if not exists (Set DepartmentId = 3 for Real Estate Development)
+    IF NOT EXISTS (SELECT 1 FROM dbo.SystemUsers WHERE UserName = @usrName)
+    BEGIN
+        INSERT INTO dbo.SystemUsers (UserName, FirstName, LastName, EmailAddress, MobileNumber, DepartmentId, IsActive, IsDeleted, IsLocked, CreatedBySystemUserId, CreatedDateTime, isInternalUser, isActiveDirectoryUser, IsPasswordReset, IsTemporaryPassword, IsIAMRegistered)
+        VALUES (@usrName, @fName, @lName, @email, '0119990000', 3, 1, 0, 0, 1, GETDATE(), 1, 0, 1, 0, 0);
+        SET @systemUserId = SCOPE_IDENTITY();
+    END
+    ELSE
+    BEGIN
+        SELECT TOP 1 @systemUserId = Id FROM dbo.SystemUsers WHERE UserName = @usrName ORDER BY Id DESC;
+        UPDATE dbo.SystemUsers SET DepartmentId = 3, isInternalUser = 1 WHERE Id = @systemUserId;
+    END
+
+    -- 2. Insert AspNetUsers if not exists, referencing @systemUserId
+    IF NOT EXISTS (SELECT 1 FROM dbo.AspNetUsers WHERE UserName = @usrName)
+    BEGIN
+        SET @aspNetId = NEWID();
+        INSERT INTO dbo.AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName, SystemUserId, isInternalUser, isActiveDirectoryUser, isDeleted)
+        VALUES (@aspNetId, @email, 1, @PasswordHash, @SecurityStamp, 0, 0, 1, 0, @usrName, @systemUserId, 1, 0, 0);
+    END
+    ELSE
+    BEGIN
+        SELECT TOP 1 @aspNetId = Id FROM dbo.AspNetUsers WHERE UserName = @usrName ORDER BY Id DESC;
+    END
+
+    -- 3. Insert Customers (Back Office Clerk Profile) if not exists
+    IF NOT EXISTS (SELECT 1 FROM dbo.Customers WHERE SystemUserId = @systemUserId)
+    BEGIN
+        INSERT INTO dbo.Customers (SystemUserId, FirstName, LastName, EmailAddress, CellPhoneNumber, DepartmentId, IsActive, IsDeleted, IsLocked, CustomerTypeId, PhysicalAddressCode, PostalAddressCode, StatusId, CreatedBySystemUserId, CreatedDateTime)
+        VALUES (@systemUserId, @fName, @lName, @email, '0119990000', 3, 1, 0, 0, 5, '0000', '0000', 1, @systemUserId, GETDATE());
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.Customers SET DepartmentId = 3 WHERE SystemUserId = @systemUserId;
+    END
+
+    -- 4. Assign Role in AspNetUserRoles
+    SELECT TOP 1 @roleId = Id FROM dbo.AspNetRoles WHERE Name = @roleName ORDER BY Id DESC;
+    IF NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles WHERE UserId = @aspNetId AND RoleId = @roleId)
+    BEGIN
+        INSERT INTO dbo.AspNetUserRoles (UserId, RoleId) VALUES (@aspNetId, @roleId);
+    END
+
+    FETCH NEXT FROM user_cursor INTO @usrName, @email, @fName, @lName, @roleName
+END
+
+CLOSE user_cursor
+DEALLOCATE user_cursor;
+
+-- C. Assign Departmental Representative role as secondary role to key representatives who act for departments
+PRINT 'Assigning secondary Departmental Representative roles...';
+DECLARE @deptRepRoleId NVARCHAR(128)
+SELECT @deptRepRoleId = Id FROM dbo.AspNetRoles WHERE Name = 'Departmental Representative';
+
+-- finance officer
+DECLARE @finUserId NVARCHAR(128)
+SELECT TOP 1 @finUserId = Id FROM dbo.AspNetUsers WHERE UserName = 're_finance_officer' ORDER BY Id DESC;
+IF @finUserId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles WHERE UserId = @finUserId AND RoleId = @deptRepRoleId)
+    INSERT INTO dbo.AspNetUserRoles (UserId, RoleId) VALUES (@finUserId, @deptRepRoleId);
+
+-- property officer
+DECLARE @propUserId NVARCHAR(128)
+SELECT TOP 1 @propUserId = Id FROM dbo.AspNetUsers WHERE UserName = 're_property_officer' ORDER BY Id DESC;
+IF @propUserId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles WHERE UserId = @propUserId AND RoleId = @deptRepRoleId)
+    INSERT INTO dbo.AspNetUserRoles (UserId, RoleId) VALUES (@propUserId, @deptRepRoleId);
+
+-- committee member
+DECLARE @commUserId NVARCHAR(128)
+SELECT TOP 1 @commUserId = Id FROM dbo.AspNetUsers WHERE UserName = 're_committee_member' ORDER BY Id DESC;
+IF @commUserId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles WHERE UserId = @commUserId AND RoleId = @deptRepRoleId)
+    INSERT INTO dbo.AspNetUserRoles (UserId, RoleId) VALUES (@commUserId, @deptRepRoleId);
+
+-- D. Cleanup any incorrect/old roles for pure department representative users
+PRINT 'Cleaning up old/incorrect roles for pure department representative users...';
+DELETE ur
+FROM dbo.AspNetUserRoles ur
+JOIN dbo.AspNetUsers u ON ur.UserId = u.Id
+JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
+WHERE u.UserName IN ('re_city_planning', 're_legal', 're_disaster', 're_economic', 're_empd', 're_energy', 're_environmental', 're_health', 're_human_settlements', 're_ict', 're_roads', 're_sports', 're_transport')
+  AND r.Name = 'Property Manager';
+
+-- E. Configure Departments CoEs vetting departments and map to the representative users
+PRINT 'Configuring Vetting Departments mapping...';
+
+-- Add columns to DepartmentsCoEs if not exists
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.DepartmentsCoEs') AND name = 'RepresentativeSystemUserId')
+BEGIN
+    ALTER TABLE dbo.DepartmentsCoEs ADD RepresentativeSystemUserId INT NULL;
+    PRINT 'Altered Table: DepartmentsCoEs - Added RepresentativeSystemUserId';
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.DepartmentsCoEs') AND name = 'RepresentedBy')
+BEGIN
+    ALTER TABLE dbo.DepartmentsCoEs ADD RepresentedBy NVARCHAR(250) NULL;
+    PRINT 'Altered Table: DepartmentsCoEs - Added RepresentedBy';
+END;
+GO
+
+-- Map vetting departments to their specific representative users
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_city_planning' ORDER BY Id DESC), RepresentedBy = 'City Planning Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'City Planning';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_legal' ORDER BY Id DESC), RepresentedBy = 'Legal Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Corporate Legal Services';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_disaster' ORDER BY Id DESC), RepresentedBy = 'Disaster Management Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Disaster and Emergency Management Services';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_economic' ORDER BY Id DESC), RepresentedBy = 'Economic Dev Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Economic Development';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_empd' ORDER BY Id DESC), RepresentedBy = 'EMPD Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Ekurhuleni Metro Police Department';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_energy' ORDER BY Id DESC), RepresentedBy = 'Energy Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Energy';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_environmental' ORDER BY Id DESC), RepresentedBy = 'Environmental Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Environmental Resource and Waste Management';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_health' ORDER BY Id DESC), RepresentedBy = 'Health Dev Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Health and Social Development';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_human_settlements' ORDER BY Id DESC), RepresentedBy = 'Human Settlements Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Human Settlements';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_ict' ORDER BY Id DESC), RepresentedBy = 'ICT Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Information and Communication Technology';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_roads' ORDER BY Id DESC), RepresentedBy = 'Roads Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Roads and Stormwater';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_sports' ORDER BY Id DESC), RepresentedBy = 'Sports Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Sports, Recreation Arts and Culture';
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_transport' ORDER BY Id DESC), RepresentedBy = 'Transport Representative', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Transport Planning and Provision';
+
+-- Finance Department mapped to Finance Officer
+UPDATE dbo.DepartmentsCoEs SET RepresentativeSystemUserId = (SELECT TOP 1 Id FROM dbo.SystemUsers WHERE UserName = 're_finance_officer' ORDER BY Id DESC), RepresentedBy = 'Finance Officer', IsActive = 1, IsDeleted = 0 WHERE DepartmentName = 'Finance';
+
+PRINT 'Real Estate Workflow Setup Mappings successfully completed!';
+GO

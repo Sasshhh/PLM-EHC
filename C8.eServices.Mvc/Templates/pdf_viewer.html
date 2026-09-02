@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>System Generated PDF Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <style>
+    body {
+      background-color: #2c2e33;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .header {
+      color: #ffffff;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .header h2 {
+      margin: 0 0 10px 0;
+      font-weight: 400;
+    }
+    .header p {
+      margin: 0;
+      color: #a0a5b0;
+      font-size: 14px;
+    }
+    #pages-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+      width: 100%;
+      max-width: 900px;
+    }
+    canvas {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      background-color: #ffffff;
+      border-radius: 4px;
+      max-width: 100%;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Reviewing Document</h2>
+    <p id="doc-name">Loading file...</p>
+  </div>
+  <div id="pages-container"></div>
+
+  <script>
+    // Set worker path
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Parse URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const pdfFile = urlParams.get('file') || 'downloaded_cancellation.pdf';
+    document.getElementById('doc-name').textContent = 'File: ' + pdfFile;
+
+    // Load PDF
+    pdfjsLib.getDocument(pdfFile).promise.then(function(pdf) {
+      console.log('PDF successfully loaded. Pages:', pdf.numPages);
+      const container = document.getElementById('pages-container');
+      
+      // Render all pages
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pdf.getPage(pageNum).then(function(page) {
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          container.appendChild(canvas);
+
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+          };
+          
+          page.render(renderContext).promise.then(function() {
+            console.log('Page ' + pageNum + ' rendered successfully.');
+          });
+        });
+      }
+    }).catch(function(err) {
+      console.error('Error loading PDF:', err);
+      document.getElementById('doc-name').textContent = 'Error loading document: ' + err.message;
+      document.getElementById('doc-name').style.color = '#ff6b6b';
+    });
+  </script>
+</body>
+</html>

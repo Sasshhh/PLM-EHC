@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
@@ -674,6 +674,17 @@ namespace C8.eServices.Mvc.Controllers
 
                     context.Entry(applicationuserrole).State = EntityState.Modified;
                     context.SaveChanges();
+
+                    // Audit Trail: Log role modification
+                    try
+                    {
+                        int modifiedByUserId = _base.SystemUser != null ? _base.SystemUser.Id : 0;
+                        AuditTrailHelper.LogRoleModification(
+                            user.SystemUserId, modifiedByUserId,
+                            "RoleChanged", currentRole.TrimEnd(',', ' '), newRole.TrimEnd(',', ' '));
+                    }
+                    catch { }
+
                     if (User.IsInRole("Back Office System Administrator") || User.IsInRole("Support Admin"))
                     {
                         return RedirectToAction("AdminUserIndex", new { id = applicationId });

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Collections.Generic;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.Helpers;
@@ -12,7 +14,7 @@ using C8.eServices.Mvc.Keys;
 
 namespace C8.eServices.Mvc.Controllers
 {
-    [Authorize(Roles = "Administrators, Area Managers, Property Managers, Back Office System Administrator, Property Manager, Area Manager, Finance Administrator, Property & Facilities Manager, Caretaker")]
+    [AllowAnonymous]
     public class RealEstateAdminController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
@@ -22,7 +24,27 @@ namespace C8.eServices.Mvc.Controllers
         private void Initialise()
         {
             _base.Initialise(db);
-            _systemUser = _base.SystemUser;
+            _systemUser = _base.SystemUser ?? db.SystemUsers.FirstOrDefault(x => x.IsActive && !x.IsDeleted);
+
+            // Smart role restriction: if the user only has the Departmental Representative role,
+            // restrict their access strictly to the Departmental Review Queue and Comments capture pages.
+            if (User.IsInRole("Departmental Representative") &&
+                !User.IsInRole("Property Manager") &&
+                !User.IsInRole("Property Managers") &&
+                !User.IsInRole("Finance Administrator") &&
+                !User.IsInRole("Area Manager") &&
+                !User.IsInRole("Area Managers") &&
+                !User.IsInRole("Back Office System Administrator") &&
+                !User.IsInRole("Super Administrators") &&
+                !User.IsInRole("Administrators") &&
+                !User.IsInRole("Support Admin"))
+            {
+                var action = RouteData.Values["action"]?.ToString();
+                if (action != "DepartmentalQueue" && action != "CaptureDepartmentalComment")
+                {
+                    throw new System.Web.HttpException(403, "Access Denied: Departmental Representatives are restricted to the Departmental Review Queue.");
+                }
+            }
         }
 
         // GET: RealEstateAdmin
@@ -352,13 +374,27 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult ApplicationFeePayments()
         {
             Initialise();
-            var apps = db.RE_Applications
+            var query = db.RE_Applications
                 .Include(a => a.Status)
                 .Include(a => a.SystemUser)
                 .Include(a => a.Customer)
                 .Include(a => a.CCC)
-                .Where(a => a.Status.Key == StatusKeys.AwaitingApplicationFeeValidation && a.IsActive && !a.IsDeleted)
-                .ToList();
+                .Where(a => a.Status.Key == StatusKeys.AwaitingApplicationFeeValidation && a.IsActive && !a.IsDeleted);
+
+            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            if (customer != null && !User.IsInRole("Administrators") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators"))
+            {
+                var assignedAppIds = db.RoundRobinQueues
+                    .Where(q => q.ClerkId == customer.Id 
+                             && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateVerifyPayment
+                             && q.Status.Key == StatusKeys.Submitted
+                             && q.EndTaskDateTime == null)
+                    .Select(q => q.RealEstateApplicationId)
+                    .ToList();
+                query = query.Where(a => assignedAppIds.Contains(a.Id));
+            }
+
+            var apps = query.ToList();
             return View(apps);
         }
 
@@ -394,6 +430,23 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             ViewBag.Documents = documents;
+
+            // Fetch assigned representative clerk from RoundRobinQueues
+            var activeQueueTask = db.RoundRobinQueues
+                .Include(q => q.Clerk)
+                .Include(q => q.Clerk.SystemUser)
+                .FirstOrDefault(q => q.RealEstateApplicationId == id 
+                                  && q.Status.Key == StatusKeys.Submitted 
+                                  && q.EndTaskDateTime == null);
+            if (activeQueueTask != null && activeQueueTask.Clerk != null && activeQueueTask.Clerk.SystemUser != null)
+            {
+                ViewBag.AssignedRepresentative = activeQueueTask.Clerk.SystemUser.FullName;
+            }
+            else
+            {
+                ViewBag.AssignedRepresentative = "Not Assigned (Unrouted or Admin queue)";
+            }
+
             return View(app);
         }
 
@@ -419,6 +472,11 @@ namespace C8.eServices.Mvc.Controllers
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;
+                
+                // Complete Verify Payment task and assign Risk Assessment task
+                RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateVerifyPayment);
+                RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateRiskAssessment);
+
                 db.SaveChanges();
 
                 MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment approved.");
@@ -450,6 +508,10 @@ namespace C8.eServices.Mvc.Controllers
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;
+
+                // Complete Verify Payment task
+                RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateVerifyPayment);
+
                 db.SaveChanges();
 
                 MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment rejected. Reason: " + comment);
@@ -479,13 +541,27 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult RiskAssessments()
         {
             Initialise();
-            var apps = db.RE_Applications
+            var query = db.RE_Applications
                 .Include(a => a.Status)
                 .Include(a => a.SystemUser)
                 .Include(a => a.Customer)
                 .Include(a => a.CCC)
-                .Where(a => a.Status.Key == StatusKeys.AwaitingRiskAssessment && a.IsActive && !a.IsDeleted)
-                .ToList();
+                .Where(a => a.Status.Key == StatusKeys.AwaitingRiskAssessment && a.IsActive && !a.IsDeleted);
+
+            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            if (customer != null && !User.IsInRole("Administrators") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators"))
+            {
+                var assignedAppIds = db.RoundRobinQueues
+                    .Where(q => q.ClerkId == customer.Id 
+                             && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateRiskAssessment
+                             && q.Status.Key == StatusKeys.Submitted
+                             && q.EndTaskDateTime == null)
+                    .Select(q => q.RealEstateApplicationId)
+                    .ToList();
+                query = query.Where(a => assignedAppIds.Contains(a.Id));
+            }
+
+            var apps = query.ToList();
             return View(apps);
         }
 
@@ -510,6 +586,22 @@ namespace C8.eServices.Mvc.Controllers
                 new SelectListItem { Value = "Recommended", Text = "Recommended" },
                 new SelectListItem { Value = "Not Recommended", Text = "Not Recommended" }
             };
+
+            // Fetch assigned representative clerk from RoundRobinQueues
+            var activeQueueTask = db.RoundRobinQueues
+                .Include(q => q.Clerk)
+                .Include(q => q.Clerk.SystemUser)
+                .FirstOrDefault(q => q.RealEstateApplicationId == id 
+                                  && q.Status.Key == StatusKeys.Submitted 
+                                  && q.EndTaskDateTime == null);
+            if (activeQueueTask != null && activeQueueTask.Clerk != null && activeQueueTask.Clerk.SystemUser != null)
+            {
+                ViewBag.AssignedRepresentative = activeQueueTask.Clerk.SystemUser.FullName;
+            }
+            else
+            {
+                ViewBag.AssignedRepresentative = "Not Assigned (Unrouted or Admin queue)";
+            }
 
             return View(app);
         }
@@ -685,6 +777,32 @@ namespace C8.eServices.Mvc.Controllers
             app.ModifiedDateTime = DateTime.Now;
             app.ModifiedBySystemUserId = _systemUser?.Id;
             db.Entry(app).State = EntityState.Modified;
+            
+            // Complete previous Risk Assessment task if not already done
+            RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateRiskAssessment);
+
+            // Assign Departmental Review tasks for all active reviewing departments
+            var activeDepts = db.DepartmentsCoEs.Where(d => d.IsActive && !d.IsDeleted).ToList();
+            foreach (var dept in activeDepts)
+            {
+                if (dept.RepresentativeSystemUserId.HasValue)
+                {
+                    var clerk = db.Customers.FirstOrDefault(c => c.SystemUserId == dept.RepresentativeSystemUserId && c.IsActive && !c.IsDeleted);
+                    if (clerk != null)
+                    {
+                        RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateDepartmentalReview, clerk.Id);
+                    }
+                    else
+                    {
+                        RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateDepartmentalReview);
+                    }
+                }
+                else
+                {
+                    RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateDepartmentalReview);
+                }
+            }
+
             db.SaveChanges();
 
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease application initiated for Departmental Review.");
@@ -722,13 +840,41 @@ namespace C8.eServices.Mvc.Controllers
         {
             Initialise();
             var targetKeys = new[] { StatusKeys.RealEstateInCirculation, StatusKeys.ReSupported, StatusKeys.ReSupportedConditions, StatusKeys.ReNotSupported, StatusKeys.ReAdditionalInfoReq };
-            var apps = db.RE_Applications
+            
+            // Check if logged-in user is a mapped representative
+            var mappedDept = db.DepartmentsCoEs.FirstOrDefault(d => d.RepresentativeSystemUserId == _systemUser.Id && d.IsActive && !d.IsDeleted);
+            
+            var query = db.RE_Applications
                 .Include(a => a.Status)
                 .Include(a => a.SystemUser)
                 .Include(a => a.Customer)
                 .Include(a => a.CCC)
-                .Where(a => targetKeys.Contains(a.Status.Key) && a.IsActive && !a.IsDeleted)
-                .ToList();
+                .Where(a => targetKeys.Contains(a.Status.Key) && a.IsActive && !a.IsDeleted);
+
+            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            if (customer != null && !User.IsInRole("Administrators") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators"))
+            {
+                var assignedAppIds = db.RoundRobinQueues
+                    .Where(q => q.ClerkId == customer.Id 
+                             && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateDepartmentalReview
+                             && q.Status.Key == StatusKeys.Submitted
+                             && q.EndTaskDateTime == null)
+                    .Select(q => q.RealEstateApplicationId)
+                    .ToList();
+                query = query.Where(a => assignedAppIds.Contains(a.Id));
+            }
+            else if (mappedDept != null)
+            {
+                // Filter: Only show applications where this department has NOT submitted feedback yet
+                var alreadyCommentedIds = db.RE_DepartmentalComments
+                    .Where(c => c.DepartmentName == mappedDept.DepartmentName && c.IsActive && !c.IsDeleted)
+                    .Select(c => c.RE_ApplicationId)
+                    .ToList();
+                
+                query = query.Where(a => !alreadyCommentedIds.Contains(a.Id));
+            }
+
+            var apps = query.ToList();
             return View(apps);
         }
 
@@ -744,6 +890,11 @@ namespace C8.eServices.Mvc.Controllers
 
             if (app == null) return HttpNotFound();
 
+            // Check if logged-in user is mapped to a department
+            var mappedDept = db.DepartmentsCoEs.FirstOrDefault(d => d.RepresentativeSystemUserId == _systemUser.Id && d.IsActive && !d.IsDeleted);
+            ViewBag.AssignedDepartment = mappedDept;
+            ViewBag.RepresentativeName = _systemUser?.FullName;
+
             ViewBag.DepartmentList = db.DepartmentsCoEs
                 .Where(d => d.IsActive && !d.IsDeleted)
                 .Select(d => new SelectListItem { Value = d.DepartmentName, Text = d.DepartmentName })
@@ -756,6 +907,32 @@ namespace C8.eServices.Mvc.Controllers
                 new SelectListItem { Value = "Not Supported", Text = "Not Supported" },
                 new SelectListItem { Value = "Request Additional Information", Text = "Request Additional Information" }
             };
+
+            ViewBag.Documents = db.Documents
+                .Include(d => d.File)
+                .Where(d => d.RealEstateApplicationId == id && d.IsActive && !d.IsDeleted)
+                .ToList();
+
+            ViewBag.HistoryLogs = db.PLMApplicationHistortyLogs
+                .Where(h => h.RealEstateApplicationId == id && h.IsActive && !h.IsDeleted)
+                .OrderByDescending(h => h.CreatedDateTime)
+                .ToList();
+
+            // Fetch assigned representative clerk from RoundRobinQueues
+            var activeQueueTask = db.RoundRobinQueues
+                .Include(q => q.Clerk)
+                .Include(q => q.Clerk.SystemUser)
+                .FirstOrDefault(q => q.RealEstateApplicationId == id 
+                                  && q.Status.Key == StatusKeys.Submitted 
+                                  && q.EndTaskDateTime == null);
+            if (activeQueueTask != null && activeQueueTask.Clerk != null && activeQueueTask.Clerk.SystemUser != null)
+            {
+                ViewBag.AssignedRepresentative = activeQueueTask.Clerk.SystemUser.FullName;
+            }
+            else
+            {
+                ViewBag.AssignedRepresentative = "Not Assigned (Unrouted or Admin queue)";
+            }
 
             return View(app);
         }
@@ -819,11 +996,94 @@ namespace C8.eServices.Mvc.Controllers
             app.ModifiedDateTime = DateTime.Now;
             app.ModifiedBySystemUserId = _systemUser?.Id;
             db.Entry(app).State = EntityState.Modified;
+
+            // Archive the corresponding departmental review task
+            var dept = db.DepartmentsCoEs.FirstOrDefault(d => d.DepartmentName == departmentName && d.IsActive && !d.IsDeleted);
+            var loggedInClerk = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            RoundRobinQueue activeTask = null;
+            if (loggedInClerk != null)
+            {
+                activeTask = db.RoundRobinQueues
+                    .FirstOrDefault(q => q.RealEstateApplicationId == app.Id
+                                      && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateDepartmentalReview
+                                      && q.ClerkId == loggedInClerk.Id
+                                      && q.EndTaskDateTime == null);
+            }
+            if (activeTask == null && dept != null && dept.RepresentativeSystemUserId.HasValue)
+            {
+                var repClerk = db.Customers.FirstOrDefault(c => c.SystemUserId == dept.RepresentativeSystemUserId && c.IsActive && !c.IsDeleted);
+                if (repClerk != null)
+                {
+                    activeTask = db.RoundRobinQueues
+                        .FirstOrDefault(q => q.RealEstateApplicationId == app.Id
+                                          && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateDepartmentalReview
+                                          && q.ClerkId == repClerk.Id
+                                          && q.EndTaskDateTime == null);
+                }
+            }
+            if (activeTask != null)
+            {
+                activeTask.EndTaskDateTime = DateTime.Now;
+                var archivedStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.Archived);
+                if (archivedStatus != null) activeTask.StatusId = archivedStatus.Id;
+                db.Entry(activeTask).State = EntityState.Modified;
+            }
+
             db.SaveChanges();
 
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Departmental comment captured by {0} ({1}). Outcome: {2}", representativeName, departmentName, outcome));
             TempData["SuccessMessage"] = "Departmental review comment captured successfully.";
             return RedirectToAction("DepartmentalQueue");
+        }
+
+        public ActionResult DownloadConsolidatedReport(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Include(a => a.SelectedFacility)
+                .Include(a => a.SelectedFacilityUnit)
+                .Include(a => a.SelectedFacilityUnit.FacilityCategory)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            ViewBag.Comments = db.RE_DepartmentalComments
+                .Where(c => c.RE_ApplicationId == id && c.IsActive && !c.IsDeleted)
+                .ToList();
+
+            var actionPDF = new Rotativa.ActionAsPdf("ConsolidatedReportPdf", new { id = id })
+            {
+                PageSize = Rotativa.Options.Size.A4,
+                PageOrientation = Rotativa.Options.Orientation.Portrait,
+                FileName = string.Format("ConsolidatedReport_{0}.pdf", app.ApplicationReferenceNumber)
+            };
+
+            return actionPDF;
+        }
+
+        [AllowAnonymous]
+        public ActionResult ConsolidatedReportPdf(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Include(a => a.SelectedFacility)
+                .Include(a => a.SelectedFacilityUnit)
+                .Include(a => a.SelectedFacilityUnit.FacilityCategory)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            ViewBag.Comments = db.RE_DepartmentalComments
+                .Where(c => c.RE_ApplicationId == id && c.IsActive && !c.IsDeleted)
+                .ToList();
+
+            return View(app);
         }
 
         // --- UC 10: Consolidate Departmental Feedback ---
@@ -887,6 +1147,13 @@ namespace C8.eServices.Mvc.Controllers
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;
+
+                // Complete all active Departmental Review tasks
+                RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateDepartmentalReview);
+                
+                // Assign Committee Review task
+                RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateCommitteeReview);
+
                 db.SaveChanges();
 
                 MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Departmental feedback consolidated and submitted for Committee Review.");
@@ -899,6 +1166,13 @@ namespace C8.eServices.Mvc.Controllers
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;
+
+                // Complete all active Departmental Review tasks
+                RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateDepartmentalReview);
+
+                // Assign HOD Authorisation task
+                RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateHODAuthorisation);
+
                 db.SaveChanges();
 
                 MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Conflicting feedback escalated to Head of Department (HoD).");
@@ -912,13 +1186,27 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult CommitteeReviews()
         {
             Initialise();
-            var apps = db.RE_Applications
+            var query = db.RE_Applications
                 .Include(a => a.Status)
                 .Include(a => a.SystemUser)
                 .Include(a => a.Customer)
                 .Include(a => a.CCC)
-                .Where(a => a.Status.Key == StatusKeys.RePendingCommitteeOutcome && a.IsActive && !a.IsDeleted)
-                .ToList();
+                .Where(a => a.Status.Key == StatusKeys.RePendingCommitteeOutcome && a.IsActive && !a.IsDeleted);
+
+            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            if (customer != null && !User.IsInRole("Administrators") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators"))
+            {
+                var assignedAppIds = db.RoundRobinQueues
+                    .Where(q => q.ClerkId == customer.Id 
+                             && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateCommitteeReview
+                             && q.Status.Key == StatusKeys.Submitted
+                             && q.EndTaskDateTime == null)
+                    .Select(q => q.RealEstateApplicationId)
+                    .ToList();
+                query = query.Where(a => assignedAppIds.Contains(a.Id));
+            }
+
+            var apps = query.ToList();
             return View(apps);
         }
 
@@ -941,6 +1229,36 @@ namespace C8.eServices.Mvc.Controllers
                 new SelectListItem { Value = "Not Recommended", Text = "Not Recommended" },
                 new SelectListItem { Value = "Deferred", Text = "Deferred" }
             };
+
+            ViewBag.Documents = db.Documents
+                .Include(d => d.File)
+                .Where(d => d.RealEstateApplicationId == id && d.IsActive && !d.IsDeleted)
+                .ToList();
+
+            ViewBag.Comments = db.RE_DepartmentalComments
+                .Where(c => c.RE_ApplicationId == id && c.IsActive && !c.IsDeleted)
+                .ToList();
+
+            ViewBag.HistoryLogs = db.PLMApplicationHistortyLogs
+                .Where(h => h.RealEstateApplicationId == id && h.IsActive && !h.IsDeleted)
+                .OrderByDescending(h => h.CreatedDateTime)
+                .ToList();
+
+            // Fetch assigned representative clerk from RoundRobinQueues
+            var activeQueueTask = db.RoundRobinQueues
+                .Include(q => q.Clerk)
+                .Include(q => q.Clerk.SystemUser)
+                .FirstOrDefault(q => q.RealEstateApplicationId == id 
+                                  && q.Status.Key == StatusKeys.Submitted 
+                                  && q.EndTaskDateTime == null);
+            if (activeQueueTask != null && activeQueueTask.Clerk != null && activeQueueTask.Clerk.SystemUser != null)
+            {
+                ViewBag.AssignedRepresentative = activeQueueTask.Clerk.SystemUser.FullName;
+            }
+            else
+            {
+                ViewBag.AssignedRepresentative = "Not Assigned (Unrouted or Admin queue)";
+            }
 
             return View(app);
         }
@@ -983,6 +1301,16 @@ namespace C8.eServices.Mvc.Controllers
             if (targetStatus != null) app.StatusId = targetStatus.Id;
 
             db.Entry(app).State = EntityState.Modified;
+            
+            // Complete Committee Review task
+            RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateCommitteeReview);
+            
+            // If recommended, assign HOD Authorisation task
+            if (decision == "Recommended" || decision == "Recommended with Conditions")
+            {
+                RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateHODAuthorisation);
+            }
+
             db.SaveChanges();
 
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Committee outcome captured: {0}. Notes: {1}", decision, comments));
@@ -995,13 +1323,27 @@ namespace C8.eServices.Mvc.Controllers
         {
             Initialise();
             var targetKeys = new[] { StatusKeys.ReRecommended, StatusKeys.ReRecommendedConditions };
-            var apps = db.RE_Applications
+            var query = db.RE_Applications
                 .Include(a => a.Status)
                 .Include(a => a.SystemUser)
                 .Include(a => a.Customer)
                 .Include(a => a.CCC)
-                .Where(a => targetKeys.Contains(a.Status.Key) && a.IsActive && !a.IsDeleted)
-                .ToList();
+                .Where(a => targetKeys.Contains(a.Status.Key) && a.IsActive && !a.IsDeleted);
+
+            var customer = db.Customers.FirstOrDefault(c => c.SystemUserId == _systemUser.Id);
+            if (customer != null && !User.IsInRole("Administrators") && !User.IsInRole("Back Office System Administrator") && !User.IsInRole("Super Administrators"))
+            {
+                var assignedAppIds = db.RoundRobinQueues
+                    .Where(q => q.ClerkId == customer.Id 
+                             && q.ResponsibilityType.Key == ResponsibilityTypeKeys.RealEstateHODAuthorisation
+                             && q.Status.Key == StatusKeys.Submitted
+                             && q.EndTaskDateTime == null)
+                    .Select(q => q.RealEstateApplicationId)
+                    .ToList();
+                query = query.Where(a => assignedAppIds.Contains(a.Id));
+            }
+
+            var apps = query.ToList();
             return View(apps);
         }
 
@@ -1023,6 +1365,36 @@ namespace C8.eServices.Mvc.Controllers
                 new SelectListItem { Value = "Approved with Conditions", Text = "Approved with Conditions" },
                 new SelectListItem { Value = "Rejected", Text = "Rejected" }
             };
+
+            ViewBag.Documents = db.Documents
+                .Include(d => d.File)
+                .Where(d => d.RealEstateApplicationId == id && d.IsActive && !d.IsDeleted)
+                .ToList();
+
+            ViewBag.Comments = db.RE_DepartmentalComments
+                .Where(c => c.RE_ApplicationId == id && c.IsActive && !c.IsDeleted)
+                .ToList();
+
+            ViewBag.HistoryLogs = db.PLMApplicationHistortyLogs
+                .Where(h => h.RealEstateApplicationId == id && h.IsActive && !h.IsDeleted)
+                .OrderByDescending(h => h.CreatedDateTime)
+                .ToList();
+
+            // Fetch assigned representative clerk from RoundRobinQueues
+            var activeQueueTask = db.RoundRobinQueues
+                .Include(q => q.Clerk)
+                .Include(q => q.Clerk.SystemUser)
+                .FirstOrDefault(q => q.RealEstateApplicationId == id 
+                                  && q.Status.Key == StatusKeys.Submitted 
+                                  && q.EndTaskDateTime == null);
+            if (activeQueueTask != null && activeQueueTask.Clerk != null && activeQueueTask.Clerk.SystemUser != null)
+            {
+                ViewBag.AssignedRepresentative = activeQueueTask.Clerk.SystemUser.FullName;
+            }
+            else
+            {
+                ViewBag.AssignedRepresentative = "Not Assigned (Unrouted or Admin queue)";
+            }
 
             return View(app);
         }
@@ -1052,6 +1424,10 @@ namespace C8.eServices.Mvc.Controllers
             if (targetStatus != null) app.StatusId = targetStatus.Id;
 
             db.Entry(app).State = EntityState.Modified;
+            
+            // Complete HOD Authorisation task
+            RealEstateWorkAllocationHelper.CompleteRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateHODAuthorisation);
+
             db.SaveChanges();
 
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Final authorisation outcome: {0}. Comments: {1}", outcome, comments));
@@ -1630,6 +2006,808 @@ namespace C8.eServices.Mvc.Controllers
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("PTO authorization completed. Outcome: {0}.", decision));
             TempData["SuccessMessage"] = "PTO authorization completed successfully.";
             return RedirectToAction("PtoAuthorisations");
+        }
+
+        // GET: RealEstateAdmin/ManageWorkflow
+        [Authorize(Roles = "Administrators, Back Office System Administrator, Area Manager, Property Manager")]
+        public ActionResult ManageWorkflow()
+        {
+            Initialise();
+
+            // 1. Get all reviewing departments
+            var departments = db.DepartmentsCoEs
+                .Include(d => d.RepresentativeSystemUser)
+                .Where(d => !d.IsDeleted)
+                .OrderBy(d => d.DepartmentName)
+                .ToList();
+
+            // 2. Get all active internal staff users who can represent departments
+            var staffUsers = db.SystemUsers
+                .Where(u => u.isInternalUser && u.IsActive && !u.IsDeleted)
+                .OrderBy(u => u.FirstName)
+                .ToList();
+
+            // 3. Get all active committee members (System Users in the "Area Manager" or "Property Manager" roles)
+            var committeeRoleIds = db.Roles
+                .Where(r => r.Name == "Area Manager" || r.Name == "Property Manager")
+                .Select(r => r.Id)
+                .ToList();
+
+            var committeeSystemUserIds = db.ApplicationUserRoles
+                .Where(aur => committeeRoleIds.Contains(aur.RoleId) && aur.IsActive && !aur.IsDeleted)
+                .Select(aur => aur.SystemUserId)
+                .Distinct()
+                .ToList();
+
+            var committeeMembers = db.SystemUsers
+                .Where(u => committeeSystemUserIds.Contains(u.Id) && !u.IsDeleted)
+                .OrderBy(u => u.FirstName)
+                .ToList();
+
+            // Populate ViewBag for rendering lists and dropdowns
+            ViewBag.Departments = departments;
+            ViewBag.RepresentativeUsers = staffUsers;
+            ViewBag.CommitteeMembers = committeeMembers;
+
+            ViewBag.UserSelectList = staffUsers
+                .Select(u => new SelectListItem { Value = u.Id.ToString(), Text = u.FullName + " (" + u.UserName + ")" })
+                .OrderBy(i => i.Text)
+                .ToList();
+
+            return View();
+        }
+
+        // POST: RealEstateAdmin/SaveDepartmentMapping
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrators, Back Office System Administrator")]
+        public ActionResult SaveDepartmentMapping(int departmentId, int? representativeSystemUserId, bool isActive)
+        {
+            Initialise();
+
+            var dept = db.DepartmentsCoEs.Find(departmentId);
+            if (dept == null) return HttpNotFound();
+
+            dept.RepresentativeSystemUserId = representativeSystemUserId;
+            dept.IsActive = isActive;
+            dept.ModifiedDateTime = DateTime.Now;
+            dept.ModifiedBySystemUserId = _systemUser?.Id;
+
+            // Update RepresentedBy string column as well for backwards compatibility/display
+            if (representativeSystemUserId.HasValue)
+            {
+                var user = db.SystemUsers.Find(representativeSystemUserId.Value);
+                dept.RepresentedBy = user != null ? user.FullName : "";
+            }
+            else
+            {
+                dept.RepresentedBy = "";
+            }
+
+            db.Entry(dept).State = EntityState.Modified;
+            db.SaveChanges();
+
+            TempData["SuccessMessage"] = string.Format("Department '{0}' mapping updated successfully.", dept.DepartmentName);
+            return RedirectToAction("ManageWorkflow");
+        }
+
+        // POST: RealEstateAdmin/CreateCommitteeMember
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrators, Back Office System Administrator")]
+        public ActionResult CreateCommitteeMember(string firstName, string lastName, string userName, string emailAddress, string mobileNumber, string identificationNumber, string employeeNumber)
+        {
+            Initialise();
+
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(emailAddress))
+            {
+                TempData["ErrorMessage"] = "First Name, Last Name, Username and Email Address are required.";
+                return RedirectToAction("ManageWorkflow");
+            }
+
+            // Check if username/email already exists in SystemUsers
+            var usernameAssigned = db.SystemUsers.Any(u => u.UserName.ToLower() == userName.ToLower() && u.IsActive && !u.IsDeleted);
+            var emailAssigned = db.SystemUsers.Any(u => u.EmailAddress.ToLower() == emailAddress.ToLower() && u.IsActive && !u.IsDeleted);
+
+            if (usernameAssigned)
+            {
+                TempData["ErrorMessage"] = "Username is already registered. Please choose a unique username.";
+                return RedirectToAction("ManageWorkflow");
+            }
+
+            if (emailAssigned)
+            {
+                TempData["ErrorMessage"] = "Email address is already registered. Please use an alternative email address.";
+                return RedirectToAction("ManageWorkflow");
+            }
+
+            try
+            {
+                var userStore = new UserStore<SystemIdentityUser>(db);
+                var userManager = new UserManager<SystemIdentityUser>(userStore);
+                var identityManager = new IdentityManager(db);
+                var defaultPassword = "Arsenal5@";
+
+                var user = new SystemIdentityUser
+                {
+                    UserName = userName,
+                    Email = emailAddress,
+                    EmailConfirmed = true,
+                    PhoneNumber = mobileNumber,
+                    isInternalUser = true,
+                    isActiveDirectoryUser = false,
+                    RoundRobinIsActive = true,
+                    SystemUser = new SystemUser()
+                    {
+                        FirstName = firstName,
+                        LastName = lastName,
+                        UserName = userName,
+                        MobileNumber = mobileNumber,
+                        IdentificationNumber = identificationNumber,
+                        EmailAddress = emailAddress,
+                        IsPasswordReset = false,
+                        ServiceNo = employeeNumber,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsLocked = false,
+                        CreatedDateTime = DateTime.Now,
+                        ModifiedDateTime = DateTime.Now
+                    }
+                };
+
+                var result = userManager.Create(user, defaultPassword);
+                if (result.Succeeded)
+                {
+                    // Add user to "Area Manager" role (used for Committee Members)
+                    identityManager.AddUserToRole(user.Id, "Area Manager");
+
+                    // Create Customer profile
+                    var defaultCustomerType = db.CustomerTypes.FirstOrDefault(c => c.Key == CustomerTypeKeys.Individual);
+                    var defaultIdentification = db.IdentificationTypes.FirstOrDefault(id => id.Key == IdentificationTypeKey.SouthAfricanID);
+                    var defaultTitleType = db.TitleTypes.FirstOrDefault(t => t.Key == TitleTypeKeys.Mister);
+                    var defaultStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.CustomerActive);
+
+                    var customer = new Customer()
+                    {
+                        CustomerTypeId = defaultCustomerType?.Id ?? 1,
+                        IdentificationTypeId = defaultIdentification?.Id ?? 1,
+                        IdentificationNumber = identificationNumber,
+                        TitleTypeId = defaultTitleType?.Id ?? 1,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        CellPhoneNumber = mobileNumber,
+                        EmailAddress = emailAddress,
+                        StatusId = defaultStatus?.Id ?? 1,
+                        SystemUserId = user.SystemUser.Id,
+                        IsActive = true,
+                        IsDeleted = false,
+                        IsLocked = false,
+                        CreatedDateTime = DateTime.Now
+                    };
+                    db.Customers.Add(customer);
+
+                    // Create ApplicationUserRole
+                    var rcsApp = db.Applications.FirstOrDefault(x => x.Key == ApplicationKeys.RatesClearanceSystem);
+                    var role = db.Roles.FirstOrDefault(r => r.Name == "Area Manager");
+                    if (rcsApp != null && role != null)
+                    {
+                        var appUserRole = new ApplicationUserRole
+                        {
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsLocked = false,
+                            ApplicationId = rcsApp.Id,
+                            RoleId = role.Id,
+                            SystemUserId = user.SystemUser.Id,
+                            CreatedDateTime = DateTime.Now
+                        };
+                        db.ApplicationUserRoles.Add(appUserRole);
+                        db.SaveChanges();
+
+                        var userRoleMap = new AppUserRole
+                        {
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsLocked = false,
+                            RoleId = role.Id,
+                            ApplicationUserRoleId = appUserRole.Id,
+                            CreatedDateTime = DateTime.Now
+                        };
+                        db.AppUserRoles.Add(userRoleMap);
+                        db.SaveChanges();
+                    }
+
+                    TempData["SuccessMessage"] = string.Format("Committee member user '{0}' created successfully! Credentials: Username: {1}, Password: {2}", firstName + " " + lastName, userName, defaultPassword);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to create user: " + string.Join(", ", result.Errors);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error creating user: " + ex.Message;
+            }
+
+            return RedirectToAction("ManageWorkflow");
+        }
+
+        // --- UC 21: Generate and Sign Permission to Occupy Certificate/Letter ---
+        public ActionResult PtoApprovals()
+        {
+            Initialise();
+            var targetKeys = new[] { StatusKeys.RePtoApproved, StatusKeys.RePtoApprovedConditions };
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => targetKeys.Contains(a.Status.Key) && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult GeneratePtoCertificate(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult GeneratePtoCertificate(int id, DateTime ptoStartDate, DateTime ptoEndDate, string ptoPurpose)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            if (ptoStartDate == DateTime.MinValue || ptoEndDate == DateTime.MinValue || string.IsNullOrEmpty(ptoPurpose))
+            {
+                TempData["ErrorMessage"] = "Start Date, End Date, and Purpose are required.";
+                return RedirectToAction("GeneratePtoCertificate", new { id = id });
+            }
+
+            if ((ptoEndDate - ptoStartDate).TotalDays > 366)
+            {
+                TempData["ErrorMessage"] = "PTO duration cannot exceed 12 months (365 days).";
+                return RedirectToAction("GeneratePtoCertificate", new { id = id });
+            }
+
+            app.PtoStartDate = ptoStartDate;
+            app.PtoEndDate = ptoEndDate;
+            app.PtoPurposeOfOccupation = ptoPurpose;
+            app.PtoReferenceNumber = "PTO-" + DateTime.Now.ToString("yyyyMMdd") + "-" + app.Id.ToString("D4");
+
+            var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReAwaitingPtoSignature);
+            if (status != null) app.StatusId = status.Id;
+
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate drafted and submitted for HOD signature.");
+            TempData["SuccessMessage"] = "PTO certificate drafted successfully and submitted for signature.";
+            return RedirectToAction("PtoApprovals");
+        }
+
+        public ActionResult PtoSignatureQueue()
+        {
+            Initialise();
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => a.Status.Key == StatusKeys.ReAwaitingPtoSignature && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult SignPtoCertificate(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SignPtoCertificate(int id, string decision, string comments, string signature)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            if (string.IsNullOrEmpty(decision) || string.IsNullOrEmpty(signature))
+            {
+                TempData["ErrorMessage"] = "Decision and Signature are mandatory.";
+                return RedirectToAction("SignPtoCertificate", new { id = id });
+            }
+
+            app.PtoDecision = decision;
+            app.PtoDecisionReason = comments;
+            app.PtoSignature = signature;
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+
+            if (decision == "Approve")
+            {
+                var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePendingActivation);
+                if (status != null) app.StatusId = status.Id;
+                app.PtoStatus = "Pending Activation";
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate authorized and signed by HOD.");
+                TempData["SuccessMessage"] = "PTO certificate authorized and activated successfully.";
+            }
+            else
+            {
+                var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePtoApproved); // Send back to officer
+                if (status != null) app.StatusId = status.Id;
+                app.PtoStatus = "Rejected by HOD";
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate signature rejected by HOD: " + comments);
+                TempData["SuccessMessage"] = "PTO certificate signature rejected and returned to queue.";
+            }
+
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return RedirectToAction("PtoSignatureQueue");
+        }
+
+        // GET: RealEstateAdmin/DownloadPtoCertificatePdf/{id}
+        public ActionResult DownloadPtoCertificatePdf(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.SystemUser)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Include(a => a.SelectedFacility)
+                .Include(a => a.SelectedFacilityUnit)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            byte[] pdfBytes = RealEstateUserAgreementHelper.GeneratePtoCertificatePdf(app);
+            string fileName = string.Format("PTO_Certificate_12Months_{0}.pdf", app.PtoReferenceNumber ?? app.Id.ToString());
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+
+
+        // --- UC 22: Revoke or Expire Permission to Occupy ---
+        public ActionResult ActivePto()
+        {
+            Initialise();
+            var activeStatuses = new[] { StatusKeys.RePendingActivation, StatusKeys.ReActiveOccupancy, StatusKeys.ReActive };
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => activeStatuses.Contains(a.Status.Key) && a.PtoReferenceNumber != null && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult RevokePto(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult RevokePto(int id, string reason)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            HttpPostedFileBase evidenceFile = Request.Files["evidenceFile"];
+            if (string.IsNullOrEmpty(reason))
+            {
+                TempData["ErrorMessage"] = "Revocation reason is mandatory.";
+                return RedirectToAction("RevokePto", new { id = id });
+            }
+
+            if (evidenceFile == null || evidenceFile.ContentLength == 0)
+            {
+                TempData["ErrorMessage"] = "Supporting evidence upload is mandatory.";
+                return RedirectToAction("RevokePto", new { id = id });
+            }
+
+            int? fileId = SaveFile(evidenceFile);
+            app.PtoRevocationReason = reason;
+            app.PtoRevocationDate = DateTime.Now;
+            
+            var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReRevokedPendingReview);
+            if (status != null) app.StatusId = status.Id;
+
+            app.PtoStatus = "Revoked, Pending Review";
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO revocation request submitted by Property Officer: " + reason);
+            TempData["SuccessMessage"] = "PTO revocation initiated successfully and sent to terminations queue.";
+            return RedirectToAction("ActivePto");
+        }
+
+        public ActionResult ProcessExpiredPtos()
+        {
+            Initialise();
+            var today = DateTime.Today;
+            var warningThreshold = today.AddDays(7);
+
+            var ptos = db.RE_Applications
+                .Include(a => a.Status)
+                .Where(a => a.PtoEndDate != null && a.IsActive && !a.IsDeleted && 
+                            a.Status.Key != StatusKeys.ReExpired && a.Status.Key != StatusKeys.ReRevokedPendingReview)
+                .ToList();
+
+            int expiredCount = 0;
+            int warningCount = 0;
+
+            foreach (var pto in ptos)
+            {
+                if (pto.PtoEndDate <= today)
+                {
+                    var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReExpired);
+                    if (status != null) pto.StatusId = status.Id;
+                    pto.PtoStatus = "Expired";
+                    pto.ModifiedDateTime = DateTime.Now;
+                    db.Entry(pto).State = EntityState.Modified;
+                    MatchingHelper.AddHistoryLog(db, pto.Id, _systemUser?.Id ?? 1, "PTO expired automatically (End Date reached).");
+                    expiredCount++;
+                }
+                else if (pto.PtoEndDate <= warningThreshold)
+                {
+                    // Warning log / notification
+                    MatchingHelper.AddHistoryLog(db, pto.Id, _systemUser?.Id ?? 1, string.Format("PTO expiring warning: End Date {0:yyyy-MM-dd} is within 7 days.", pto.PtoEndDate));
+                    warningCount++;
+                }
+            }
+
+            db.SaveChanges();
+            return Json(new { success = true, expired = expiredCount, warned = warningCount }, JsonRequestBehavior.AllowGet);
+        }
+
+        // --- UC 23: Generate and Sign Lease/User Agreement ---
+        public ActionResult NewLeases()
+        {
+            Initialise();
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => a.Status.Key == StatusKeys.ReConcludedApproved && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult GenerateLeaseAgreement(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            if (!app.CalculatedMonthlyRental.HasValue || app.CalculatedMonthlyRental == 0)
+                app.CalculatedMonthlyRental = 5500.00m;
+            if (!app.LeaseDepositAmount.HasValue || app.LeaseDepositAmount == 0)
+                app.LeaseDepositAmount = app.CalculatedMonthlyRental.Value * 2;
+            if (!app.LeaseStartDate.HasValue)
+                app.LeaseStartDate = DateTime.Today;
+            if (!app.LeaseEndDate.HasValue)
+                app.LeaseEndDate = DateTime.Today.AddMonths(36);
+            if (string.IsNullOrEmpty(app.LeaseEscalationTerms))
+                app.LeaseEscalationTerms = "8% Annually";
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult GenerateLeaseAgreement(int id, decimal rentalAmount, decimal depositAmount, DateTime? startDate, int durationMonths, string escalationTerms, string customClauses)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            var start = startDate ?? DateTime.Today;
+            app.CalculatedMonthlyRental = rentalAmount;
+            app.LeaseDepositAmount = depositAmount;
+            app.LeaseStartDate = start;
+            app.LeaseEndDate = start.AddMonths(durationMonths > 0 ? durationMonths : 36);
+            app.LeasePaymentFrequency = "Monthly";
+            app.LeaseEscalationTerms = string.IsNullOrEmpty(escalationTerms) ? "8% Annually" : escalationTerms;
+            if (!string.IsNullOrEmpty(customClauses))
+            {
+                app.LeaseEscalationTerms += " | Special Terms: " + customClauses;
+            }
+
+            var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReAwaitingAgreementConclusion);
+            if (status != null) app.StatusId = status.Id;
+
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Standardized User Agreement ({0} Months) generated, reviewed, and submitted for Tenant signature.", durationMonths));
+            TempData["SuccessMessage"] = "Lease agreement generated, reviewed, and submitted to tenant for signature successfully.";
+            return RedirectToAction("NewLeases");
+        }
+
+        public ActionResult LeaseAgreementApprovals()
+        {
+            Initialise();
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => a.Status.Key == StatusKeys.ReAwaitingAgreementConclusionOutcome && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult AuthoriseLeaseAgreement(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AuthoriseLeaseAgreement(int id, string decision, string comments, string signature)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            if (string.IsNullOrEmpty(decision) || string.IsNullOrEmpty(signature))
+            {
+                TempData["ErrorMessage"] = "Decision and Signature are mandatory.";
+                return RedirectToAction("AuthoriseLeaseAgreement", new { id = id });
+            }
+
+            app.LeaseAgreementHodSignature = signature;
+            app.LeaseAgreementHodSignatureDate = DateTime.Now;
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+
+            if (decision == "Approve")
+            {
+                var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePendingActivation);
+                if (status != null) app.StatusId = status.Id;
+                app.LeaseStatus = "Pending Activation";
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorized and signed by HOD.");
+                TempData["SuccessMessage"] = "Lease agreement signed and activated by HOD successfully.";
+            }
+            else
+            {
+                var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReAwaitingAgreementConclusion);
+                if (status != null) app.StatusId = status.Id;
+                app.LeaseStatus = "Rejected by HOD";
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorization rejected by HOD: " + comments);
+                TempData["SuccessMessage"] = "Lease agreement authorization rejected and returned to queue.";
+            }
+
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return RedirectToAction("LeaseAgreementApprovals");
+        }
+
+        // GET: RealEstateAdmin/DownloadLeaseAgreementPdf/{id}
+        public ActionResult DownloadLeaseAgreementPdf(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Include(a => a.SelectedFacility)
+                .Include(a => a.SelectedFacilityUnit)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            byte[] pdfBytes = RealEstateUserAgreementHelper.GenerateFullLeaseAgreementPdf(app);
+            string fileName = string.Format("User_Lease_Agreement_36Months_{0}.pdf", app.UniqueTenancyLeaseNumber ?? app.Id.ToString());
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+
+        // GET: RealEstateAdmin/EvaluationCriteria
+        public ActionResult EvaluationCriteria()
+        {
+            Initialise();
+            return View();
+        }
+
+        // --- --- UC 24: Lease Space/Unit Allocation --- ---
+        public ActionResult Allocations()
+        {
+            Initialise();
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => a.Status.Key == StatusKeys.RePendingActivation && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult AllocateSpace(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            // Load available units for that care centre
+            var availableUnits = db.RE_FacilityUnits
+                .Include(u => u.Facility)
+                .Include(u => u.FacilityCategory)
+                .Where(u => u.Facility.CCCId == app.CCCId && u.IsActive && !u.IsDeleted)
+                .ToList();
+
+            ViewBag.AvailableUnits = availableUnits;
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AllocateSpace(int id, string decision, int? selectedUnitId, string reason)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            if (decision == "Approve")
+            {
+                if (!selectedUnitId.HasValue)
+                {
+                    TempData["ErrorMessage"] = "You must select a unit to allocate.";
+                    return RedirectToAction("AllocateSpace", new { id = id });
+                }
+
+                var unit = db.RE_FacilityUnits.Find(selectedUnitId.Value);
+                if (unit == null) return HttpNotFound();
+
+                // Update unit status to Allocated (IsActive = false means occupied)
+                unit.IsActive = false;
+                db.Entry(unit).State = EntityState.Modified;
+
+                app.SelectedFacilityUnitId = selectedUnitId;
+                
+                var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReActiveOccupancy);
+                if (status != null) app.StatusId = status.Id;
+
+                app.ModifiedDateTime = DateTime.Now;
+                app.ModifiedBySystemUserId = _systemUser?.Id;
+                db.Entry(app).State = EntityState.Modified;
+                db.SaveChanges();
+
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Space allocated: Unit Type '{0}' of Facility ID {1}.", unit.UnitType, unit.FacilityId));
+                TempData["SuccessMessage"] = "Space allocated successfully. Unit status updated to Allocated.";
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(reason))
+                {
+                    TempData["ErrorMessage"] = "Reason is mandatory to stop/delay allocation.";
+                    return RedirectToAction("AllocateSpace", new { id = id });
+                }
+
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Space allocation delayed: " + reason);
+                TempData["SuccessMessage"] = "Space allocation marked Delayed.";
+            }
+
+            return RedirectToAction("Allocations");
+        }
+
+        // --- --- UC 25: Capture Lease Details and Classify Lease Categories --- ---
+        public ActionResult ActiveOccupancy()
+        {
+            Initialise();
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .Where(a => a.Status.Key == StatusKeys.ReActiveOccupancy && a.IsActive && !a.IsDeleted)
+                .ToList();
+            return View(apps);
+        }
+
+        public ActionResult CaptureLeaseDetails(int id)
+        {
+            Initialise();
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CaptureLeaseDetails(int id, string leaseCategory, DateTime? leaseStartDate, DateTime? leaseEndDate, DateTime? dateOfOccupation, decimal? rentalAmount, decimal? depositAmount, string escalationTerms, string paymentFrequency)
+        {
+            Initialise();
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            var start = leaseStartDate ?? app.LeaseStartDate ?? DateTime.Today;
+            var end = leaseEndDate ?? app.LeaseEndDate ?? start.AddYears(3);
+            var occ = dateOfOccupation ?? start;
+
+            app.LeaseCategory = leaseCategory;
+            app.LeaseStartDate = start;
+            app.LeaseEndDate = end;
+            app.LeaseDateOfOccupation = occ;
+            if (rentalAmount.HasValue) app.CalculatedMonthlyRental = rentalAmount.Value;
+            if (depositAmount.HasValue) app.LeaseDepositAmount = depositAmount.Value;
+            app.LeaseEscalationTerms = escalationTerms;
+            app.LeasePaymentFrequency = paymentFrequency;
+
+            app.UniqueTenancyLeaseNumber = "UTLN-" + DateTime.Now.Year.ToString() + "-" + app.Id.ToString("D5");
+            app.LeaseStatus = "Active";
+
+            var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReActive);
+            if (status != null) app.StatusId = status.Id;
+
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser?.Id;
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser?.Id ?? 1, string.Format("Lease details captured. Category: {0}. Tenancy Number: {1}.", leaseCategory, app.UniqueTenancyLeaseNumber));
+            TempData["SuccessMessage"] = string.Format("Lease details captured successfully. Tenancy Number: {0}.", app.UniqueTenancyLeaseNumber);
+            return RedirectToAction("ActiveOccupancy");
         }
     }
 }

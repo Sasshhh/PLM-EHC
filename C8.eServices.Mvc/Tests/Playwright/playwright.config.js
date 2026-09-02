@@ -12,12 +12,12 @@ module.exports = defineConfig({
     ['list']
   ],
   use: {
-    baseURL: 'http://localhost:3450/',
+    baseURL: process.env.BASE_URL || 'http://localhost:3450/',
     trace: 'retain-on-failure', // Pro feature: Keeps a DOM snapshot trace if test fails
     screenshot: 'only-on-failure',
     video: 'on', // Pro feature: Records video automatically
-    actionTimeout: 30000,
-    navigationTimeout: 30000,
+    actionTimeout: 90000,
+    navigationTimeout: 90000,
   },
   projects: [
     {

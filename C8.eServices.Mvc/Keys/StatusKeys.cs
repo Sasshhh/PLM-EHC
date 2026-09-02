@@ -385,5 +385,14 @@ namespace C8.eServices.Mvc.Keys
         public const string RePtoRejected = "re_pto_rejected";
         public const string RePtoApprovedConditions = "re_pto_approved_conditions";
         public const string RePtoAdditionalInfo = "re_pto_additional_info";
+
+        // Real Estate Use Cases (UC 21 to UC 25)
+        public const string ReAwaitingPtoSignature = "re_awaiting_pto_signature";
+        public const string ReAwaitingAgreementConclusionOutcome = "re_awaiting_agreement_conclusion_outcome";
+        public const string RePendingActivation = "re_pending_activation";
+        public const string ReActiveOccupancy = "re_active_occupancy";
+        public const string ReActive = "re_active";
+        public const string ReRevokedPendingReview = "re_revoked_pending_review";
+        public const string ReExpired = "re_expired";
     }
 }

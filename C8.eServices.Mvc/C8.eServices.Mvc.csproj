@@ -1899,6 +1899,8 @@
     <Content Include="Views\RealEstateAdmin\WorkOrders.cshtml" />
     <Content Include="Views\RealEstate\RequestPto.cshtml" />
     <Content Include="Views\RealEstate\SelectInspectionSlot.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ConsolidatedReportPdf.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ManageWorkflow.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1935,6 +1937,7 @@
     <Compile Include="App_Start\Startup_Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AuditTrailController.cs" />
     <Compile Include="Controllers\AccountTypeController.cs" />
     <Compile Include="Controllers\ApplicantUnitsController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
@@ -2135,6 +2138,7 @@
     <Compile Include="Helpers\ReportExecution.cs" />
     <Compile Include="Helpers\SecureActionLinkExtension.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
+    <Compile Include="Helpers\AuditTrailHelper.cs" />
     <Compile Include="Helpers\SmsHelper.cs" />
     <Compile Include="Helpers\StoredProcedure.cs" />
     <Compile Include="Helpers\TokenHelper.cs" />
@@ -2142,6 +2146,8 @@
     <Compile Include="Helpers\UnitEngine\Abstract\IUnitAllocation.cs" />
     <Compile Include="Helpers\UnitEngine\Concrete\UnitAllocation.cs" />
     <Compile Include="Helpers\WebHepler.cs" />
+    <Compile Include="Helpers\RealEstateWorkAllocationHelper.cs" />
+    <Compile Include="Helpers\RealEstateUserAgreementHelper.cs" />
     <Compile Include="Helpers\WorkAllocationHumanHelper.cs" />
     <Compile Include="Helpers\Wso2Helper.cs" />
     <Compile Include="Keys\AccessLevelKeys.cs" />
@@ -2624,6 +2630,11 @@
     <Compile Include="Models\Support.cs" />
     <Compile Include="Models\SystemIdentityUser.cs" />
     <Compile Include="Models\SystemUser.cs" />
+    <Compile Include="Models\AuditTrail\AuditTrailUserLogin.cs" />
+    <Compile Include="Models\AuditTrail\AuditTrailActivity.cs" />
+    <Compile Include="Models\AuditTrail\AuditTrailPasswordReset.cs" />
+    <Compile Include="Models\AuditTrail\AuditTrailRoleModification.cs" />
+    <Compile Include="Filters\AuditTrailActionFilter.cs" />
     <Compile Include="Models\SystemUserException.cs" />
     <Compile Include="Models\SystemUserLogTime.cs" />
     <Compile Include="Models\SystemUserType.cs" />

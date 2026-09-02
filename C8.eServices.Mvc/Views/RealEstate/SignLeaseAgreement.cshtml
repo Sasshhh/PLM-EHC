@@ -1,0 +1,375 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Sign Lease Agreement";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .re-container {
+        padding: 30px 15px;
+        font-family: 'Inter', Arial, sans-serif;
+        color: var(--re-text-dark);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .re-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .re-header-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--re-border-color);
+        padding-bottom: 12px;
+    }
+
+    .contract-preview {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 30px;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 15px;
+        line-height: 1.8;
+        color: #0f172a;
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 25px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .contract-title {
+        text-align: center;
+        font-weight: 800;
+        font-size: 18px;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .detail-val {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .btn-re-primary {
+        background-color: var(--re-gold);
+        color: white !important;
+        border: 1px solid var(--re-gold);
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-re-primary:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+        color: white !important;
+    }
+
+    /* UNIFIED PERFECT MODAL STYLING */
+    .modal-content {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        padding: 18px 25px !important;
+        margin: 0 !important;
+        border: none !important;
+        border-top-left-radius: 12px !important;
+        border-top-right-radius: 12px !important;
+        display: block !important;
+    }
+
+    .modal-header .modal-title {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        margin: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .btn-modal-gold {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--re-gold) !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease;
+    }
+
+    .btn-modal-gold:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-modal-cancel {
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    .btn-modal-cancel:hover {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+</style>
+
+<div class="re-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" style="border-radius: 8px; margin-bottom: 20px;">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="re-card">
+        <h2 class="re-header-title" style="color: var(--re-gold);"><i class="fa fa-pencil-square-o"></i> Execute Lease Agreement</h2>
+        
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 25px; color: #166534; font-size: 14px;">
+            <i class="fa fa-info-circle"></i> Your lease application is approved! Please review the terms of your lease agreement below, download the copy for signing, and upload the signed document to finalize the activation request.
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <h4 style="font-weight: 700; color: #334155; margin-bottom: 15px;">Lease Key Terms</h4>
+            <div class="detail-row">
+                <span class="detail-label">Lessor</span>
+                <span class="detail-val">City of Ekurhuleni (CoE)</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Lessee</span>
+                <span class="detail-val">@Model.EntityName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Property Address</span>
+                <span class="detail-val">@Model.PropertyAddress, @Model.TownshipSuburbFarmName</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Monthly Rental</span>
+                <span class="detail-val">R @(Model.CalculatedMonthlyRental.HasValue ? Model.CalculatedMonthlyRental.Value.ToString("N2") : "5,500.00")</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Security Deposit Required</span>
+                <span class="detail-val">R @(Model.LeaseDepositAmount.HasValue ? Model.LeaseDepositAmount.Value.ToString("N2") : "11,000.00")</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Agreement Period</span>
+                <span class="detail-val">36 Months (From @(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd")) to @(Model.LeaseEndDate.HasValue ? Model.LeaseEndDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.AddYears(3).ToString("yyyy-MM-dd")))</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Annual Escalation</span>
+                <span class="detail-val">@(string.IsNullOrEmpty(Model.LeaseEscalationTerms) ? "8% Annually" : Model.LeaseEscalationTerms)</span>
+            </div>
+        </div>
+
+        <h4 style="font-weight: 700; color: #334155; margin-bottom: 12px;">Agreement Document Preview</h4>
+        <div class="contract-preview">
+            <div class="contract-title">STANDARDISED LEASE / USER AGREEMENT</div>
+            <p><strong>MEMORANDUM OF AGREEMENT</strong> entered into by and between:</p>
+            <p><strong>THE CITY OF EKURHULENI METROPOLITAN MUNICIPALITY</strong> (hereinafter referred to as the "Lessor")</p>
+            <p>and</p>
+            <p><strong>@Model.EntityName</strong> (hereinafter referred to as the "Lessee")</p>
+            <hr />
+            <p><strong>1. PREMISES:</strong> The Lessor hereby lets to the Lessee who hires the municipal space located at @Model.PropertyAddress, @Model.TownshipSuburbFarmName (Erf: @Model.ErfFarmNumber).</p>
+            <p><strong>2. DURATION:</strong> This agreement shall commence on @(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd")) and shall remain in force for a period of 36 months, ending on @(Model.LeaseEndDate.HasValue ? Model.LeaseEndDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.AddYears(3).ToString("yyyy-MM-dd")).</p>
+            <p><strong>3. RENTAL AND DEPOSIT:</strong> The monthly rental shall be R @(Model.CalculatedMonthlyRental.HasValue ? Model.CalculatedMonthlyRental.Value.ToString("N2") : "5,500.00") payable monthly in advance. The Lessee shall deposit a security amount of R @(Model.LeaseDepositAmount.HasValue ? Model.LeaseDepositAmount.Value.ToString("N2") : "11,000.00") prior to occupation.</p>
+            <p><strong>4. ESCALATION:</strong> The rental shall escalate at a rate of @(string.IsNullOrEmpty(Model.LeaseEscalationTerms) ? "8% Annually" : Model.LeaseEscalationTerms) on each anniversary of the commencement date.</p>
+            <p><strong>5. SPECIAL CONDITIONS:</strong> Lessee is responsible for operational maintenance and statutory compliance.</p>
+            <p><strong>6. GOVERNING LAW:</strong> This agreement is governed by the laws of the Republic of South Africa.</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 30px; display: flex; justify-content: center; gap: 15px;">
+            <a href="@Url.Action("DownloadLeaseAgreementPdf", "RealEstateAdmin", new { id = Model.Id })" class="btn btn-default" style="padding: 12px 24px; font-weight: 600; border-radius: 8px; background: #f8fafc; border: 1px solid #cbd5e1;" target="_blank">
+                <i class="fa fa-download"></i> Download Lease Agreement (PDF)
+            </a>
+            <button type="button" class="btn btn-info" style="padding: 12px 24px; font-weight: 600; border-radius: 8px;" onclick="window.open('@Url.Action("DownloadLeaseAgreementPdf", "RealEstateAdmin", new { id = Model.Id })', '_blank')">
+                <i class="fa fa-eye"></i> View Agreement PDF
+            </button>
+        </div>
+
+        <!-- Signing Mode Toggle -->
+        <div style="background: #f1f5f9; border-radius: 10px; padding: 20px; margin-bottom: 25px; border: 1px solid var(--re-border-color);">
+            <h4 style="margin-top: 0; font-weight: 700; color: #1e293b; font-size: 15px; margin-bottom: 12px;">Choose Signing Method:</h4>
+            <div style="display: flex; gap: 20px;">
+                <label style="font-weight: 600; cursor: pointer; color: #0f172a;">
+                    <input type="radio" name="signingMode" value="offline" checked onclick="toggleSigningMode('offline')" /> 
+                    <i class="fa fa-upload" style="color: var(--re-gold);"></i> Offline Sign (Download PDF, Sign with Witnesses, Upload)
+                </label>
+                <label style="font-weight: 600; cursor: pointer; color: #0f172a;">
+                    <input type="radio" name="signingMode" value="online" onclick="toggleSigningMode('online')" /> 
+                    <i class="fa fa-pencil" style="color: var(--re-gold);"></i> Online Digital Signature (Draw Signature Canvas)
+                </label>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("SignLeaseAgreement", "RealEstate", FormMethod.Post, new { enctype = "multipart/form-data", id = "signLeaseForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <!-- Mode 1: Offline Upload Control -->
+            <div id="divOfflineUpload" class="form-group" style="margin-bottom: 25px;">
+                <label style="font-weight: 700; color: #334155; margin-bottom: 8px; display: block;">Upload Signed Lease/User Agreement (PDF only) <span class="text-danger">*</span></label>
+                <input type="file" name="signedLeaseFile" id="signedLeaseFile" class="form-control" accept=".pdf" style="height: auto; padding: 10px;" />
+                <small class="text-muted" style="margin-top: 4px; display: block;">Please download the pre-filled PDF above, sign together with your 2 witnesses, and upload the scanned PDF.</small>
+            </div>
+
+            <!-- Mode 2: Online Canvas Control -->
+            <div id="divOnlineCanvas" style="display: none; margin-bottom: 25px; background: #ffffff; border: 1px solid var(--re-border-color); border-radius: 8px; padding: 20px;">
+                <label style="font-weight: 700; color: #334155; margin-bottom: 8px; display: block;">Draw Your Digital Signature Canvas <span class="text-danger">*</span></label>
+                <div style="border: 2px dashed var(--re-gold); border-radius: 8px; padding: 10px; background: #fafaf9; width: 100%; max-width: 500px; margin: 0 auto;">
+                    <canvas id="digitalSigCanvas" width="480" height="140" style="background: white; border: 1px solid #e2e8f0; width: 100%; cursor: crosshair;"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <button type="button" class="btn btn-default btn-xs" onclick="clearSigCanvas()"><i class="fa fa-eraser"></i> Clear Canvas</button>
+                </div>
+                <input type="hidden" name="digitalSignatureBlob" id="digitalSignatureBlob" />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--re-border-color); padding-top: 20px;">
+                <a href="@Url.Action("LeaseAgreements")" class="btn btn-default" style="padding: 10px 20px; border-radius: 8px;">Cancel</a>
+                <button type="button" class="btn-re-primary" id="btnSubmitAgreement" onclick="openTenantModal()">Submit Agreement</button>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div class="modal fade" id="modalTenantConfirm" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title"><i class="fa fa-question-circle"></i> Confirm Agreement Submission</h4>
+                        </div>
+                        <div class="modal-body" style="padding: 25px; font-size: 15px; color: #1e293b;">
+                            <p style="font-weight: 600; font-size: 16px; margin-bottom: 10px;">
+                                Are you sure you want to submit this agreement document?
+                            </p>
+                            <p class="text-muted" style="font-size: 13px; margin: 0;">
+                                By clicking <strong>"Yes, I am sure"</strong>, your signed user agreement will be submitted to the Delegated Official (HOD) for final sign-off and activation.
+                            </p>
+                        </div>
+                        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 15px 25px;">
+                            <button type="button" class="btn-modal-cancel" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn-modal-gold" onclick="submitTenantForm()">
+                                Yes, I am sure
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    var currentSigningMode = 'offline';
+    var canvas, ctx, isDrawing = false, hasDrawn = false;
+
+    function toggleSigningMode(mode) {
+        currentSigningMode = mode;
+        if (mode === 'offline') {
+            document.getElementById('divOfflineUpload').style.display = 'block';
+            document.getElementById('divOnlineCanvas').style.display = 'none';
+        } else {
+            document.getElementById('divOfflineUpload').style.display = 'none';
+            document.getElementById('divOnlineCanvas').style.display = 'block';
+            initCanvas();
+        }
+    }
+
+    function initCanvas() {
+        if (!canvas) {
+            canvas = document.getElementById('digitalSigCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0f172a';
+
+                canvas.addEventListener('mousedown', function (e) {
+                    isDrawing = true;
+                    hasDrawn = true;
+                    ctx.beginPath();
+                    ctx.moveTo(e.offsetX, e.offsetY);
+                });
+                canvas.addEventListener('mousemove', function (e) {
+                    if (isDrawing) {
+                        ctx.lineTo(e.offsetX, e.offsetY);
+                        ctx.stroke();
+                    }
+                });
+                canvas.addEventListener('mouseup', function () { isDrawing = false; });
+                canvas.addEventListener('mouseleave', function () { isDrawing = false; });
+            }
+        }
+    }
+
+    function clearSigCanvas() {
+        if (canvas && ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasDrawn = false;
+        }
+    }
+
+    function openTenantModal() {
+        if (currentSigningMode === 'offline') {
+            var fileInput = document.getElementById('signedLeaseFile');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a signed lease PDF file before submitting.');
+                return;
+            }
+        } else {
+            if (!hasDrawn && (!window.hasDrawn)) {
+                alert('Please draw your digital signature on the canvas before submitting.');
+                return;
+            }
+            if (canvas) {
+                document.getElementById('digitalSignatureBlob').value = canvas.toDataURL();
+            }
+        }
+        $('#modalTenantConfirm').modal('show');
+    }
+
+    function submitTenantForm() {
+        document.getElementById('signLeaseForm').submit();
+    }
+</script>

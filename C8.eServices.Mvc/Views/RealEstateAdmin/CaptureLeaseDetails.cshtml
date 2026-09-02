@@ -1,0 +1,120 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Capture Lease Details & Classification";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .btn-submit {
+        background-color: var(--re-gold);
+        color: white !important;
+        border: 1px solid var(--re-gold);
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+        color: white !important;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-card">
+        <h2 style="margin-top:0; margin-bottom:20px; font-weight:700; color: var(--re-gold);"><i class="fa fa-pencil-square-o"></i> Capture Lease Details & Classification</h2>
+
+        @using (Html.BeginForm("CaptureLeaseDetails", "RealEstateAdmin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <input type="hidden" name="leaseStartDate" value="@(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))" />
+            <input type="hidden" name="leaseEndDate" value="@(Model.LeaseEndDate.HasValue ? Model.LeaseEndDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.AddYears(3).ToString("yyyy-MM-dd"))" />
+            <input type="hidden" name="dateOfOccupation" value="@(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))" />
+            <input type="hidden" name="rentalAmount" value="@(Model.CalculatedMonthlyRental.HasValue ? Convert.ToInt32(Model.CalculatedMonthlyRental.Value).ToString() : "5500")" />
+            <input type="hidden" name="depositAmount" value="@(Model.LeaseDepositAmount.HasValue ? Convert.ToInt32(Model.LeaseDepositAmount.Value).ToString() : "11000")" />
+            <input type="hidden" name="escalationTerms" value="@(string.IsNullOrEmpty(Model.LeaseEscalationTerms) ? "8% Annually" : Model.LeaseEscalationTerms)" />
+            <input type="hidden" name="paymentFrequency" value="Monthly" />
+
+            <div class="form-group">
+                <label>Tenant Name</label>
+                <input type="text" class="form-control" value="@Model.EntityName" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Property Allocated</label>
+                <input type="text" class="form-control" value="@Model.PropertyAddress, @Model.TownshipSuburbFarmName" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Lease Classification Category *</label>
+                @Html.DropDownList("leaseCategory", new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Commercial", Text = "Commercial Lease" },
+                    new SelectListItem { Value = "Social", Text = "Social Lease (Subsidy/Discounted)" },
+                    new SelectListItem { Value = "Community", Text = "Community / NGO Facility Lease" }
+                }, "-- Select Category --", new { @class = "form-control", required = "required", id = "ddlCategory" })
+            </div>
+
+            <div class="form-group">
+                <label>Unique Tenancy / Lease Number *</label>
+                <input type="text" name="tenancyNumber" id="tenancyNumber" class="form-control" 
+                       value="@(string.IsNullOrEmpty(Model.UniqueTenancyLeaseNumber) ? "LSE-" + (Model.CCC != null ? Model.CCC.CCCName.Replace(" ", "") : "COE") + "-" + DateTime.Now.ToString("yyMMdd") + "-01" : Model.UniqueTenancyLeaseNumber)" 
+                       required />
+                <span class="help-block" style="font-size:11px; color:#64748b;">Recommended format: LSE-[CCC]-[DATE]-[SEQUENCE]</span>
+            </div>
+
+            <div class="form-group">
+                <label>Specific Lease Clauses / Notes</label>
+                <textarea name="clauses" class="form-control" rows="4" placeholder="Enter special conditions, maintenance responsibilities, or escalation exclusions..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--re-border-color); padding-top: 20px; margin-top: 30px;">
+                <a href="@Url.Action("ActiveOccupancy")" class="btn btn-default">Cancel</a>
+                <button type="submit" class="btn-submit" id="btnSubmitClassification">Save & Activate Lease</button>
+            </div>
+        }
+    </div>
+</div>

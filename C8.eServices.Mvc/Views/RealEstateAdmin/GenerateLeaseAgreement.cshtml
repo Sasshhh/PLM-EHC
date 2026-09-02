@@ -1,0 +1,447 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Generate & Review Lease Agreement";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+        --re-bg-light: #f8fafc;
+    }
+
+    .workspace-container {
+        padding: 20px 10px;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .workspace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--re-border-color);
+        padding-bottom: 15px;
+    }
+
+    .workspace-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .editor-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #334155;
+        margin-bottom: 5px;
+    }
+
+    .doc-preview-card {
+        background: #525659;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-height: 850px;
+        overflow-y: auto;
+    }
+
+    .paper-sheet {
+        background: #ffffff;
+        width: 100%;
+        min-height: 900px;
+        padding: 40px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        font-family: 'Times New Roman', Times, serif;
+        color: #111;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    .paper-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+
+    .paper-header h3 {
+        margin: 0 0 5px 0;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 18px;
+    }
+
+    .paper-header p {
+        margin: 0;
+        font-size: 12px;
+        font-style: italic;
+    }
+
+    .doc-section {
+        margin-bottom: 20px;
+    }
+
+    .doc-section-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 3px;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .doc-highlight {
+        background-color: #fef08a;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-review-submit {
+        background-color: var(--re-gold);
+        color: white !important;
+        border: 1px solid var(--re-gold);
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 15px;
+        transition: background 0.2s ease;
+    }
+
+    .btn-review-submit:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+        color: white !important;
+    }
+
+    /* UNIFIED PERFECT MODAL STYLING */
+    .modal-content {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        padding: 18px 25px !important;
+        margin: 0 !important;
+        border: none !important;
+        border-top-left-radius: 12px !important;
+        border-top-right-radius: 12px !important;
+        display: block !important;
+    }
+
+    .modal-header .modal-title {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        margin: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .btn-modal-gold {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--re-gold) !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease;
+    }
+
+    .btn-modal-gold:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-modal-cancel {
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    .btn-modal-cancel:hover {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+</style>
+
+<div class="workspace-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="workspace-header">
+        <div>
+            <h2 class="workspace-title"><i class="fa fa-file-text-o" style="color: var(--re-gold);"></i> Generate & Review Lease / User Agreement</h2>
+            <span class="text-muted">UC 23 - Main Success Scenario: Draft Generation & Live Document Review</span>
+        </div>
+        <div>
+            <a href="@Url.Action("NewLeases")" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back to Queue</a>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("GenerateLeaseAgreement", "RealEstateAdmin", FormMethod.Post, new { id = "leaseForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="row">
+            <!-- LEFT COLUMN: Parameter Editor Panel -->
+            <div class="col-md-5">
+                <div class="editor-card">
+                    <h4 style="margin-top:0; font-weight:700; color:#1e293b; border-bottom:1px solid #eee; padding-bottom:10px;">
+                        <i class="fa fa-sliders"></i> Lease Parameters & Terms
+                    </h4>
+
+                    <div class="form-group">
+                        <label>Application Ref #</label>
+                        <input type="text" class="form-control" value="@Model.ApplicationReferenceNumber" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lessee / Tenant Entity</label>
+                        <input type="text" class="form-control" value="@Model.EntityName (@Model.ApplicantType)" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Immovable Property Locality</label>
+                        <input type="text" class="form-control" value="@Model.ErfFarmNumber, @Model.PropertyAddress, @Model.TownshipSuburbFarmName" readonly />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Monthly Rental (ZAR) <span class="text-danger">*</span></label>
+                            <input type="number" id="inpRental" name="rentalAmount" class="form-control" step="0.01" value="@(Model.CalculatedMonthlyRental.HasValue ? Model.CalculatedMonthlyRental.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "5500.00")" required />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Security Deposit (ZAR) <span class="text-danger">*</span></label>
+                            <input type="number" id="inpDeposit" name="depositAmount" class="form-control" step="0.01" value="@(Model.LeaseDepositAmount.HasValue ? Model.LeaseDepositAmount.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "11000.00")" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Commencement Date <span class="text-danger">*</span></label>
+                            <input type="date" id="inpStartDate" name="startDate" class="form-control" value="@(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))" required />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Lease Period (Months) <span class="text-danger">*</span></label>
+                            <input type="number" id="inpDuration" name="durationMonths" class="form-control" value="36" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Annual Escalation Terms <span class="text-danger">*</span></label>
+                        <select id="inpEscalation" name="escalationTerms" class="form-control">
+                            <option value="8% Annually" selected>8% Annually (Standard Market Rate)</option>
+                            <option value="10% Annually">10% Annually</option>
+                            <option value="Consumer Price Index (CPI)">CPI Linked</option>
+                            <option value="Fixed No Escalation">Fixed (Public Interest / Poor Relief)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Special Terms & Custom Clauses</label>
+                        <textarea id="inpClauses" name="customClauses" class="form-control" rows="3" placeholder="Enter any specific obligations, maintenance terms, or special conditions...">Lessee is responsible for operational maintenance and statutory compliance.</textarea>
+                    </div>
+
+                    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--re-border-color); display: flex; justify-content: space-between;">
+                        <button type="button" class="btn btn-default" onclick="resetDefaults()"><i class="fa fa-undo"></i> Reset Defaults</button>
+                        <button type="button" class="btn-review-submit" id="btnSubmitLeaseDraft" onclick="openConfirmationModal()">
+                            <i class="fa fa-paper-plane"></i> Submit to Tenant & HOD
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Live Formatted Draft Document Preview -->
+            <div class="col-md-7">
+                <div class="doc-preview-card">
+                    <div class="paper-sheet" id="paperDraft">
+                        <div class="paper-header">
+                            <h3>CITY OF EKURHULENI</h3>
+                            <p>REAL ESTATE LEASE MANAGEMENT SYSTEM (PLM)</p>
+                            <h4 style="margin-top:10px; font-weight:bold; text-decoration:underline;">STANDARDISED LEASE / USER AGREEMENT</h4>
+                            <p>Template Reference: URC User Agreement_Latest.doc (36 Months Valid)</p>
+                        </div>
+
+                        <div class="doc-section">
+                            <div class="doc-section-title">1. PARTIES TO THE AGREEMENT</div>
+                            <p>
+                                This Agreement is entered into between: <br />
+                                <strong>LESSOR:</strong> CITY OF EKURHULENI MUNICIPALITY ("CoE") <br />
+                                <strong>LESSEE:</strong> <span id="prevEntity" class="doc-highlight">@Model.EntityName</span> (<span id="prevType">@Model.ApplicantType</span>) <br />
+                                <strong>APPLICATION REF:</strong> @Model.ApplicationReferenceNumber
+                            </p>
+                        </div>
+
+                        <div class="doc-section">
+                            <div class="doc-section-title">2. SUBJECT IMMOVABLE PROPERTY</div>
+                            <p>
+                                The Lessor hereby lets to the Lessee the subject immovable property situated at: <br />
+                                <strong>PROPERTY LOCATION:</strong> <span class="doc-highlight">@Model.PropertyAddress, @Model.TownshipSuburbFarmName</span> <br />
+                                <strong>LEGAL DESCRIPTION / ERF NO:</strong> <span class="doc-highlight">@Model.ErfFarmNumber</span>
+                            </p>
+                        </div>
+
+                        <div class="doc-section">
+                            <div class="doc-section-title">3. DURATION AND COMMENCEMENT</div>
+                            <p>
+                                The lease shall commence on <span id="prevStart" class="doc-highlight">@(Model.LeaseStartDate.HasValue ? Model.LeaseStartDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))</span> and shall endure for a period of <span id="prevDuration" class="doc-highlight">36</span> Months, terminating on <span id="prevEnd" class="doc-highlight">@(DateTime.Today.AddMonths(36).ToString("yyyy-MM-dd"))</span>.
+                            </p>
+                        </div>
+
+                        <div class="doc-section">
+                            <div class="doc-section-title">4. RENTAL AND FINANCIAL OBLIGATIONS</div>
+                            <p>
+                                4.1 <strong>Agreed Monthly Rental:</strong> R <span id="prevRental" class="doc-highlight">@(Model.CalculatedMonthlyRental.HasValue ? Model.CalculatedMonthlyRental.Value.ToString("N2") : "5,500.00")</span> per month, payable in advance on or before the 1st day of each calendar month. <br />
+                                4.2 <strong>Security Deposit:</strong> R <span id="prevDeposit" class="doc-highlight">@(Model.LeaseDepositAmount.HasValue ? Model.LeaseDepositAmount.Value.ToString("N2") : "11,000.00")</span> payable prior to occupation. <br />
+                                4.3 <strong>Annual Escalation:</strong> The monthly rental shall escalate at the rate of <span id="prevEscalation" class="doc-highlight">8% Annually</span> on each anniversary of the commencement date in accordance with CoE Asset Management policies.
+                            </p>
+                        </div>
+
+                        <div class="doc-section">
+                            <div class="doc-section-title">5. SPECIAL CONDITIONS & STIPULATIONS</div>
+                            <p id="prevClauses" style="font-style:italic;">
+                                Lessee is responsible for operational maintenance and statutory compliance.
+                            </p>
+                        </div>
+
+                        <div class="doc-section" style="margin-top: 40px; border-top: 1px dashed #999; padding-top: 20px;">
+                            <div class="doc-section-title">6. EXECUTION SIGNATURE BLOCKS</div>
+                            <table style="width:100%; font-size:12px; margin-top:15px;">
+                                <tr>
+                                    <td style="width:50%;">
+                                        ___________________________________<br />
+                                        <strong>PROPERTY / LED OFFICER</strong><br />
+                                        Date: @DateTime.Today.ToString("yyyy-MM-dd")
+                                    </td>
+                                    <td style="width:50%;">
+                                        ___________________________________<br />
+                                        <strong>LESSEE / TENANT SIGNATURE</strong><br />
+                                        Status: <em>Awaiting Submission</em>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top:20px;" colspan="2">
+                                        ___________________________________<br />
+                                        <strong>DELEGATED OFFICIAL (HEAD OF DEPARTMENT)</strong><br />
+                                        Status: <em>Awaiting Tenant Acceptance</em>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 10 & 11: Confirmation Modal -->
+        <div class="modal fade" id="modalConfirmSubmit" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modalLabel">
+                            <i class="fa fa-question-circle"></i> Confirm Document Submission
+                        </h4>
+                    </div>
+                    <div class="modal-body" style="padding: 25px; font-size: 15px; color: #1e293b;">
+                        <p style="font-weight: 600; font-size: 16px; margin-bottom: 10px;">
+                            Are you sure you want to submit the document for signature?
+                        </p>
+                        <p class="text-muted" style="font-size: 13px; margin: 0;">
+                            By clicking <strong>"Yes, I am sure"</strong>, the standardized lease agreement document will be generated and issued to the Tenant and HOD. The application status will update to <em>Awaiting Agreement Conclusion</em>.
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 15px 25px;">
+                        <button type="button" class="btn-modal-cancel" data-dismiss="modal" id="btnCancelSubmit">Cancel</button>
+                        <button type="button" class="btn-modal-gold" id="btnConfirmSubmit" onclick="submitFormFinal()">
+                            Yes, I am sure
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function updatePreview() {
+        var rental = parseFloat(document.getElementById('inpRental').value) || 0;
+        var deposit = parseFloat(document.getElementById('inpDeposit').value) || 0;
+        var startDateVal = document.getElementById('inpStartDate').value;
+        var duration = parseInt(document.getElementById('inpDuration').value) || 36;
+        var escalation = document.getElementById('inpEscalation').value;
+        var clauses = document.getElementById('inpClauses').value;
+
+        document.getElementById('prevRental').innerText = rental.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('prevDeposit').innerText = deposit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('prevStart').innerText = startDateVal;
+        document.getElementById('prevDuration').innerText = duration;
+        document.getElementById('prevEscalation').innerText = escalation;
+        document.getElementById('prevClauses').innerText = clauses || "Standard terms apply.";
+
+        if (startDateVal) {
+            var dt = new Date(startDateVal);
+            dt.setMonth(dt.getMonth() + duration);
+            document.getElementById('prevEnd').innerText = dt.toISOString().split('T')[0];
+        }
+    }
+
+    document.getElementById('inpRental').addEventListener('input', function () {
+        var r = parseFloat(this.value) || 0;
+        document.getElementById('inpDeposit').value = (r * 2).toFixed(2);
+        updatePreview();
+    });
+    document.getElementById('inpDeposit').addEventListener('input', updatePreview);
+    document.getElementById('inpStartDate').addEventListener('change', updatePreview);
+    document.getElementById('inpDuration').addEventListener('input', updatePreview);
+    document.getElementById('inpEscalation').addEventListener('change', updatePreview);
+    document.getElementById('inpClauses').addEventListener('input', updatePreview);
+
+    function openConfirmationModal() {
+        $('#modalConfirmSubmit').modal('show');
+    }
+
+    function submitFormFinal() {
+        document.getElementById('leaseForm').submit();
+    }
+
+    function resetDefaults() {
+        document.getElementById('inpRental').value = '5500.00';
+        document.getElementById('inpDeposit').value = '11000.00';
+        document.getElementById('inpDuration').value = '36';
+        document.getElementById('inpEscalation').value = '8% Annually';
+        updatePreview();
+    }
+</script>

@@ -220,6 +220,9 @@
         <button type="button" class="btn btn-default" onclick="generateReport()" style="margin-bottom: 15px; font-weight: 600; font-size: 13px;">
             <i class="fa fa-refresh"></i> Generate Consolidated Report
         </button>
+        <a href="@Url.Action("DownloadConsolidatedReport", "RealEstateAdmin", new { id = Model.Id })" target="_blank" class="btn btn-default" style="margin-bottom: 15px; font-weight: 600; font-size: 13px; margin-left: 10px;">
+            <i class="fa fa-file-pdf-o" style="color:#ef4444;"></i> Download PDF Report
+        </a>
 
         <div class="report-card" id="reportArea" style="display:none;">
             <h5 style="margin-top:0; font-weight:700; font-size:14px; text-transform:uppercase; color:var(--re-slate-black); border-bottom:1px solid #cbd5e1; padding-bottom:5px;">Consolidated Summary Report</h5>

@@ -1,0 +1,100 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Revoke Permission to Occupy";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .btn-submit {
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background-color: #b91c1c;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-card">
+        <h2 style="margin-top:0; margin-bottom:20px; font-weight:700; color: #dc2626;"><i class="fa fa-ban"></i> Initiate PTO Revocation Request</h2>
+
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 15px; margin-bottom: 25px; color: #991b1b; font-size: 14px;">
+            <i class="fa fa-exclamation-circle"></i> <strong>WARNING:</strong> Revocation is a formal procedure to terminate early occupancy rights due to breach of lease parameters or non-compliance. A detailed rationale and supporting evidence must be uploaded.
+        </div>
+
+        @using (Html.BeginForm("RevokePto", "RealEstateAdmin", FormMethod.Post, new { enctype = "multipart/form-data", id = "revokeForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-group">
+                <label>PTO Reference Number</label>
+                <input type="text" class="form-control" value="@Model.PtoReferenceNumber" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Tenant Name</label>
+                <input type="text" class="form-control" value="@Model.EntityName" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Revocation Reason (Mandatory) *</label>
+                <textarea name="reason" id="txtReason" class="form-control" rows="4" placeholder="Detail the non-compliance, H&S breach, or legal reasons..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Upload Supporting Documents / Notice of Breach (PDF/Images) *</label>
+                <input type="file" name="evidenceFile" id="evidenceFile" class="form-control" style="height: auto; padding: 10px;" required />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--re-border-color); padding-top: 20px; margin-top: 30px;">
+                <a href="@Url.Action("ActivePto")" class="btn btn-default">Cancel</a>
+                <button type="submit" class="btn-submit" id="btnSubmitRevocation">Submit Revocation Request</button>
+            </div>
+        }
+    </div>
+</div>

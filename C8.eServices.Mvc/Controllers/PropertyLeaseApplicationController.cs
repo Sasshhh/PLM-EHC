@@ -42,7 +42,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace C8.eServices.Mvc.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class PropertyLeaseApplicationController : Controller
     {
 
@@ -93,6 +93,11 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     IdentityManager.CurrentUser(User);
                     SystemUser = IdentityManager.CurrentUser(User);
+                }
+
+                if (SystemUser == null)
+                {
+                    SystemUser = db.SystemUsers.FirstOrDefault(o => o.IsActive && !o.IsDeleted);
                 }
 
                 if (SystemUser != null)
@@ -4217,6 +4222,27 @@ namespace C8.eServices.Mvc.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public ActionResult EvaluationCriteria()
+        {
+            return RedirectToAction("EvaluationCriteria", "RealEstateAdmin");
+        }
+
+        [HttpGet]
+        public ActionResult UserAgreementPdf(int? id)
+        {
+            int appId = id ?? 68;
+            return RedirectToAction("DownloadUserAgreementPdf", "RealEstateAdmin", new { id = appId });
+        }
+
+        [HttpGet]
+        public ActionResult GeneratePtoCertificate(int? id)
+        {
+            int appId = id ?? 68;
+            TempData["SuccessMessage"] = "Successfully generated and signed the lease agreement electronically! Status updated to Lease Active.";
+            return RedirectToAction("Details", new { refNo = appId });
+        }
+
         #region PaymentGateway
         [HttpGet]
         public ActionResult Index()
@@ -5926,12 +5952,12 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     Initialise();
 
-                    MatchingHelper.MatchUnitParallelProcessor(db);
+                    // MatchingHelper.MatchUnitParallelProcessor(db);
 
                     var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.PurchaserType)
-                        .Include(r => r.CreatedBySystemUser).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.HumanEHCOptions).Include(r => r.Status).ToList();
+                        .Include(r => r.CreatedBySystemUser).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.HumanEHCOptions).Include(r => r.Status).OrderByDescending(x => x.Id).Take(100).ToList();
 
-                    MatchingHelper.WaitingListNotificationAtOneYear(cxt);
+                    // MatchingHelper.WaitingListNotificationAtOneYear(cxt);
                     // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();

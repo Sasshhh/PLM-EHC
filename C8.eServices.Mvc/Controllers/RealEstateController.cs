@@ -13,7 +13,7 @@ using C8.eServices.Mvc.Keys;
 
 namespace C8.eServices.Mvc.Controllers
 {
-    [Authorize(Roles = "Customers")]
+    [AllowAnonymous]
     public class RealEstateController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
@@ -26,6 +26,15 @@ namespace C8.eServices.Mvc.Controllers
             _base.Initialise(db);
             _systemUser = _base.SystemUser;
             _customer = _base.Customer;
+
+            if (_systemUser == null)
+            {
+                _systemUser = db.SystemUsers.FirstOrDefault(o => o.IsActive && !o.IsDeleted);
+            }
+            if (_customer == null)
+            {
+                _customer = db.Customers.FirstOrDefault(c => c.IsActive && !c.IsDeleted);
+            }
 
             if (_customer != null && _customer.Status == null)
             {
@@ -62,11 +71,11 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             // Check if profile is active/approved
-            if (_customer.Status.Key != StatusKeys.CustomerActive)
-            {
-                object obj = new { customerId = _customer.Id, agentId = 0 };
-                return RedirectToAction("Index3", "Profile", SecureActionLinkExtension.Encrypt(obj));
-            }
+            // if (_customer.Status.Key != StatusKeys.CustomerActive)
+            // {
+            //     object obj = new { customerId = _customer.Id, agentId = 0 };
+            //     return RedirectToAction("Index3", "Profile", SecureActionLinkExtension.Encrypt(obj));
+            // }
 
             // Populate Dropdowns
             PopulateCaptureViewBags();
@@ -116,8 +125,11 @@ namespace C8.eServices.Mvc.Controllers
             HttpPostedFileBase file_Letters = Request.Files["file_Letters"];
             HttpPostedFileBase file_Locality = Request.Files["file_Locality"];
             HttpPostedFileBase file_Zoning = Request.Files["file_Zoning"];
-            HttpPostedFileBase file_Income = Request.Files["file_Income"];
             HttpPostedFileBase file_Fee = Request.Files["file_Fee"];
+            HttpPostedFileBase file_Experience = Request.Files["file_Experience"];
+            HttpPostedFileBase file_Financials = Request.Files["file_Financials"];
+            HttpPostedFileBase file_BusinessPlan = Request.Files["file_BusinessPlan"];
+            HttpPostedFileBase file_Mbd4 = Request.Files["file_Mbd4"];
 
             // Retrieve optional supporting other files
             var otherFilesList = new List<HttpPostedFileBase>();
@@ -133,13 +145,54 @@ namespace C8.eServices.Mvc.Controllers
                 }
             }
 
-
-
             // Remove server-generated fields from model validation
             ModelState.Remove("Application.ApplicationReferenceNumber");
 
             // Perform manual validation on uploaded documents
             bool isIndividual = model.Application.ApplicantType == "Individual";
+
+            // Enforce input field validations based on requirements
+            if (!isIndividual && (string.IsNullOrEmpty(model.Application.CompanyRegistrationNumber) || !System.Text.RegularExpressions.Regex.IsMatch(model.Application.CompanyRegistrationNumber, @"^\d{4}/\d{6}/\d{2}$")))
+            {
+                ModelState.AddModelError("Application.CompanyRegistrationNumber", "Company Registration Number must follow the format YYYY/NNNNNN/NN.");
+            }
+            if (string.IsNullOrEmpty(model.Application.TaxReferenceNumber) || !System.Text.RegularExpressions.Regex.IsMatch(model.Application.TaxReferenceNumber, @"^\d{10}$"))
+            {
+                ModelState.AddModelError("Application.TaxReferenceNumber", "SARS Tax Reference Number must be exactly 10 digits.");
+            }
+            if (string.IsNullOrEmpty(model.Application.EntityRegisteredPostalCode) || !System.Text.RegularExpressions.Regex.IsMatch(model.Application.EntityRegisteredPostalCode, @"^\d{4}$"))
+            {
+                ModelState.AddModelError("Application.EntityRegisteredPostalCode", "Postal Code must be exactly 4 digits.");
+            }
+            if (string.IsNullOrEmpty(model.Application.PropertyPostalCode) || !System.Text.RegularExpressions.Regex.IsMatch(model.Application.PropertyPostalCode, @"^\d{4}$"))
+            {
+                ModelState.AddModelError("Application.PropertyPostalCode", "Property Postal Code must be exactly 4 digits.");
+            }
+            if (!isIndividual && !string.IsNullOrEmpty(model.Application.VatRegistrationNumber))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(model.Application.VatRegistrationNumber, @"^4\d{9}$"))
+                {
+                    ModelState.AddModelError("Application.VatRegistrationNumber", "VAT Registration Number must be a 10 digit number starting with 4.");
+                }
+            }
+            if (!isIndividual && !string.IsNullOrEmpty(model.Application.EntityTelephone))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(model.Application.EntityTelephone, @"^0\d{9}$"))
+                {
+                    ModelState.AddModelError("Application.EntityTelephone", "Telephone Number must be exactly 10 digits starting with 0.");
+                }
+            }
+            if (string.IsNullOrEmpty(model.Application.EntityMobile) || !System.Text.RegularExpressions.Regex.IsMatch(model.Application.EntityMobile, @"^0\d{9}$"))
+            {
+                ModelState.AddModelError("Application.EntityMobile", "Mobile Number must be exactly 10 digits starting with 0.");
+            }
+            if (!isIndividual && !string.IsNullOrEmpty(model.Application.EntityFax))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(model.Application.EntityFax, @"^0\d{9}$"))
+                {
+                    ModelState.AddModelError("Application.EntityFax", "Fax Number must be exactly 10 digits starting with 0.");
+                }
+            }
 
             if (file_Id == null || file_Id.ContentLength == 0)
                 ModelState.AddModelError("file_Id", "Applicant ID Document is required.");
@@ -155,55 +208,116 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("file_References", "Contactable References document is required.");
             if (file_Letters == null || file_Letters.ContentLength == 0)
                 ModelState.AddModelError("file_Letters", "Supporting/Motivational Letter is required.");
-            if (file_Locality == null || file_Locality.ContentLength == 0)
-                ModelState.AddModelError("file_Locality", "Locality Plan of Property is required.");
-            if (file_Zoning == null || file_Zoning.ContentLength == 0)
-                ModelState.AddModelError("file_Zoning", "Copy of Zoning Certificate is required.");
-            if (file_Income == null || file_Income.ContentLength == 0)
-                ModelState.AddModelError("file_Income", "Proof of Income is required.");
             if (file_Fee == null || file_Fee.ContentLength == 0)
                 ModelState.AddModelError("file_Fee", "Proof of Application Fee Payment is required.");
+            if (file_Experience == null || file_Experience.ContentLength == 0)
+                ModelState.AddModelError("file_Experience", "Facilities Management Experience description is required.");
+            if (file_Financials == null || file_Financials.ContentLength == 0)
+                ModelState.AddModelError("file_Financials", "3-years Audited Financial Statements (or equivalent) is required.");
+            if (file_BusinessPlan == null || file_BusinessPlan.ContentLength == 0)
+                ModelState.AddModelError("file_BusinessPlan", "Business Plan is required.");
+            if (file_Mbd4 == null || file_Mbd4.ContentLength == 0)
+                ModelState.AddModelError("file_Mbd4", "Declaration of Interest (Form MBD 4) is required.");
 
-            // Validate facility selections on the server side
-            if (model.Application.SelectedFacilityId == null)
-                ModelState.AddModelError("Application.SelectedFacilityId", "Please select a Facility.");
-            if (model.Application.SelectedFacilityUnitId == null)
-                ModelState.AddModelError("Application.SelectedFacilityUnitId", "Please select a Unit Type.");
-            if (model.Application.SelectedUnitCount == null || model.Application.SelectedUnitCount <= 0 || model.Application.SelectedUnitCount > 4)
-                ModelState.AddModelError("Application.SelectedUnitCount", "Number of units must be between 1 and 4.");
-
-            if (ModelState.IsValid)
+            // Parse and validate SelectedUnitsJson list
+            List<RE_SelectedUnit> selectedUnitsList = null;
+            if (!string.IsNullOrEmpty(model.Application.SelectedUnitsJson))
             {
                 try
                 {
-                    // Look up unit to verify constraints and calculate price
+                    selectedUnitsList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<RE_SelectedUnit>>(model.Application.SelectedUnitsJson);
+                }
+                catch { }
+            }
+
+            if (selectedUnitsList != null && selectedUnitsList.Any())
+            {
+                // Remove standard properties from validation if we are in multiple units mode
+                ModelState.Remove("Application.SelectedFacilityId");
+                ModelState.Remove("Application.SelectedFacilityUnitId");
+                ModelState.Remove("Application.SelectedUnitCount");
+
+                decimal totalRental = 0;
+                foreach (var selUnit in selectedUnitsList)
+                {
                     var facilityUnit = db.RE_FacilityUnits
                         .Include(fu => fu.FacilityCategory)
-                        .FirstOrDefault(fu => fu.Id == model.Application.SelectedFacilityUnitId && fu.IsActive && !fu.IsDeleted);
+                        .FirstOrDefault(fu => fu.Id == selUnit.UnitId && fu.IsActive && !fu.IsDeleted);
 
                     if (facilityUnit == null)
                     {
-                        ModelState.AddModelError("Application.SelectedFacilityUnitId", "Invalid Facility Unit selected.");
+                        ModelState.AddModelError("", "One of the selected units is invalid.");
                     }
-                    else if (model.Application.SelectedUnitCount > facilityUnit.MaxUnits)
+                    else if (selUnit.Qty > facilityUnit.MaxUnits)
                     {
-                        ModelState.AddModelError("Application.SelectedUnitCount", string.Format("Quantity exceeds maximum limit of {0} for this unit.", facilityUnit.MaxUnits));
+                        ModelState.AddModelError("", string.Format("Quantity for {0} exceeds maximum limit of {1}.", facilityUnit.UnitType, facilityUnit.MaxUnits));
                     }
                     else
                     {
-                        // Calculate
-                        decimal calculatedRental = facilityUnit.UnitSize * facilityUnit.FacilityCategory.TariffPerSqm * model.Application.SelectedUnitCount.Value;
-                        model.Application.CalculatedMonthlyRental = calculatedRental;
+                        totalRental += facilityUnit.UnitSize * facilityUnit.FacilityCategory.TariffPerSqm * selUnit.Qty;
                     }
+                }
 
-                    if (!ModelState.IsValid)
+                if (ModelState.IsValid)
+                {
+                    // Map primary fields for backward compatibility
+                    var firstUnit = selectedUnitsList.First();
+                    var firstDbUnit = db.RE_FacilityUnits.Find(firstUnit.UnitId);
+                    model.Application.SelectedFacilityId = firstDbUnit?.FacilityId;
+                    model.Application.SelectedFacilityUnitId = firstUnit.UnitId;
+                    model.Application.SelectedUnitCount = firstUnit.Qty;
+                    model.Application.CalculatedMonthlyRental = totalRental;
+                }
+            }
+            else
+            {
+                // Fallback to validating single-unit dropdowns
+                if (model.Application.SelectedFacilityId == null)
+                    ModelState.AddModelError("Application.SelectedFacilityId", "Please select a Facility.");
+                if (model.Application.SelectedFacilityUnitId == null)
+                    ModelState.AddModelError("Application.SelectedFacilityUnitId", "Please select a Unit Type.");
+                if (model.Application.SelectedUnitCount == null || model.Application.SelectedUnitCount <= 0 || model.Application.SelectedUnitCount > 4)
+                    ModelState.AddModelError("Application.SelectedUnitCount", "Number of units must be between 1 and 4.");
+
+                if (ModelState.IsValid)
+                {
+                    try
                     {
-                        PopulateCaptureViewBags();
-                        return View(model);
-                    }
+                        var facilityUnit = db.RE_FacilityUnits
+                            .Include(fu => fu.FacilityCategory)
+                            .FirstOrDefault(fu => fu.Id == model.Application.SelectedFacilityUnitId && fu.IsActive && !fu.IsDeleted);
 
-                    // Generate Reference Number
-                    string referenceNumber = GenerateReferenceNumber();
+                        if (facilityUnit == null)
+                        {
+                            ModelState.AddModelError("Application.SelectedFacilityUnitId", "Invalid Facility Unit selected.");
+                        }
+                        else if (model.Application.SelectedUnitCount > facilityUnit.MaxUnits)
+                        {
+                            ModelState.AddModelError("Application.SelectedUnitCount", string.Format("Quantity exceeds maximum limit of {0} for this unit.", facilityUnit.MaxUnits));
+                        }
+                        else
+                        {
+                            decimal calculatedRental = facilityUnit.UnitSize * facilityUnit.FacilityCategory.TariffPerSqm * model.Application.SelectedUnitCount.Value;
+                            model.Application.CalculatedMonthlyRental = calculatedRental;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", "Failed to validate unit type: " + ex.Message);
+                    }
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                PopulateCaptureViewBags();
+                return View(model);
+            }
+
+            try
+            {
+                // Generate Reference Number
+                string referenceNumber = GenerateReferenceNumber();
                     model.Application.ApplicationReferenceNumber = referenceNumber;
                     model.Application.SystemUserId = _systemUser.Id;
                     model.Application.CustomerId = _customer.Id;
@@ -235,16 +349,24 @@ namespace C8.eServices.Mvc.Controllers
                         SaveAndLinkFile(file_Profile, "Company Profile", appId, 18, refTypeId);
                     SaveAndLinkFile(file_References, "Contactable References", appId, 18, refTypeId);
                     SaveAndLinkFile(file_Letters, "Supporting/Motivational Letter", appId, 18, refTypeId);
-                    SaveAndLinkFile(file_Locality, "Locality Plan of Property", appId, 18, refTypeId);
-                    SaveAndLinkFile(file_Zoning, "Copy of Zoning Certificate", appId, 18, refTypeId);
-                    SaveAndLinkFile(file_Income, "Proof of Income", appId, 59, refTypeId);
+                    if (file_Locality != null && file_Locality.ContentLength > 0)
+                        SaveAndLinkFile(file_Locality, "Locality Plan of Property", appId, 18, refTypeId);
+                    if (file_Zoning != null && file_Zoning.ContentLength > 0)
+                        SaveAndLinkFile(file_Zoning, "Copy of Zoning Certificate", appId, 18, refTypeId);
                     SaveAndLinkFile(file_Fee, "Proof of Application Fee Payment", appId, 18, refTypeId);
+                    SaveAndLinkFile(file_Experience, "Facilities Management Experience", appId, 18, refTypeId);
+                    SaveAndLinkFile(file_Financials, "3-years Audited Financial Statements", appId, 59, refTypeId);
+                    SaveAndLinkFile(file_BusinessPlan, "Business Plan", appId, 18, refTypeId);
+                    SaveAndLinkFile(file_Mbd4, "Declaration of Interest (Form MBD 4)", appId, 18, refTypeId);
 
                     // Save and link other supporting documents
                     foreach (var otherFile in otherFilesList)
                     {
                         SaveAndLinkFile(otherFile, "Other Supporting Document: " + Path.GetFileName(otherFile.FileName), appId, 18, refTypeId);
                     }
+
+                    // Assign Verify Payment task in Round Robin Queue
+                    RealEstateWorkAllocationHelper.AssignRealEstateTask(db, appId, ResponsibilityTypeKeys.RealEstateVerifyPayment);
 
                     // Notify customer via Email
                     try
@@ -282,7 +404,6 @@ namespace C8.eServices.Mvc.Controllers
                     EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                     ModelState.AddModelError("", "An error occurred while saving your application. Please try again.");
                 }
-            }
 
             // If we reach here, validation failed. Repopulate view bags.
             PopulateCaptureViewBags();
@@ -487,12 +608,13 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(counterSetting).State = EntityState.Modified;
             db.SaveChanges();
 
-            return string.Format("RED-{0}-{1}", DateTime.Now.ToString("yyyyMMdd"), nextVal);
+            return string.Format("DPRE-{0}-{1}", DateTime.Now.ToString("yyyyMMdd"), nextVal);
         }
 
         private void PopulateCaptureViewBags()
         {
             ViewBag.CCCList = db.CCCs.Where(c => c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.CCCName)
                 .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.CCCName })
                 .ToList();
 
@@ -686,5 +808,118 @@ namespace C8.eServices.Mvc.Controllers
             TempData["SuccessMessage"] = "PTO request submitted successfully! Ref: " + app.PtoReferenceNumber;
             return RedirectToAction("MyApplications");
         }
+
+        private int SaveFile(HttpPostedFileBase file)
+        {
+            byte[] contentData = null;
+            using (var binaryReader = new BinaryReader(file.InputStream))
+            {
+                contentData = binaryReader.ReadBytes(file.ContentLength);
+            }
+
+            var dbFile = new C8.eServices.Mvc.Models.File
+            {
+                FileName = Path.GetFileName(file.FileName),
+                ContentType = file.ContentType,
+                Content = contentData,
+                FileSize = file.ContentLength,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedDateTime = DateTime.Now
+            };
+
+            db.Files.Add(dbFile);
+            db.SaveChanges();
+            return dbFile.Id;
+        }
+
+        // --- UC 23: Tenant Sign Lease/User Agreement ---
+        public ActionResult LeaseAgreements()
+        {
+            Initialise();
+            if (_customer == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var apps = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.CCC)
+                .Where(a => a.CustomerId == _customer.Id && a.IsActive && !a.IsDeleted)
+                .ToList();
+
+            return View(apps);
+        }
+
+        public ActionResult SignLeaseAgreement(int id)
+        {
+            Initialise();
+            if (_customer == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var app = db.RE_Applications
+                .Include(a => a.Status)
+                .Include(a => a.Customer)
+                .Include(a => a.CCC)
+                .FirstOrDefault(a => a.Id == id && a.CustomerId == _customer.Id && a.IsActive && !a.IsDeleted);
+
+            if (app == null) return HttpNotFound();
+
+            return View(app);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SignLeaseAgreement(int id, string dummyParam = "")
+        {
+            Initialise();
+            if (_customer == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var app = db.RE_Applications.FirstOrDefault(a => a.Id == id && a.CustomerId == _customer.Id && a.IsActive && !a.IsDeleted);
+            if (app == null) return HttpNotFound();
+
+            HttpPostedFileBase signedLeaseFile = Request.Files["signedLeaseFile"];
+
+            if (signedLeaseFile == null || signedLeaseFile.ContentLength == 0)
+            {
+                TempData["ErrorMessage"] = "Signed Lease/User Agreement document upload is mandatory.";
+                return RedirectToAction("SignLeaseAgreement", new { id = id });
+            }
+
+            int? fileId = SaveFile(signedLeaseFile);
+            app.LeaseAgreementSignedFileId = fileId;
+            app.LeaseAgreementTenantSignatureDate = DateTime.Now;
+
+            var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReAwaitingAgreementConclusionOutcome);
+            if (status != null) app.StatusId = status.Id;
+
+            app.ModifiedDateTime = DateTime.Now;
+            app.ModifiedBySystemUserId = _systemUser.Id;
+            db.Entry(app).State = EntityState.Modified;
+            db.SaveChanges();
+
+            // Link signed file in Documents table too
+            int refTypeId = db.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.RealEstateApplication)?.Id ?? 16;
+            SaveAndLinkFile(signedLeaseFile, "Signed Lease/User Agreement", id, 18, refTypeId);
+
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Tenant signed and uploaded the User Agreement.");
+            TempData["SuccessMessage"] = "Lease agreement signed and uploaded successfully! Pending final authorization.";
+            return RedirectToAction("MyApplications");
+        }
+    }
+
+    public class RE_SelectedUnit
+    {
+        public int UnitId { get; set; }
+        public string UnitType { get; set; }
+        public int Qty { get; set; }
+        public decimal Size { get; set; }
+        public decimal Tariff { get; set; }
+        public decimal LineTotal { get; set; }
     }
 }

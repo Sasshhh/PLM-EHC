@@ -129,9 +129,17 @@
         </div>
     }
 
-    <div class="admin-header-card">
-        <h1 style="margin:0 0 5px 0; font-size:24px; font-weight:700;">Capture Departmental Review Comments</h1>
-        <p style="margin:0; font-size:14px; color:#cbd5e1;">Review details and capture official departmental comments for reference @Model.ApplicationReferenceNumber.</p>
+    <div class="admin-header-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+        <div>
+            <h1 style="margin:0 0 5px 0; font-size:24px; font-weight:700;">Capture Departmental Review Comments</h1>
+            <p style="margin:0 0 5px 0; font-size:14px; color:#cbd5e1;">Review details and capture official departmental comments for reference @Model.ApplicationReferenceNumber.</p>
+            <span class="badge" style="background-color: var(--re-gold); color: #ffffff; font-weight: 600; padding: 5px 10px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                <i class="fa fa-user"></i> Assigned Representative: @ViewBag.AssignedRepresentative
+            </span>
+        </div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#capturedDetailsModal" style="background-color:var(--re-gold); border-color:var(--re-gold); font-weight:600;">
+            <i class="fa fa-list-alt"></i> View Full Application Details
+        </button>
     </div>
 
     <div class="info-grid">
@@ -168,6 +176,105 @@
         </div>
     </div>
 
+    <div class="info-grid" style="margin-bottom: 25px;">
+        <!-- Credit Review Details -->
+        <div class="info-card">
+            <h4>Risk Assessment & Credit Review</h4>
+            <div class="info-item">
+                <span class="info-label">Credit Bureau Result:</span>
+                <span class="info-value" style="font-weight:600;">@Model.CreditBureauResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Deeds Registry Search:</span>
+                <span class="info-value">@Model.DeedsResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Home Affairs status:</span>
+                <span class="info-value">@Model.HomeAffairsResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">SARS / CIPC verification:</span>
+                <span class="info-value">@Model.CipcResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">SASSA status:</span>
+                <span class="info-value">@Model.SassaResult</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Risk Recommendation:</span>
+                <span class="info-value" style="font-weight:700; color:@(Model.RiskAssessmentRecommendation == "Recommended" ? "#16a34a" : "#dc2626");">@Model.RiskAssessmentRecommendation</span>
+            </div>
+            <div class="info-item" style="flex-direction:column; align-items:flex-start;">
+                <span class="info-label" style="margin-bottom:4px;">Risk Assessment Notes:</span>
+                <span class="info-value" style="text-align:left; color:#475569; font-size:12px; font-style:italic;">@Model.RiskAssessmentReason</span>
+            </div>
+        </div>
+
+        <!-- Uploaded Documents Details -->
+        <div class="info-card">
+            <h4>Applicant Uploaded Documents</h4>
+            @{
+                var docs = (IEnumerable<C8.eServices.Mvc.Models.Document>)ViewBag.Documents;
+            }
+            @if (docs == null || !docs.Any())
+            {
+                <p style="color:#64748b; font-style:italic; font-size:13px; margin: 15px 0;">No documents uploaded for this application.</p>
+            }
+            else
+            {
+                <div style="max-height: 250px; overflow-y: auto; padding-right:5px;">
+                    @foreach (var d in docs)
+                    {
+                        <div class="info-item" style="align-items:center; padding: 10px 0;">
+                            <span class="info-label" style="text-align:left; font-size:12px; max-width:60%;">
+                                <i class="fa fa-file-pdf-o" style="color:#ef4444; margin-right:6px;"></i> @d.DocumentName
+                            </span>
+                            <span class="info-value">
+                                <a href="@Url.Action("GetDocument", "File", new { fileId = d.FileId })" target="_blank" class="btn btn-xs btn-default" style="font-weight:600; font-size:11px;">
+                                    <i class="fa fa-download"></i> View File
+                                </a>
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Application Process Audit Trail & History Log -->
+    <div class="info-card" style="margin-bottom: 25px;">
+        <h4 style="border-bottom: 2px solid var(--re-gold); padding-bottom: 6px; margin-bottom: 15px;">Application History Log & Audit Trail</h4>
+        @{
+            var logs = (IEnumerable<C8.eServices.Mvc.Models.PLMApplicationHistortyLog>)ViewBag.HistoryLogs;
+        }
+        @if (logs == null || !logs.Any())
+        {
+            <p style="color:#64748b; font-style:italic; font-size:13px; margin: 15px 0;">No history logs recorded for this application.</p>
+        }
+        else
+        {
+            <div style="max-height: 250px; overflow-y: auto; padding-right:5px;">
+                <table class="table table-striped table-hover" style="font-size: 12px; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background-color: #f8fafc;">
+                            <th style="width: 25%; font-weight:700; color:var(--re-slate-black); text-align:left;">Date / Time</th>
+                            <th style="width: 75%; font-weight:700; color:var(--re-slate-black); text-align:left;">Action Description & Audit Trail Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in logs)
+                        {
+                            <tr>
+                                <td style="color:#64748b; font-weight: 500; text-align:left;">@(log.CreatedDateTime.HasValue ? log.CreatedDateTime.Value.ToString("yyyy-MM-dd HH:mm:ss") : "")</td>
+                                <td style="color:#334155; font-weight: 600; text-align:left;">@log.AuditAction</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
     <div class="form-card">
         <h4 style="margin-top:0; margin-bottom: 20px; font-weight: 700; font-size:16px; border-bottom: 2px solid var(--re-gold); padding-bottom: 8px;">Comment Details</h4>
 
@@ -176,15 +283,32 @@
             @Html.AntiForgeryToken()
 
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label style="font-weight:600; color:#475569;">Reviewing Department *</label>
-                    @Html.DropDownList("departmentName", departments, "-- Select Department --", new { @class = "form-control", required = "required" })
-                </div>
+                @if (ViewBag.AssignedDepartment != null)
+                {
+                    <div class="col-md-6 form-group">
+                        <label style="font-weight:600; color:#475569;">Reviewing Department *</label>
+                        <input type="text" class="form-control" value="@ViewBag.AssignedDepartment.DepartmentName" disabled="disabled" style="background-color: #f1f5f9; cursor: not-allowed;" />
+                        <input type="hidden" name="departmentName" value="@ViewBag.AssignedDepartment.DepartmentName" />
+                    </div>
 
-                <div class="col-md-6 form-group">
-                    <label style="font-weight:600; color:#475569;">Representative/Official Name *</label>
-                    @Html.TextBox("representativeName", "", new { @class = "form-control", required = "required", placeholder = "Enter your full name" })
-                </div>
+                    <div class="col-md-6 form-group">
+                        <label style="font-weight:600; color:#475569;">Representative/Official Name *</label>
+                        <input type="text" class="form-control" value="@ViewBag.RepresentativeName" disabled="disabled" style="background-color: #f1f5f9; cursor: not-allowed;" />
+                        <input type="hidden" name="representativeName" value="@ViewBag.RepresentativeName" />
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-6 form-group">
+                        <label style="font-weight:600; color:#475569;">Reviewing Department *</label>
+                        @Html.DropDownList("departmentName", departments, "-- Select Department --", new { @class = "form-control", required = "required" })
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label style="font-weight:600; color:#475569;">Representative/Official Name *</label>
+                        @Html.TextBox("representativeName", "", new { @class = "form-control", required = "required", placeholder = "Enter your full name" })
+                    </div>
+                }
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
@@ -234,6 +358,82 @@
         </div>
     </div>
 </div>
+
+<!-- Full Application Details Modal -->
+<div class="modal fade" id="capturedDetailsModal" tabindex="-1" role="dialog" aria-labelledby="capturedDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: 2px solid var(--re-gold);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%); color:#ffffff; border-bottom: 2px solid var(--re-gold); border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:0.8;">&times;</button>
+                <h4 class="modal-title" id="capturedDetailsModalLabel" style="font-weight: 700;">Captured Application Details: @Model.ApplicationReferenceNumber</h4>
+            </div>
+            <div class="modal-body" style="padding: 25px; max-height:70vh; overflow-y:auto; font-family:'Inter', sans-serif;">
+                
+                <!-- Section 1: Entity Details -->
+                <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-user"></i> Applicant & Entity Profile</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Applicant Type:</strong> @Model.ApplicantType<br />
+                            <strong>Entity/Business Name:</strong> @(string.IsNullOrEmpty(Model.EntityName) ? "N/A" : Model.EntityName)<br />
+                            <strong>Company Registration Number:</strong> @(string.IsNullOrEmpty(Model.CompanyRegistrationNumber) ? "N/A" : Model.CompanyRegistrationNumber)<br />
+                            <strong>VAT Registration Number:</strong> @(string.IsNullOrEmpty(Model.VatRegistrationNumber) ? "N/A" : Model.VatRegistrationNumber)<br />
+                            <strong>SARS Tax Reference Number:</strong> @(string.IsNullOrEmpty(Model.TaxReferenceNumber) ? "N/A" : Model.TaxReferenceNumber)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Authorized Representative:</strong> @(string.IsNullOrEmpty(Model.AuthorizedRepresentativeName) ? "N/A" : Model.AuthorizedRepresentativeName) (@(string.IsNullOrEmpty(Model.AuthorizedRepresentativeCapacity) ? "N/A" : Model.AuthorizedRepresentativeCapacity))<br />
+                            <strong>Registered Address:</strong> @(string.IsNullOrEmpty(Model.EntityRegisteredAddress) ? "N/A" : Model.EntityRegisteredAddress)<br />
+                            <strong>Postal Code:</strong> @(string.IsNullOrEmpty(Model.EntityRegisteredPostalCode) ? "N/A" : Model.EntityRegisteredPostalCode)<br />
+                            <strong>Email Address:</strong> @(string.IsNullOrEmpty(Model.EntityEmail) ? "N/A" : Model.EntityEmail)<br />
+                            <strong>Mobile Number:</strong> @(string.IsNullOrEmpty(Model.EntityMobile) ? "N/A" : Model.EntityMobile)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Premises Details -->
+                <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-building"></i> Premises & Space Specifications</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Purpose of Lease:</strong> @Model.PurposeOfLease<br />
+                            <strong>Customer Care Centre (CCC):</strong> @(Model.CCC != null ? Model.CCC.CCCName : "N/A")<br />
+                            <strong>Erf / Farm Number:</strong> @(string.IsNullOrEmpty(Model.ErfFarmNumber) ? "N/A" : Model.ErfFarmNumber)<br />
+                            <strong>Property Address:</strong> @(string.IsNullOrEmpty(Model.PropertyAddress) ? "N/A" : Model.PropertyAddress)<br />
+                            <strong>Township / Suburb / Farm Name:</strong> @(string.IsNullOrEmpty(Model.TownshipSuburbFarmName) ? "N/A" : Model.TownshipSuburbFarmName)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Property Postal Code:</strong> @(string.IsNullOrEmpty(Model.PropertyPostalCode) ? "N/A" : Model.PropertyPostalCode)<br />
+                            <strong>Letting Facility / Site:</strong> @(Model.SelectedFacility != null ? Model.SelectedFacility.Name : "N/A")<br />
+                            <strong>Unit Type & Spec:</strong> @(Model.SelectedFacilityUnit != null ? Model.SelectedFacilityUnit.UnitType : "N/A")<br />
+                            <strong>Number of Units:</strong> @Model.SelectedUnitCount<br />
+                            <strong>Calculated Monthly Rental:</strong> <span style="color:var(--re-gold); font-weight:700;">R @string.Format("{0:N2}", Model.CalculatedMonthlyRental) / month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Banking Details -->
+                <div>
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-credit-card"></i> Banking Details</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Bank Name:</strong> @(string.IsNullOrEmpty(Model.BankName) ? "N/A" : Model.BankName)<br />
+                            <strong>Branch Code:</strong> @(string.IsNullOrEmpty(Model.BankBranchCode) ? "N/A" : Model.BankBranchCode)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Account Type:</strong> @(string.IsNullOrEmpty(Model.BankAccountType) ? "N/A" : Model.BankAccountType)<br />
+                            <strong>Account Number:</strong> @(string.IsNullOrEmpty(Model.BankAccountNumber) ? "N/A" : Model.BankAccountNumber)
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding:15px 20px; display:flex; justify-content:flex-end; border-top:1px solid #e2e8f0;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; font-weight:600;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script>

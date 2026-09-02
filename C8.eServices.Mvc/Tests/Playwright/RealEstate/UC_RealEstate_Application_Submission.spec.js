@@ -21,7 +21,7 @@ test('Submit Real Estate Lease Application (UC 05) - Full Submission & Details M
   const fileNames = [
     'id.pdf', 'address.pdf', 'cipc.pdf', 'sars.pdf', 'profile.pdf',
     'references.pdf', 'letter.pdf', 'locality.pdf', 'zoning.pdf',
-    'income.pdf', 'fee.pdf'
+    'income.pdf', 'fee.pdf', 'experience.pdf', 'financials.pdf', 'bizplan.pdf', 'mbd4.pdf'
   ];
   const filePaths = {};
   for (const name of fileNames) {
@@ -78,14 +78,7 @@ test('Submit Real Estate Lease Application (UC 05) - Full Submission & Details M
     await page.locator('input[name="Application.EntityEmail"]').fill('sasha@acmecorporate.co.za');
     await delay(1000);
 
-    // STEP 4: Fill Banking Details
-    console.log('STEP 4: Filling out Banking details...');
-    await page.locator('input[name="Application.BankName"]').fill('Standard Bank');
-    await page.locator('select[name="Application.BankAccountType"]').selectOption({ label: 'Cheque / Current Account' });
-    await page.locator('input[name="Application.BankAccountName"]').fill('Acme Corporate Solutions');
-    await page.locator('input[name="Application.BankAccountNumber"]').fill('1029384756');
-    await page.locator('input[name="Application.BankBranchCode"]').fill('051001');
-    await delay(1000);
+
 
     // STEP 5: Fill Space / Lease Specifications
     console.log('STEP 5: Filling out Space and Lease specifications...');
@@ -102,18 +95,39 @@ test('Submit Real Estate Lease Application (UC 05) - Full Submission & Details M
     await page.locator('#facBusiness').check();
     await delay(1000);
 
-    // STEP 6: Upload the 11 Pre-Qualification documents
-    console.log('STEP 6: Uploading all 11 mandatory documents inline...');
+    console.log('Selecting Facility, Unit and Count...');
+    await page.waitForSelector('#ddlSelectedFacility:not([disabled])', { timeout: 10000 });
+    await page.locator('#ddlSelectedFacility').selectOption({ index: 1 });
+    await delay(500);
+
+    await page.waitForSelector('#ddlSelectedUnit:not([disabled])', { timeout: 10000 });
+    await page.locator('#ddlSelectedUnit').selectOption({ index: 1 });
+    await delay(500);
+
+    await page.waitForSelector('#txtUnitCount:not([disabled])', { timeout: 10000 });
+    await page.locator('#txtUnitCount').click();
+    await page.locator('#txtUnitCount').fill('1');
+    await delay(800);
+
+    console.log('Adding unit to selection list...');
+    await page.locator('#btnAddUnit').click();
+    await delay(1000);
+
+    // STEP 6: Upload the Pre-Qualification documents
+    console.log('STEP 6: Uploading all mandatory documents inline...');
     await page.setInputFiles('input[name="file_Id"]', filePaths['id.pdf']);
     await page.setInputFiles('input[name="file_Address"]', filePaths['address.pdf']);
     await page.setInputFiles('input[name="file_Cipc"]', filePaths['cipc.pdf']);
     await page.setInputFiles('input[name="file_Sars"]', filePaths['sars.pdf']);
     await page.setInputFiles('input[name="file_Profile"]', filePaths['profile.pdf']);
+    await page.setInputFiles('input[name="file_Experience"]', filePaths['experience.pdf']);
     await page.setInputFiles('input[name="file_References"]', filePaths['references.pdf']);
     await page.setInputFiles('input[name="file_Letters"]', filePaths['letter.pdf']);
     await page.setInputFiles('input[name="file_Locality"]', filePaths['locality.pdf']);
     await page.setInputFiles('input[name="file_Zoning"]', filePaths['zoning.pdf']);
-    await page.setInputFiles('input[name="file_Income"]', filePaths['income.pdf']);
+    await page.setInputFiles('input[name="file_Financials"]', filePaths['financials.pdf']);
+    await page.setInputFiles('input[name="file_BusinessPlan"]', filePaths['bizplan.pdf']);
+    await page.setInputFiles('input[name="file_Mbd4"]', filePaths['mbd4.pdf']);
     await page.setInputFiles('input[name="file_Fee"]', filePaths['fee.pdf']);
     await delay(2000); // Visual pause showing files successfully loaded in list
 
@@ -147,7 +161,6 @@ test('Submit Real Estate Lease Application (UC 05) - Full Submission & Details M
     await expect(modalContent).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#valEntityName')).toContainText('Acme Corporate Solutions (Pty) Ltd');
     await expect(page.locator('#valRegNo')).toContainText('2025/987654/07');
-    await expect(page.locator('#valBankName')).toContainText('Standard Bank');
     await expect(page.locator('#valPurposeOfLease')).toContainText('Office/Professional');
     
     // Verify facility checkboxes rendered correctly

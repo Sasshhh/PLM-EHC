@@ -297,28 +297,67 @@ IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND 
 IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Offices' AND UnitSize = 24.0)
     INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Offices', 24.0, 1);
 
--- 17. Katlehong Automotive manufacturing hub (Katlehong)
-SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Katlehong');
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Katlehong Automotive manufacturing hub' AND CCCId = @CCCId)
-    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Katlehong Automotive manufacturing hub', @CCCId);
-SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Katlehong Automotive manufacturing hub' AND CCCId = @CCCId);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A01 Workshop' AND UnitSize = 128.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A01 Workshop', 128.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A02 Workshop' AND UnitSize = 128.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A02 Workshop', 128.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A03 Workshop' AND UnitSize = 117.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A03 Workshop', 117.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A04 Workshop' AND UnitSize = 117.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A04 Workshop', 117.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A05 Workshop' AND UnitSize = 150.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A05 Workshop', 150.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Unit A06 Workshop' AND UnitSize = 30.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Unit A06 Workshop', 30.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Offices' AND UnitSize = 30.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Offices', 30.0, 1);
-IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Canteen' AND UnitSize = 30.0)
-    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Canteen', 30.0, 1);
+-- 18. Reiger Park Enterprise Hub (Boksburg)
+IF NOT EXISTS (SELECT 1 FROM dbo.CCCs WHERE CCCName = 'Boksburg')
+    INSERT INTO dbo.CCCs (CCCTypeId, CCCName, Prefix, IsActive, IsDeleted) VALUES (1, 'Boksburg', '97', 1, 0);
+SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Boksburg');
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Reiger Park Enterprise Hub' AND CCCId = @CCCId)
+    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Reiger Park Enterprise Hub', @CCCId);
+SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Reiger Park Enterprise Hub' AND CCCId = @CCCId);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Workshop' AND UnitSize = 15.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Workshop', 15.0, 28);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Offices' AND UnitSize = 21.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Offices', 21.0, 12);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Restaurant Areas/Tuckshops' AND UnitSize = 110.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Restaurant Areas/Tuckshops', 110.0, 4);
+
+-- 19. Vosloorus Skills Centre (Vosloorus)
+IF NOT EXISTS (SELECT 1 FROM dbo.CCCs WHERE CCCName = 'Vosloorus')
+    INSERT INTO dbo.CCCs (CCCTypeId, CCCName, Prefix, IsActive, IsDeleted) VALUES (1, 'Vosloorus', '98', 1, 0);
+SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Vosloorus');
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Vosloorus Skills Centre' AND CCCId = @CCCId)
+    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Vosloorus Skills Centre', @CCCId);
+SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Vosloorus Skills Centre' AND CCCId = @CCCId);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Trade Training Stations' AND UnitSize = 25.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAutomotive, 'Trade Training Stations', 25.0, 8);
+
+-- 20. Essellen Park Incubation Farm (Thembisa - Agri)
+SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Thembisa');
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Essellen Park Incubation Farm' AND CCCId = @CCCId)
+    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Essellen Park Incubation Farm', @CCCId);
+SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Essellen Park Incubation Farm' AND CCCId = @CCCId);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Plot (20,000m²)' AND UnitSize = 20000.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Plot (20,000m²)', 20000.0, 20);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Chicken Broiler' AND UnitSize = 50.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Chicken Broiler', 50.0, 4);
+
+-- 21. Spaarwater Incubation Farm (Duduza - Agri)
+IF NOT EXISTS (SELECT 1 FROM dbo.CCCs WHERE CCCName = 'Duduza')
+    INSERT INTO dbo.CCCs (CCCTypeId, CCCName, Prefix, IsActive, IsDeleted) VALUES (1, 'Duduza', '99', 1, 0);
+SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Duduza');
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Spaarwater Incubation Farm' AND CCCId = @CCCId)
+    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Spaarwater Incubation Farm', @CCCId);
+SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Spaarwater Incubation Farm' AND CCCId = @CCCId);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Plot (20,000m²)' AND UnitSize = 20000.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Plot (20,000m²)', 20000.0, 35);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Full Farm Plot' AND UnitSize = 3150000.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Full Farm Plot', 3150000.0, 1);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Piggery Unit' AND UnitSize = 1858.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Piggery Unit', 1858.0, 4);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Cattle Kraal' AND UnitSize = 1500.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatAgri, 'Cattle Kraal', 1500.0, 1);
+
+-- 22. Nigel Traders Market (Nigel)
+IF NOT EXISTS (SELECT 1 FROM dbo.CCCs WHERE CCCName = 'Nigel')
+    INSERT INTO dbo.CCCs (CCCTypeId, CCCName, Prefix, IsActive, IsDeleted) VALUES (1, 'Nigel', '89', 1, 0);
+SET @CCCId = (SELECT Id FROM dbo.CCCs WHERE CCCName = 'Nigel');
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_Facilities WHERE Name = 'Nigel Traders Market' AND CCCId = @CCCId)
+    INSERT INTO dbo.RE_Facilities (Name, CCCId) VALUES ('Nigel Traders Market', @CCCId);
+SET @FacId = (SELECT Id FROM dbo.RE_Facilities WHERE Name = 'Nigel Traders Market' AND CCCId = @CCCId);
+IF NOT EXISTS (SELECT 1 FROM dbo.RE_FacilityUnits WHERE FacilityId = @FacId AND UnitType = 'Small Shop' AND UnitSize = 18.0)
+    INSERT INTO dbo.RE_FacilityUnits (FacilityId, FacilityCategoryId, UnitType, UnitSize, MaxUnits) VALUES (@FacId, @CatBusiness, 'Small Shop', 18.0, 15);
 
 PRINT 'Seeded Facilities & Facility Units.';
 
 PRINT '--- REAL ESTATE SCHEMA MIGRATION COMPLETE ---';
+

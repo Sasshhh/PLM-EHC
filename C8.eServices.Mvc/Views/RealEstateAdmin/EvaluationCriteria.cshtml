@@ -1,0 +1,391 @@
+@{
+    ViewBag.Title = "Evaluation Criteria & Screening Tools";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-gold-light: #fafaf9;
+        --re-text-dark: #1c1917;
+        --re-border-color: #e7e5e4;
+    }
+
+    .re-container {
+        padding: 30px 15px;
+        font-family: 'Inter', 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+        color: var(--re-text-dark);
+    }
+
+    .re-header-card {
+        background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .re-header-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+    }
+
+    .re-header-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    /* Tabs Styling */
+    .eval-tabs {
+        border-bottom: 2px solid var(--re-border-color);
+        margin-bottom: 25px;
+        display: flex;
+        gap: 10px;
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .eval-tabs > li > a {
+        border: none !important;
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 22px;
+        border-bottom: 3px solid transparent !important;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .eval-tabs > li.active > a {
+        color: var(--re-gold) !important;
+        border-bottom-color: var(--re-gold) !important;
+        background: #ffffff !important;
+    }
+
+    .eval-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        padding: 24px;
+        margin-bottom: 25px;
+    }
+
+    .eval-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .score-badge {
+        background: var(--re-gold-light);
+        color: var(--re-gold);
+        border: 1px solid rgba(197, 155, 39, 0.4);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .doc-item-row {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .doc-item-row:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="re-container">
+    <div class="re-header-card">
+        <h1 class="re-header-title">Evaluation Criteria & Screening Workspace</h1>
+        <p class="re-header-subtitle">
+            Development Planning & Real Estate (DPRE). Reference mandatory pre-qualification document requirements, score applicant capability matrices, and perform committee compliance screening.
+        </p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs eval-tabs" role="tablist">
+        <li class="active" role="presentation">
+            <a href="#tab-prequal-docs" aria-controls="tab-prequal-docs" role="tab" data-toggle="tab">
+                <i class="fa fa-file-text-o"></i> 1. Pre-Qualification Documents
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#tab-scoring-matrix" aria-controls="tab-scoring-matrix" role="tab" data-toggle="tab">
+                <i class="fa fa-calculator"></i> 2. Pre-Qualification Evaluation (Scoring)
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#tab-committee-checklist" aria-controls="tab-committee-checklist" role="tab" data-toggle="tab">
+                <i class="fa fa-check-square-o"></i> 3. Checklist for Committee Evaluations
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content">
+        <!-- TAB 1: Pre-Qualification Documents -->
+        <div class="tab-pane active fade in" id="tab-prequal-docs" role="tabpanel">
+            <div class="eval-card">
+                <h3 class="eval-card-title"><i class="fa fa-folder-open" style="color: var(--re-gold);"></i> Mandatory Pre-Qualifying Documents Guidelines (UC 01 / UC 05)</h3>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">
+                    Applicants must submit the following 12 pre-qualifying documents during lease application capture. CSOs and Property Officers verify these documents during initial pre-screening.
+                </p>
+
+                <div style="border: 1px solid var(--re-border-color); border-radius: 8px; overflow: hidden;">
+                    <div class="doc-item-row">
+                        <span><strong>(i) Comprehensive Business Plan</strong> — Copy of Business Plan as per sub-criteria in Section 5.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(ii) Company Profile</strong> — Directorship, ownership structure, management experience.</span>
+                        <span class="label label-danger">Mandatory (Entity)</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(iii) Company Registration Documents</strong> — Valid Tax Clearance, B-BBEE Certificate or Affidavit, CIPC Certificate.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(iv) Declaration of Interest (Form MBD 4)</strong> — Completed & signed conflict of interest declaration.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(v) Central Suppliers Database (CSD) Registration</strong> — Valid CSD registration report printout.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(vi) 3-Years Audited Financial Statements</strong> — Audited financials or management accounts.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(vii) Proof of Business Location</strong> — Recent municipal account or lease agreement.</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(viii) Certified Identity Document</strong> — Copy of ID Book/Smart Card (Not older than 6 months).</span>
+                        <span class="label label-danger">Mandatory</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(ix) Facilities Management Experience</strong> — Description of FM experience and/or accreditation.</span>
+                        <span class="label label-warning">Evaluated</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(x) Letter of Funding / Bank Intent</strong> — Letter showing ability to provide necessary project financing.</span>
+                        <span class="label label-warning">Evaluated</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(xi) Strategic Partnerships & Alliances</strong> — Letters of strategic partnerships and supplier alliances.</span>
+                        <span class="label label-warning">Evaluated</span>
+                    </div>
+                    <div class="doc-item-row">
+                        <span><strong>(xii) Ownership & Job Creation Plan</strong> — Job creation count, empowerment plan, and social benefit.</span>
+                        <span class="label label-warning">Evaluated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Pre-Qualification Evaluation Scoring Matrix -->
+        <div class="tab-pane fade" id="tab-scoring-matrix" role="tabpanel">
+            <div class="eval-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="eval-card-title" style="margin: 0;"><i class="fa fa-calculator" style="color: var(--re-gold);"></i> Functionality & Capability Scoring Matrix (UC 04 / RE_UC003)</h3>
+                    <span class="score-badge" style="font-size: 16px;">Total Calculated Score: <span id="lblTotalScore">0</span> / 90 Pts</span>
+                </div>
+
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">
+                    Assessment Officers grade applicants against official functional criteria before recommending for HOD approval. Minimum threshold required for recommendation: <strong>60 Points</strong>.
+                </p>
+
+                <table class="table table-bordered" style="font-size: 13px;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th style="width: 25%;">Functional Criteria</th>
+                            <th style="width: 45%;">Sub-Criteria & Rules</th>
+                            <th style="width: 15%; text-align: center;">Max Points</th>
+                            <th style="width: 15%; text-align: center;">Score Assignment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Track Record / Experience</strong></td>
+                            <td>
+                                11+ Years Experience = 15 Pts<br />
+                                6 to 10 Years = 13 Pts<br />
+                                3 to 5 Years = 5 Pts<br />
+                                No Submission = 0 Pts<br />
+                                <small class="text-muted">Requires 3 yrs financials & 3 testimonial letters.</small>
+                            </td>
+                            <td style="text-align: center; font-weight: 700;">15 Pts</td>
+                            <td>
+                                <select id="scoreTrackRecord" class="form-control score-input">
+                                    <option value="0">0 Pts (No Submission)</option>
+                                    <option value="5">5 Pts (3-5 Years)</option>
+                                    <option value="13">13 Pts (6-10 Years)</option>
+                                    <option value="15">15 Pts (11+ Years)</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Financial Stability</strong></td>
+                            <td>
+                                R1,500,000+ Funding/Commitment = 20 Pts<br />
+                                R1,000,000+ = 15 Pts<br />
+                                R750,000+ = 12 Pts<br />
+                                R500,000+ = 10 Pts<br />
+                                No Funding = 0 Pts<br />
+                                <small class="text-muted">Requires official bank statement/guarantee/letter of intent.</small>
+                            </td>
+                            <td style="text-align: center; font-weight: 700;">20 Pts</td>
+                            <td>
+                                <select id="scoreFinancial" class="form-control score-input">
+                                    <option value="0">0 Pts (No Funding)</option>
+                                    <option value="10">10 Pts (R500,000+)</option>
+                                    <option value="12">12 Pts (R750,000+)</option>
+                                    <option value="15">15 Pts (R1,000,000+)</option>
+                                    <option value="20">20 Pts (R1,500,000+)</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Business Case</strong></td>
+                            <td>
+                                Strategic Plan (Implementation Plan) = 10 Pts<br />
+                                Sector Analysis = 5 Pts<br />
+                                Financial Model (Funding Mix & Revenues) = 10 Pts
+                            </td>
+                            <td style="text-align: center; font-weight: 700;">25 Pts</td>
+                            <td>
+                                <input type="number" id="scoreBusinessCase" class="form-control score-input" min="0" max="25" value="0" placeholder="0 - 25" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Marketing Plan</strong></td>
+                            <td>
+                                Marketing Methods & Strategy = 10 Pts<br />
+                                Strategic Partnerships & Alliances = 10 Pts
+                            </td>
+                            <td style="text-align: center; font-weight: 700;">20 Pts</td>
+                            <td>
+                                <input type="number" id="scoreMarketing" class="form-control score-input" min="0" max="20" value="0" placeholder="0 - 20" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Operations Plan</strong></td>
+                            <td>
+                                Enterprise Development Activities = 5 Pts<br />
+                                Facility Management Strategy = 5 Pts
+                            </td>
+                            <td style="text-align: center; font-weight: 700;">10 Pts</td>
+                            <td>
+                                <input type="number" id="scoreOperations" class="form-control score-input" min="0" max="10" value="0" placeholder="0 - 10" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: Committee Evaluation Checklist -->
+        <div class="tab-pane fade" id="tab-committee-checklist" role="tabpanel">
+            <div class="eval-card">
+                <h3 class="eval-card-title"><i class="fa fa-check-square-o" style="color: var(--re-gold);"></i> Working Committee Screening & Adjudication Tool (UC 20 / RE_UC020)</h3>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">
+                    Screening Committee compliance verification for mandatory document submission.
+                </p>
+
+                <table class="table table-striped" style="font-size: 13px;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th>Compliance Document</th>
+                            <th style="width: 150px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1. Application Form</td><td style="text-align: center;"><label><input type="radio" name="c1" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c1" value="not" /> Not attached</label></td></tr>
+                        <tr><td>2. Company Registration Document</td><td style="text-align: center;"><label><input type="radio" name="c2" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c2" value="not" /> Not attached</label></td></tr>
+                        <tr><td>3. Directors Certified ID Copies</td><td style="text-align: center;"><label><input type="radio" name="c3" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c3" value="not" /> Not attached</label></td></tr>
+                        <tr><td>4. B-BBEE Certificate / Affidavit</td><td style="text-align: center;"><label><input type="radio" name="c4" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c4" value="not" /> Not attached</label></td></tr>
+                        <tr><td>5. Company Profile</td><td style="text-align: center;"><label><input type="radio" name="c5" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c5" value="not" /> Not attached</label></td></tr>
+                        <tr><td>6. Business Proposal</td><td style="text-align: center;"><label><input type="radio" name="c6" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c6" value="not" /> Not attached</label></td></tr>
+                        <tr><td>7. Valid Tax Clearance Certificate</td><td style="text-align: center;"><label><input type="radio" name="c7" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c7" value="not" /> Not attached</label></td></tr>
+                        <tr><td>8. Bank Account Confirmation Letter</td><td style="text-align: center;"><label><input type="radio" name="c8" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c8" value="not" /> Not attached</label></td></tr>
+                        <tr><td>9. Latest CSD Report</td><td style="text-align: center;"><label><input type="radio" name="c9" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c9" value="not" /> Not attached</label></td></tr>
+                        <tr><td>10. Municipal Account / Lease Statement</td><td style="text-align: center;"><label><input type="radio" name="c10" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c10" value="not" /> Not attached</label></td></tr>
+                        <tr><td>11. Proof of Accreditation</td><td style="text-align: center;"><label><input type="radio" name="c11" value="attached" checked /> Attached</label> &nbsp; <label><input type="radio" name="c11" value="not" /> Not attached</label></td></tr>
+                    </tbody>
+                </table>
+
+                <hr />
+
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col-md-6">
+                        <h4>Screening Decision & Sign-off</h4>
+                        <div class="form-group">
+                            <label>Declined Application?</label><br />
+                            <label><input type="radio" name="declined" value="no" checked /> No (Proceed to Evaluation)</label> &nbsp;
+                            <label><input type="radio" name="declined" value="yes" /> Yes (Decline Application)</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Screening Officer Name:</label>
+                            <input type="text" class="form-control" value="Official Committee Representative" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Evaluation Committee Job Creation Scoring</h4>
+                        <div class="form-group">
+                            <label>Job Creation Impact Scale:</label>
+                            <select id="ddlJobsScore" class="form-control">
+                                <option value="50">15+ Jobs Created (50 Points)</option>
+                                <option value="40">10 - 14 Jobs Created (40 Points)</option>
+                                <option value="30">5 - 9 Jobs Created (30 Points)</option>
+                                <option value="20">2 - 4 Jobs Created (20 Points)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function calcTotalScore() {
+                var track = parseInt($("#scoreTrackRecord").val()) || 0;
+                var fin = parseInt($("#scoreFinancial").val()) || 0;
+                var biz = parseInt($("#scoreBusinessCase").val()) || 0;
+                var mkt = parseInt($("#scoreMarketing").val()) || 0;
+                var ops = parseInt($("#scoreOperations").val()) || 0;
+
+                var total = track + fin + biz + mkt + ops;
+                $("#lblTotalScore").text(total);
+            }
+
+            $(".score-input").on("change input", function () {
+                calcTotalScore();
+            });
+
+            calcTotalScore();
+        });
+    </script>
+}

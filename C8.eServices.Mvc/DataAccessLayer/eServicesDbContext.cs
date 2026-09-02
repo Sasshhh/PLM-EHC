@@ -18,6 +18,7 @@ using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.Models.Audits;
+using C8.eServices.Mvc.Models.AuditTrail;
 using Microsoft.AspNet.Identity.EntityFramework;
 using EntityType = C8.eServices.Mvc.Models.EntityType;
 
@@ -54,6 +55,12 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public string CurrentUserName { get; set; }
         public List<Claim> UserClaims { get; set; }
 
+
+        // Audit Trail Tables
+        public DbSet<AuditTrailUserLogin> AuditTrailUserLogins { get; set; }
+        public DbSet<AuditTrailActivity> AuditTrailActivities { get; set; }
+        public DbSet<AuditTrailPasswordReset> AuditTrailPasswordResets { get; set; }
+        public DbSet<AuditTrailRoleModification> AuditTrailRoleModifications { get; set; }
 
         //HSD tables
         public DbSet<HSUnitTypology> HSUnitTypologies { get; set; }
@@ -658,6 +665,23 @@ namespace C8.eServices.Mvc.DataAccessLayer
                 }
             }
             return changeCount;
+        }
+
+        /// <summary>
+        /// Saves changes WITHOUT triggering the audit trail logic.
+        /// Used by AuditTrailHelper to prevent recursive audit-of-audit loops.
+        /// </summary>
+        public int SaveChangesWithoutAudit()
+        {
+            try
+            {
+                return base.SaveChanges();
+            }
+            catch (Exception)
+            {
+                // Swallow — audit writes must never crash the application
+                return 0;
+            }
         }
 
 

@@ -1,0 +1,350 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Authorise Lease Agreement";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --re-gold: #c59b27;
+        --re-gold-hover: #a37f1c;
+        --re-border-color: #e7e5e4;
+        --re-slate-dark: #2e2a27;
+        --re-slate-black: #1c1917;
+    }
+
+    .admin-container {
+        padding: 30px 15px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .admin-header-card {
+        background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--re-gold);
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .info-card h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: var(--re-slate-black);
+        border-bottom: 2px solid var(--re-gold);
+        padding-bottom: 6px;
+        font-size: 15px;
+        text-transform: uppercase;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #f1f5f9;
+        font-size: 13px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-re-gold {
+        background-color: var(--re-gold);
+        color: #ffffff !important;
+        border: 1px solid var(--re-gold);
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-re-gold:hover {
+        background-color: var(--re-gold-hover);
+        border-color: var(--re-gold-hover);
+        color: #ffffff !important;
+    }
+
+    .signature-area {
+        background-color: #fafaf9;
+        border: 2px dashed var(--re-gold);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .signature-canvas-container {
+        display: inline-block;
+        background-color: #ffffff;
+        border: 1px solid var(--re-border-color);
+        border-radius: 4px;
+    }
+
+    #signatureCanvas {
+        cursor: crosshair;
+    }
+
+    /* UNIFIED PERFECT MODAL STYLING */
+    .modal-content {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        padding: 18px 25px !important;
+        margin: 0 !important;
+        border: none !important;
+        border-top-left-radius: 12px !important;
+        border-top-right-radius: 12px !important;
+        display: block !important;
+    }
+
+    .modal-header .modal-title {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        margin: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .btn-modal-gold {
+        background-color: var(--re-gold) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--re-gold) !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease;
+    }
+
+    .btn-modal-gold:hover {
+        background-color: var(--re-gold-hover) !important;
+        border-color: var(--re-gold-hover) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-modal-cancel {
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 10px 22px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    .btn-modal-cancel:hover {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+</style>
+
+<div class="admin-container">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="admin-header-card">
+        <h1 style="margin:0 0 5px 0; font-size:24px;">HoD Lease Agreement Sign-off</h1>
+        <p style="margin:0; font-size:14px; color:#cbd5e1;">Review the tenant-signed contract and apply your signature.</p>
+    </div>
+
+    <div class="info-card">
+        <h4>Agreement Specifications</h4>
+        <div class="info-item">
+            <span class="info-label">Application Reference:</span>
+            <span class="info-value" style="font-weight:700; color:var(--re-gold);">@Model.ApplicationReferenceNumber</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Tenant Name:</span>
+            <span class="info-value">@Model.EntityName</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Property:</span>
+            <span class="info-value">@Model.PropertyAddress, @Model.TownshipSuburbFarmName</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Monthly Rental:</span>
+            <span class="info-value">R @(Model.CalculatedMonthlyRental.HasValue ? Model.CalculatedMonthlyRental.Value.ToString("N2") : "5,500.00")</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Agreement Period:</span>
+            <span class="info-value">36 Months</span>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h4 style="margin-top:0; margin-bottom: 20px; font-weight:700;">Final Authorisation & Signature</h4>
+
+        @using (Html.BeginForm("AuthoriseLeaseAgreement", "RealEstateAdmin", new { id = Model.Id }, FormMethod.Post, new { id = "leaseSignForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-group">
+                <label style="font-weight:600; color:#475569;">Decision *</label>
+                @Html.DropDownList("decision", new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Approve", Text = "Approve & Sign Lease Agreement" },
+                    new SelectListItem { Value = "Reject", Text = "Decline & Return to Tenant" }
+                }, "-- Select Option --", new { @class = "form-control", required = "required", id = "ddlDecision" })
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label style="font-weight:600; color:#475569;">Comments / Rationale</label>
+                @Html.TextArea("comments", "", new { @class = "form-control", rows = "4", placeholder = "Enter comments..." })
+            </div>
+
+            <div class="signature-area">
+                <label style="font-weight:600; color:#475569; display:block; margin-bottom:10px;">Draw Signature below *</label>
+                <div class="signature-canvas-container">
+                    <canvas id="signatureCanvas" width="400" height="150"></canvas>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button type="button" class="btn btn-sm btn-default" onclick="clearSignatureCanvas()">
+                        <i class="fa fa-eraser"></i> Clear Pad
+                    </button>
+                </div>
+                <input type="hidden" name="signature" id="signatureInput" />
+            </div>
+
+            <div style="margin-top: 25px; display:flex; gap:12px;">
+                <button type="button" class="btn-re-gold" id="btn-submit-lease-sign" onclick="validateAndOpenModal()">
+                    <i class="fa fa-check"></i> Submit
+                </button>
+                <a href="@Url.Action("LeaseAgreementApprovals")" class="btn btn-default" style="padding:10px 24px;">Cancel</a>
+            </div>
+
+            <!-- HOD Confirmation Modal -->
+            <div class="modal fade" id="modalHodConfirm" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title"><i class="fa fa-question-circle"></i> Confirm Lease Activation</h4>
+                        </div>
+                        <div class="modal-body" style="padding: 25px; font-size: 15px; color: #1e293b;">
+                            <p style="font-weight: 600; font-size: 16px; margin-bottom: 10px;" id="modalQuestionText">
+                                Are you sure you want to activate the Lease/User Agreement?
+                            </p>
+                            <p class="text-muted" style="font-size: 13px; margin: 0;">
+                                By clicking <strong>"Yes, I am sure"</strong>, the lease agreement will be activated and notifications sent to the Tenant to open a Billing Account with CoE.
+                            </p>
+                        </div>
+                        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 15px 25px;">
+                            <button type="button" class="btn-modal-cancel" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn-modal-gold" onclick="submitHodFormFinal()">
+                                Yes, I am sure
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var canvas;
+        var ctx;
+        var drawing = false;
+        var hasDrawn = false;
+
+        function getX(e) {
+            return e.clientX - canvas.getBoundingClientRect().left;
+        }
+
+        function getY(e) {
+            return e.clientY - canvas.getBoundingClientRect().top;
+        }
+
+        function clearSignatureCanvas() {
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasDrawn = false;
+                $('#signatureInput').val('');
+            }
+        }
+
+        $(document).ready(function() {
+            canvas = document.getElementById('signatureCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                canvas.addEventListener('mousedown', function(e) {
+                    drawing = true;
+                    ctx.beginPath();
+                    ctx.moveTo(getX(e), getY(e));
+                });
+                canvas.addEventListener('mousemove', function(e) {
+                    if (drawing) {
+                        ctx.lineTo(getX(e), getY(e));
+                        ctx.stroke();
+                        hasDrawn = true;
+                    }
+                });
+                canvas.addEventListener('mouseup', function() {
+                    drawing = false;
+                });
+            }
+        });
+
+        function validateAndOpenModal() {
+            let decision = $('#ddlDecision').val();
+            if (!decision || decision === '') {
+                alert('Decision is required.');
+                return;
+            }
+            if (decision === 'Approve' && !hasDrawn) {
+                alert('Signature is required for approval.');
+                return;
+            }
+            if (decision === 'Reject') {
+                $('#modalQuestionText').text('Are you sure you want to reject this Agreement?');
+            } else {
+                $('#modalQuestionText').text('Are you sure you want to activate the Lease/User Agreement?');
+            }
+            var dataUrl = canvas.toDataURL();
+            $('#signatureInput').val(dataUrl);
+            $('#modalHodConfirm').modal('show');
+        }
+
+        function submitHodFormFinal() {
+            $('#leaseSignForm').submit();
+        }
+    </script>
+}

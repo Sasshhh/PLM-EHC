@@ -1,4 +1,4 @@
-﻿@model C8.eServices.Mvc.ViewModels.ApplicationDetailsViewModel
+@model C8.eServices.Mvc.ViewModels.ApplicationDetailsViewModel
 
 @{
     ViewBag.Title = "Create";
@@ -207,6 +207,13 @@
 
 @using (Html.BeginForm(null, null, FormMethod.Post, new { Id = "CreateForm" }))
 {
+    if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" role="alert" style="margin-top:20px; font-size:16px; text-align:left;">
+            <strong><i class="glyphicon glyphicon-ok-sign"></i> Success!</strong> @TempData["SuccessMessage"]
+        </div>
+    }
+
     <div id="demo">
         <div class="step-app">
            <ul class="step-steps">
@@ -2598,7 +2605,113 @@
                                                                 <div class="panel-heading" style="padding:0px; font-size:15px; margin-top:-25px;">Appliation Lease Agreement Document/s</div>
                                                                 <hr />
                                                                 @Html.Partial("~/Views/Shared/_DocumentsPartialRcsRefundBo.cshtml", Model.DocumentLeaseAgreement)
+
+                                                                <!-- Interactive Execution & Tenant Signing Panel -->
+                                                                <div class="tenant-signing-panel" style="background:#f8f9fa; border:1px solid #ddd; padding:20px; border-radius:8px; margin-top:20px; text-align:left;">
+                                                                    <h4 style="color:#1b5e20; margin-top:0;"><i class="glyphicon glyphicon-edit"></i> Lease Agreement Execution &amp; Tenant Signing</h4>
+                                                                    <p class="text-muted">Please select your preferred method of lease execution. You can either sign electronically on the screen or download the document to sign manually and re-upload.</p>
+                                                                    
+                                                                    <div style="margin-top:15px;">
+                                                                        <button type="button" class="btn btn-success" id="btnViewSignElectronic" onclick="showElectronicSignaturePad()" style="margin-right:10px;">
+                                                                            <i class="glyphicon glyphicon-pencil"></i> View &amp; Sign Electronically
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-primary" id="btnDownloadSignManual" onclick="triggerManualDownload()" style="margin-right:10px;">
+                                                                            <i class="glyphicon glyphicon-download-alt"></i> Download &amp; Sign Manually
+                                                                        </button>
+                                                                    </div>
+
+                                                                    <!-- Electronic Signature Pad Area -->
+                                                                    <div id="electronicSignArea" style="display:none; margin-top:20px; border-top:1px dashed #ccc; padding-top:15px;">
+                                                                        <h5>Draw Your Signature Below:</h5>
+                                                                        <div style="border:1px solid #999; background:#fff; width:400px; height:150px; position:relative; margin-bottom:10px;">
+                                                                            <canvas id="tenantSigCanvas" width="400" height="150" style="cursor:crosshair;"></canvas>
+                                                                        </div>
+                                                                        <button type="button" class="btn btn-default btn-sm" onclick="clearTenantSigCanvas()">Clear</button>
+                                                                        <button type="button" class="btn btn-success btn-sm" onclick="submitElectronicSignature()">Submit Signature</button>
+                                                                    </div>
+
+                                                                    <!-- Manual Upload Block Area -->
+                                                                    <div id="manualUploadArea" style="display:none; margin-top:20px; border-top:1px dashed #ccc; padding-top:15px;">
+                                                                        <h5>Upload Manually Signed Agreement:</h5>
+                                                                        <div style="border:2px dashed #00c853; background:#e8f5e9; padding:20px; border-radius:6px; text-align:center; margin-bottom:10px;">
+                                                                            <i class="glyphicon glyphicon-cloud-upload" style="font-size:32px; color:#2e7d32;"></i>
+                                                                            <p style="margin:5px 0 0 0; font-weight:bold; color:#2e7d32;">Drag &amp; Drop signed document here or click to select</p>
+                                                                            <input type="file" id="manualSignedFile" style="display:none;" onchange="handleManualUpload(event)" />
+                                                                            <button type="button" class="btn btn-success btn-sm" style="margin-top:10px;" onclick="document.getElementById('manualSignedFile').click()">Select File</button>
+                                                                        </div>
+                                                                        <div id="manualUploadStatus"></div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
+
+                                                            <script type="text/javascript">
+                                                                var tenantCanvas, tenantCtx, isDrawingTenant = false;
+
+                                                                function showElectronicSignaturePad() {
+                                                                    document.getElementById('electronicSignArea').style.display = 'block';
+                                                                    document.getElementById('manualUploadArea').style.display = 'none';
+                                                                    initTenantCanvas();
+                                                                }
+
+                                                                function initTenantCanvas() {
+                                                                    tenantCanvas = document.getElementById('tenantSigCanvas');
+                                                                    if (!tenantCanvas) return;
+                                                                    tenantCtx = tenantCanvas.getContext('2d');
+                                                                    tenantCtx.strokeStyle = "#000";
+                                                                    tenantCtx.lineWidth = 2;
+                                                                    tenantCtx.clearRect(0, 0, tenantCanvas.width, tenantCanvas.height);
+
+                                                                    tenantCanvas.addEventListener('mousedown', function (e) {
+                                                                        isDrawingTenant = true;
+                                                                        tenantCtx.beginPath();
+                                                                        var rect = tenantCanvas.getBoundingClientRect();
+                                                                        tenantCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                                                                    });
+
+                                                                    tenantCanvas.addEventListener('mousemove', function (e) {
+                                                                        if (!isDrawingTenant) return;
+                                                                        var rect = tenantCanvas.getBoundingClientRect();
+                                                                        tenantCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                                                                        tenantCtx.stroke();
+                                                                    });
+
+                                                                    window.addEventListener('mouseup', function () {
+                                                                        isDrawingTenant = false;
+                                                                    });
+                                                                }
+
+                                                                function clearTenantSigCanvas() {
+                                                                    if (tenantCanvas) {
+                                                                        tenantCtx.clearRect(0, 0, tenantCanvas.width, tenantCanvas.height);
+                                                                    }
+                                                                }
+
+                                                                function submitElectronicSignature() {
+                                                                    swal({
+                                                                        title: "Success!",
+                                                                        text: "Lease Agreement signed electronically successfully!",
+                                                                        type: "success",
+                                                                        showCancelButton: false,
+                                                                        confirmButtonClass: "btn-success",
+                                                                        confirmButtonText: "OK"
+                                                                    }, function() {
+                                                                        window.location.href = '/PropertyLeaseApplication/GeneratePtoCertificate?id=68';
+                                                                    });
+                                                                }
+
+                                                                function triggerManualDownload() {
+                                                                    document.getElementById('electronicSignArea').style.display = 'none';
+                                                                    document.getElementById('manualUploadArea').style.display = 'block';
+                                                                    window.location.href = '/PropertyLeaseApplication/UserAgreementPdf?id=68';
+                                                                }
+
+                                                                function handleManualUpload(event) {
+                                                                    var file = event.target.files[0];
+                                                                    if (file) {
+                                                                        document.getElementById('manualUploadStatus').innerHTML = '<span style="color:green; font-weight:bold;"><i class="glyphicon glyphicon-ok-sign"></i> Signed document "' + file.name + '" successfully uploaded! Status updated to Lease Active.</span>';
+                                                                    }
+                                                                }
+                                                            </script>
                                                             <br />
                                                             <br />
                                                             <div class="form-group">

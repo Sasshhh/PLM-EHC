@@ -1,0 +1,209 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    Layout = null;
+    var comments = (IEnumerable<C8.eServices.Mvc.Models.RE_DepartmentalComment>)ViewBag.Comments;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Consolidated Departmental Review Report - @Model.ApplicationReferenceNumber</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333333;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px double #c59b27;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #1c1917;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .header h2 {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        .meta-table td {
+            padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .meta-label {
+            font-weight: 700;
+            color: #475569;
+            background-color: #f8fafc;
+            width: 25%;
+        }
+        .meta-val {
+            color: #1e293b;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1c1917;
+            border-bottom: 2px solid #c59b27;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .comments-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .comments-table th {
+            background-color: #1c1917;
+            color: #ffffff;
+            font-weight: 700;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 12px;
+            border: 1px solid #1c1917;
+        }
+        .comments-table td {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            vertical-align: top;
+            font-size: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .badge-supported {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        .badge-other {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+        .footer {
+            margin-top: 50px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>City of Ekurhuleni - Real Estate Department</h1>
+        <h2>Consolidated Departmental Review Report</h2>
+    </div>
+
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Reference Number</td>
+            <td class="meta-val" style="font-weight:700;">@Model.ApplicationReferenceNumber</td>
+            <td class="meta-label">Date Generated</td>
+            <td class="meta-val">@DateTime.Today.ToString("yyyy-MM-dd")</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Applicant Name</td>
+            <td class="meta-val">@(Model.Customer != null ? Model.Customer.FullName : "N/A")</td>
+            <td class="meta-label">Applicant Type</td>
+            <td class="meta-val">@Model.ApplicantType</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Property Location</td>
+            <td class="meta-val" colspan="3">@Model.PropertyAddress</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Purpose of Lease</td>
+            <td class="meta-val">@Model.PurposeOfLease</td>
+            <td class="meta-label">Estimated Monthly Rental</td>
+            <td class="meta-val" style="font-weight:700; color:#c59b27;">R @string.Format("{0:N2}", Model.CalculatedMonthlyRental)</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Credit Bureau & Risk Assessment Summary</div>
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Credit Bureau Status</td>
+            <td class="meta-val">@Model.CreditBureauResult</td>
+            <td class="meta-label">Home Affairs Status</td>
+            <td class="meta-val">@Model.HomeAffairsResult</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Deeds Registry Search</td>
+            <td class="meta-val">@Model.DeedsResult</td>
+            <td class="meta-label">SARS/CIPC Registration</td>
+            <td class="meta-val">@Model.CipcResult</td>
+        </tr>
+        <tr>
+            <td class="meta-label">SASSA Verification</td>
+            <td class="meta-val">@Model.SassaResult</td>
+            <td class="meta-label">Risk Recommendation</td>
+            <td class="meta-val" style="font-weight:700;">@Model.RiskAssessmentRecommendation</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Risk Assessor Reason</td>
+            <td class="meta-val" colspan="3">@Model.RiskAssessmentReason</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Departmental Reviews and Comments</div>
+    @if (comments == null || !comments.Any())
+    {
+        <p style="font-style: italic; color:#64748b;">No departmental reviews have been captured for this application.</p>
+    }
+    else
+    {
+        <table class="comments-table">
+            <thead>
+                <tr>
+                    <th style="width:20%;">Department</th>
+                    <th style="width:20%;">Representative</th>
+                    <th style="width:15%;">Outcome</th>
+                    <th style="width:15%;">Date Reviewed</th>
+                    <th style="width:30%;">Reviewer Comments / Conditions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var com in comments)
+                {
+                    <tr>
+                        <td style="font-weight:700;">@com.DepartmentName</td>
+                        <td>@com.RepresentativeName</td>
+                        <td>
+                            <span class="badge @(com.Outcome == "Supported" ? "badge-supported" : "badge-other")">
+                                @com.Outcome
+                            </span>
+                        </td>
+                        <td>@(com.DateStamp.HasValue ? com.DateStamp.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                        <td>@com.Comments</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="footer">
+        <p>This is a system generated report. City of Ekurhuleni Real Estate Lease Management Portal.</p>
+    </div>
+</body>
+</html>

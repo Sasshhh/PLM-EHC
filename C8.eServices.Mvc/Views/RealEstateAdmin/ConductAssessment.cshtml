@@ -165,9 +165,17 @@
 </style>
 
 <div class="admin-container">
-    <div class="admin-header-card">
-        <h1 class="admin-title">Conduct Risk Assessment</h1>
-        <p class="admin-subtitle">Capture risk metrics and recommend application @Model.ApplicationReferenceNumber.</p>
+    <div class="admin-header-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+        <div>
+            <h1 class="admin-title" style="margin:0 0 5px 0;">Conduct Risk Assessment</h1>
+            <p class="admin-subtitle" style="margin:0 0 5px 0;">Capture risk metrics and recommend application @Model.ApplicationReferenceNumber.</p>
+            <span class="badge" style="background-color: var(--re-gold); color: #ffffff; font-weight: 600; padding: 5px 10px; border-radius: 4px; font-size: 12px; display: inline-block;">
+                <i class="fa fa-user"></i> Assigned Representative: @ViewBag.AssignedRepresentative
+            </span>
+        </div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#capturedDetailsModal" style="background-color:var(--re-gold); border-color:var(--re-gold); font-weight:600;">
+            <i class="fa fa-list-alt"></i> View Full Application Details
+        </button>
     </div>
 
     <!-- Info Grid -->
@@ -294,6 +302,81 @@
             <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 15px 24px; display:flex; justify-content:flex-end; gap:10px;">
                 <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; font-weight:600; padding:8px 16px;">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="submitConfirmed()" style="background-color: var(--re-gold); border-color: var(--re-gold); font-weight:600; border-radius: 6px; padding:8px 20px;">Yes, I am sure</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Application Details Modal -->
+<div class="modal fade" id="capturedDetailsModal" tabindex="-1" role="dialog" aria-labelledby="capturedDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: 2px solid var(--re-gold);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--re-slate-dark) 0%, var(--re-slate-black) 100%); color:#ffffff; border-bottom: 2px solid var(--re-gold); border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:0.8;">&times;</button>
+                <h4 class="modal-title" id="capturedDetailsModalLabel" style="font-weight: 700;">Captured Application Details: @Model.ApplicationReferenceNumber</h4>
+            </div>
+            <div class="modal-body" style="padding: 25px; max-height:70vh; overflow-y:auto; font-family:'Inter', sans-serif;">
+                
+                <!-- Section 1: Entity Details -->
+                <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-user"></i> Applicant & Entity Profile</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Applicant Type:</strong> @Model.ApplicantType<br />
+                            <strong>Entity/Business Name:</strong> @(string.IsNullOrEmpty(Model.EntityName) ? "N/A" : Model.EntityName)<br />
+                            <strong>Company Registration Number:</strong> @(string.IsNullOrEmpty(Model.CompanyRegistrationNumber) ? "N/A" : Model.CompanyRegistrationNumber)<br />
+                            <strong>VAT Registration Number:</strong> @(string.IsNullOrEmpty(Model.VatRegistrationNumber) ? "N/A" : Model.VatRegistrationNumber)<br />
+                            <strong>SARS Tax Reference Number:</strong> @(string.IsNullOrEmpty(Model.TaxReferenceNumber) ? "N/A" : Model.TaxReferenceNumber)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Authorized Representative:</strong> @(string.IsNullOrEmpty(Model.AuthorizedRepresentativeName) ? "N/A" : Model.AuthorizedRepresentativeName) (@(string.IsNullOrEmpty(Model.AuthorizedRepresentativeCapacity) ? "N/A" : Model.AuthorizedRepresentativeCapacity))<br />
+                            <strong>Registered Address:</strong> @(string.IsNullOrEmpty(Model.EntityRegisteredAddress) ? "N/A" : Model.EntityRegisteredAddress)<br />
+                            <strong>Postal Code:</strong> @(string.IsNullOrEmpty(Model.EntityRegisteredPostalCode) ? "N/A" : Model.EntityRegisteredPostalCode)<br />
+                            <strong>Email Address:</strong> @(string.IsNullOrEmpty(Model.EntityEmail) ? "N/A" : Model.EntityEmail)<br />
+                            <strong>Mobile Number:</strong> @(string.IsNullOrEmpty(Model.EntityMobile) ? "N/A" : Model.EntityMobile)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Premises Details -->
+                <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-building"></i> Premises & Space Specifications</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Purpose of Lease:</strong> @Model.PurposeOfLease<br />
+                            <strong>Customer Care Centre (CCC):</strong> @(Model.CCC != null ? Model.CCC.CCCName : "N/A")<br />
+                            <strong>Erf / Farm Number:</strong> @(string.IsNullOrEmpty(Model.ErfFarmNumber) ? "N/A" : Model.ErfFarmNumber)<br />
+                            <strong>Property Address:</strong> @(string.IsNullOrEmpty(Model.PropertyAddress) ? "N/A" : Model.PropertyAddress)<br />
+                            <strong>Township / Suburb / Farm Name:</strong> @(string.IsNullOrEmpty(Model.TownshipSuburbFarmName) ? "N/A" : Model.TownshipSuburbFarmName)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Property Postal Code:</strong> @(string.IsNullOrEmpty(Model.PropertyPostalCode) ? "N/A" : Model.PropertyPostalCode)<br />
+                            <strong>Letting Facility / Site:</strong> @(Model.SelectedFacility != null ? Model.SelectedFacility.Name : "N/A")<br />
+                            <strong>Unit Type & Spec:</strong> @(Model.SelectedFacilityUnit != null ? Model.SelectedFacilityUnit.UnitType : "N/A")<br />
+                            <strong>Number of Units:</strong> @Model.SelectedUnitCount<br />
+                            <strong>Calculated Monthly Rental:</strong> <span style="color:var(--re-gold); font-weight:700;">R @string.Format("{0:N2}", Model.CalculatedMonthlyRental) / month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Banking Details -->
+                <div>
+                    <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-credit-card"></i> Banking Details</h5>
+                    <div class="row" style="font-size:13px; line-height:2.0;">
+                        <div class="col-md-6">
+                            <strong>Bank Name:</strong> @(string.IsNullOrEmpty(Model.BankName) ? "N/A" : Model.BankName)<br />
+                            <strong>Branch Code:</strong> @(string.IsNullOrEmpty(Model.BankBranchCode) ? "N/A" : Model.BankBranchCode)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Account Type:</strong> @(string.IsNullOrEmpty(Model.BankAccountType) ? "N/A" : Model.BankAccountType)<br />
+                            <strong>Account Number:</strong> @(string.IsNullOrEmpty(Model.BankAccountNumber) ? "N/A" : Model.BankAccountNumber)
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding:15px 20px; display:flex; justify-content:flex-end; border-top:1px solid #e2e8f0;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; font-weight:600;">Close</button>
             </div>
         </div>
     </div>

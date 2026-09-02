@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -81,5 +81,10 @@ namespace C8.eServices.Mvc.Models.Audits
         [Display(Name = "Tenant Complaint Id")]
         public int? TenantComplaintId { get; set; }
 
+        [Column(Order = 23)]
+        [Display(Name = "RealEstateApplication Id")]
+        public int? RealEstateApplicationId { get; set; }
+        [ForeignKey("RealEstateApplicationId")]
+        public virtual RE_Application RealEstateApplication { get; set; }
     }
 }

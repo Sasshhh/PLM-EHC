@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +10,7 @@ using System.Web.Helpers;
 using System.Security.Claims;
 using System.Web.Http;
 using C8.eServices.Mvc.Helpers;
+using C8.eServices.Mvc.Filters;
 
 namespace C8.eServices.Mvc
 {
@@ -25,6 +26,7 @@ namespace C8.eServices.Mvc
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             //GlobalFilters.Filters.Add(new SqlExceptionFilter());
+            GlobalFilters.Filters.Add(new AuditTrailActionFilter());
 
             OfflineData.Execute(
                 online: () =>
