@@ -1,6 +1,6 @@
 # Real Estate Development (RED) System Standards
 
-This document establishes the architecture, boundaries, and conventions for the **Real Estate Development** system (Department ID = 2). 
+This document establishes the architecture, boundaries, and conventions for the **Real Estate Development** system (Department ID = 3). 
 
 These standards ensure that any agentic AI or developer working on the `RealEstate-Development` branch stays strictly focused on the Real Estate components, avoiding unnecessary context from other departments (EHC or HSD).
 
@@ -50,7 +50,7 @@ When modifying files shared by all departments:
 ## 3. Workflow & Data Isolation
 
 * **Department ID Mapping:**
-  * Always verify that the current user belongs to the Real Estate department (`DepartmentId = 2`) before displaying data or processing forms.
+  * Always verify that the current user belongs to the Real Estate department (`DepartmentId = 3`) before displaying data or processing forms.
 * **Master Data Isolation:**
   * Do not query or modify `ApplicationEntityKeys` belonging to `EkurhuleniHousingCompany` or `HumanSettlmentDevelopment`. Keep all operations strictly aligned to the `RealEstateDevelopment` key.
 

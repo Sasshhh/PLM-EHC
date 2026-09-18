@@ -1,3 +1,9 @@
+## Playwright Test Output ##
+test-results/
+playwright-report/
+**/Tests/Playwright/test-results/
+**/Tests/Playwright/playwright-report/
+
 ## Visual Studio Specifics ##
 .vs/
 *.user

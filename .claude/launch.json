@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "PLM-EHC (IIS Express)",
+      "runtimeExecutable": "C:\\Program Files\\IIS Express\\iisexpress.exe",
+      "runtimeArgs": [
+        "/config:.vs\\C8.eServices\\config\\applicationhost.config",
+        "/site:C8.eServices.Mvc"
+      ],
+      "port": 3450
+    }
+  ]
+}

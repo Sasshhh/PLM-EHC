@@ -54,10 +54,10 @@ function runQuery(query) {
 }
 
 test.use({
-  viewport: { width: 3840, height: 2160 },
+  viewport: { width: 1920, height: 1080 },
   video: {
     mode: 'on',
-    size: { width: 3840, height: 2160 }
+    size: { width: 1920, height: 1080 }
   }
 });
 
@@ -110,11 +110,11 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     await delay(3000);
 
     console.log('STEP 2: Navigating to Capture page...');
-    const reMenu = page.locator('ul.nav-list a:has-text("Real Estate Applications")');
+    const reMenu = page.locator('ul.nav-list > li > a', { hasText: 'APPLICATIONS' });
     await reMenu.click();
     await delay(1500);
 
-    const captureMenu = page.locator('ul.nav-list a:has-text("Capture")');
+    const captureMenu = page.locator('ul.nav-list a:has-text("Lease Application Screen")');
     await captureMenu.click();
 
     await expect(page).toHaveURL(/.*\/RealEstate\/Capture/, { timeout: 15000 });
@@ -152,7 +152,10 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
 
     console.log('Selecting Facility, Unit and Count...');
     await page.waitForSelector('#ddlSelectedFacility:not([disabled])', { timeout: 10000 });
-    await page.locator('#ddlSelectedFacility').selectOption({ index: 1 });
+    // Facility list is scoped to the Tokoza CCC selected above. Of its 2 facilities,
+    // "Fannie Malape..." (index 1) has been fully consumed (0 active units) by earlier
+    // test/demo runs, so we target "Tokoza Traders Market" by label instead.
+    await page.locator('#ddlSelectedFacility').selectOption({ label: 'Tokoza Traders Market' });
     await delay(1500);
 
     await page.waitForSelector('#ddlSelectedUnit:not([disabled])', { timeout: 10000 });
@@ -162,6 +165,11 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     await page.waitForSelector('#txtUnitCount:not([disabled])', { timeout: 10000 });
     await page.locator('#txtUnitCount').click();
     await page.locator('#txtUnitCount').fill('1');
+    await delay(1500);
+
+    // Required: add the configured unit to the selection list before submission
+    // validates the application (missing here caused "Selection Required" errors).
+    await page.locator('#btnAddUnit').click();
     await delay(2000);
 
     console.log('STEP 6: Uploading pre-qualification files...');
@@ -211,7 +219,7 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     // PART 2: ADMIN PAYMENT VALIDATION (UC 06) & RISK (UC 07) & CIRCULATE (UC 08)
     // ========================================================
     console.log('STEP 8: Logging in as Back Office System Administrator...');
-    await page.locator('#UserName').fill('BOSystemAdminstrator');
+    await page.locator('#UserName').fill('re_hod');
     await delay(1000);
     await page.locator('#Password').fill('Arsenal5@');
     await delay(1500);
@@ -373,7 +381,7 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     // PART 6: CONDUCT INSPECTION & LOG WORKS ORDER (UC 14)
     // ========================================================
     console.log('STEP 18: Admin logs in to conduct unit inspection (UC 14)...');
-    await page.locator('#UserName').fill('BOSystemAdminstrator');
+    await page.locator('#UserName').fill('re_hod');
     await delay(1000);
     await page.locator('#Password').fill('Arsenal5@');
     await delay(1500);
@@ -541,7 +549,7 @@ test('Real Estate Complete End-to-End Workflow (UC 06 - UC 20) - 4K Video Presen
     // PART 9: ADMIN REVIEW (UC 19) & HOD AUTHORISE PTO (UC 20)
     // ========================================================
     console.log('STEP 26: Administrator logs in to review PTO request (UC 19)...');
-    await page.locator('#UserName').fill('BOSystemAdminstrator');
+    await page.locator('#UserName').fill('re_hod');
     await delay(1000);
     await page.locator('#Password').fill('Arsenal5@');
     await delay(1500);

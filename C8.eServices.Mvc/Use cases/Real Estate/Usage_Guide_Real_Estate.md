@@ -1,6 +1,6 @@
 # Real Estate Development (RED) System - Usage & Architectural Reference Guide
 
-This document establishes the official development guidelines, directory boundaries, database schema conventions, and testing protocols for the **Real Estate Development (RED)** system (Department ID = 2). It serves as the definitive reference to ensure complete isolation from the residential/housing (EHC/HSD) workflows.
+This document establishes the official development guidelines, directory boundaries, database schema conventions, and testing protocols for the **Real Estate Development (RED)** system (Department ID = 3). It serves as the definitive reference to ensure complete isolation from the residential/housing (EHC/HSD) workflows.
 
 ---
 

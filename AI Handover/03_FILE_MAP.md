@@ -203,9 +203,18 @@ This document maps every Real Estate use case (RE_UC001–RE_UC025) to the exact
 
 ## Test Files
 
+> Updated 2026-09-02: the folder actually contains 11 specs, not the 4 originally listed here.
+
 | File | Path | Purpose |
 |:---|:---|:---|
 | E2E Submission | `Tests/Playwright/RealEstate/UC_RealEstate_Application_Submission.spec.js` | Fast application submission test |
 | E2E Slow Demo | `Tests/Playwright/RealEstate/UC_RealEstate_Application_Submission_Slow.spec.js` | 4K video capture submission |
 | E2E Full Flow | `Tests/Playwright/RealEstate/UC_RealEstate_Full_EndToEnd.spec.js` | Complete workflow test |
 | E2E Role-Based | `Tests/Playwright/RealEstate/UC_RealEstate_RoleBased_E2E.spec.js` | Multi-user role-based test |
+| E2E New Use Cases | `Tests/Playwright/RealEstate/UC_RealEstate_NewUseCases_E2E.spec.js` | Use Cases 21-25 flow |
+| Admin Walkthrough | `Tests/Playwright/RealEstate/UC_RealEstate_Admin_Walkthrough.spec.js` | Back-office admin walkthrough |
+| Back Office | `Tests/Playwright/RealEstate/UC_RealEstate_BackOffice.spec.js` | Back-office queue actions |
+| Other Uploads | `Tests/Playwright/RealEstate/UC_RealEstate_Application_Other_Uploads.spec.js` | Additional document upload flow |
+| Full Registration | `Tests/Playwright/RealEstate/UC_RealEstate_Full_Registration_Submission.spec.js` | Registration + submission flow |
+| Login Flow | `Tests/Playwright/RealEstate/UC_RealEstate_Login_Flow.spec.js` | Login flow test |
+| Negative Flows | `Tests/Playwright/RealEstate/UC_RealEstate_Negative_Flows.spec.js` | Negative/validation test cases (see Unified Use Cases §7) |
