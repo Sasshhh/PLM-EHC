@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -11,10 +11,14 @@ using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
+using C8.eServices.Mvc.Filters;
 
 namespace C8.eServices.Mvc.Controllers
 {
     [AllowAnonymous]
+    // Department isolation: an authenticated user from another department
+    // (e.g. EHC) must not reach Real Estate screens by typing the address.
+    [DepartmentAuthorize(ApplicationEntityKeys.RealEstateDevelopment)]
     public class RealEstateAdminController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();

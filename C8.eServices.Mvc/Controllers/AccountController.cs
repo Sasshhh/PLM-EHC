@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data.Entity;
 using System.Data.Linq;
 using System.Globalization;
@@ -385,7 +385,8 @@ namespace C8.eServices.Mvc.Controllers
                             if (UserManager.IsInRole(user.Id, "System Administrators"))
                             {
                                 await SignInAsync(user, model.RememberMe);
-                                return RedirectToAction("Index", "Home");
+                                // PLM landing page, not the municipal portal (Home/Index)
+                                return RedirectToAction(DepartmentHelper.LandingAction, DepartmentHelper.LandingController);
                             }
                             if (UserManager.IsInRole(user.Id, "Internal Registration"))
                             {

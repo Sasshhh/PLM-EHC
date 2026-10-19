@@ -1,8 +1,9 @@
-using C8.eServices.Mvc.DataAccessLayer;
+﻿using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
 using System;
 using System.Linq;
+using C8.eServices.Mvc.Helpers;
 
 namespace C8.eServices.Mvc.Engines
 {
@@ -201,7 +202,7 @@ namespace C8.eServices.Mvc.Engines
                     IsActive = true,
                     IsDeleted = false,
                     CreatedDateTime = DateTime.Now,
-                    DepartmentId = 1
+                    DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
                 };
 
                 _db.ComplaintAuditLogs.Add(auditLog);

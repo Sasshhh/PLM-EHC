@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Models;
@@ -114,7 +114,7 @@ namespace C8.eServices.Mvc.Engines
                 IsActive = true,
                 IsDeleted = false,
                 CreatedDateTime = DateTime.Now,
-                DepartmentId = 1
+                DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
             };
 
             _db.PaymentTransgressionAuditLogs.Add(auditLog);

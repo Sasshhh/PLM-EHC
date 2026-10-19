@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -42,7 +42,10 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace C8.eServices.Mvc.Controllers
 {
-    [AllowAnonymous]
+    // Restored from the EHC baseline, which has [Authorize] here. The combined branch
+    // had changed it to [AllowAnonymous], so a signed-out visitor could open every
+    // lease screen - All Leases listed each tenant's name, lease reference and status.
+    [Authorize]
     public class PropertyLeaseApplicationController : Controller
     {
 
@@ -95,10 +98,9 @@ namespace C8.eServices.Mvc.Controllers
                     SystemUser = IdentityManager.CurrentUser(User);
                 }
 
-                if (SystemUser == null)
-                {
-                    SystemUser = db.SystemUsers.FirstOrDefault(o => o.IsActive && !o.IsDeleted);
-                }
+                // No fallback when nobody is signed in. The combined branch used to
+                // substitute the first active SystemUser here, so an anonymous request
+                // silently acted as a real user. The EHC baseline has no such fallback.
 
                 if (SystemUser != null)
                 {
@@ -8919,7 +8921,11 @@ Activating your billing account and debit order mandate is required before occup
                 PropertyLeaseApplicationId = applicationId,
                 RejectReason = string.Format("[{0}] Not Supported due to {1}: {2}", rejectedBy, rejectedTarget, comment),
                 LeaseRenewalValidation = false,
-                ClerkId = Customer.Id
+                ClerkId = Customer.Id,
+                // Stamp the department so rejection history stays inside the department
+                // that raised it. Without this the row is written with a NULL
+                // DepartmentId and is invisible to any department-filtered report.
+                DepartmentId = DepartmentHelper.CurrentOrEhc(context)
             };
             context.propertyLeaseActionComments.Add(record);
             context.SaveChanges();
@@ -11854,7 +11860,19 @@ Activating your billing account and debit order mandate is required before occup
                 var dates = context.DateToSchedules.Where(x => x.PropertyLeaseApplicationId == Id).ToList();
                 if (dates.Count>0)
                 {
-                    MatchingHelper.ChangeApplicationStatus(context, (int)db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwitingInspectionSchedule)?.Id, Id);
+                    // Publishing slots must not clobber an exit inspection.
+                    // PropertyLeaseInspections - the officer's "conduct" queue - filters on
+                    // the APPLICATION status and accepts AwaitingExitInspection, but not
+                    // AwitingInspectionSchedule. Overwriting it here moved the application
+                    // out of that queue the moment the slots went out, so an exit inspection
+                    // could be scheduled and confirmed by the tenant and then never conducted:
+                    // UC029 was unreachable. A pre-tenancy inspection is unaffected.
+                    var currentStatusKey = context.PropertyLeaseApplications
+                        .Where(x => x.Id == Id).Select(x => x.Status.Key).FirstOrDefault();
+                    if (currentStatusKey != StatusKeys.AwaitingExitInspection)
+                    {
+                        MatchingHelper.ChangeApplicationStatus(context, (int)db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwitingInspectionSchedule)?.Id, Id);
+                    }
 
                     var User =  EHCWorkflowEngine.GetBackOfficeId(db,  Id, false);    
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.ScheduleInspectionSlots).FirstOrDefault();
@@ -17409,6 +17427,20 @@ Activating your billing account and debit order mandate is required before occup
             }
         }
 
+        /// <summary>
+        /// Reads a money amount posted by the browser, whatever its decimal separator.
+        /// Number inputs always post "1500.50"; a user-typed value may use ",".
+        /// </summary>
+        private static decimal? ParseMoney(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return null;
+            raw = raw.Trim().Replace(" ", "").Replace("R", "");
+            decimal value;
+            if (decimal.TryParse(raw, NumberStyles.Number, CultureInfo.InvariantCulture, out value)) return value;
+            if (decimal.TryParse(raw, NumberStyles.Number, CultureInfo.CurrentCulture, out value)) return value;
+            return null;
+        }
+
         [DecryptParameter]
         [HttpPost]
         public ActionResult StartRefundProcess(DepartmentsApprovalViewModel vm, int? id)
@@ -17424,9 +17456,19 @@ Activating your billing account and debit order mandate is required before occup
                     var LeaseTermination = _context.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
                     if (LeaseTermination != null)
                     {
-                        LeaseTermination.MaintenanceCost = vm.LeaseTermination.MaintenanceCost;
-                        LeaseTermination.ApprovedDeductions = vm.LeaseTermination.ApprovedDeductions;
-                        LeaseTermination.NettRefundAmount = vm.LeaseTermination.NettRefundAmount;
+                        // The amounts are posted from <input type="number"> fields and a
+                        // script-calculated total, which the browser always writes with a
+                        // "." decimal ("229.00"). This server runs en-ZA, where the decimal
+                        // separator is ",", so model binding rejected them and every refund
+                        // was saved with NettRefundAmount = NULL - the Revenue Manager and
+                        // the CEO were then shown, and approved, a nett refund of R 0.00.
+                        // Parse the posted amounts culture-independently, and calculate the
+                        // nett refund here rather than trusting a figure computed in the page.
+                        var maintenance = ParseMoney(Request.Form["LeaseTermination.MaintenanceCost"]) ?? vm.LeaseTermination.MaintenanceCost ?? 0m;
+                        var deductions = ParseMoney(Request.Form["LeaseTermination.ApprovedDeductions"]) ?? vm.LeaseTermination.ApprovedDeductions ?? 0m;
+                        LeaseTermination.MaintenanceCost = maintenance;
+                        LeaseTermination.ApprovedDeductions = deductions;
+                        LeaseTermination.NettRefundAmount = Math.Max(0m, LeaseApplication.DepositeAmount - (maintenance + deductions));
                         LeaseTermination.FinancialOfficerOfficialNumber = vm.LeaseTermination.FinancialOfficerOfficialNumber;
                         LeaseTermination.DepositRefundRecommended = vm.LeaseTermination.DepositRefundRecommended;
                         LeaseTermination.FinancialOfficerReason = vm.LeaseTermination.FinancialOfficerReason;
@@ -17655,7 +17697,7 @@ Activating your billing account and debit order mandate is required before occup
                     bool isSupported = (RevenueManagerRefundSupport == "True" || RevenueManagerRefundSupport == "true");
                     leaseTermination.RevenueManagerRefundSupport = isSupported;
                     leaseTermination.RevenueManagerRefundReason = Comment;
-                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedBySystemUserId = Customer.SystemUserId;   // SystemUser id, not Customer id
                     leaseTermination.ModifiedDateTime = DateTime.Now;
 
                     var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
@@ -17837,7 +17879,7 @@ Activating your billing account and debit order mandate is required before occup
                     leaseTermination.CEORefundSignature = CEORefundSignature;
                     leaseTermination.CEORefundSignDate = DateTime.Now;
                     leaseTermination.CEORefundReason = Comment;
-                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedBySystemUserId = Customer.SystemUserId;   // SystemUser id, not Customer id
                     leaseTermination.ModifiedDateTime = DateTime.Now;
 
                     var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault();
@@ -17869,7 +17911,7 @@ Activating your billing account and debit order mandate is required before occup
                         if (applicationStatusClosed != null)
                         {
                             rcsApps.StatusId = applicationStatusClosed.Id;
-                            rcsApps.ModifiedBySystemUserId = Customer.Id;
+                            rcsApps.ModifiedBySystemUserId = Customer.SystemUserId;   // SystemUser id, not Customer id
                             rcsApps.ModifiedDateTime = DateTime.Now;
                         }
 
@@ -17881,7 +17923,7 @@ Activating your billing account and debit order mandate is required before occup
                             if (formerTenantStatus != null)
                             {
                                 customer.StatusId = formerTenantStatus.Id;
-                                customer.ModifiedBySystemUserId = Customer.Id;
+                                customer.ModifiedBySystemUserId = Customer.SystemUserId;   // SystemUser id, not Customer id
                                 customer.ModifiedDateTime = DateTime.Now;
                             }
                         }
@@ -19128,7 +19170,10 @@ Activating your billing account and debit order mandate is required before occup
         }
 
         #endregion
-        [AllowAnonymous]
+        // A debugging hook that rewrites an application's status and work queue from
+        // the address bar. It was open to anonymous visitors on both branches. It is
+        // not part of any EHC workflow, so it is restricted to Super Administrators.
+        [Authorize(Roles = "Super Administrators")]
         public ActionResult ForceStatusUpdate(int id = 1127)
         {
             using (var db = new eServicesDbContext())

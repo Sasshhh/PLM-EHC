@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -1004,8 +1004,6 @@
     <Content Include="Content\sweetalert\sweet-alert.css" />
     <Content Include="Content\sweetalert\sweet-alert.less" />
     <Content Include="Content\sweetalert\thumbs-up.jpg" />
-    <Content Include="Content\Training Content\ExamQuestions.txt" />
-    <Content Include="Content\Training Content\TrainingSlides.txt" />
     <Content Include="Content\Training Slides\slide-01.jpg" />
     <Content Include="Content\Training Slides\slide-02.jpg" />
     <Content Include="Content\Training Slides\slide-03.jpg" />
@@ -1130,27 +1128,11 @@
     <Content Include="Manuals\PLM H-Senior Housing Specialist Manual.pdf" />
     <Content Include="Content\Images\Ekurhuleni.xcf" />
     <Content Include="ClearTempFiles.ps1" />
-    <Content Include="COMPLAINTS_MODULE_IMPLEMENTATION_STATUS.md" />
     <Content Include="Content\Pre-inspection Form v2.pdf" />
-    <Content Include="AUTO_MATCHING_CEO_APPROVAL.md" />
-    <Content Include="CODE_QUALITY_IMPROVEMENT_HOUSING_SUPERVISOR.md" />
     <None Include="Content\RcsStyles\Scripts\jquery-1.10.2.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery-3.3.1.intellisense.js" />
     <None Include="Content\RcsStyles\Scripts\jquery.validate-vsdoc.js" />
     <None Include="Content\RcsStyles\Scripts\_references.js" />
-    <Content Include="IMPLEMENTATION_GUIDE.md" />
-    <Content Include="MIGRATIONS_GUIDE.md" />
-    <Content Include="MIGRATIONS_SUMMARY.md" />
-    <Content Include="FIXED_FK_CONSTRAINT_ERROR.md" />
-    <Content Include="DATABASE_SETUP_COMPLETE.md" />
-    <Content Include="NEXT_STEPS_CHECKLIST.md" />
-    <Content Include="CURRENT_SLIDE_STATUS.md" />
-    <Content Include="FIX_CLIENTTRAINING_STATUS.md" />
-    <Content Include="CUSTOMER_TRAINING_NAV_COMPLETE.md" />
-    <Content Include="EXAMINATION_FLOW_TESTING.md" />
-    <Content Include="FINAL_VERIFICATION_CHECKLIST.md" />
-    <Content Include="EXAMRESULTS_ALL_FIXES.md" />
-    <Content Include="FIX_CLIENTTRAINING_REMOVE_INSPECTION.md" />
     <Content Include="PDFTemplates\Agreement_PDF.pdf" />
     <Content Include="PDFTemplates\CA_Agreement_UPD.pdf" />
     <Content Include="PDFTemplates\DO_AuthorityForm.pdf" />
@@ -1159,33 +1141,6 @@
     <Content Include="PDFTemplates\LA_Template_backup_20260306.pdf" />
     <Content Include="PDFTemplates\Revised Lease Agreement_.pdf" />
     <Content Include="PDFTemplates\Revised Lease Agreement_v1.pdf" />
-    <Content Include="PDFTemplates\Revised_Lease_Agreement_v1_Field_Analysis.md" />
-    <Content Include="PDFTemplates\DEFERRED_FIELDS_TRACKER.md" />
-    <Content Include="PDFTemplates\IMPLEMENTATION_PLAN_Revised_Lease_v1.md" />
-    <Content Include="PDFTemplates\IMPLEMENTATION_SUMMARY_REVISED_LEASE_V1.md" />
-    <Content Include="PDFTemplates\FONT_SIZE_UPDATE_SUMMARY.md" />
-    <Content Include="PDFTemplates\WITNESS_SIGNATURE_IMPLEMENTATION_GUIDE.md" />
-    <Content Include="PDFTemplates\DUAL_SIGNATURE_IMPLEMENTATION_STATUS.md" />
-    <Content Include="PDFTemplates\MANAGER_SIGNATURE_IMPLEMENTATION_STATUS.md" />
-    <Content Include="HOUSING_SUPERVISOR_ASSIGNMENT_CHANGE.md" />
-    <Content Include="INSPECTION_ASSIGNMENT_LOGIC.md" />
-    <Content Include="MAINTENANCE_DEFECT_WORKFLOW_IMPLEMENTATION.md" />
-    <Content Include="DATABASE_SETUP_COMPLETION_SUMMARY.md" />
-    <Content Include="PRODUCTION_DEPLOYMENT_CHECKLIST.md" />
-    <Content Include="PRODUCTION_DEPLOYMENT_PACKAGE.md" />
-    <Content Include="MAINTENANCE_WORKFLOW_README.md" />
-    <Content Include="DEV_SETUP_COMPLETE.md" />
-    <Content Include="MAINTENANCE_JOB_CARD_ENHANCEMENT.md" />
-    <Content Include="HASDSTV_NULLABLE_FIX_SUMMARY.md" />
-    <Content Include="HASDSTV_MIGRATION_CONFLICT_RESOLUTION.md" />
-    <Content Include="PENDING_CHANGES_FIX_GUIDE.md" />
-    <Content Include="FINAL_FIX_MISSING_MIGRATIONS.md" />
-    <Content Include="CONTEXTKEY_MISMATCH_FIX.md" />
-    <Content Include="MIGRATION_RESOLUTION_COMPLETE.md" />
-    <Content Include="MODAL_VISUAL_COMPARISON.md" />
-    <Content Include="HOUSING_SUPERVISOR_FIX_COMPLETE.md" />
-    <Content Include="MAINTENANCE_MANAGER_ASSIGNMENT_FIX.md" />
-    <Content Include="LEGACY_APPROVAL_FORM_REMOVAL.md" />
     <Content Include="Content\review webconfig\Web.config" />
     <Content Include="MasterData\COMPLAINTS_MODULE_README.md" />
     <Content Include="MasterData\PAYMENT_TRANSGRESSIONS_README.md" />
@@ -1194,9 +1149,6 @@
     <Content Include="PDFTemplates\Maintenance Job Sheet Template.pdf" />
     <Content Include="PDFTemplates\Revised Lease Agreement_v2.pdf" />
     <None Include="Properties\PublishProfiles\LocalFileSystem.pubxml" />
-    <Content Include="QUICKSTART_SASH38.md" />
-    <Content Include="README_SASH38.md" />
-    <Content Include="ROLES_CONSOLIDATION_PLAN.md" />
     <Content Include="Scripts\Delete_Problematic_Migrations.sql" />
     <Content Include="Scripts\DEV_SETUP_MAINTENANCE_USERS.sql" />
     <Content Include="Scripts\diagnose_maintenance_records.sql" />
@@ -1206,9 +1158,6 @@
     <Content Include="Scripts\Fix_GZip_Model_Corruption.sql" />
     <Content Include="Scripts\Fix_GZip_Model_Corruption_v2.sql" />
     <Content Include="Scripts\Fix_HasDSTV_Migration.ps1" />
-    <Content Include="QUICK_REF_MODAL_FIX.md" />
-    <Content Include="ROLLBACK_SUCCESS_5218.md" />
-    <Content Include="QUICK_FIX_SUMMARY.md" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\c3.min.js" />
     <Content Include="Scripts\d3.min.js" />
@@ -1409,7 +1358,6 @@
     <Content Include="Scripts\verify_housing_supervisor_assignment_5218.sql" />
     <Content Include="Scripts\verify_rollback_5218.sql" />
     <Content Include="Scripts\verify_uc012_uc013_setup.sql" />
-    <Content Include="Scripts\view_lease_pdf_EHC2026020600001.txt" />
     <Content Include="Scripts\_generate_masterdata_sync.sql" />
     <Content Include="Service References\CorrespondenceSoapService\C8.eServices.Mvc.CorrespondenceSoapService.CaseStartOffline_Response.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -1428,8 +1376,6 @@
     <Content Include="Scripts\Verify_Template_Fix.ps1" />
     <Content Include="Scripts\Setup-MaintenanceDocuments.ps1" />
     <Content Include="Scripts\Run_MASTER_SETUP.ps1" />
-    <Content Include="Scripts\MASTER_SETUP_FIXED_README.md" />
-    <Content Include="Scripts\NO_USERS_FOUND_QUICK_FIX.md" />
     <Content Include="Scripts\_build_PROD_MASTER_SEED.ps1" />
     <None Include="Service References\CorrespondenceSoapService\configuration91.svcinfo" />
     <None Include="Service References\CorrespondenceSoapService\configuration.svcinfo" />
@@ -1445,7 +1391,6 @@
     <Content Include="SQL Scripts\QuickTest_Training.sql" />
     <Content Include="SQL Scripts\Verify_SlideCount.sql" />
     <Content Include="SQL Scripts\Verify_Training_Setup.sql" />
-    <Content Include="Use cases\Usecase summary.txt" />
     <Content Include="Views\HumanSettlementApplication\AcceptanceLetter.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AddProperty.cshtml" />
     <Content Include="Views\HumanSettlementApplication\AffectedDepart.cshtml" />
@@ -1814,15 +1759,10 @@
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentCEO.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\WaitingListIndex.cshtml" />
     <Content Include="Views\TenantTraining\Index.cshtml" />
-    <Content Include="TENANT_TRAINING_VIEWS_TO_CREATE.md" />
     <Content Include="Views\TenantTraining\TrainingProgramme.cshtml" />
     <Content Include="Views\TenantTraining\Examination.cshtml" />
     <Content Include="Views\TenantTraining\ExamResults.cshtml" />
-    <Content Include="SYSTEM_COMPLETE_SUMMARY.md" />
-    <Content Include="TESTING_GUIDE.md" />
     <Content Include="Views\TenantTraining\MyTraining.cshtml" />
-    <Content Include="TRAININGPROGRAMME_FIXED.md" />
-    <Content Include="TODO_TRAINING_WORKFLOW_FIXES.md" />
     <Content Include="Use cases\Dev Use Cases_V.0.1 %281%29.docx" />
     <Content Include="Use cases\Dev Use Cases_V.0.2.docx" />
     <Content Include="Use cases\Dev Use Cases_V.0.3.docx" />
@@ -1839,19 +1779,8 @@
     <Content Include="Views\ServiceRequests\Create.cshtml" />
     <Content Include="Views\ServiceRequests\Details.cshtml" />
     <Content Include="Views\ServiceRequests\Edit.cshtml" />
-    <Content Include="UNIT_OFFER_ACCEPTANCE_IMPLEMENTATION.md" />
-    <Content Include="UNIT_INSPECTION_ASSIGNMENT_SUMMARY.md" />
-    <Content Include="UC012_IMPLEMENTATION_COMPLETE.md" />
-    <Content Include="UC012_FINAL_SETUP_STATUS.md" />
-    <Content Include="UC012_IMPLEMENTATION_SUCCESS.md" />
-    <Content Include="UNIT_ACCEPTANCE_MODAL_FIX.md" />
-    <Content Include="UNIT_ACCEPTANCE_MODAL_FIX_SUMMARY.md" />
-    <Content Include="TEMPLATE_DOWNLOAD_FIX.md" />
-    <Content Include="TEMPLATE_DOWNLOAD_FIX_COMPLETE.md" />
     <Content Include="Views\PropertyLeaseApplication\PropertyFacilitiesMaintenanceReviews.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\PropertyMaintenanceOverview.cshtml" />
-    <Content Include="UC012_TO_UC013_WORKFLOW_FIX.md" />
-    <Content Include="UC012_UC013_DATABASE_SETUP_REQUIRED.md" />
     <Content Include="Views\PropertyLeaseApplication\PropertyFacilitiesManagerReview.cshtml" />
     <Content Include="Views\PaymentTransgressions\Index.cshtml" />
     <Content Include="Views\PaymentTransgressions\Create.cshtml" />
@@ -2120,6 +2049,8 @@
     <Compile Include="Helpers\EncryptedActionParameterAttribute.cs" />
     <Compile Include="Helpers\EscalationHelper.cs" />
     <Compile Include="Helpers\EventLogHelper.cs" />
+
+    <Compile Include="Helpers\DepartmentHelper.cs" />
     <Compile Include="Helpers\GlobalUtility.cs" />
     <Compile Include="Helpers\HashHelper.cs" />
     <Compile Include="Helpers\LeaseRenewalService.cs" />
@@ -2634,7 +2565,8 @@
     <Compile Include="Models\AuditTrail\AuditTrailActivity.cs" />
     <Compile Include="Models\AuditTrail\AuditTrailPasswordReset.cs" />
     <Compile Include="Models\AuditTrail\AuditTrailRoleModification.cs" />
-    <Compile Include="Filters\AuditTrailActionFilter.cs" />
+    <Compile Include="Filters\AuditTrailActionFilter.cs" />
+    <Compile Include="Filters\DepartmentAuthorizeAttribute.cs" />
     <Compile Include="Models\SystemUserException.cs" />
     <Compile Include="Models\SystemUserLogTime.cs" />
     <Compile Include="Models\SystemUserType.cs" />
@@ -3259,4 +3191,66 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <!-- Runtime files used by the tested build but missing from the project, so a publish would omit them -->
+    <Content Include="Views\AreaManager\EditWorkAllocation.cshtml" />
+    <Content Include="Views\AreaManager\UserWorkAllocation.cshtml" />
+    <Content Include="Views\AuditTrail\ActiveUsers.cshtml" />
+    <Content Include="Views\AuditTrail\ActivityLog.cshtml" />
+    <Content Include="Views\AuditTrail\AdminActivityLog.cshtml" />
+    <Content Include="Views\AuditTrail\PasswordResets.cshtml" />
+    <Content Include="Views\AuditTrail\RoleModifications.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\DFC.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\DFCList.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\Index.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\REACTermination.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\TLADFC.cshtml" />
+    <Content Include="Views\DepartmentalComments\PLMCases.cshtml" />
+    <Content Include="Views\DepartmentalComments\TLAComments.cshtml" />
+    <Content Include="Views\DepartmentalComments\View.cshtml" />
+    <Content Include="Views\HoDs\TLACase.cshtml" />
+    <Content Include="Views\LeaseDetails\GenerateRenewalLeaseAgreement.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\AuthorizeRefund.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\CaptureProofOfService.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\CloseLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\EvictionCEOAuthorization.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\LeaseDisputes.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\RefundAuthorisation.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\RegisterLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ResolveLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ReviewLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ServeEvictionNotice.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\TerminationCSOReview.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\TerminationCSOReviewDetails.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActiveOccupancy.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActivePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AllocateSpace.cshtml" />
+    <Content Include="Views\RealEstateAdmin\Allocations.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AuthoriseLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\CaptureLeaseDetails.cshtml" />
+    <Content Include="Views\RealEstateAdmin\EvaluationCriteria.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GenerateLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GeneratePtoCertificate.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseAgreementApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\NewLeases.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoSignatureQueue.cshtml" />
+    <Content Include="Views\RealEstateAdmin\RevokePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\SignPtoCertificate.cshtml" />
+    <Content Include="Views\RealEstate\LeaseAgreements.cshtml" />
+    <Content Include="Views\RealEstate\SignLeaseAgreement.cshtml" />
+    <Content Include="Views\RiskAssessmentOutcomes\Create.cshtml" />
+    <Content Include="Views\Section49\EmtPage.cshtml" />
+    <Content Include="Views\Section49\ErrorPage.cshtml" />
+    <Content Include="Views\Section49\FileBox.cshtml" />
+    <Content Include="Views\Section49\FullTitle.cshtml" />
+    <Content Include="Views\Section49\Index.cshtml" />
+    <Content Include="Views\Section49\LetterBox.cshtml" />
+    <Content Include="Views\Section49\Section49View.cshtml" />
+    <Content Include="Views\Shared\_PLMDetailViewTemplate.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="PDFTemplates\Cancellation_Lease_Template.pdf" />
+    <Content Include="PDFTemplates\Notice_To_Vacate_Template.pdf" />
+    <Content Include="Templates\PLMEvictionNotice.pdf" />
+  </ItemGroup>
 </Project>

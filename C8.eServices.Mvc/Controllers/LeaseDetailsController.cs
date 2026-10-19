@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -1247,11 +1247,22 @@ namespace C8.eServices.Mvc.Controllers
                         var rmSignRespId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RenewalRMSign).FirstOrDefault()?.Id ?? 0;
                         int AwaitingRenewalRMSignature = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalRMSignature)?.Id ?? 0;
 
+                        // The Revenue Manager has TWO renewal stages, not one. As well as signing
+                        // the renewal agreement, they review the CSO's recommendation first
+                        // (UC022). RecommendForRenewal queues that review as LeaseRenewalRevenue
+                        // with the lease at AwaitingRenewalReviewOutcome; without this pair the
+                        // recommendation lands in a queue nobody reads and the chain stops dead,
+                        // even though Renewals.cshtml already renders a "Revenue Review" button.
+                        var rmReviewRespId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalRevenue).FirstOrDefault()?.Id ?? 0;
+                        int AwaitingRenewalReviewOutcome = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalReviewOutcome)?.Id ?? 0;
+
                         rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser)
-                            .Where(x => x.ResponsibilityTypeId == rmSignRespId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
+                            .Where(x => (x.ResponsibilityTypeId == rmSignRespId || x.ResponsibilityTypeId == rmReviewRespId)
+                                     && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
                         var list = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId.Value).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && x.StatusId == AwaitingRenewalRMSignature)
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id)
+                            && (x.StatusId == AwaitingRenewalRMSignature || x.StatusId == AwaitingRenewalReviewOutcome))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -1264,11 +1275,20 @@ namespace C8.eServices.Mvc.Controllers
                         var ceoSignRespId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RenewalCEOSign).FirstOrDefault()?.Id ?? 0;
                         int AwaitingRenewalCEOSignature = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalCEOSignature)?.Id ?? 0;
 
+                        // Same two-stage split as the Revenue Manager above: the CEO/Director
+                        // decides the renewal (UC023) before signing it. RevenueManagerRenewalReview
+                        // queues that decision as LeaseRenewalCEOApproval with the lease at
+                        // AwaitingRenewalOutcome.
+                        var ceoDecisionRespId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalCEOApproval).FirstOrDefault()?.Id ?? 0;
+                        int AwaitingRenewalOutcome = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingRenewalOutcome)?.Id ?? 0;
+
                         rrq = db.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser)
-                            .Where(x => x.ResponsibilityTypeId == ceoSignRespId && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
+                            .Where(x => (x.ResponsibilityTypeId == ceoSignRespId || x.ResponsibilityTypeId == ceoDecisionRespId)
+                                     && x.Clerk.Id == activeDirectoryOn && x.StatusId == SubmittedId).ToList();
                         var allLeaseIds = rrq.Where(x => x.LeaseDetailsId.HasValue).Select(x => x.LeaseDetailsId.Value).ToList();
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && allLeaseIds.Contains(x.Id) && x.StatusId == AwaitingRenewalCEOSignature)
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && allLeaseIds.Contains(x.Id)
+                            && (x.StatusId == AwaitingRenewalCEOSignature || x.StatusId == AwaitingRenewalOutcome))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -2038,7 +2058,11 @@ namespace C8.eServices.Mvc.Controllers
                         months: months,
                         csoOutcome: ApprovalStatusddl,
                         csoComment: RejectComment,
-                        csoSystemUserId: Customer.Id);
+                        // CSO_SystemUserId / RM_SystemUserId / CEO_SystemUserId are foreign keys onto
+                        // SystemUsers, so they need the SystemUser id, not the Customer id.
+                        // Passing Customer.Id here made every renewal decision fail with
+                        // "INSERT statement conflicted with the FOREIGN KEY constraint".
+                        csoSystemUserId: (int)Customer.SystemUserId);
 
                     var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
                     MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
@@ -2177,7 +2201,7 @@ namespace C8.eServices.Mvc.Controllers
                         propertyLeaseApplicationId: (int)lease.PropertyLeaseApplicationId,
                         outcome: ApprovalStatusddl,
                         comment: RejectComment,
-                        rmSystemUserId: Customer.Id);
+                        rmSystemUserId: (int)Customer.SystemUserId);
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
                     {
@@ -2342,7 +2366,7 @@ namespace C8.eServices.Mvc.Controllers
                         propertyLeaseApplicationId: (int)lease.PropertyLeaseApplicationId,
                         outcome: ApprovalStatusddl,
                         comment: RejectComment,
-                        ceoSystemUserId: Customer.Id);
+                        ceoSystemUserId: (int)Customer.SystemUserId);
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
                     {
@@ -2622,7 +2646,18 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         case RCSActionTypeKeys.Approved:
                             // Change status to Awaiting Renewal Tenant Signature
-                            MatchingHelper.ChangeApplicationStatus(cxt, cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRenewalTenantSignature).Id, rcsAppId);
+                            var awaitingTenantSignature = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRenewalTenantSignature).Id;
+                            MatchingHelper.ChangeApplicationStatus(cxt, awaitingTenantSignature, rcsAppId);
+
+                            // The LEASE status has to move too, not just the application's.
+                            // Every renewal queue - the CSO's, the Revenue Manager's, the
+                            // CEO's and the tenant's - filters on LeaseDetails.StatusId, so
+                            // updating only the application left the lease stranded at
+                            // Awaiting Renewal Agreement Generation: the CSO kept being
+                            // offered "Generate Agreement" over and over and the tenant was
+                            // never given the agreement to sign.
+                            if (lease != null)
+                                MatchingHelper.ChangeLeaseStatusII(cxt, awaitingTenantSignature, lease.Id);
 
                             var sysUserId = (int?)Session["SystemUserId"] ?? 0;
                             var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.GenerateLeaseAgreement).FirstOrDefault();

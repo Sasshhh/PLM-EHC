@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.IO;
@@ -152,7 +152,13 @@ namespace C8.eServices.Mvc.Controllers
                     complaint.IsActive = true;
                     complaint.IsDeleted = false;
                     complaint.CreatedDateTime = DateTime.Now;
-                    complaint.DepartmentId = customer?.DepartmentId ?? 1;
+                    // Customers.DepartmentId is NULL for every customer in the database
+                    // (4,093 of them), so the old "?? 1" fallback always applied - and there
+                    // is no ApplicationEntities row with Id 1, so every complaint insert
+                    // failed on the foreign key. The exception was swallowed by the catch
+                    // below and the form simply re-rendered, so lodging a complaint silently
+                    // did nothing. Resolve the real department instead.
+                    complaint.DepartmentId = customer?.DepartmentId ?? DepartmentHelper.CurrentOrEhc(db);
                     complaint.WarningLetterCount = 0;
 
                     db.TenantComplaints.Add(complaint);
@@ -293,7 +299,7 @@ namespace C8.eServices.Mvc.Controllers
                     investigation.IsActive = true;
                     investigation.IsDeleted = false;
                     investigation.CreatedDateTime = DateTime.Now;
-                    investigation.DepartmentId = customer?.DepartmentId ?? 1;
+                    investigation.DepartmentId = customer?.DepartmentId ?? DepartmentHelper.CurrentOrEhc(db);
 
                     db.ComplaintInvestigations.Add(investigation);
                 }
@@ -588,7 +594,7 @@ namespace C8.eServices.Mvc.Controllers
                         IsActive = true,
                         IsDeleted = false,
                         CreatedDateTime = DateTime.Now,
-                        DepartmentId = customer?.DepartmentId ?? 1
+                        DepartmentId = customer?.DepartmentId ?? DepartmentHelper.CurrentOrEhc(db)
                     };
 
                     db.ComplaintExternalReferrals.Add(referral);
@@ -745,7 +751,7 @@ namespace C8.eServices.Mvc.Controllers
                     IsActive = true,
                     IsDeleted = false,
                     CreatedDateTime = DateTime.Now,
-                    DepartmentId = 1
+                    DepartmentId = DepartmentHelper.CurrentOrEhc(db)
                 };
 
                 db.ComplaintEvidences.Add(evidence);
@@ -789,7 +795,7 @@ namespace C8.eServices.Mvc.Controllers
                     IsActive = true,
                     IsDeleted = false,
                     CreatedDateTime = DateTime.Now,
-                    DepartmentId = 1
+                    DepartmentId = DepartmentHelper.CurrentOrEhc(db)
                 };
 
                 db.ComplaintInvestigationDocuments.Add(document);

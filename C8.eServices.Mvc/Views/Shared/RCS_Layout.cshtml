@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -857,7 +857,8 @@
                     }
 
                     <!-- UC 06: Financials (Finance Officer/Admin) -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    @* Real Estate (DPRE) menu - department-gated, see DepartmentHelper *@
+                    @if (Request.IsAuthenticated && DepartmentHelper.CanSeeRealEstate() && (User.IsInRole("Finance Administrator") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -877,7 +878,8 @@
                     }
 
                     <!-- Back-office Applications Menu -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
+                    @* Real Estate (DPRE) menu - department-gated, see DepartmentHelper *@
+                    @if (Request.IsAuthenticated && DepartmentHelper.CanSeeRealEstate() && (User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1048,7 +1050,8 @@
                     }
 
                     <!-- Inspections (UC 13, 14) -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    @* Real Estate (DPRE) menu - department-gated, see DepartmentHelper *@
+                    @if (Request.IsAuthenticated && DepartmentHelper.CanSeeRealEstate() && (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1092,7 +1095,8 @@
                     }
 
                     <!-- Maintenance & Works Orders (UC 15, 16, 17) -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Property & Facilities Manager") || User.IsInRole("Caretaker") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    @* Real Estate (DPRE) menu - department-gated, see DepartmentHelper *@
+                    @if (Request.IsAuthenticated && DepartmentHelper.CanSeeRealEstate() && (User.IsInRole("Property & Facilities Manager") || User.IsInRole("Caretaker") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -3242,7 +3246,11 @@
             </li>*@
                     }
 
-                    @if (Request.IsAuthenticated && User.IsInRole("Back Office System Administrator"))
+                    @* Department isolation: these tools act on EHC leases and waiting lists, so a
+                       Real Estate or Human Settlement administrator must not see them. "Back Office
+                       System Administrator" is a role name shared across departments, so the role
+                       check alone is not enough. *@
+                    @if (Request.IsAuthenticated && DepartmentHelper.CanSeeEhc() && User.IsInRole("Back Office System Administrator"))
                     {
                         <li>
                             <a href="javascript:;">

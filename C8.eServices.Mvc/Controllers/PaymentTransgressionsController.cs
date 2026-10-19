@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -100,7 +100,7 @@ namespace C8.eServices.Mvc.Controllers
                 model.IsActive = true;
                 model.IsDeleted = false;
                 model.CreatedDateTime = DateTime.Now;
-                model.DepartmentId = 1;
+                model.DepartmentId = DepartmentHelper.CurrentOrEhc(_db);
 
                 // Get current CSO
                 var identityManager = new IdentityManager();
@@ -397,7 +397,7 @@ namespace C8.eServices.Mvc.Controllers
                         IsActive = true,
                         IsDeleted = false,
                         CreatedDateTime = DateTime.Now,
-                        DepartmentId = 1
+                        DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
                     };
 
                     _db.PaymentTransgressionDocuments.Add(document);
