@@ -270,6 +270,13 @@ namespace C8.eServices.Mvc.Controllers
         // GET: /Home/
         public ActionResult Index()
         {
+            // Home/Index is the municipal Siyakhokha portal page, on _LayoutPage. PLM
+            // staff - EHC, Real Estate, Human Settlement - belong on the PLM landing
+            // page instead, which uses RCS_Layout like every other PLM screen. Anonymous
+            // visitors to the public portal are unaffected.
+            if (DepartmentHelper.IsPlmUser())
+                return RedirectToAction(DepartmentHelper.LandingAction, DepartmentHelper.LandingController);
+
             try
             {
                 Session["payments"] = null;

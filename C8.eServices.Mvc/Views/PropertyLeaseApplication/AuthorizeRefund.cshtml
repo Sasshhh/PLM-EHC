@@ -1,4 +1,4 @@
-@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -17,8 +17,13 @@
             margin-bottom: 30px;
             color: #2c3e50;
         }
+        /* The layout's table headers use white text (they normally sit on the green
+           header row). These label cells are light grey, so without an explicit colour
+           the labels were effectively invisible - readable only when highlighted. */
         .info-table th {
             background-color: #f8f9fa;
+            color: #2c3e50 !important;
+            font-weight: 600;
             width: 35%;
         }
         canvas#signature-pad {

@@ -229,17 +229,15 @@ namespace C8.eServices.Mvc.Helpers
         {
             try
             {
-                var user = db.SystemUsers.Find(systemUserId);
-                if (user != null && !string.IsNullOrEmpty(user.StatusId))
-                {
-                    // DepartmentId is stored on SystemUser but accessed via the DB column
-                    // Use raw SQL for safety since DepartmentId may not be in the EF model
-                    var result = db.Database.SqlQuery<int?>(
-                        "SELECT DepartmentId FROM SystemUsers WHERE Id = @p0", systemUserId
-                    ).FirstOrDefault();
-                    return result;
-                }
-                return null;
+                // NOTE: this used to be guarded by !string.IsNullOrEmpty(user.StatusId).
+                // StatusId has nothing to do with the department, and it is NULL for
+                // effectively every EHC account, so DepartmentId was written as NULL on
+                // every audit row - which silently defeated the department filtering the
+                // audit reports rely on (UC027). Resolve the department directly.
+                return db.SystemUsers
+                    .Where(u => u.Id == systemUserId)
+                    .Select(u => u.DepartmentId)
+                    .FirstOrDefault();
             }
             catch (Exception)
             {

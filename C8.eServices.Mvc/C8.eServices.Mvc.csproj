@@ -2036,6 +2036,7 @@
     <Compile Include="Engines\PaymentTransgressionEngine.cs" />
     <Compile Include="Engines\PaymentTransgressionLetterEngine.cs" />
     <Compile Include="Engines\ServiceRequestEngine.cs" />
+    <Compile Include="Filters\DepartmentAuthorizeAttribute.cs" />
     <Compile Include="Filters\BasicAuthenticationAttribute.cs" />
     <Compile Include="Filters\HttpAuthenticationChallengeContextExtensions.cs" />
     <Compile Include="Filters\IdentityBasicAuthenticationAttribute.cs" />
@@ -2076,6 +2077,7 @@
     <Compile Include="Helpers\SecureActionLinkExtension.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
     <Compile Include="Helpers\AuditTrailHelper.cs" />
+    <Compile Include="Helpers\DepartmentHelper.cs" />
     <Compile Include="Helpers\SmsHelper.cs" />
     <Compile Include="Helpers\StoredProcedure.cs" />
     <Compile Include="Helpers\TokenHelper.cs" />

@@ -2048,17 +2048,17 @@ input[type="checkbox"]:checked + .slider:before {
                                                     </h3>
                                                     <p class="fs-24">In this declaration, the singular “I” and “my” should be read to include the plural “we” and “our””</p>
                                                     <p>
-                                                        I declare that all information provided is true and correct to the best of my knowledge. I understand that any misrepresentation made inthis application or in
-                                                        additional information I may supply to Ekurhuleni Housing Company mayrender me ineligible for Ekurhuleni Housing Company
+                                                        I declare that all information provided is true and correct to the best of my knowledge. I understand that any misrepresentation made in this application or in
+                                                        additional information I may supply to Ekurhuleni Housing Company may render me ineligible for Ekurhuleni Housing Company
                                                     </p>
                                                     <p>
                                                         I authorize Ekurhuleni Housing Company to undertake any enquiries necessary to arrive at a decision concerning my application for
-                                                        accommodation and to conduct such enquiries from time to time during tenancy. These would include but are not limit to enquiry into my personal
-                                                        information and creditrecord(s) with any credit reference agency. I further consent to the company carrying out identity and fraud prevention checks
+                                                        accommodation and to conduct such enquiries from time to time during tenancy. These would include but are not limited to enquiry into my personal
+                                                        information and credit record(s) with any credit reference agency. I further consent to the company carrying out identity and fraud prevention checks
                                                         and sharing information relating to this application through fraud prevention agencies.
                                                     </p>
                                                     <p>
-                                                        I understand and accept the terms and conditions of this application. I also understand that Ekurhuleni Housing Company isunableto
+                                                        I understand and accept the terms and conditions of this application. I also understand that Ekurhuleni Housing Company is unable to
                                                         guarantee accommodation to applicants.
                                                     </p>
                                                     <p>
@@ -2097,10 +2097,15 @@ input[type="checkbox"]:checked + .slider:before {
                                                                 id = "consentEnabled",
                                                                 data_toggle = "tooltip",
                                                                 data_placement = "top",
-                                                                title = "Check this box if you want your move to forward."
+                                                                title = "Switch this on to accept the declaration and continue."
                                                                 })
                                                                 <div class="slider round">
                                                                 </div>
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label for="consentEnabled" class="control-label" style="font-weight:normal;">
+                                                                I accept the declaration above<b style="color:red;">*</b>
                                                             </label>
                                                         </div>
                                                     </div>
@@ -2336,7 +2341,7 @@ input[type="checkbox"]:checked + .slider:before {
 
                     <button class="button1" onclick="Cancel()">Cancel</button>
                     <button data-direction="prev" class="button1">Previous</button>
-                    <button data-direction="next" class="button1" id="btnNext" disabled onclick="IdentityNumber()">Next</button>
+                    <button data-direction="next" class="button1" id="btnNext" onclick="IdentityNumber()">Next</button>
                     <button data-direction="finish" class="button1">Upload Documents</button>
                 </div>
                 <div class="step-footer" align="left">
@@ -2492,14 +2497,11 @@ input[type="checkbox"]:checked + .slider:before {
         });
 
         // --- END: Preferred Area Dynamic Logic ---
+    // The Next button stays enabled so that an applicant who has not accepted
+    // the declaration is told why, instead of clicking a dead button.
+    // Acceptance is enforced in IdentityNumber() before the step advances.
     $('#consentEnabled').change(function(){
-        if ($('#consentEnabled').is(':checked')) {
-            $('#btnNext').removeAttr('disabled');
-          }
-        else
-        {
-            $('#btnNext').attr('disabled',true);
-        }
+        $('#btnNext').removeAttr('disabled');
     });
      
 
@@ -2536,6 +2538,36 @@ input[type="checkbox"]:checked + .slider:before {
         }
         return ValidateRSAIDNo(IdentityNumber);
     }
+
+    // Gate for step 1 of the capture wizard.
+    //
+    // jquery-steps binds its own click handler to the footer buttons and always
+    // advances, so the inline onclick return value is ignored. The Next button
+    // used to be rendered disabled until the declaration switch was set, which
+    // blocked the step but gave the applicant no explanation. We now keep the
+    // button enabled and block the advance here, in the capture phase, so this
+    // runs before the wizard handler and can stop it.
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.getElementById('btnNext');
+        if (!btn) { return; }
+        btn.addEventListener('click', function (e) {
+            var consent = document.getElementById('consentEnabled');
+            if (consent && !consent.checked) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                swal("Declaration required",
+                     "Please read the declaration, then switch on 'I accept the declaration above' to continue.",
+                     "warning");
+                consent.scrollIntoView({ block: 'center' });
+                return false;
+            }
+            if (IdentityNumber() === false) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+    });
 
     function LIMS() {
         debugger;
