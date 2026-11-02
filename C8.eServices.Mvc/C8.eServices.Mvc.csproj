@@ -3259,4 +3259,77 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <!-- Files that exist in source control but were never added to the project, so Publish
+       skipped them (views of live controllers, PDF templates the code opens, manuals, images). -->
+  <ItemGroup>
+    <Content Include="Content\Images\Artboard 8@3x.png" />
+    <Content Include="Content\Images\SID-pay-with-blue@2x.png" />
+    <Content Include="PDFTemplates\Cancellation_Lease_Template.pdf" />
+    <Content Include="PDFTemplates\Cancellation_Lease_Template_Draft.pdf" />
+    <Content Include="PDFTemplates\Notice_To_Vacate_Template.pdf" />
+    <Content Include="PDFTemplates\Notice_To_Vacate_Template_Draft.pdf" />
+    <Content Include="PDFTemplates\RealEstate\SDS Input Sheet (1).xlsx" />
+    <Content Include="PDFTemplates\RealEstate\URC User Agreement_Latest.doc" />
+    <Content Include="PDFTemplates\RealEstate\Updated User Agreement.doc" />
+    <Content Include="PDFTemplates\URC_User_Agreement_Latest.doc" />
+    <Content Include="PDFTemplates\URC_User_Agreement_Latest_Template.html" />
+    <Content Include="PDFTemplates\URC_User_Agreement_Latest_Template.pdf" />
+    <Content Include="PDFTemplates\URC_User_Agreement_Latest_WithFields.pdf" />
+    <Content Include="PDFTemplates\Updated_User_Agreement.doc" />
+    <Content Include="PDFTemplates\Updated_User_Agreement_Template.html" />
+    <Content Include="PDFTemplates\Updated_User_Agreement_Template.pdf" />
+    <Content Include="PDFTemplates\Updated_User_Agreement_WithFields.pdf" />
+    <Content Include="PDFTemplates\WordTemplates\Cancellation of Lease agreement template.docx" />
+    <Content Include="PDFTemplates\WordTemplates\Notice to Vacate.docx" />
+    <Content Include="Templates\PLMEvictionNotice.pdf" />
+    <Content Include="Templates\pdf_viewer.html" />
+    <Content Include="Views\AreaManager\EditWorkAllocation.cshtml" />
+    <Content Include="Views\AreaManager\UserWorkAllocation.cshtml" />
+    <Content Include="Views\AuditTrail\ActiveUsers.cshtml" />
+    <Content Include="Views\AuditTrail\ActivityLog.cshtml" />
+    <Content Include="Views\AuditTrail\AdminActivityLog.cshtml" />
+    <Content Include="Views\AuditTrail\PasswordResets.cshtml" />
+    <Content Include="Views\AuditTrail\RoleModifications.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\DFC.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\DFCList.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\Index.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\REACTermination.cshtml" />
+    <Content Include="Views\CommitteeOutcomes\TLADFC.cshtml" />
+    <Content Include="Views\DepartmentalComments\PLMCases.cshtml" />
+    <Content Include="Views\DepartmentalComments\TLAComments.cshtml" />
+    <Content Include="Views\DepartmentalComments\View.cshtml" />
+    <Content Include="Views\HoDs\TLACase.cshtml" />
+    <Content Include="Views\LeaseDetails\GenerateRenewalLeaseAgreement.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\AuthorizeRefund.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\CaptureProofOfService.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\CloseLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\EvictionCEOAuthorization.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\LeaseDisputes.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\RefundAuthorisation.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\RegisterLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ResolveLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ReviewLeaseDispute.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\ServeEvictionNotice.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\TerminationCSOReview.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\TerminationCSOReviewDetails.cshtml" />
+    <Content Include="Views\RealEstate\LeaseAgreements.cshtml" />
+    <Content Include="Views\RealEstate\SignLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActiveOccupancy.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActivePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AllocateSpace.cshtml" />
+    <Content Include="Views\RealEstateAdmin\Allocations.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AuthoriseLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\CaptureLeaseDetails.cshtml" />
+    <Content Include="Views\RealEstateAdmin\EvaluationCriteria.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GenerateLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GeneratePtoCertificate.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseAgreementApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\NewLeases.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoSignatureQueue.cshtml" />
+    <Content Include="Views\RealEstateAdmin\RevokePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\SignPtoCertificate.cshtml" />
+    <Content Include="Views\RiskAssessmentOutcomes\Create.cshtml" />
+    <Content Include="Views\Shared\_PLMDetailViewTemplate.cshtml" />
+  </ItemGroup>
 </Project>
