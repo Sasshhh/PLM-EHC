@@ -59,5 +59,13 @@ IF NOT EXISTS (SELECT 1 FROM dbo.DocumentTypes WHERE [Key] = N'dt_water_meter_re
     INSERT dbo.DocumentTypes ([Name], [Description], [Key], IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'Water Meter Reading', N'Water meter reading', N'dt_water_meter_reading', 1, 0, GETDATE());
 
+-- Deposit refund -> CEO authorisation: EHCWorkflowEngine reads AppSettings 's_ceo' as the CEO's Customer Id
+-- and crashes when the row is missing. '0' stops the crash (the step is then not queued to anyone);
+-- set it to the CEO test user's Customer Id so refunds actually reach the CEO:
+--   UPDATE dbo.AppSettings SET Value = N'<Customers.Id of the CEO user>' WHERE [Key] = N's_ceo';
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N's_ceo')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'CEO', N'Customer Id of the CEO who authorises deposit refunds (0 = not set)', N's_ceo', N'0', 1, 0, GETDATE());
+
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';
