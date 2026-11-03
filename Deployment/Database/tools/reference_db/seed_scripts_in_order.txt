@@ -1,0 +1,26 @@
+C8.eServices.Mvc/Scripts/sync_masterdata_to_target.sql
+C8.eServices.Mvc/Scripts/PLM_FULL_PRODUCTION_DEPLOYMENT.sql
+C8.eServices.Mvc/Use cases/All_Status_Metadata.sql
+C8.eServices.Mvc/Use cases/All_ActivityTrackerMessages_Metadata.sql
+C8.eServices.Mvc/Use cases/All_RCSActionTypes_Metadata.sql
+C8.eServices.Mvc/Use cases/All_ResponsibilityTypes_Metadata.sql
+C8.eServices.Mvc/Use cases/All_EmailContentTypes_Metadata.sql
+C8.eServices.Mvc/Use cases/Unified_PLM_Metadata_Migration.sql
+C8.eServices.Mvc/MasterData/ComplaintsMasterData.sql
+C8.eServices.Mvc/MasterData/PaymentTransgressionsMasterData.sql
+C8.eServices.Mvc/MasterData/ServiceRequestsMasterData.sql
+C8.eServices.Mvc/Migrations/UC021_RenewalAgreement_StatusInserts.sql
+C8.eServices.Mvc/SQL/PLM_UC025_UC026_MIGRATION.sql
+C8.eServices.Mvc/SQL/PLM_UC027_UC030_MIGRATION.sql
+C8.eServices.Mvc/scratch_master_prod_migration.sql
+seed_renewal_status.sql
+add_uc021_master_data.sql
+C8.eServices.Mvc/Scripts/add_deposit_payment_email_template.sql
+C8.eServices.Mvc/Scripts/add_facilities_manager_responsibility_type.sql
+C8.eServices.Mvc/Scripts/add_maintenance_document_checklists.sql
+C8.eServices.Mvc/Scripts/add_maintenance_job_card_document_types.sql
+C8.eServices.Mvc/Scripts/add_renewal_document_types.sql
+C8.eServices.Mvc/Scripts/add_cso_role.sql
+C8.eServices.Mvc/Scripts/MASTER_SETUP_MAINTENANCE_WORKFLOW.sql
+C8.eServices.Mvc/SQL Scripts/Create_TrainingTables_Migration.sql
+C8.eServices.Mvc/SQL Scripts/Insert_TrainingData.sql

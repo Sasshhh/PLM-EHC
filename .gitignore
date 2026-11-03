@@ -63,3 +63,4 @@ Thumbs.db
 Deployment/out/
 Deployment/Build/nuget.exe
 Deployment/Database/logs/
+__pycache__/
