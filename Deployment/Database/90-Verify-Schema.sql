@@ -6,6 +6,8 @@
 
   Output
     1. Summary: latest EF migration in the DB vs. in the code, table/column counts.
+       MigrationState is informational only: 10-Upgrade-Schema.sql adds what is missing
+       without writing __MigrationHistory, and the app never checks it (SetInitializer(null)).
     2. Missing tables.
     3. Missing columns on tables that do exist.
   Empty result sets 2 and 3 mean the schema matches. Extra tables/columns in the
@@ -1459,6 +1461,8 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'ApplicationRoleAudits', N'ModifiedDateTime'),
   (N'dbo', N'AspNetRoles', N'Id'),
   (N'dbo', N'AspNetRoles', N'Name'),
+  (N'dbo', N'AspNetUserRoles', N'UserId'),
+  (N'dbo', N'AspNetUserRoles', N'RoleId'),
   (N'dbo', N'ApplicationRoles', N'Id'),
   (N'dbo', N'ApplicationRoles', N'ApplicationId'),
   (N'dbo', N'ApplicationRoles', N'RoleId'),
@@ -1817,10 +1821,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'CategoryTypeAudits', N'Name'),
   (N'dbo', N'CategoryTypeAudits', N'Description'),
   (N'dbo', N'CategoryTypeAudits', N'Key'),
-  (N'dbo', N'CategoryTypeAudits', N'DepartmentId'),
-  (N'dbo', N'CategoryTypeAudits', N'IsActive'),
-  (N'dbo', N'CategoryTypeAudits', N'IsDeleted');
+  (N'dbo', N'CategoryTypeAudits', N'DepartmentId');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'CategoryTypeAudits', N'IsActive'),
+  (N'dbo', N'CategoryTypeAudits', N'IsDeleted'),
   (N'dbo', N'CategoryTypeAudits', N'IsLocked'),
   (N'dbo', N'CategoryTypeAudits', N'CreatedBySystemUserId'),
   (N'dbo', N'CategoryTypeAudits', N'CreatedDateTime'),
@@ -2718,10 +2722,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'DocumentsLeaseAudits', N'DepartmentId'),
   (N'dbo', N'DocumentsLeaseAudits', N'IsActive'),
   (N'dbo', N'DocumentsLeaseAudits', N'IsDeleted'),
-  (N'dbo', N'DocumentsLeaseAudits', N'IsLocked'),
-  (N'dbo', N'DocumentsLeaseAudits', N'CreatedBySystemUserId'),
-  (N'dbo', N'DocumentsLeaseAudits', N'CreatedDateTime');
+  (N'dbo', N'DocumentsLeaseAudits', N'IsLocked');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'DocumentsLeaseAudits', N'CreatedBySystemUserId'),
+  (N'dbo', N'DocumentsLeaseAudits', N'CreatedDateTime'),
   (N'dbo', N'DocumentsLeaseAudits', N'ModifiedBySystemUserId'),
   (N'dbo', N'DocumentsLeaseAudits', N'ModifiedDateTime'),
   (N'dbo', N'DocumentsLeases', N'Id'),
@@ -3619,10 +3623,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegTelephone'),
   (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegTelephone2'),
   (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegCellularNo'),
-  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegCellularNo2'),
-  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegFax'),
-  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegEmail');
+  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegCellularNo2');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegFax'),
+  (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegEmail'),
   (N'dbo', N'LeaseCaptureAddressContacts', N'LeaNegPostalAddress'),
   (N'dbo', N'LeaseCaptureAddressContacts', N'DepartmentId'),
   (N'dbo', N'LeaseCaptureAddressContacts', N'IsActive'),
@@ -4520,10 +4524,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'PaymentTransgressions', N'DetailedDescription'),
   (N'dbo', N'PaymentTransgressions', N'LetterType'),
   (N'dbo', N'PaymentTransgressions', N'LetterGeneratedDate'),
-  (N'dbo', N'PaymentTransgressions', N'LetterSentDate'),
-  (N'dbo', N'PaymentTransgressions', N'LetterFilePath'),
-  (N'dbo', N'PaymentTransgressions', N'StatusId');
+  (N'dbo', N'PaymentTransgressions', N'LetterSentDate');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'PaymentTransgressions', N'LetterFilePath'),
+  (N'dbo', N'PaymentTransgressions', N'StatusId'),
   (N'dbo', N'PaymentTransgressions', N'DateSubmitted'),
   (N'dbo', N'PaymentTransgressions', N'AssignedToCustomerId'),
   (N'dbo', N'PaymentTransgressionCategories', N'Id'),
@@ -5421,10 +5425,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'PurchaserInformationAudits', N'ResPostal'),
   (N'dbo', N'PurchaserInformationAudits', N'PostAddress'),
   (N'dbo', N'PurchaserInformationAudits', N'PostalCity'),
-  (N'dbo', N'PurchaserInformationAudits', N'PostSuburb'),
-  (N'dbo', N'PurchaserInformationAudits', N'PostPostalCode'),
-  (N'dbo', N'PurchaserInformationAudits', N'DomAddress');
+  (N'dbo', N'PurchaserInformationAudits', N'PostSuburb');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'PurchaserInformationAudits', N'PostPostalCode'),
+  (N'dbo', N'PurchaserInformationAudits', N'DomAddress'),
   (N'dbo', N'PurchaserInformationAudits', N'DomSub'),
   (N'dbo', N'PurchaserInformationAudits', N'DomCity'),
   (N'dbo', N'PurchaserInformationAudits', N'DomiciliumPostalCode'),
@@ -6322,10 +6326,10 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'SystemUserTypeAudits', N'IsActive'),
   (N'dbo', N'SystemUserTypeAudits', N'IsDeleted'),
   (N'dbo', N'SystemUserTypeAudits', N'IsLocked'),
-  (N'dbo', N'SystemUserTypeAudits', N'CreatedBySystemUserId'),
-  (N'dbo', N'SystemUserTypeAudits', N'CreatedDateTime'),
-  (N'dbo', N'SystemUserTypeAudits', N'ModifiedBySystemUserId');
+  (N'dbo', N'SystemUserTypeAudits', N'CreatedBySystemUserId');
 INSERT @expected (SchemaName, TableName, ColumnName) VALUES
+  (N'dbo', N'SystemUserTypeAudits', N'CreatedDateTime'),
+  (N'dbo', N'SystemUserTypeAudits', N'ModifiedBySystemUserId'),
   (N'dbo', N'SystemUserTypeAudits', N'ModifiedDateTime'),
   (N'dbo', N'SystemUserTypes', N'Id'),
   (N'dbo', N'SystemUserTypes', N'Name'),
@@ -6733,6 +6737,9 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'AspNetUserClaims', N'UserId'),
   (N'dbo', N'AspNetUserClaims', N'ClaimType'),
   (N'dbo', N'AspNetUserClaims', N'ClaimValue'),
+  (N'dbo', N'AspNetUserLogins', N'LoginProvider'),
+  (N'dbo', N'AspNetUserLogins', N'ProviderKey'),
+  (N'dbo', N'AspNetUserLogins', N'UserId'),
   (N'dbo', N'UserWorkAllocations', N'Id'),
   (N'dbo', N'UserWorkAllocations', N'Roles'),
   (N'dbo', N'UserWorkAllocations', N'SystemUserId'),
@@ -7175,7 +7182,37 @@ INSERT @expected (SchemaName, TableName, ColumnName) VALUES
   (N'dbo', N'RE_DepartmentalCommentAudits', N'Outcome'),
   (N'dbo', N'RE_DepartmentalCommentAudits', N'Comments'),
   (N'dbo', N'RE_DepartmentalCommentAudits', N'SupportingDocumentFileId'),
-  (N'dbo', N'RE_DepartmentalCommentAudits', N'DateStamp');
+  (N'dbo', N'RE_DepartmentalCommentAudits', N'DateStamp'),
+  (N'dbo', N'PropertyLeaseApplications', N'RoundRobinQueueId'),
+  (N'dbo', N'Documents', N'RealEstateApplicationId'),
+  (N'dbo', N'DepartmentsCoEs', N'RepresentativeSystemUserId'),
+  (N'dbo', N'DocumentAudits', N'RealEstateApplicationId'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerSignature'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerOfficialNumber'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerSignDate'),
+  (N'dbo', N'LeaseTerminations', N'CEOSignature'),
+  (N'dbo', N'LeaseTerminations', N'CEOOfficialNumber'),
+  (N'dbo', N'LeaseTerminations', N'CEOSignDate'),
+  (N'dbo', N'LeaseTerminations', N'AccessCardNumber'),
+  (N'dbo', N'LeaseTerminations', N'KeyNumber'),
+  (N'dbo', N'LeaseTerminations', N'OtherPossessions'),
+  (N'dbo', N'LeaseTerminations', N'MaintenanceCost'),
+  (N'dbo', N'LeaseTerminations', N'ApprovedDeductions'),
+  (N'dbo', N'LeaseTerminations', N'NettRefundAmount'),
+  (N'dbo', N'LeaseTerminations', N'FinancialOfficerOfficialNumber'),
+  (N'dbo', N'LeaseTerminations', N'DepositRefundRecommended'),
+  (N'dbo', N'LeaseTerminations', N'FinancialOfficerReason'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerRefundSupport'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerRefundOfficialNumber'),
+  (N'dbo', N'LeaseTerminations', N'RevenueManagerRefundReason'),
+  (N'dbo', N'LeaseTerminations', N'CEORefundResponse'),
+  (N'dbo', N'LeaseTerminations', N'CEORefundOfficialNumber'),
+  (N'dbo', N'LeaseTerminations', N'CEORefundSignature'),
+  (N'dbo', N'LeaseTerminations', N'CEORefundSignDate'),
+  (N'dbo', N'LeaseTerminations', N'CEORefundReason'),
+  (N'dbo', N'PLMApplicationHistortyLogs', N'RealEstateApplicationId'),
+  (N'dbo', N'RoundRobinQueueAudits', N'RealEstateApplicationId'),
+  (N'dbo', N'RoundRobinQueues', N'RealEstateApplicationId');
 
 DECLARE @dbMigration nvarchar(150) = NULL;
 IF OBJECT_ID(N'dbo.__MigrationHistory', N'U') IS NOT NULL

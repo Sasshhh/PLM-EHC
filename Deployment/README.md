@@ -9,8 +9,13 @@ Deployment/
   Database/01-Restore-Database.sql        SQL: restore any .bak, files moved to this server's folders
   Database/02-Create-AppLogin.sql         SQL: app login/user, re-links orphaned users, least-privilege rights
   Database/03-Review-Environment-Settings.sql  SQL: lists AppSettings rows that still point at the old servers
+  Database/Upgrade-Database.ps1           one command: backup, then 10 + 20 + 25, then both checks
+  Database/10-Upgrade-Schema.sql          SQL: adds missing tables/columns (generated, additive only)
+  Database/20-Upgrade-MasterData.sql      SQL: adds missing master data (generated, insert-only)
+  Database/25-EHC-Gap-MasterData.sql      SQL: EHC keys the code needs that no repo script created
+  Database/30-Verify-MasterData.sql       SQL: lists keys the code looks up that the DB lacks
   Database/90-Verify-Schema.sql           SQL: compares the DB with the tables/columns this code expects
-  Database/tools/generate_schema_check.py regenerates 90-Verify-Schema.sql after model changes
+  Database/tools/                         generators for 10, 20, 30 and 90
   IIS/Install-Site.ps1                    web server: IIS features, app pool, site, bindings, permissions
   IIS/Set-WebConfig.ps1                   web server: connection strings + production hardening in Web.config
 ```
@@ -83,7 +88,7 @@ sqlcmd -S SQLHOST\INSTANCE -E -W -i 90-Verify-Schema.sql -v DbName="PropertyLeas
 
 - **MigrationState MATCH, no missing tables/columns**: done, go to step 5.
 - **Missing tables/columns**: the backup is older than the code. See
-  [Bringing an older database up to date](#bringing-an-older-database-up-to-date).
+  [Bringing an existing database up to date](#bringing-an-existing-database-up-to-date).
 
 ### 5. Point environment settings at the new servers
 
@@ -124,18 +129,35 @@ Build a new zip and run `Install-Site.ps1` again. It backs the current site up t
 `C:\inetpub\PLM_backup_<time>`, keeps the live `Web.config` and every upload/generated
 document folder, and replaces the code. Roll back by copying the backup folder back.
 
-## Bringing an older database up to date
+## Bringing an existing database up to date
 
-*To be finalised once the production backup has been checked against this branch.*
+For a database that already exists (a dev copy, a restored backup), one command does it:
 
-The schema has been changed two ways over time, so an old backup needs both:
+```powershell
+cd Deployment\Database
+.\Upgrade-Database.ps1 -Server localhost -Database PropertyLeaseManagementRealEstateFinal
+# SQL login instead of Windows auth:  -SqlCredential (Get-Credential sa)
+```
 
-1. **EF code-first migrations** up to `202605220446274_initmig34` (tracked in `dbo.__MigrationHistory`).
-2. **Hand-run scripts** for objects never put in migrations: the `AuditTrail_*` tables
-   (`DatabaseScripts\AuditTrail_CreateTables.sql`) and the Real Estate `RE_*` tables
-   (`AI Handover\RE_Complete_Schema_And_Seed.sql`, then `DatabaseScripts\dpre_plm_deployment_fixes.sql`).
+It takes a COPY_ONLY backup first, then runs, stopping at the first error:
 
-Re-run `90-Verify-Schema.sql` afterwards; both result lists must be empty.
+| Step | Script | What it does |
+|---|---|---|
+| 1 | `10-Upgrade-Schema.sql` | Creates missing tables (keys, indexes, FKs) and adds missing columns. Additive only. Generated from the EF model plus the C# models for tables/columns that were added by hand SQL (RE_*, AuditTrail_*, LeaseTerminations refund fields, ...). |
+| 2 | `20-Upgrade-MasterData.sql` | Inserts missing statuses, status types, action types, responsibility types, tracker messages, email texts, document types and checklists, roles, tenant-training slides and exam questions, complaint / payment transgression / service request lookups, and missing AppSettings keys. Insert-only, matched on natural key, FKs resolved by key. |
+| 3 | `25-EHC-Gap-MasterData.sql` | Eight EHC keys the code uses that no seed script in the repo ever created (hand-written, each traced to its code path). |
+| 4 | `90-Verify-Schema.sql` | Must list no missing tables or columns. |
+| 5 | `30-Verify-MasterData.sql` | Lists every key the code looks up that the DB still lacks. Keys starting `re_` are Real Estate (DPRE); a few belong to modules EHC never opens. |
+
+Every script is idempotent: a second run adds nothing. Logs go to `Deployment\Database\logs\<time>\`.
+Existing rows are never changed, so names or AppSettings values someone edited on dev stay as they are.
+New AppSettings rows carry dev values; review them with `03-Review-Environment-Settings.sql`.
+
+How `20-Upgrade-MasterData.sql` was built: the repo's ~25 seed scripts (statuses, UC021-UC030,
+complaints, training, maintenance, ...) were run in order on a scratch SQL Server 2019 database,
+with their bugs fixed on the way (hard-coded ids, wrong column names, `USE` of other databases,
+a transaction that swallowed its own error). `tools/generate_masterdata.py` then exported the
+combined result as one clean script. Re-generate it the same way when new seed scripts are added.
 
 ## Notes
 

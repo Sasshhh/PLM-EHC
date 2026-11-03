@@ -62,3 +62,4 @@ Thumbs.db
 ## Deployment kit build output ##
 Deployment/out/
 Deployment/Build/nuget.exe
+Deployment/Database/logs/

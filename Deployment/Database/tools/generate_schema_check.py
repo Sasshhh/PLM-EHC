@@ -33,7 +33,7 @@ def latest_snapshot():
 def ssdl_columns(edmx):
     ssdl = edmx[edmx.find('<StorageModels>'):edmx.find('</StorageModels>')]
     types = {}
-    for m in re.finditer(r'<EntityType Name="([^"]+)">(.*?)</EntityType>', ssdl, re.S):
+    for m in re.finditer(r'<EntityType Name="([^"]+)"[^>]*>(.*?)</EntityType>', ssdl, re.S):
         types[m.group(1)] = re.findall(r'<Property Name="([^"]+)"', m.group(2))
     rows, tables = [], set()
     for m in re.finditer(r'<EntitySet Name="([^"]+)" EntityType="[^"]*?\.([^".]+)" Schema="(\w+)" (?:\w+:)?Table="([^"]+)"', ssdl):
@@ -50,6 +50,8 @@ def ssdl_columns(edmx):
 def find_class(name):
     for path in glob.glob(os.path.join(MVC, 'Models', '**', '*.cs'), recursive=True):
         src = open(path, encoding='utf-8-sig', errors='ignore').read()
+        src = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
+        src = re.sub(r'(?<![:"])//[^\n]*', '', src)      # strip comments, keep "http://" in strings
         m = re.search(r'(\[Table\("([^"]+)"\)\]\s*)?public\s+(?:partial\s+)?class\s+' + re.escape(name) + r'\b[^{]*\{', src)
         if m:
             return src, m
@@ -97,6 +99,20 @@ def main():
         extra.append(table)
         rows += [('dbo', table, c) for c in cols]
 
+    # Columns the C# models have that the snapshot lacks (added later by hand SQL).
+    mapping = edmx[edmx.find('<Mappings>'):edmx.find('</Mappings>')]
+    ssdl = edmx[edmx.find('<StorageModels>'):edmx.find('</StorageModels>')]
+    set_table = dict(re.findall(r'<EntitySet Name="([^"]+)" EntityType="[^"]*" Schema="\w+" (?:\w+:)?Table="([^"]+)"', ssdl))
+    have = {(t, c) for _, t, c in rows}
+    for entity, eset in re.findall(r'<EntityTypeMapping TypeName="[^"]*?\.([^".]+)">\s*<MappingFragment StoreEntitySet="([^"]+)"', mapping):
+        t = set_table.get(eset)
+        if not t:
+            continue
+        for c in class_columns(entity)[1]:
+            if (t, c) not in have:
+                have.add((t, c))
+                rows.append(('dbo', t, c))
+
     lines = ["  (N'%s', N'%s', N'%s')" % r for r in rows]
     inserts = '\n'.join(
         'INSERT @expected (SchemaName, TableName, ColumnName) VALUES\n' + ',\n'.join(lines[i:i + 900]) + ';'
@@ -109,6 +125,8 @@ def main():
 
   Output
     1. Summary: latest EF migration in the DB vs. in the code, table/column counts.
+       MigrationState is informational only: 10-Upgrade-Schema.sql adds what is missing
+       without writing __MigrationHistory, and the app never checks it (SetInitializer(null)).
     2. Missing tables.
     3. Missing columns on tables that do exist.
   Empty result sets 2 and 3 mean the schema matches. Extra tables/columns in the
