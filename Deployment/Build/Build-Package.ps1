@@ -67,7 +67,7 @@ if (Test-Path $publish) { Remove-Item $publish -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $publish | Out-Null
 & $msbuild $proj /nologo /m /v:minimal `
     /p:Configuration=$Configuration /p:Platform=AnyCPU `
-    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishProvider=FileSystem `
+    /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:PublishProvider=FileSystem `
     /p:publishUrl="$publish" /p:DeleteExistingFiles=true /p:ExcludeApp_Data=false
 if ($LASTEXITCODE) { throw "MSBuild failed ($LASTEXITCODE)" }
 
