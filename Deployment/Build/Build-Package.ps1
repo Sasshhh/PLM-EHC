@@ -104,7 +104,7 @@ if ($notInProj) { Write-Warning ("{0} view(s) on disk are not in the .csproj and
 if (-not (Test-Path (Join-Path $publish 'Rotativa\wkhtmltopdf.exe'))) { $problems += 'Rotativa\wkhtmltopdf.exe missing (PDF generation will fail)' }
 if (-not (Test-Path (Join-Path $publish 'bin\C8.eServices.Mvc.dll'))) { $problems += 'bin\C8.eServices.Mvc.dll missing' }
 [xml]$wc = Get-Content (Join-Path $publish 'Web.config')
-if ($wc.configuration.'system.web'.compilation.debug -eq 'true') { $problems += 'Web.config still has compilation debug="true" (Release transform not applied?)' }
+if ($wc.SelectSingleNode("/configuration/system.web/compilation[@debug='true']")) { $problems += 'Web.config still has compilation debug="true" (Release transform not applied?)' }
 if ($problems) { $problems | ForEach-Object { Write-Error $_ -ErrorAction Continue }; throw 'Package checks failed.' }
 
 # --- 5. Version stamp + zip -----------------------------------------------------

@@ -1724,6 +1724,14 @@
     <Content Include="Views\Shared\_DocumentsPartialWarningLetter.cshtml" />
     <Content Include="Views\Shared\_DocumentsPartialWarningLetterHistory.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Section49\EmtPage.cshtml" />
+    <Content Include="Views\Section49\ErrorPage.cshtml" />
+    <Content Include="Views\Section49\FileBox.cshtml" />
+    <Content Include="Views\Section49\FullTitle.cshtml" />
+    <Content Include="Views\Section49\Index.cshtml" />
+    <Content Include="Views\Section49\LetterBox.cshtml" />
+    <Content Include="Views\Section49\Section49View.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\DepositRefunds.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\StartRefundProcess.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\UpdateRefundResponse.cshtml" />
