@@ -47,7 +47,7 @@ Write-Host $msbuild
 $webTargets = Get-ChildItem (Split-Path (Split-Path (Split-Path $msbuild))) -Recurse -Filter 'Microsoft.WebApplication.targets' -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $webTargets) { throw 'Microsoft.WebApplication.targets missing: add the "ASP.NET and web development build tools" workload.' }
 
-$nuget = (Get-Command nuget.exe -ErrorAction SilentlyContinue).Source
+$nuget = Get-Command nuget.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
 if (-not $nuget) {
     $nuget = Join-Path $PSScriptRoot 'nuget.exe'
     if (-not (Test-Path $nuget)) {
