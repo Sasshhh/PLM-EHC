@@ -9,6 +9,7 @@ Deployment/
   Database/01-Restore-Database.sql        SQL: restore any .bak, files moved to this server's folders
   Database/02-Create-AppLogin.sql         SQL: app login/user, re-links orphaned users, least-privilege rights
   Database/03-Review-Environment-Settings.sql  SQL: lists AppSettings rows that still point at the old servers
+  Database/PLM-Upgrade-ALL.sql            ONE file for SSMS: 10 + 20 + 25 + both checks (generated)
   Database/Upgrade-Database.ps1           one command: backup, then 10 + 20 + 25, then both checks
   Database/10-Upgrade-Schema.sql          SQL: adds missing tables/columns (generated, additive only)
   Database/20-Upgrade-MasterData.sql      SQL: adds missing master data (generated, insert-only)
@@ -131,7 +132,13 @@ document folder, and replaces the code. Roll back by copying the backup folder b
 
 ## Bringing an existing database up to date
 
-For a database that already exists (a dev copy, a restored backup), one command does it:
+For a database that already exists (a dev copy, a restored backup), the simplest route is
+**`Database/PLM-Upgrade-ALL.sql`**: back the database up, open the file in SSMS, pick the PLM
+database in the drop-down, Execute. It runs 10, 20 and 25 and then both checks, stops at the first
+error, refuses to run against master or a non-PLM database, and is safe to run again. Rebuild it with
+`python3 Deployment/Database/tools/build_single_script.py` whenever 10/20/25/30/90 change.
+
+Or from PowerShell, with an automatic backup and log files:
 
 ```powershell
 cd Deployment\Database
