@@ -58,3 +58,9 @@ Thumbs.db
 ## Logs ##
 *.log
 *.txt
+
+## Deployment kit build output ##
+Deployment/out/
+Deployment/Build/nuget.exe
+Deployment/Database/logs/
+__pycache__/
