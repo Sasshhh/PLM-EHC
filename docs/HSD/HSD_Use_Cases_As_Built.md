@@ -10,6 +10,17 @@ This document describes, step by step, how the Human Settlement Department (HSD)
 
 The use case numbers and names follow the HSD FRS (Version 3, 27/09/2023) so the two documents can be read side by side. Where the system's flow differs from the FRS, this document describes what the system does, not what the FRS says. The separate *HSD FRS Coverage* document lists the differences.
 
+## Test status
+
+This document was checked by a factory test on 10 November 2026 (branch HSD-Development at 2d63095, test database PropertyLeaseManagementRealEstate). That run covered 255 steps, and the screen text in this document was corrected to match what the system showed. Where the system does not work as described, the step says so and names the defect (D1 to D9 and N1 to N5 in *HSD_FRS_Coverage*).
+
+These steps were not tested:
+
+- tenant signing through the e-mailed link (UC-17, alternative flow 1);
+- the Regional Manager rejecting a *Renew for 24 months* recommendation;
+- the Reject options on UC-16, UC-17 and UC-18;
+- the "OTP already used" message.
+
 ## Roles
 
 The FRS role names map to system roles as follows.
@@ -51,7 +62,7 @@ If no user with the role is allocated to the complex/area, the step is not assig
 | Agreement rejected at any step | In Awaiting Agreement Of Lease Update |
 | Termination captured | Termination Due To Tenant Notice / Termination Due To Lease Not Renewed / Termination Due To Tenant Deceased |
 | Termination approved | In Awaiting Exit Inspection |
-| Exit inspection done | Awaiting CSO Vacating Confirmation |
+| Exit inspection done | In Awaiting Vacating Confirmation |
 | Vacated | Applicant Vacated The Unit |
 
 ## The end-to-end HSD flow
@@ -68,7 +79,7 @@ If no user with the role is allocated to the complex/area, the step is not assig
 
 **Main flow**
 
-1. User opens the PLM site and goes to the login page. The page shows **Sign in** with the fields *username or e-mail* and *password*, a **Remember login** tick box, the link **Forgot your password?** and the button **Sign In**.
+1. User opens the PLM site and goes to the login page. The page shows **Sign in** with the fields *username or e-mail* and *password*, the link **Forgot your password?** and the button **Sign In**.
 2. User enters their user name (or e-mail) and password and clicks **Sign In**.
 3. If the *Active Directory* setting is on, the system checks the password against the City's Active Directory; otherwise against the PLM user store.
 4. On success the system opens the landing page for the user's role. Housing Liaison Officer, Senior Housing Specialist and Regional Manager land on the **Human Settlement Dashboard - {user name}**. Back Office System Administrator and Super Administrators land on the admin inbox.
@@ -79,6 +90,8 @@ If no user with the role is allocated to the complex/area, the step is not assig
 
 **Notes on screen behaviour**
 
+- There is no **Remember login** tick box (it is commented out of the page).
+- Every role also sees the **Profile** and **Audit** menus. The Caretaker also sees the EHC **Maintenance** menus.
 - There is no "COE SSO" button. The WSO2/IAM sign-in was switched off in the code because the IAM server was decommissioned.
 
 # Home: Human Settlement Dashboard
@@ -103,13 +116,13 @@ These pages list leases with the columns *Applicant Name, Application Type, Appl
 2. The system opens a four-step wizard with an **Instructions** panel and the steps **1 Tenant Information**, **2 Spouse Information**, **3 Contact Person**, **4 Agreement Information**. Buttons along the bottom: **Cancel**, **Previous**, **Next**, **Submit**.
 3. **Step 1, Tenant Information.** User captures:
    - *Tenant Details:* Tenant Type (Natural Person only), First Name, Surname, ID Number (13 digits, validated), Date of Birth.
-   - *Contact Details:* Mobile Number (10 digits), Email Address, Home Number, Work Number.
+   - *Contact Details:* Mobile Number (10 digits), Email Address. (Home Number and Work Number exist in the model but are not shown.)
    - *Income Infomation:* Income Source, Sassa Number (when the source is a SASSA grant), Gross Income, Net Income, Total Income (calculated, read-only).
    - *Current Address:* Address, Suburb, Postal Code (4 digits).
 
    User clicks **Next**.
 4. The system validates the required fields on the step. Missing fields are highlighted and the wizard stays on the step. Otherwise it moves to **Spouse Information**.
-5. **Step 2, Spouse Information.** If there is a spouse, user ticks **Spouse Information?** and captures *Spouse Details* (First Name, Last Name, Gender, Title, Identification Type = South African ID, ID Number, **Nomimate For Take-Over?**), *Contact Details* (Mobile Number, Email Address), *Income Infomation* (Income Source, Sassa Number, Gross Income, Net Income, Total Income) and *Current Address* (Address, Suburb, Postal Code). Without the tick box the spouse fields stay hidden. User clicks **Next**.
+5. **Step 2, Spouse Information.** If there is a spouse, user ticks **Spouse Information?** and captures *Spouse Details* (First Name, Last Name, Gender, Title, Identification Type = South African ID (labelled *Nationality* on screen), ID Number, **Nomimate For Take-Over?**), *Contact Details* (Mobile Number, Email Address), *Income Infomation* (Income Source, Sassa Number, Gross Income, Net Income, Total Income) and *Current Address* (Address, Suburb, Postal Code). Without the tick box the spouse fields stay hidden. User clicks **Next**.
 6. **Step 3, Contact Person.** User captures *Contact Person Details* (First Name, Surname, Relationship, Title) and *Contact Details* (Mobile Number, Email). User clicks **Next**.
 7. **Step 4, Agreement Information.** User captures:
    - *Space Unit Details:* Complex/Area (only the user's allocated HSD complexes), Space/Unit No., Solar Ref., Income Brackets, Category, Typology (enabled after Category is chosen; options depend on the Category).
@@ -198,7 +211,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 7. User clicks **Yes, I am sure!**.
 8. The system compares the Regional Manager's outcome with the Housing Liaison Officer's recommendation:
    - **Approve** a *Renew for 24 months* recommendation, or **Reject** a *Not Renew* recommendation: the lease goes to *In Awaiting Tenant Renewal Acceptance*. The system generates a 4-digit One Time Pin, e-mails the tenant *"PLM: Agreement Renewal Acceptance"* with a link to accept or decline, sends the "renewal approved" message containing the OTP, and assigns **Accept Lease Renewal** to a Housing Liaison Officer.
-   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease goes back to *In Awaiting Agreement Recommendation Review* (Senior Housing Specialist) and the tenant gets the "renewal rejected" message.
+   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease status goes back to *In Awaiting Agreement Recommendation Review* and the tenant gets the "renewal rejected" message. **Tested 10/11/2026: no review item is created, the work item is an Accept Lease Renewal instead, so the lease appears in no user's list, the admin's included (defects D1 and N5; the history log records it as "Renewal Rejected").**
 
 **Alternative flows:** as UC-24.
 
@@ -223,7 +236,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 1. Tenant clicks the link in the *PLM: Agreement Renewal Acceptance* e-mail. No login is needed.
 2. If the lease is still awaiting acceptance, the system opens the renewal acceptance screen with **ACTION** and **ONE TIME PIN**; otherwise it shows *"An error has occurred while processing your request. Your application has moved to the next step!"*.
 3. Tenant selects the action, enters the OTP and clicks **Verifiy**, then **Yes, I am sure!**.
-4. The system processes it as in step 8 and shows the result.
+4. **Tested 10/11/2026: this does not work (defect N1).** The page posts back to a handler that does not exist, so it reloads and nothing is saved. The tenant has to accept through the Housing Liaison Officer (main flow).
 
 **Alternative flow 2: wrong OTP**
 
@@ -243,11 +256,11 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 1. User selects **Agreement Renewal** and then **Pending Renewal**.
 2. The system lists the user's leases under *Awaiting Agreement Renewal*.
 3. User clicks **Renewal Documents**.
-4. The system opens the **Documents Upload** panel for the six renewal documents: Identity Document, Payslip/Proof of Pension Grant, Bank Statemant, Confirmation of Employment, Affidavit Document, Proof of Residential Address (plus an optional Additional Document).
+4. The system opens the **Documents Upload** panel for the six renewal documents: Identity Document, Payslip/Proof of Pension Grant, Bank Statement, Confirmation of Employment, Affidavit Document, Proof of Residential Address (plus an optional Additional Document).
 5. For each document the user clicks the file chooser, selects the file and clicks **Upload**.
 6. User clicks **Finish**.
 7. The system checks that all six documents are uploaded. If any is missing it shows *"Please upload complete documents, {n} of 6 missing!"*.
-8. When complete, the system asks **"Are you sure you want to submit these documents?"**; user clicks **Yes, I am sure!**.
+8. When complete, the system submits straight away. There is no confirmation pop-up.
 9. The system extends the lease End Date, Renewal Notice and Termination Notice by 24 months (12 months for Dormitory units), sets the lease to *Agreement Of Lease Renewed Successfully*, sets the application to *In Awaiting Lease Agreement*, sends the "renewal documents uploaded" message and assigns **Generate Lease Agreement** to a Housing Liaison Officer.
 
 **Alternative flow:** user clicks **Back To List** to return without submitting.
@@ -266,7 +279,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 4. The system immediately generates the agreement of lease data, sets the application to *In Awaiting Lease Agreement Review*, assigns **Agreement Review** to a Senior Housing Specialist, sends the related notification and opens the **Generated Lease Agreement** screen (lease row under **Evaluating Application** plus *Document Type / Document*).
 5. User clicks **View** to download the Agreement of Lease PDF, filled from the HSD agreement template (tenant name, ID, unit, commencement and expiry dates, monthly amount, nominee).
 6. User clicks **Finish**.
-7. The system returns to the Agreement Generate list and shows *"Agreement of Lease Successfully Generated!"*.
+7. The system returns to the Agreement Generate list and shows **Succcess** – *"Succcessfully Actioned"* (spelled this way on screen).
 
 # UC-15 Review Lease Agreement
 
@@ -376,6 +389,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 3. User clicks **Update Agreement**.
 4. The system opens the Capture Master wizard pre-filled with the lease (same four steps and fields as UC-13).
 5. User corrects the details and clicks **Submit**.
+4a. The **Start Date** is not pre-filled. Re-entering it recalculates End Date, Renewal Notice and Termination Notice. **After a renewal this undoes the 24-month extension and sets the lease back to *Active Lease* (defect N2).**
 6. The system saves the changes, sets the application to *In Awaiting Lease Agreement* and assigns **Generate Lease Agreement** to a Housing Liaison Officer. The agreement then runs through UC-14 to UC-18 again.
 
 # UC-19 Capture Tenant Details (Manage Tenants)
@@ -393,16 +407,18 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 6. The system shows **"Are you sure you want to add this occupant?"**; user clicks **Yes, I am sure!**.
 7. The system saves the occupant as *Active Occupant* and shows **"Agreement Occupant Added Successfully."**
 8. User clicks **Upload Documents**.
-9. The system opens the document upload page for the lease (Identity Document, Payslip/Proof of Pension Grant, Bank Statemant, Confirmation of Employment, Affidavit Document, Proof of Residential Address, Additional Document). User browses, uploads and saves.
+9. The system opens the document upload page for the lease, offering Identity Document and Additional Document. User browses, uploads and saves.
 
 **Alternative flow 1: duplicate ID**
 
-5a. The ID number already exists on the lease. The system shows **Error – "Occupant has been added with the same ID"**.
+5a. The ID number already exists on the lease. The view has a check for this ("Occupant has been added with the same ID") but it is never called. **Tested 10/11/2026: the system shows a server error page instead (defect N3).**
 
 **Alternative flow 2: Activate / Deactivate**
 
 1. In **List of Active Occupant/s** user clicks **Deactivate**; the occupant moves to **List of Deactive Occupant/s**.
 2. In **List of Deactive Occupant/s** user clicks **Activate**; the occupant moves back to the active list.
+
+Note: the **List of Deactive Occupant/s** only shows while at least one occupant is active. If the only occupant is deactivated, they disappear from the screen and cannot be reactivated (defect N4).
 
 **Alternative flow 3:** user clicks **Return To Manage** to go back to the lease list.
 
@@ -418,7 +434,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 3. User enters the lease reference number and clicks **Submit**.
 4. The system shows **"Are you sure you want to this search this application?"**; user clicks **Yes, I am sure!**.
 5. The system opens the lease (*Lease Reference No, Tenant Type, Status, Captured Date, Tenant Name, Action/View*) and the transfer form.
-6. User selects **Reason For Transfer** (*Tenant Deceased* or *Other*) and **Preference** (the replacement tenant: one of the lease's active occupants, or the spouse captured on the lease). For *Other*, user can tick **Make main tenant an occupant?**. User confirms or edits **Email** and **Cell No.** and clicks **Submit**.
+6. User selects **Reason For Transfer** (*Tenant Deceased* or *Other*) and **Preference** (the replacement tenant: one of the lease's active occupants, or the spouse captured on the lease, which is listed as "Spouse" rather than by name). For *Other*, user can tick **Make main tenant an occupant?**. User confirms or edits **Email** and **Cell No.** and clicks **Submit**.
 7. The system shows **"Are you sure you want to submit this recommendation?"**; user clicks **Yes, I am sure!**.
 8. The system replaces the main tenant's name, ID and contact details on the same lease with the selected person's details, deactivates that person as an occupant, and for *Other* with the tick box adds the previous main tenant as an active occupant. It sends the "transfer successful" message and shows **"Agreement Of Lease Successfully Transferred to {name}."**
 
@@ -464,7 +480,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 
 1. User selects **Notice** and then **Serve Notice**.
 2. The system opens the notice search with **Application Reference Number**.
-3. User enters the reference number and clicks **Submit**.
+3. User enters the reference number and clicks **Submit**. The pop-up reads **"Are you sure you want to send notice for this application?"**; user clicks **Yes, I am sure!**.
 4. The system opens the lease (*Applicant Name, Application Type, Application Reference Number, Agreement Created Date, Status, Action/View*) and the **Notice Date** field.
 5. User selects the notice (termination) date and clicks **Submit**.
 6. The system shows **"Are you sure you want to send notice for this application?"**; user clicks **Yes, I am sure!**.
@@ -512,7 +528,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 
 1. User selects **Terminations** and then **Terminate Agreement**.
 2. The system opens **Agreement Of Lease Termination** with **Application Reference Number**.
-3. User enters the reference number and clicks **Submit**; confirms with **Yes, I am sure!**.
+3. User enters the reference number and clicks **Submit**; the pop-up reads **"Are you sure you want to send notice for this application?"**; user confirms with **Yes, I am sure!**.
 4. The system opens **Evaluating Application** with the lease row, **Notice Date** (only if a notice was served), **Termination Date** and **Termination Reason**.
 5. User selects **Termination Date** and **Termination Reason** (*Lease not renewed* or *Tenant Deceased*; *Tenant Notice* is added when a notice was served) and clicks **Submit**.
 6. The system shows **"Are you sure you want to send notice for this application?"**; user clicks **Yes, I am sure!**.
@@ -557,7 +573,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 5. User downloads the template, completes the inspection, uploads the completed document(s) with **Upload**.
 6. User selects **Approval Status** (*Habitable - No defects*, *Habitable - Minor defects* or *Not Habitable*) and clicks **Submit**.
 7. The system shows **"Are you sure you want to submit the following document approval?"**; user clicks **Yes, I am sure!**.
-8. For all three outcomes the system sets the lease and application to *Awaiting CSO Vacating Confirmation*, sends the tenant a notice message, closes the inspection item and assigns **Pending Take-Off** to a Housing Liaison Officer.
+8. For all three outcomes the system sets the lease and application to *In Awaiting Vacating Confirmation*, sends the tenant a notice message, closes the inspection item and assigns **Pending Take-Off** to a Housing Liaison Officer.
 
 **Alternative flow: No** – the pop-up closes and the screen is unchanged.
 
@@ -569,7 +585,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 **Main flow**
 
 1. User selects **Terminations** and then **Pending Take-Off**.
-2. The system lists the user's leases in *Awaiting CSO Vacating Confirmation*.
+2. The system lists the user's leases in *In Awaiting Vacating Confirmation*.
 3. User clicks **Confirmation**.
 4. The system opens **Evaluating Application** and **Vacating Applicant Action** with **Tenant Vacated** (*Vacated* / *Not Vacated*).
 5. User selects *Vacated* and clicks **Submit**.
@@ -578,7 +594,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 
 **Alternative flow 1: Not Vacated**
 
-5a. User selects *Not Vacated*. The lease stays in *Awaiting CSO Vacating Confirmation* and the take-off item is closed.
+5a. User selects *Not Vacated*. The lease stays in *In Awaiting Vacating Confirmation* and the take-off item is closed.
 
 **Alternative flow 2: No** – the pop-up closes and the screen is unchanged.
 
