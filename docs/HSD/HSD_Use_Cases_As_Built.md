@@ -6,15 +6,15 @@ date: "10 November 2026"
 
 # About this document
 
-This document describes, step by step, how the Human Settlement Department (HSD) part of the PLM system works **today**. It was written from the application code on the shared (mixed EHC + Real Estate + HSD) build, commit `e27d7f4`, which is the build packaged for deployment on 3 November 2026. Menu names, page titles, field labels, button captions and pop-up messages are quoted exactly as they appear on screen, including their spelling.
+This document describes, step by step, how the Human Settlement Department (HSD) part of the PLM system works **today**. Menu names, page titles, field labels, button captions and pop-up messages are quoted exactly as they appear on screen, including their spelling.
 
 The use case numbers and names follow the HSD FRS (Version 3, 27/09/2023) so the two documents can be read side by side. Where the system's flow differs from the FRS, this document describes what the system does, not what the FRS says. The separate *HSD FRS Coverage* document lists the differences.
 
-## Test status
+## Known issues
 
-This document was checked by a factory test on 10 November 2026 (branch HSD-Development at 2d63095, test database PropertyLeaseManagementRealEstate). That run covered 255 steps, and the screen text in this document was corrected to match what the system showed. Where the system does not work as described, the step says so and names the defect (BUG-01 to BUG-14 in *HSD_FRS_Coverage*).
+Where the system does not work as described, the step says so and names the bug (BUG-01 to BUG-14 in *HSD_FRS_Coverage*).
 
-These steps were not tested:
+These steps have not been verified yet:
 
 - tenant signing through the e-mailed link (UC-17, alternative flow 1);
 - the Regional Manager rejecting a *Renew for 24 months* recommendation;
@@ -92,7 +92,7 @@ If no user with the role is allocated to the complex/area, the step is not assig
 
 - There is no **Remember login** tick box (it is commented out of the page).
 - Every role also sees the **Profile** and **Audit** menus. The Caretaker also sees the EHC **Maintenance** menus.
-- There is no "COE SSO" button. The WSO2/IAM sign-in was switched off in the code because the IAM server was decommissioned.
+- There is no "COE SSO" button. The WSO2/IAM sign-in is switched off because the IAM server was decommissioned.
 
 # Home: Human Settlement Dashboard
 
@@ -211,7 +211,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 7. User clicks **Yes, I am sure!**.
 8. The system compares the Regional Manager's outcome with the Housing Liaison Officer's recommendation:
    - **Approve** a *Renew for 24 months* recommendation, or **Reject** a *Not Renew* recommendation: the lease goes to *In Awaiting Tenant Renewal Acceptance*. The system generates a 4-digit One Time Pin, e-mails the tenant *"PLM: Agreement Renewal Acceptance"* with a link to accept or decline, sends the "renewal approved" message containing the OTP, and assigns **Accept Lease Renewal** to a Housing Liaison Officer.
-   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease status goes back to *In Awaiting Agreement Recommendation Review* and the tenant gets the "renewal rejected" message. **Tested 10/11/2026: no review item is created, the work item is an Accept Lease Renewal instead, so the lease appears in no user's list, the admin's included (BUG-01 and BUG-13; the history log records it as "Renewal Rejected").**
+   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease status goes back to *In Awaiting Agreement Recommendation Review* and the tenant gets the "renewal rejected" message. **No review item is created, the work item is an Accept Lease Renewal instead, so the lease appears in no user's list, the admin's included (BUG-01 and BUG-13; the history log records it as "Renewal Rejected").**
 
 **Alternative flows:** as UC-24.
 
@@ -236,7 +236,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 1. Tenant clicks the link in the *PLM: Agreement Renewal Acceptance* e-mail. No login is needed.
 2. If the lease is still awaiting acceptance, the system opens the renewal acceptance screen with **ACTION** and **ONE TIME PIN**; otherwise it shows *"An error has occurred while processing your request. Your application has moved to the next step!"*.
 3. Tenant selects the action, enters the OTP and clicks **Verifiy**, then **Yes, I am sure!**.
-4. **Tested 10/11/2026: this does not work (BUG-03).** The page posts back to a handler that does not exist, so it reloads and nothing is saved. The tenant has to accept through the Housing Liaison Officer (main flow).
+4. **This does not work (BUG-03).** The page posts back to a handler that does not exist, so it reloads and nothing is saved. The tenant has to accept through the Housing Liaison Officer (main flow).
 
 **Alternative flow 2: wrong OTP**
 
@@ -411,7 +411,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 
 **Alternative flow 1: duplicate ID**
 
-5a. The ID number already exists on the lease. The view has a check for this ("Occupant has been added with the same ID") but it is never called. **Tested 10/11/2026: the system shows a server error page instead (BUG-05).**
+5a. The ID number already exists on the lease. The view has a check for this ("Occupant has been added with the same ID") but it is never called. **The system shows a server error page instead (BUG-05).**
 
 **Alternative flow 2: Activate / Deactivate**
 
