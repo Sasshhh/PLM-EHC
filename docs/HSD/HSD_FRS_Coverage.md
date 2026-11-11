@@ -27,7 +27,6 @@ The core lease flow works end to end: capture, the agreement chain, renewal, not
 2. **No finance link.** Finance is not told about a new lease (FR4.7), the rental amount is not calculated from the tariff (FR5.1, BR18), arrears cannot be captured (FR13.5), and there is no SOLAR account balance.
 3. **Renewals do not start by themselves.** Leases only enter the renewal queue when someone opens a renewal page (FR7.1).
 4. **Bugs.** 14 bugs were found, 5 of them high severity. Some lease outcomes are routed wrongly or drop out of every list. See *Bugs found* at the end.
-5. **A fresh database cannot capture HSD leases.** The HSD lookup tables are not seeded by the deployment scripts.
 
 # Functional requirements
 
@@ -142,9 +141,3 @@ These are places where the system does something wrong, not just something missi
 | BUG-12 | Low | UC-30 termination reasons | *End of lease term (60th month)* is not offered in the drop-down. |
 | BUG-13 | Low | UC-26 history | The Regional Manager's *Approve* of a *Not Renew* is recorded in the history as "Renewal Rejected". |
 | BUG-14 | Low | Tenant self-service links | The renewal and signature links open without a login and rely only on a 4-digit OTP. This should get a security review. |
-
-# Go-live setup gaps
-
-- **HSD lookup tables are empty on a new database.** Income brackets, unit categories, typologies and escalation tariffs are not loaded by the deployment scripts, so Capture Master cannot be submitted until they are loaded.
-- **HSD users and allocations must be set up.** Each HSD complex needs a Housing Liaison Officer, Senior Housing Specialist and Regional Manager allocated, otherwise work is not queued (BUG-11).
-- **EDRMS setting.** With EDRMS switched on, every document upload hangs unless the City EDRMS can be reached from the server.
