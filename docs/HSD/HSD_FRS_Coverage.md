@@ -1,20 +1,16 @@
 ---
 title: "HSD Property Lease Management: FRS Coverage"
-subtitle: "What the system covers today against the HSD FRS (Version 3)"
-date: "10 November 2026"
+subtitle: "What the system covers against the HSD FRS (Version 3)"
+date: "11 November 2026"
 ---
 
 # About this document
 
-This document checks every requirement in the HSD FRS against the system as it is built today (the mixed build released for testing, branch `claude/project-thread-uu2jvy`, commit e27d7f4). How each screen works step by step is in *HSD_Use_Cases_As_Built*.
-
-Each requirement gets one of three ratings:
+This document lists, for each item in the HSD FRS, whether the system covers it, partially covers it or does not cover it. It ends with the bugs found in the current system. How each screen works step by step is in *HSD_Use_Cases_As_Built*.
 
 - **Covered:** the system does what the FRS asks.
 - **Partially covered:** the screen or step exists, but part of the requirement is missing or works differently.
 - **Not covered:** nothing in the system does this.
-
-The evidence for each rating comes from the code and the configuration: `HumanSettlementApplicationController`, the HSD views, the side nav in `RCS_Layout.cshtml`, and the master data scripts.
 
 # Summary
 
@@ -30,7 +26,7 @@ The core lease flow works end to end: capture, the agreement chain, renewal, not
 1. **No reports.** None of IR1 to IR8 exist for HSD.
 2. **No finance link.** Finance is not told about a new lease (FR4.7), the rental amount is not calculated from the tariff (FR5.1, BR18), arrears cannot be captured (FR13.5), and there is no SOLAR account balance.
 3. **Renewals do not start by themselves.** Leases only enter the renewal queue when someone opens a renewal page (FR7.1).
-4. **Some outcomes are routed wrongly or lost.** All nine defects found in the review were confirmed by the factory test on 10 November 2026, and the test found five more, three of them high severity. See *Defects found during the review* at the end.
+4. **Bugs.** 14 bugs were found, 5 of them high severity. Some lease outcomes are routed wrongly or drop out of every list. See *Bugs found* at the end.
 5. **A fresh database cannot capture HSD leases.** The HSD lookup tables are not seeded by the deployment scripts.
 
 # Functional requirements
@@ -52,13 +48,13 @@ The core lease flow works end to end: capture, the agreement chain, renewal, not
 | FR7.1 | Automatic notification three months before the lease ends | Partially covered | The tenant is notified and the lease enters the renewal queue from the Renewal Notice date, which is two months before the end month, not three. This only happens when a user opens a renewal list page. Nothing runs on a schedule. |
 | FR7.2 | HLO recommends renewal | Covered | Agreement Renewal › Recommendations, with outcome and comment. The account balance panel shows the deposit, not the real balance, and the complaints table is always empty. |
 | FR7.3 | Senior Housing Specialist reviews renewal | Covered | Agreement Renewal › Pending Review (*Seconded* / *Not Seconded*). Both outcomes go to the Regional Manager. |
-| FR7.4 | Senior Manager Operations approves renewal | Partially covered | Agreement Renewal › Pending Approval exists, but the routing is wrong for *Not Renew* recommendations and for second renewals. See defects D1 and D2. |
-| FR7.5 | HLO or tenant (self-service) indicates whether to continue or terminate | Partially covered | Agreement Renewal › Pending Acceptance works with an OTP. The tenant e-mail link opens but cannot submit (defect N1). When the tenant declines, the lease is marked as ending at period end, but no work item is created, so no one is prompted to terminate it. |
+| FR7.4 | Senior Manager Operations approves renewal | Partially covered | Agreement Renewal › Pending Approval exists, but the routing is wrong for *Not Renew* recommendations and for second renewals. See BUG-01 and BUG-02. |
+| FR7.5 | HLO or tenant (self-service) indicates whether to continue or terminate | Partially covered | Agreement Renewal › Pending Acceptance works with an OTP. The tenant e-mail link opens but cannot submit (BUG-03). When the tenant declines, the lease is marked as ending at period end, but no work item is created, so no one is prompted to terminate it. |
 | FR7.6 | Upload the final renewed lease; tenant submits latest documents | Covered | Agreement Renewal › Pending Renewal takes the six documents, extends the lease and sends it back through the agreement chain (Generate to Finalized Agreement). |
 | FR8.1 | Officials capture notice to terminate | Covered | Notice › Serve Notice records the notice date, with the one-calendar-month and last-day-of-month rules. |
-| FR8.2 | Capture termination details, including date and reason | Partially covered | Terminations › Terminate Agreement captures date and reason. The FRS reason *End of lease term (60th month)* is handled in the code but not offered in the drop-down. |
+| FR8.2 | Capture termination details, including date and reason | Partially covered | Terminations › Terminate Agreement captures date and reason. The FRS reason *End of lease term (60th month)* is not offered in the drop-down. |
 | FR8.3 | Review termination and validate account | Partially covered | Terminations › Pending Review takes financial documents and approves. The account balance shown is the deposit only (no SOLAR balance), and there is no Reject option. |
-| FR8.4 | Confirm the tenant has vacated | Partially covered | Terminations › Pending Take-Off records *Vacated*. *Not Vacated* closes the work item and the lease drops out of every list (defect D4). Nobody is told the unit is free. |
+| FR8.4 | Confirm the tenant has vacated | Partially covered | Terminations › Pending Take-Off records *Vacated*. *Not Vacated* closes the work item and the lease drops out of every list (BUG-07). Nobody is told the unit is free. |
 | FR8.5 | Capture a serve notice | Covered | Terminations › Noticed Agreements lists the noticed leases and carries them into termination with reason *Tenant Notice*. |
 | FR9.1 | Create individual letters, texts or e-mails ad hoc | Partially covered | Communication › New Communication sends SMS and e-mail to one tenant or whole complexes. The *Postal* tick box does nothing, so no letter is produced. |
 | FR9.2 | Store copies of communications against the record | Partially covered | Individual messages are copied to the lease's history log. Complex-wide messages and system messages are only in the outgoing mail/SMS queue and cannot be viewed from the lease. |
@@ -83,7 +79,7 @@ The core lease flow works end to end: capture, the agreement chain, renewal, not
 | BR14 | Deposits are refundable once outstanding amounts are settled | Not covered | The system shows the deposit held but has no refund calculation, settlement check or refund step. |
 | BR16 | Rent continues until the tenant is confirmed vacated | Not covered | Nothing is sent to billing when a lease is terminated or vacated, so the system neither stops nor continues rent. |
 | BR17 | Leases are renewed every two years and income status is reviewed | Partially covered | The two-year renewal works. Income is not reviewed: the renewal screens do not show or update the tenant's income, apart from the payslip and bank statement uploads. |
-| BR18 | Rental amount is calculated from the Housing Rental Tariff schedule | Not covered | The rental amount is typed in by hand. The tariff lookup exists in the code but is never called. |
+| BR18 | Rental amount is calculated from the Housing Rental Tariff schedule | Not covered | The rental amount is typed in by hand. The tariff lookup is not used. |
 
 BR2, BR9 and BR15 are not listed in the FRS.
 
@@ -98,19 +94,19 @@ BR2, BR9 and BR15 are not listed in the FRS.
 | UC-16 | Approve Lease Agreement | Agreements › Agreement Approval | Covered | Signature not enforced before Approve. The SHS is not told about a rejection. |
 | UC-17 | Accept Lease Agreement | Agreements › Agreement Signature, or tenant e-mail link | Covered | |
 | UC-18 | Upload Signed Lease Agreement | Agreements › Finalized Agreement | Partially covered | No Finance notification. |
-| UC-19 | Capture Tenant Details | Department Tenants › Manage Tenants | Partially covered | No photograph. Duplicate ID crashes (N3); lone deactivated occupant cannot be reactivated (N4). |
+| UC-19 | Capture Tenant Details | Department Tenants › Manage Tenants | Partially covered | No photograph. Duplicate ID crashes (BUG-05); lone deactivated occupant cannot be reactivated (BUG-10). |
 | UC-20 | Transfer Lease | Department Tenants › Transfer Lease | Partially covered | No approval; the previous tenant's details are overwritten. |
 | UC-23 | Send Communication to Tenants | Communication › New Communication | Partially covered | Postal does nothing; complex messages say "Tenants". |
 | UC-24 | Recommend Lease Renewal | Agreement Renewal › Recommendations | Partially covered | Starts only when a renewal page is opened; balance is the deposit; complaints always empty. |
 | UC-25 | Review Lease Renewal Recommendation | Agreement Renewal › Pending Review | Covered | |
-| UC-26 | Approve Lease Renewal | Agreement Renewal › Pending Approval | Partially covered | Defects D1 and D2. |
-| UC-27 | Accept Lease Renewal | Agreement Renewal › Pending Acceptance, or tenant e-mail link | Partially covered | The tenant link cannot submit (N1). Decline creates no follow-up (D5). |
+| UC-26 | Approve Lease Renewal | Agreement Renewal › Pending Approval | Partially covered | BUG-01, BUG-02. |
+| UC-27 | Accept Lease Renewal | Agreement Renewal › Pending Acceptance, or tenant e-mail link | Partially covered | The tenant link cannot submit (BUG-03). Decline creates no follow-up (BUG-08). |
 | UC-28 | Renew Lease | Agreement Renewal › Pending Renewal | Covered | |
 | UC-29 | Capture Notice to Terminate | Notice › Serve Notice | Covered | |
 | UC-30 | Capture Lease Termination | Terminations › Terminate Agreement | Covered | 60th-month reason missing from the drop-down. |
 | UC-31 | Review Termination and Validate Account | Terminations › Pending Review | Covered | No SOLAR balance, no Reject. |
 | UC-32 | Conduct Exit Unit Inspection | Inspections › Post-Inspection | Covered | No photos, no comment, outcome does not change the route. |
-| UC-33 | Confirm Tenant Vacated | Terminations › Pending Take-Off | Partially covered | Defect D4. |
+| UC-33 | Confirm Tenant Vacated | Terminations › Pending Take-Off | Partially covered | BUG-07. |
 | UC-34 | Serve Notice | Terminations › Noticed Agreements | Covered | |
 
 # Reports and integration
@@ -126,36 +122,29 @@ BR2, BR9 and BR15 are not listed in the FRS.
 | IR8 | Waiting list report | Not covered | HSD has no waiting list. |
 | IR01 | Login integration (WSO2/IAM) | Not covered | Replaced by system login and optional Active Directory. |
 
-# Defects found during the review
+# Bugs found
 
-These are places where the system does something wrong, not just something missing. They are worth fixing before HSD goes live.
-
-The factory test on 10 November 2026 confirmed **all nine (D1 to D9)** and found five more (N1 to N5, below). Results and screenshots are on Sash's PC in `Factory Testing\HSD\` (HSD_Factory_Test_Results.xlsx, DEFECTS.md, Evidence).
-
-| # | Where | What happens | Effect |
-|---|---|---|---|
-| D1 | UC-26 Approve Lease Renewal | The result depends on the HLO's recommendation, not on the Regional Manager's decision alone. Approving a *Not Renew* sends the lease back to the SHS; rejecting a *Not Renew* sends it to the tenant to accept a renewal. | Confirmed, and worse: approving a *Not Renew* sets the status back to review but creates an Accept Lease Renewal item, so the lease is in no user's list, the admin's included. Rejecting a *Not Renew* offers the tenant a renewal. |
-| D2 | UC-26, second renewal | The system reads the first renewal action ever recorded for the lease. | From the second renewal cycle, the Regional Manager's outcome is compared with the old cycle's recommendation. |
-| D3 | UC-24 renewal trigger | Leases are put up for renewal only when someone opens a renewal list page, and the category filter (BR8) is commented out. | If no one opens the page, tenants are not notified. All lease categories are put up for renewal. |
-| D4 | UC-33 *Not Vacated* | The work item is closed and the lease stays in *Awaiting CSO Vacating Confirmation* with no queue. | The lease disappears from every list and can only be found in the database. |
-| D5 | UC-27 tenant declines | The lease is marked *Terminating At Lease Period End*, but no work item is created. | Nobody is prompted to terminate the lease at the end date. |
-| D6 | UC-30 termination reasons | *End of lease term (60th month)* is handled in the code but not in the drop-down. | The FRS reason cannot be chosen. |
-| D7 | UC-32 exit inspection | All three outcomes go to vacating confirmation, and the tenant is sent the serve-notice message. | *Not Habitable* is not followed up, and the tenant gets the wrong message. |
-| D8 | Queues | If no user with the right role is allocated to the complex, the step is not assigned and no error is shown. | Leases can stall silently. Check work allocations for every HSD complex before go-live. |
-| D9 | Tenant self-service links | The renewal and signature links open without a login and rely only on the 4-digit OTP. | Acceptable for the FRS, but worth a security review before go-live. |
-
-## New defects found in testing
+These are places where the system does something wrong, not just something missing. All of them should be fixed before HSD goes live.
 
 | # | Severity | Where | What happens |
 |---|---|---|---|
-| N1 | High | UC-27 tenant e-mail link | The tenant cannot accept or decline the renewal. The page posts back to `HumanAgreementRenewalAcceptance`, which has no POST handler, so it reloads and nothing is saved. FR7.5 self-service does not work. |
-| N2 | High | Agreement Update after a renewal | Start Date is not pre-filled. Re-entering it recalculates the dates, which undoes the renewal (end date 2030-12-31 went back to 2028-12-31) and sets the lease back to *Active Lease*. |
-| N3 | High | UC-19 add occupant | Adding an occupant whose ID is already on the lease crashes with a server error ("Property set method not found"). The duplicate check in the view is never called. |
-| N4 | Medium | UC-19 deactivate occupant | The Deactive list only shows while another occupant is active, so a lone deactivated occupant cannot be reactivated. |
-| N5 | Low | UC-26 | The Regional Manager's *Approve* of a *Not Renew* is logged as "Renewal Rejected". |
+| BUG-01 | High | UC-26 Approve Lease Renewal | The outcome depends on the Housing Liaison Officer's recommendation, not on the Regional Manager's decision alone. If the Regional Manager approves a *Not Renew*, the lease drops out of every user's list, the administrator's included. Rejecting a *Not Renew* offers the tenant a renewal. |
+| BUG-02 | High | UC-26, second renewal | From the second renewal cycle onward, the Regional Manager's outcome is compared with the first cycle's recommendation, so the lease can be routed the wrong way. |
+| BUG-03 | High | UC-27 tenant e-mail link | The tenant cannot accept or decline the renewal from the e-mailed link. The page reloads and nothing is saved. |
+| BUG-04 | High | Agreement Update after a renewal | Start Date is not pre-filled. Re-entering it recalculates the dates, which undoes the renewal (for example, the end date goes back from 2030-12-31 to 2028-12-31) and sets the lease back to *Active Lease*. |
+| BUG-05 | High | UC-19 add occupant | Adding an occupant whose ID number is already on the lease shows a server error page instead of a message. |
+| BUG-06 | Medium | UC-24 renewal trigger | Leases are only put up for renewal when someone opens a renewal list page, and every lease category is included (BR8). If nobody opens the page, tenants are not notified. |
+| BUG-07 | Medium | UC-33 *Not Vacated* | The work item is closed and the lease stays in *In Awaiting Vacating Confirmation* with no queue, so it disappears from every list. |
+| BUG-08 | Medium | UC-27 tenant declines | The lease is marked *Terminating At Lease Period End*, but no work item is created, so nobody is prompted to terminate it. |
+| BUG-09 | Medium | UC-32 exit inspection | All three outcomes go to vacating confirmation, so *Not Habitable* is not followed up. The tenant is sent the "You have served notice" message even when they never served notice. |
+| BUG-10 | Medium | UC-19 deactivate occupant | The deactivated list only shows while another occupant is active, so a lone deactivated occupant cannot be reactivated. |
+| BUG-11 | Medium | Work queues | If no user with the right role is allocated to the complex, the step is not assigned to anyone and no error is shown. Leases can stall without anyone knowing. |
+| BUG-12 | Low | UC-30 termination reasons | *End of lease term (60th month)* is not offered in the drop-down. |
+| BUG-13 | Low | UC-26 history | The Regional Manager's *Approve* of a *Not Renew* is recorded in the history as "Renewal Rejected". |
+| BUG-14 | Low | Tenant self-service links | The renewal and signature links open without a login and rely only on a 4-digit OTP. This should get a security review. |
 
-## Deployment gaps found in testing
+# Go-live setup gaps
 
-- **HSD lookup tables are empty on a fresh database.** Income brackets, unit categories, typologies and escalation tariffs are not seeded by any script in `Deployment/`, so Capture Master cannot be submitted. For the test they were copied from CRMPLMDEV_2025. They need a seed script before go-live.
-- **No HSD users or allocations.** Nobody held the Housing Liaison Officer, Senior Housing Specialist or Regional Manager roles, and there were no work allocations, so nothing would be queued (D8).
-- **EDRMS setting.** With `EDRMSACTIVE` on, every document upload hangs unless the City EDRMS is reachable from the server.
+- **HSD lookup tables are empty on a new database.** Income brackets, unit categories, typologies and escalation tariffs are not loaded by the deployment scripts, so Capture Master cannot be submitted until they are loaded.
+- **HSD users and allocations must be set up.** Each HSD complex needs a Housing Liaison Officer, Senior Housing Specialist and Regional Manager allocated, otherwise work is not queued (BUG-11).
+- **EDRMS setting.** With EDRMS switched on, every document upload hangs unless the City EDRMS can be reached from the server.

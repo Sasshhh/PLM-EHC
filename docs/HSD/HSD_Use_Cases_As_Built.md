@@ -12,7 +12,7 @@ The use case numbers and names follow the HSD FRS (Version 3, 27/09/2023) so the
 
 ## Test status
 
-This document was checked by a factory test on 10 November 2026 (branch HSD-Development at 2d63095, test database PropertyLeaseManagementRealEstate). That run covered 255 steps, and the screen text in this document was corrected to match what the system showed. Where the system does not work as described, the step says so and names the defect (D1 to D9 and N1 to N5 in *HSD_FRS_Coverage*).
+This document was checked by a factory test on 10 November 2026 (branch HSD-Development at 2d63095, test database PropertyLeaseManagementRealEstate). That run covered 255 steps, and the screen text in this document was corrected to match what the system showed. Where the system does not work as described, the step says so and names the defect (BUG-01 to BUG-14 in *HSD_FRS_Coverage*).
 
 These steps were not tested:
 
@@ -211,7 +211,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 7. User clicks **Yes, I am sure!**.
 8. The system compares the Regional Manager's outcome with the Housing Liaison Officer's recommendation:
    - **Approve** a *Renew for 24 months* recommendation, or **Reject** a *Not Renew* recommendation: the lease goes to *In Awaiting Tenant Renewal Acceptance*. The system generates a 4-digit One Time Pin, e-mails the tenant *"PLM: Agreement Renewal Acceptance"* with a link to accept or decline, sends the "renewal approved" message containing the OTP, and assigns **Accept Lease Renewal** to a Housing Liaison Officer.
-   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease status goes back to *In Awaiting Agreement Recommendation Review* and the tenant gets the "renewal rejected" message. **Tested 10/11/2026: no review item is created, the work item is an Accept Lease Renewal instead, so the lease appears in no user's list, the admin's included (defects D1 and N5; the history log records it as "Renewal Rejected").**
+   - **Reject** a *Renew for 24 months* recommendation, or **Approve** a *Not Renew* recommendation: the lease status goes back to *In Awaiting Agreement Recommendation Review* and the tenant gets the "renewal rejected" message. **Tested 10/11/2026: no review item is created, the work item is an Accept Lease Renewal instead, so the lease appears in no user's list, the admin's included (BUG-01 and BUG-13; the history log records it as "Renewal Rejected").**
 
 **Alternative flows:** as UC-24.
 
@@ -236,7 +236,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 1. Tenant clicks the link in the *PLM: Agreement Renewal Acceptance* e-mail. No login is needed.
 2. If the lease is still awaiting acceptance, the system opens the renewal acceptance screen with **ACTION** and **ONE TIME PIN**; otherwise it shows *"An error has occurred while processing your request. Your application has moved to the next step!"*.
 3. Tenant selects the action, enters the OTP and clicks **Verifiy**, then **Yes, I am sure!**.
-4. **Tested 10/11/2026: this does not work (defect N1).** The page posts back to a handler that does not exist, so it reloads and nothing is saved. The tenant has to accept through the Housing Liaison Officer (main flow).
+4. **Tested 10/11/2026: this does not work (BUG-03).** The page posts back to a handler that does not exist, so it reloads and nothing is saved. The tenant has to accept through the Housing Liaison Officer (main flow).
 
 **Alternative flow 2: wrong OTP**
 
@@ -389,7 +389,7 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 3. User clicks **Update Agreement**.
 4. The system opens the Capture Master wizard pre-filled with the lease (same four steps and fields as UC-13).
 5. User corrects the details and clicks **Submit**.
-4a. The **Start Date** is not pre-filled. Re-entering it recalculates End Date, Renewal Notice and Termination Notice. **After a renewal this undoes the 24-month extension and sets the lease back to *Active Lease* (defect N2).**
+4a. The **Start Date** is not pre-filled. Re-entering it recalculates End Date, Renewal Notice and Termination Notice. **After a renewal this undoes the 24-month extension and sets the lease back to *Active Lease* (BUG-04).**
 6. The system saves the changes, sets the application to *In Awaiting Lease Agreement* and assigns **Generate Lease Agreement** to a Housing Liaison Officer. The agreement then runs through UC-14 to UC-18 again.
 
 # UC-19 Capture Tenant Details (Manage Tenants)
@@ -411,14 +411,14 @@ Each time any user opens an **Agreement Renewal** list page, the system checks a
 
 **Alternative flow 1: duplicate ID**
 
-5a. The ID number already exists on the lease. The view has a check for this ("Occupant has been added with the same ID") but it is never called. **Tested 10/11/2026: the system shows a server error page instead (defect N3).**
+5a. The ID number already exists on the lease. The view has a check for this ("Occupant has been added with the same ID") but it is never called. **Tested 10/11/2026: the system shows a server error page instead (BUG-05).**
 
 **Alternative flow 2: Activate / Deactivate**
 
 1. In **List of Active Occupant/s** user clicks **Deactivate**; the occupant moves to **List of Deactive Occupant/s**.
 2. In **List of Deactive Occupant/s** user clicks **Activate**; the occupant moves back to the active list.
 
-Note: the **List of Deactive Occupant/s** only shows while at least one occupant is active. If the only occupant is deactivated, they disappear from the screen and cannot be reactivated (defect N4).
+Note: the **List of Deactive Occupant/s** only shows while at least one occupant is active. If the only occupant is deactivated, they disappear from the screen and cannot be reactivated (BUG-10).
 
 **Alternative flow 3:** user clicks **Return To Manage** to go back to the lease list.
 
