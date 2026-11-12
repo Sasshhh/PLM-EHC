@@ -2038,7 +2038,7 @@ namespace C8.eServices.Mvc.Controllers
                         months: months,
                         csoOutcome: ApprovalStatusddl,
                         csoComment: RejectComment,
-                        csoSystemUserId: Customer.Id);
+                        csoSystemUserId: SystemUser.Id);
 
                     var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
                     MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
@@ -2177,7 +2177,7 @@ namespace C8.eServices.Mvc.Controllers
                         propertyLeaseApplicationId: (int)lease.PropertyLeaseApplicationId,
                         outcome: ApprovalStatusddl,
                         comment: RejectComment,
-                        rmSystemUserId: Customer.Id);
+                        rmSystemUserId: SystemUser.Id);
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
                     {
@@ -2342,7 +2342,7 @@ namespace C8.eServices.Mvc.Controllers
                         propertyLeaseApplicationId: (int)lease.PropertyLeaseApplicationId,
                         outcome: ApprovalStatusddl,
                         comment: RejectComment,
-                        ceoSystemUserId: Customer.Id);
+                        ceoSystemUserId: SystemUser.Id);
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
                     {

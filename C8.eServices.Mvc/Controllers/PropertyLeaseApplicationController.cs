@@ -17655,7 +17655,7 @@ Activating your billing account and debit order mandate is required before occup
                     bool isSupported = (RevenueManagerRefundSupport == "True" || RevenueManagerRefundSupport == "true");
                     leaseTermination.RevenueManagerRefundSupport = isSupported;
                     leaseTermination.RevenueManagerRefundReason = Comment;
-                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedBySystemUserId = SystemUser.Id;
                     leaseTermination.ModifiedDateTime = DateTime.Now;
 
                     var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
@@ -17837,7 +17837,7 @@ Activating your billing account and debit order mandate is required before occup
                     leaseTermination.CEORefundSignature = CEORefundSignature;
                     leaseTermination.CEORefundSignDate = DateTime.Now;
                     leaseTermination.CEORefundReason = Comment;
-                    leaseTermination.ModifiedBySystemUserId = Customer.Id;
+                    leaseTermination.ModifiedBySystemUserId = SystemUser.Id;
                     leaseTermination.ModifiedDateTime = DateTime.Now;
 
                     var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault();
@@ -17869,7 +17869,7 @@ Activating your billing account and debit order mandate is required before occup
                         if (applicationStatusClosed != null)
                         {
                             rcsApps.StatusId = applicationStatusClosed.Id;
-                            rcsApps.ModifiedBySystemUserId = Customer.Id;
+                            rcsApps.ModifiedBySystemUserId = SystemUser.Id;
                             rcsApps.ModifiedDateTime = DateTime.Now;
                         }
 
@@ -17881,7 +17881,7 @@ Activating your billing account and debit order mandate is required before occup
                             if (formerTenantStatus != null)
                             {
                                 customer.StatusId = formerTenantStatus.Id;
-                                customer.ModifiedBySystemUserId = Customer.Id;
+                                customer.ModifiedBySystemUserId = SystemUser.Id;
                                 customer.ModifiedDateTime = DateTime.Now;
                             }
                         }
