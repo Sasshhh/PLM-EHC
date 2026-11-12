@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.IO;
@@ -142,7 +142,7 @@ namespace C8.eServices.Mvc.Controllers
                 model.IsActive = true;
                 model.IsDeleted = false;
                 model.CreatedDateTime = DateTime.Now;
-                model.DepartmentId = 1;
+                model.DepartmentId = DepartmentHelper.CurrentOrEhc(_db);
 
                 // Track the creator (only creator can edit/delete per UC17E Note 1)
                 var identityManager = new IdentityManager();
@@ -191,7 +191,13 @@ namespace C8.eServices.Mvc.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "An error occurred while creating the service request: " + ex.Message);
+                // Surface the innermost cause. A DbUpdateException's own message is
+                // always the generic "An error occurred while updating the entries",
+                // which tells the user nothing about what actually failed.
+                var root = ex;
+                while (root.InnerException != null) root = root.InnerException;
+                var detail = ReferenceEquals(root, ex) ? ex.Message : ex.Message + " -> " + root.Message;
+                ModelState.AddModelError("", "An error occurred while creating the service request: " + detail);
                 PopulateDropdowns();
                 return View(model);
             }
@@ -558,7 +564,7 @@ namespace C8.eServices.Mvc.Controllers
                         IsActive = true,
                         IsDeleted = false,
                         CreatedDateTime = DateTime.Now,
-                        DepartmentId = 1
+                        DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
                     };
 
                     _db.ServiceRequestDocuments.Add(document);

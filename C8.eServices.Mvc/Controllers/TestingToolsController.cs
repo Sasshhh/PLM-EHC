@@ -1,13 +1,19 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Helpers;
+using C8.eServices.Mvc.Filters;
 
 namespace C8.eServices.Mvc.Controllers
 {
     [Authorize(Roles = "Back Office System Administrator,Super Administrators")]
+    // These tools backdate EHC leases and waiting lists. "Back Office System
+    // Administrator" is a role name both EHC and Real Estate use - re_hod holds it -
+    // so the role check alone would let a Real Estate administrator drive EHC data.
+    // Hiding the menu is presentation only; this closes it on the server.
+    [DepartmentAuthorize(ApplicationEntityKeys.EkurhuleniHousingCompany)]
     public class TestingToolsController : Controller
     {
         public ActionResult Index()

@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Linq;
 using C8.eServices.Mvc.DataAccessLayer;
 using C8.eServices.Mvc.Models;
 using C8.eServices.Mvc.Keys;
+using C8.eServices.Mvc.Helpers;
 
 namespace C8.eServices.Mvc.Engines
 {
@@ -171,7 +172,7 @@ namespace C8.eServices.Mvc.Engines
                 ClerkId = clerkId,
                 StatusId = statusId,
                 CreatedDateTime = DateTime.Now,
-                DepartmentId = 1
+                DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
             };
             _db.RoundRobinQueues.Add(queue);
 
@@ -232,7 +233,7 @@ namespace C8.eServices.Mvc.Engines
                 ClerkId = serviceRequest.AssignedToId.Value,
                 StatusId = statusId,
                 CreatedDateTime = DateTime.Now,
-                DepartmentId = 1
+                DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
             };
             _db.RoundRobinQueues.Add(queue);
             _db.SaveChanges();
@@ -253,7 +254,7 @@ namespace C8.eServices.Mvc.Engines
                 IsActive = true,
                 IsDeleted = false,
                 CreatedDateTime = DateTime.Now,
-                DepartmentId = 1
+                DepartmentId = DepartmentHelper.CurrentOrEhc(_db)
             };
 
             _db.ServiceRequestAuditLogs.Add(auditLog);

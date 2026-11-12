@@ -64,3 +64,9 @@ Deployment/out/
 Deployment/Build/nuget.exe
 Deployment/Database/logs/
 __pycache__/
+# Generated at runtime - tenant documents contain personal information (ID numbers); never commit
+C8.eServices.Mvc/PDFFiles/*.pdf
+C8.eServices.Mvc/Templates/[0-9]*_*.pdf
+C8.eServices.Mvc/Uploads/**/Letters/
+C8.eServices.Mvc/Uploads/**/Documents/
+C8.eServices.Mvc/UploadedFiles/
