@@ -558,9 +558,9 @@
                 var outcomeReasonEl = document.getElementById("OutcomeReason");
                 var RejectComment = outcomeReasonEl ? outcomeReasonEl.value : "";
 
-                if (statusval == "Rcs_Rejected_unaffordability" || statusval == "Rcs_Rejected_itc" || statusval == "Rcs_Rejected_documents") {
-                    if ((RejectComment == null || RejectComment == "")) {
-                        swal("error", "Please enter the risk assessment outcome comment!", "warning");
+                if (true) { // BR05: reason mandatory on approvals as well as rejections
+                    if ((RejectComment == null || RejectComment.trim() == "")) {
+                        swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
                     } else {
                         document.getElementById("btnApproval").click();
                     }

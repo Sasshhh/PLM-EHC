@@ -374,7 +374,7 @@
             label.style.color = "red";
             label.style.fontWeight = "bold";
         } else {
-            label.innerText = "CEO Comments (Optional)";
+            label.innerText = "Reason *"; // BR05
             label.style.color = "black";
             label.style.fontWeight = "normal";
         }
@@ -410,8 +410,8 @@
         }
 
         // 4. Check Forced Rejection Comment
-        if (statusval == "Rejected" && comment == "") {
-            swal("Error", "A reason is mandatory when rejecting an application.", "warning");
+        if (!comment || comment.trim() == "") { // BR05: approvals too
+            swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
             // Scroll user to comment box
             document.getElementById("CEOComment").focus();
             return;

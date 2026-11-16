@@ -5931,7 +5931,9 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        public ActionResult PropertyLeaseApplications()
+        // D006: the list used to show only the latest 100 applications. It is now paged on the server (all
+        // applications reachable) with a search on reference, name, surname and ID number.
+        public ActionResult PropertyLeaseApplications(int? page, int? pageSize, string search)
         {
             using (var cxt = new eServicesDbContext())
             {
@@ -5939,10 +5941,25 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     Initialise();
 
-                    // MatchingHelper.MatchUnitParallelProcessor(db);
+                    int size = Math.Max(10, Math.Min(pageSize ?? 100, 500));
+                    var query = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false);
+                    if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        var s = search.Trim();
+                        query = query.Where(x => x.ApplicationReferenceNumber.Contains(s) || x.FirstName.Contains(s) || x.LastName.Contains(s) || x.IDNo.Contains(s));
+                    }
+                    int total = query.Count();
+                    int pages = Math.Max(1, (int)Math.Ceiling(total / (double)size));
+                    int current = Math.Max(1, Math.Min(page ?? 1, pages));
+                    ViewBag.Page = current;
+                    ViewBag.Pages = pages;
+                    ViewBag.PageSize = size;
+                    ViewBag.Total = total;
+                    ViewBag.Search = search;
 
-                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.PurchaserType)
-                        .Include(r => r.CreatedBySystemUser).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.HumanEHCOptions).Include(r => r.Status).OrderByDescending(x => x.Id).Take(100).ToList();
+                    var rCSApplicationStatus = query.Include(r => r.PurchaserType)
+                        .Include(r => r.CreatedBySystemUser).Include(r => r.Customer).Include(r => r.ModifiedBySystemUser).Include(r => r.HumanEHCOptions).Include(r => r.Status)
+                        .OrderByDescending(x => x.Id).Skip((current - 1) * size).Take(size).ToList();
 
                     // MatchingHelper.WaitingListNotificationAtOneYear(cxt);
                     // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
@@ -19218,53 +19235,5 @@ Activating your billing account and debit order mandate is required before occup
         }
 
         #endregion
-        // A debugging hook that rewrites an application's status and work queue from
-        // the address bar. It was open to anonymous visitors on both branches. It is
-        // not part of any EHC workflow, so it is restricted to Super Administrators.
-        [Authorize(Roles = "Super Administrators")]
-        public ActionResult ForceStatusUpdate(int id = 1127)
-        {
-            using (var db = new eServicesDbContext())
-            {
-                var StatusId = db.Status.FirstOrDefault(x => x.Key == "s_rcs_pending_assessment_payment_validation").Id;
-                var ResponsibilityTypeId = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == "ValidateDepositPayment").Id;
-                var SubmittedId = db.Status.FirstOrDefault(x => x.Key == "s_submitted").Id;
-                var ClerkId = db.Customers.Include(x => x.SystemUser).FirstOrDefault(x => x.SystemUser.UserName == "COESolarDev09").Id;
-
-                var app = db.PropertyLeaseApplications.Find(id);
-                if (app != null)
-                {
-                    app.StatusId = StatusId;
-                    db.Entry(app).State = EntityState.Modified;
-
-                    var rrq = db.RoundRobinQueues.FirstOrDefault(x => x.PropertyLeaseApplicationId == id && x.ResponsibilityTypeId == ResponsibilityTypeId);
-                    if (rrq != null)
-                    {
-                        rrq.StatusId = SubmittedId;
-                        rrq.ClerkId = ClerkId;
-                        // IsActive/IsDeleted are record-deletion flags, not workflow state — do not modify
-                        db.Entry(rrq).State = EntityState.Modified;
-                    }
-                    else
-                    {
-                        rrq = new RoundRobinQueue
-                        {
-                            PropertyLeaseApplicationId = id,
-                            ResponsibilityTypeId = ResponsibilityTypeId,
-                            ClerkId = ClerkId,
-                            StatusId = SubmittedId,
-                            IsActive = true,
-                            IsDeleted = false,
-                            CreatedDateTime = DateTime.Now,
-                            ModifiedDateTime = DateTime.Now
-                        };
-                        db.RoundRobinQueues.Add(rrq);
-                    }
-                    db.SaveChanges();
-                    return Content("Success! Application 1127 is now in Pending Deposit Validation for COESolarDev09.");
-                }
-                return Content("Application not found.");
-            }
-        }
     }
 }
