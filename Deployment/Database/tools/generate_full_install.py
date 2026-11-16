@@ -239,6 +239,30 @@ GO
                           WHERE fk.is_disabled=0 AND (SELECT COUNT(*) FROM sys.foreign_key_columns x WHERE x.constraint_object_id=fk.object_id)=1""")
     # Foreign-key consistency: rows were filtered (users, transactions), so a kept row may point at a row that
     # is not kept. A nullable reference is set to NULL; a row with a required reference is dropped. Repeat until stable.
+    # fk_fallback: {"Table.Column": "UserName"} -> a required reference to a user that is not copied is
+    # pointed at this test user instead of dropping the row (e.g. units "allocated by" a dev-only user).
+    fallback = {}
+    for tc, uname in rules.get('fk_fallback', {}).items():
+        fallback[tuple(tc.split('.'))] = uname
+
+    def user_key(table, uname):
+        su = data.get('SystemUsers'); asp = data.get('AspNetUsers'); cu = data.get('Customers')
+        def col(d, name):
+            return [c['name'] for c in d['cols']].index(name)
+        su_id = None
+        if asp:
+            r = next((r for r in asp['rows'] if r[col(asp, 'UserName')] == uname), None)
+            if r is not None:
+                if table == 'AspNetUsers':
+                    return r[col(asp, 'Id')]
+                su_id = r[col(asp, 'SystemUserId')]
+        if table == 'SystemUsers':
+            return su_id
+        if table == 'Customers' and cu:
+            r = next((r for r in cu['rows'] if r[col(cu, 'SystemUserId')] == su_id), None)
+            return r[col(cu, 'Id')] if r is not None else None
+        return None
+
     report = {}
     changed = True
     while changed:
@@ -261,6 +285,11 @@ GO
                 v = r[ci]
                 if v is None or v in keys:
                     keep.append(r)
+                elif (fk['pt'], fk['pcol']) in fallback and user_key(fk['rt'], fallback[(fk['pt'], fk['pcol'])]) in keys:
+                    r[ci] = user_key(fk['rt'], fallback[(fk['pt'], fk['pcol'])])
+                    keep.append(r)
+                    report[(fk['pt'], fk['pcol'], 'pointed at ' + fallback[(fk['pt'], fk['pcol'])])] = report.get((fk['pt'], fk['pcol'], 'pointed at ' + fallback[(fk['pt'], fk['pcol'])]), 0) + 1
+                    changed = True
                 elif fk['nul']:
                     r[ci] = None
                     keep.append(r)

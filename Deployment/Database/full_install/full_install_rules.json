@@ -261,5 +261,8 @@
   "ApplicationAllocatedProperties": {
    "IsTaken": "0"
   }
+ },
+ "fk_fallback": {
+  "ApplicationAllocatedProperties.AllocatedByUserId": "susans"
  }
 }
