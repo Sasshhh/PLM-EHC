@@ -1375,7 +1375,7 @@ namespace C8.eServices.Mvc.Controllers
                                     _context.PLMApplicationHistortyLogs.Add(RCSHistoryLog);
                                     _context.SaveChanges();
 
-                                    Session["DepositPaidDocSession"] = string.Format($"Document uploaded successfully for application reference ,{RcsApplication.ApplicationReferenceNumber}");
+                                    Session["DepositPaidDocSession"] = string.Format($"Document uploaded successfully for application reference {RcsApplication.ApplicationReferenceNumber}");
                                 }
                             }
 

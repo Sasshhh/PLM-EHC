@@ -536,14 +536,22 @@ namespace C8.eServices.Mvc.DataAccessLayer
                     entityState = entry.State.ToString();
                     tableName = GetTableName(entryEntityType);
 
-                    ((IAuditable)entry.Entity).ModifiedBySystemUserId = currentUserId;
+                    // When this context was created without a current user (most controllers do `new eServicesDbContext()`),
+                    // keep a user id the code set explicitly instead of overwriting it with NULL
+                    // (e.g. LeaseTerminations.ModifiedBySystemUserId after the refund steps).
+                    bool modifierSetByCode = entry.State == EntityState.Added
+                        ? ((IAuditable)entry.Entity).ModifiedBySystemUserId != null
+                        : entry.State == EntityState.Modified && entry.Property("ModifiedBySystemUserId").IsModified;
+                    if (currentUserId != null || !modifierSetByCode)
+                        ((IAuditable)entry.Entity).ModifiedBySystemUserId = currentUserId;
                     ((IAuditable)entry.Entity).ModifiedDateTime = transactionDateTime;
 
                     switch (entry.State)
                     {
                         case EntityState.Added:
 
-                            ((IAuditable)entry.Entity).CreatedBySystemUserId = currentUserId;
+                            if (currentUserId != null || ((IAuditable)entry.Entity).CreatedBySystemUserId == null)
+                                ((IAuditable)entry.Entity).CreatedBySystemUserId = currentUserId;
                             ((IAuditable)entry.Entity).CreatedDateTime = transactionDateTime;
                             ((BaseModel)entry.Entity).IsActive = true;
                             ((BaseModel)entry.Entity).IsDeleted = false;

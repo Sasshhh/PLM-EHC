@@ -90,6 +90,8 @@ namespace C8.eServices.Mvc.Keys
         public const string IncentivePolicyApplicationInQuery = "s_incentive_policy_application_inquery";
         public const string IncentivePolicyApplicationPending = "s_incentive_policy_application_pending";
         public const string IncentivePolicyApplicationApproved = "s_incentive_policy_application_approved";
+        // D028: EHC risk assessment supported by the Revenue Manager, waiting for the CEO (was shown as "Debit Order Authority Approved")
+        public const string AwaitingCEORiskApproval = "s_awaiting_ceo_risk_approval";
         public const string IncentivePolicyApplicationDeclined = "s_incentive_policy_application_declined";
         public const string IncentivePolicyApplicationProcessing = "s_incentive_policy_application_processing";
 

@@ -320,7 +320,6 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '@Url.Action( "AddDocument", "File", new { folder = Model.ApplicationReferenceNumber, rcsappid = Model.RcsApplicationId } )');
 
-                xhr.send(formdata);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
                         documentCheckListIds = '';
@@ -382,6 +381,7 @@
                         }
                     }
                 }
+                xhr.send(formdata);
 
                 return false;
             }
@@ -433,7 +433,6 @@
         var xhr = new XMLHttpRequest();
 
         xhr.open('POST', '@Url.Action( "DeleteDocument", "File" )?q=' + documentId);
-        xhr.send(formdata);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 HoldOn.close();
@@ -442,6 +441,7 @@
                 displayDocumentDetails();
             }
         }
+        xhr.send(formdata);
 
         return false;
     }
@@ -456,12 +456,12 @@
         var xhr = new XMLHttpRequest();
 
         xhr.open('POST', '@Url.Action( "GetDocument", "File" )?fileId=' + fileId);
-        xhr.send(formdata);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 HoldOn.close();
             }
         }
+        xhr.send(formdata);
 
         return false;
     }*@

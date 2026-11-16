@@ -544,7 +544,7 @@ namespace C8.eServices.Mvc.Controllers
                     EventLogHelper.LogSystemError(IO.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                 }
                 ViewBag.Purchaser = new SelectList(db.PurchaserType.OrderBy(x => x.Name).Where(x => (bool)x.IsDeleted != true), "Key", "Name");
-                Session["UpdateLeaseDetailsSession"] = string.Format($"Lease details captured successfully for application reference ,{property.ApplicationReferenceNumber}");
+                Session["UpdateLeaseDetailsSession"] = string.Format($"Lease details captured successfully for application reference {property.ApplicationReferenceNumber}");
             }
             return RedirectToAction("UpdateLeaseDetails", "PropertyLeaseApplication");
         }
@@ -1233,7 +1233,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     Initialise();
                     List<LeaseDetails> rCSApplicationStatus = new List<LeaseDetails>();
-                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    MatchingHelper.RunScheduledEhcChecksIfDue(cxt);
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
 
                     var Keys = db.Status;
@@ -1538,8 +1538,10 @@ namespace C8.eServices.Mvc.Controllers
                         int TenantEvictionApproved = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.TenantEvictionApproved).Id;
                         int AwaitingVacatingConfirm = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingVacatingConfirm).Id;
                         int TerminationApproved = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.TerminationApproved).Id;
+                        // D051: a lease marked Not Vacated stays in this queue so the move-out can be re-confirmed.
+                        int ApplicantNotVacated = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantNotVacated)?.Id ?? -1;
 
-                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list2.Contains(x.Id) && (x.StatusId == TerminationDateIssued || x.StatusId == TerminationApproved || x.StatusId == EvictionGranted || x.StatusId == AwaitingVacatingConfirm))
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list2.Contains(x.Id) && (x.StatusId == TerminationDateIssued || x.StatusId == TerminationApproved || x.StatusId == EvictionGranted || x.StatusId == AwaitingVacatingConfirm || x.StatusId == ApplicantNotVacated))
                             .Include(r => r.CreatedBySystemUser)
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
@@ -1779,7 +1781,7 @@ namespace C8.eServices.Mvc.Controllers
                     //                                                        1      2      3      4       5     6     7       8      9      10     11    12     13     14     15     16     17     18    19     20     21     22     23   24    25    26   27                                                       
                     cc.EHCRoundRobin((int)lease.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, 1, false, false, 1);
 
-                    Session["LeaseRenewalSession"] = string.Format($"Lease renewal processed successfully for application reference ,{lease.LeaseReferenceNo}");
+                    Session["LeaseRenewalSession"] = string.Format($"Lease renewal processed successfully for application reference {lease.LeaseReferenceNo}");
                     var Offer = new PropertyLeaseRenewalOffer
                     {
                         PropertyLeaseApplicationId = lease.PropertyLeaseApplicationId,
@@ -2454,6 +2456,7 @@ namespace C8.eServices.Mvc.Controllers
                     }
 
                     MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalAgreementConcluded).Id, (int)lease.Id);
+                    MatchingHelper.ChangeApplicationStatus(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)lease.PropertyLeaseApplicationId);
 
                     var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
                     MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
@@ -3153,6 +3156,9 @@ namespace C8.eServices.Mvc.Controllers
                 }
 
                 MatchingHelper.ChangeLeaseStatusII(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalAgreementConcluded).Id, lease.Id);
+                // The renewal is concluded: the application leaves "awaiting renewal tenant signature" (set when the
+                // agreement was generated) and is an active lease again.
+                MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)lease.PropertyLeaseApplicationId);
                 
                 var ceoResp = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.RenewalCEOSign);
                 int sysUserId = (int?)Session["SystemUserId"] ?? 0;
@@ -3629,7 +3635,7 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         MatchingHelper.AcceptRenewalOfferPeriod(cxt, pp.Id);
                     }
-                    Session["LeaseOfferValidationSession"] = string.Format($"Lease offer accepted for application reference ,{rcsApps.LeaseReferenceNo}");
+                    Session["LeaseOfferValidationSession"] = string.Format($"Lease offer accepted for application reference {rcsApps.LeaseReferenceNo}");
                     return RedirectToAction("AcceptLeaseRenewal", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("Id=" + rcsApps.Id.ToString()) });
 
                 }
@@ -3906,7 +3912,7 @@ namespace C8.eServices.Mvc.Controllers
                     MatchingHelper.ActivityTrackerAudit(_context, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
 
                 }
-                Session["LeaseTerminationLOSession"] = string.Format($"Lease termination processed successfully for application ref ,{LeaseApplication.LeaseReferenceNo}");
+                Session["LeaseTerminationLOSession"] = string.Format($"Lease termination processed successfully for application ref {LeaseApplication.LeaseReferenceNo}");
                 //                                                                    1     2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17      18   19
                 cc.EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
@@ -4727,7 +4733,7 @@ namespace C8.eServices.Mvc.Controllers
                     int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.WarningLetter).Id;
                     EmailHelper.CustomerEmailNotification(_conx, lease.PropertyLeaseApplicationId, emailboodyId, "EHC Warning letter");
 
-                    Session["SendWarningLetterSession"] = string.Format($"Warning letter sent successfully for application reference ,{lease.LeaseReferenceNo}");
+                    Session["SendWarningLetterSession"] = string.Format($"Warning letter sent successfully for application reference {lease.LeaseReferenceNo}");
                     return RedirectToAction("AllPropertyLeases", "PropertyLeaseApplication");
                 }
                 catch (Exception e)

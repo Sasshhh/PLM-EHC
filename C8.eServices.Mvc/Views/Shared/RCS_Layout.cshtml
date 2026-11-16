@@ -830,6 +830,10 @@
                                 }
                             </ul>
                         </li>
+                    }
+                    @* D052: dispute steps are role-owned (review CSO, resolve Revenue Manager, close CEO), so those roles see the dashboard too *@
+                    @if (Request.IsAuthenticated && (User.IsInRole("Client Services Officer") || User.IsInRole("Housing Supervisor") || User.IsInRole("Letting Officer") || User.IsInRole("Revenue Manager") || User.IsInRole("CEO") || User.IsInRole("Property Manager") || User.IsInRole("Customers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators")))
+                    {
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-ios-gavel"></i>

@@ -58,21 +58,25 @@
                             <td><span class="@badgeClass">@(d.Status != null ? d.Status.Name : "N/A")</span></td>
                             <td>@(d.CreatedDateTime.HasValue ? d.CreatedDateTime.Value.ToString("yyyy/MM/dd") : "")</td>
                             <td>
-                                @if (statusKey == StatusKeys.DisputeOpenAwaitingReview)
+                                @if (statusKey == StatusKeys.DisputeOpenAwaitingReview && (User.IsInRole("Client Services Officer") || User.IsInRole("Housing Supervisor") || User.IsInRole("Letting Officer")))
                                 {
                                     @Html.ActionLink("Review", "ReviewLeaseDispute", "PropertyLeaseApplication", new { q = d.Data }, new { @class = "btn btn-warning btn-sm" })
                                 }
-                                else if (statusKey == StatusKeys.DisputeReferred)
+                                else if (statusKey == StatusKeys.DisputeReferred && User.IsInRole("Revenue Manager"))
                                 {
                                     @Html.ActionLink("Resolve", "ResolveLeaseDispute", "PropertyLeaseApplication", new { q = d.Data }, new { @class = "btn btn-success btn-sm" })
                                 }
-                                else if (statusKey == StatusKeys.DisputeResolved)
+                                else if (statusKey == StatusKeys.DisputeResolved && (User.IsInRole("CEO") || User.IsInRole("Property Manager")))
                                 {
                                     @Html.ActionLink("Close", "CloseLeaseDispute", "PropertyLeaseApplication", new { q = d.Data }, new { @class = "btn btn-primary btn-sm" })
                                 }
-                                else
+                                else if (statusKey == StatusKeys.DisputeClosed)
                                 {
                                     <span class="text-muted">Closed</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Awaiting @(statusKey == StatusKeys.DisputeOpenAwaitingReview ? "CSO review" : statusKey == StatusKeys.DisputeReferred ? "Revenue Manager" : "CEO decision")</span>
                                 }
                             </td>
                         </tr>

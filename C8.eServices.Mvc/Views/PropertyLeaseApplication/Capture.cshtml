@@ -2417,6 +2417,12 @@ input[type="checkbox"]:checked + .slider:before {
 
 
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
+@if (TempData["BR01Message"] != null)
+{
+    <script type="text/javascript">
+        $(function () { swal({ title: "Application not allowed", text: @Html.Raw(Json.Encode(TempData["BR01Message"].ToString())), type: "warning" }); });
+    </script>
+}
 
 <script src="@Url.Content("~/scripts/jquery.datetimepicker.js")"></script>
 
@@ -2600,10 +2606,13 @@ input[type="checkbox"]:checked + .slider:before {
             debugger;
             var Id_leng = val.length;
             if (Id_leng==13) {
-                $.getJSON("../PropertyLeaseApplication/ValidateAgainstWaitingList?ID=" + val,
+                $.getJSON("@Url.Action("ValidateAgainstWaitingList", "PropertyLeaseApplication")?ID=" + val,
                     function (result) {
-
-                        @*window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")";*@
+                        // BR01 / D017: one application per applicant
+                        if (result && result.allowed === false) {
+                            swal({ title: "Application not allowed", text: result.message, type: "warning", confirmButtonText: "OK" },
+                                function () { window.location.href = "@Url.Action("Inbox", "PropertyLeaseApplication")"; });
+                        }
                     });
             }
         }

@@ -2165,7 +2165,7 @@ namespace C8.eServices.Mvc.Controllers
             };
             db.conductUnitInspections.Add(ConductInspec);
             db.SaveChanges();
-            Session["ConductUnitInspectionSession"] = string.Format($"Conduct unit inspection processed successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            Session["ConductUnitInspectionSession"] = string.Format($"Conduct unit inspection processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
             return RedirectToAction("PropertyLeaseInspections");
         }
 
@@ -2438,7 +2438,7 @@ namespace C8.eServices.Mvc.Controllers
             db.conductUnitInspections.Add(ConductInspec);
             db.SaveChanges();
 
-            Session["ConductUnitInspectionSession"] = string.Format($"Conduct exit unit inspection processed successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+            Session["ConductUnitInspectionSession"] = string.Format($"Conduct exit unit inspection processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
             return RedirectToAction("PropertyLeaseInspections");
         }
 
@@ -2898,7 +2898,7 @@ namespace C8.eServices.Mvc.Controllers
                         var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UnitInspectionApproved).Description.ToString();
                         MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, Customer.Id);
 
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber}. Major defects require Property & Facilities Manager review before re-inspection.");
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference {rcsApps.ApplicationReferenceNumber}. Major defects require Property & Facilities Manager review before re-inspection.");
 
                     }
                     else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
@@ -2923,7 +2923,7 @@ namespace C8.eServices.Mvc.Controllers
                         db.SaveChanges();
                         EHCWorkflowEngine.BackOfficeNotification(db, rcsApps.Id, facilitiesManagerId, facilitiesResponsibilityType.Name);
 
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber}. Minor defects - application continues flow while Property & Facilities Manager reviews completed work.");
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference {rcsApps.ApplicationReferenceNumber}. Minor defects - application continues flow while Property & Facilities Manager reviews completed work.");
 
                     }
 
@@ -2932,7 +2932,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
                     db.SaveChanges();
-                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference {rcsApps.ApplicationReferenceNumber}");
                 }
             }
             else if (UM2.InspectionType == StatusKeys.ExitUnitInspection)
@@ -2963,12 +2963,12 @@ namespace C8.eServices.Mvc.Controllers
                         //EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
                         EHCRoundRobin((int)rcsApps.Id, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
                         MatchingHelper.ChangeApplicationStatus(db, AwaitingExitInspection, rcsApps.Id);
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , Application sent back to conduct exit inspection");
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference {rcsApps.ApplicationReferenceNumber} , Application sent back to conduct exit inspection");
 
                     }
                     else if (UM.RCSActionType.Key == RCSActionTypeKeys.HabitableMinorDefects)
                     {
-                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference ,{rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
+                        Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet approved for application reference {rcsApps.ApplicationReferenceNumber} , due to minor defects there are no changes to application process flow.");
 
                     }
 
@@ -2978,7 +2978,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.CustomerQueryPending).Id, (int)id);
                     db.SaveChanges();
-                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                    Session["MaintenanceJobSheetSession"] = string.Format($"Job sheet rejected for application reference {rcsApps.ApplicationReferenceNumber}");
                 }
             }
 
@@ -3560,7 +3560,7 @@ namespace C8.eServices.Mvc.Controllers
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
 
-                Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference {rcsApps.ApplicationReferenceNumber}");
                 return RedirectToAction("PropertyLeaseTenantTraining");
             }
         }
@@ -3589,7 +3589,7 @@ namespace C8.eServices.Mvc.Controllers
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.InviteToClientTraining).FirstOrDefault();
                 MatchingHelper.RoundRobinMarkJobAsFinished(cxt, (int)rcsApps.Id, null, ResponsibilityTypeId.Id, activeDirectoryOn);
 
-                Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ClientTrainingInviteSession"] = string.Format($"Tenant has been invited successfully for application reference {rcsApps.ApplicationReferenceNumber}");
                 return RedirectToAction("PropertyLeaseTenantTraining");
             }
             
@@ -3738,7 +3738,7 @@ namespace C8.eServices.Mvc.Controllers
                             // Trigger the next workflow step (LeaseAgreementValidation)
                             EHCRoundRobin(leaseInfo.Id, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
-                            Session["LeaseAgreementReview"] = string.Format($"Lease agreement generated successfully for application reference ,{leaseInfo.ApplicationReferenceNumber}");
+                            Session["LeaseAgreementReview"] = string.Format($"Lease agreement generated successfully for application reference {leaseInfo.ApplicationReferenceNumber}");
                             break;
                         case RCSActionTypeKeys.Rejected:
                             MatchingHelper.ChangeApplicationStatus(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id, (Int32)leaseInfo.Id);
@@ -4228,21 +4228,6 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult EvaluationCriteria()
         {
             return RedirectToAction("EvaluationCriteria", "RealEstateAdmin");
-        }
-
-        [HttpGet]
-        public ActionResult UserAgreementPdf(int? id)
-        {
-            int appId = id ?? 68;
-            return RedirectToAction("DownloadUserAgreementPdf", "RealEstateAdmin", new { id = appId });
-        }
-
-        [HttpGet]
-        public ActionResult GeneratePtoCertificate(int? id)
-        {
-            int appId = id ?? 68;
-            TempData["SuccessMessage"] = "Successfully generated and signed the lease agreement electronically! Status updated to Lease Active.";
-            return RedirectToAction("Details", new { refNo = appId });
         }
 
         #region PaymentGateway
@@ -4839,7 +4824,7 @@ namespace C8.eServices.Mvc.Controllers
                     Initialise();
                     MatchingHelper.WaitingListNotificationAtOneYear(cxt);
                     MatchingHelper.MatchUnitParallelProcessor(cxt);
-                    // MatchingHelper.RenewalNotificationAtEndOfTime(cxt);
+                    MatchingHelper.RunScheduledEhcChecksIfDue(cxt);
                    //MatchingHelper.ValidateWaitingListTime(cxt);
 
                     List<int> rrq = new List<int>();
@@ -5543,7 +5528,7 @@ namespace C8.eServices.Mvc.Controllers
                     
                     if (rcsApps != null)
                     {
-                        MatchingHelper.AddHistoryLog(context, Id, rcsApps.CustomerId, "Application manually returned to the waiting list by CSO following a unit rejection.");
+                        MatchingHelper.AddHistoryLog(context, Id, rcsApps.CustomerId, "Application manually returned to the waiting list by CSO following a unit rejection.", MatchingHelper.HistoryEntity.PropertyLease);
 
                         var emailTemplate = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.plm_re_list_to_queue);
                         if (emailTemplate != null)
@@ -5669,7 +5654,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 //                                                     1      2      3      4       5     6     7       8      9      10     11    12     13     14     15     16     17     18    19     20     21     22     23   24    25    26   27                                                       
                 EHCRoundRobin((int)lease.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, 1, false, false, 1);
-                Session["LeaseRenewalSession"] = string.Format($"Property Review Lease renewal processed successfully for application reference ,{lease.LeaseReferenceNo}");
+                Session["LeaseRenewalSession"] = string.Format($"Property Review Lease renewal processed successfully for application reference {lease.LeaseReferenceNo}");
                 return RedirectToAction("Renewals", "LeaseDetails");
             }
         }
@@ -5803,7 +5788,7 @@ namespace C8.eServices.Mvc.Controllers
                         int emailboodyId = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RenewalRejectRecommendation).Id;
                         EmailHelper.CustomerEmailNotification(_conx, lease.PropertyLeaseApplicationId, emailboodyId);
                     }
-                    Session["LeaseRenewalSession"] = string.Format($"Revenue Review Lease renewal approved for application reference ,{lease.LeaseReferenceNo}");
+                    Session["LeaseRenewalSession"] = string.Format($"Revenue Review Lease renewal approved for application reference {lease.LeaseReferenceNo}");
                 }
 
                 if (ApprovalStatus == RCSActionTypeKeys.Rejected)
@@ -5839,7 +5824,7 @@ namespace C8.eServices.Mvc.Controllers
                         _conx.SaveChanges();
 
                     }
-                    Session["LeaseRenewalSession"] = string.Format($"Revenue Review Lease renewal rejected for application reference ,{lease.LeaseReferenceNo}");
+                    Session["LeaseRenewalSession"] = string.Format($"Revenue Review Lease renewal rejected for application reference {lease.LeaseReferenceNo}");
                 }
 
                 var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.LeaseRenewalRevenue).FirstOrDefault();
@@ -6903,7 +6888,7 @@ namespace C8.eServices.Mvc.Controllers
                     int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.DepositPaymentApprove).Id;
                     EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
                 }
-                Session["BODepositVerifySession"] = string.Format($"Deposit payment accepted application successfully for application ref ,{rcsApps.ApplicationReferenceNumber}");
+                Session["BODepositVerifySession"] = string.Format($"Deposit payment accepted for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -6916,7 +6901,7 @@ namespace C8.eServices.Mvc.Controllers
                 MatchingHelper.ActivityTrackerAudit(db, rcsApps.Id, ActivityTrackerMessage, custmusers.Id);
                 int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.DepositPaymentReject).Id;
                 EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                Session["BODepositVerifySession"] = string.Format($"Deposit payment rejected application successfully for application ref ,{rcsApps.ApplicationReferenceNumber}");
+                Session["BODepositVerifySession"] = string.Format($"Deposit payment rejected application successfully for application ref {rcsApps.ApplicationReferenceNumber}");
             }
 
             return RedirectToAction("PropertyLeaseDeposit");
@@ -7087,7 +7072,7 @@ ApplicationFeeValidation(int? id)
                     int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationFeeApproved).Id;
                     EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
                 }
-                Session["BODepositVerifySession"] = string.Format($"Application Fee payment accepted application successfully for application ref ,{rcsApps.ApplicationReferenceNumber}");
+                Session["BODepositVerifySession"] = string.Format($"Application fee payment accepted for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -7101,7 +7086,7 @@ ApplicationFeeValidation(int? id)
                 MatchingHelper.ActivityTrackerAudit(db, rcsApps.Id, ActivityTrackerMessage, custmusers.Id);
                 int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationFeeRejection).Id;
                 EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                Session["BODepositVerifySession"] = string.Format($"Application fee payment rejected application successfully for application ref ,{rcsApps.ApplicationReferenceNumber}");
+                Session["BODepositVerifySession"] = string.Format($"Application fee payment rejected application successfully for application ref {rcsApps.ApplicationReferenceNumber}");
             }
 
             return RedirectToAction("PropertyLeaseDeposit");
@@ -7271,7 +7256,7 @@ ApplicationFeeValidation(int? id)
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementApproved).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["LeaseAgreementSignedSession"] = string.Format($"Lease agreement approved by candidate for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["LeaseAgreementSignedSession"] = string.Format($"Lease agreement approved by candidate for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -7287,7 +7272,7 @@ ApplicationFeeValidation(int? id)
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AssessmentFiguresPOPRejected).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["LeaseAgreementSignedSession"] = string.Format($"Lease agreement rejected by candidate for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["LeaseAgreementSignedSession"] = string.Format($"Lease agreement rejected by candidate for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             return RedirectToAction("Inbox");
         }
@@ -8073,7 +8058,7 @@ Activating your billing account and debit order mandate is required before occup
                 var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToTenant);
                 var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by CEO - returned to Tenant";
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToCSO)
             {
@@ -8089,7 +8074,7 @@ Activating your billing account and debit order mandate is required before occup
                 var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToCSO);
                 var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by CEO - returned to CSO";
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -8100,7 +8085,7 @@ Activating your billing account and debit order mandate is required before occup
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AssessmentFiguresPOPRejected).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement rejected for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             return RedirectToAction("PropertyLeaseAgreements");
         }
@@ -8267,7 +8252,7 @@ Activating your billing account and debit order mandate is required before occup
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementApproved).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement approved by Revenue Manager. Forwarded to CEO for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement approved by Revenue Manager. Forwarded to CEO for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToTenant)
             {
@@ -8285,7 +8270,7 @@ Activating your billing account and debit order mandate is required before occup
                 var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToTenant);
                 var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by Revenue Manager - returned to Tenant";
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (tenant) for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.NotSupportedDueToCSO)
             {
@@ -8303,7 +8288,7 @@ Activating your billing account and debit order mandate is required before occup
                 var atMsg = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.LeaseAgreementRejectedToCSO);
                 var ActivityTrackerMessage = atMsg != null ? atMsg.Description.ToString() : "Lease Agreement rejected by Revenue Manager - returned to CSO";
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Lease agreement not supported (CSO) for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -8316,7 +8301,7 @@ Activating your billing account and debit order mandate is required before occup
                 var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                 var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AssessmentFiguresPOPRejected).Description.ToString();
                 MatchingHelper.ActivityTrackerAudit(db, id, ActivityTrackerMessage, custmusers.Id);
-                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["ManagerLeaseAgreementValidationSession"] = string.Format($"Signed lease agreement rejected for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             return RedirectToAction("PropertyLeaseAgreements");
         }
@@ -8462,7 +8447,7 @@ Activating your billing account and debit order mandate is required before occup
                 debit.Rejected = false;
                 db.Entry(debit).State = EntityState.Modified;
                 db.SaveChanges();
-                Session["DebitOrderValidationSession"] = string.Format($"Debit Order approved for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["DebitOrderValidationSession"] = string.Format($"Debit Order approved for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
             {
@@ -8481,7 +8466,7 @@ Activating your billing account and debit order mandate is required before occup
                 //Send e-mail and SMS notification
                 int emailboodyId = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.DebitOrderRejectByBO).Id;
                 EmailHelper.CustomerEmailNotification(db, rcsApps.Id, emailboodyId);
-                Session["DebitOrderValidationSession"] = string.Format($"Debit Order rejected for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                Session["DebitOrderValidationSession"] = string.Format($"Debit Order rejected for application reference {rcsApps.ApplicationReferenceNumber}");
             }
             return RedirectToAction("PropertyLeaseDebitOrder");
         }
@@ -10746,11 +10731,39 @@ Activating your billing account and debit order mandate is required before occup
             }
         }
         
+        // BR01 / D017: one application per applicant, ID matched against the waiting list (SDS UC03 alt flow 2).
+        // "Still open" is defined narrowly so applicants with old, finished applications are not blocked:
+        // the ID is refused only while one of its applications is on the waiting list (active queue entry)
+        // or holds an active lease.
+        public static string FindOpenApplicationForId(eServicesDbContext cxt, string idNo)
+        {
+            if (string.IsNullOrWhiteSpace(idNo)) return null;
+            idNo = idNo.Trim();
+            var activeLeaseIds = cxt.Status.Where(s => s.Key == StatusKeys.ActiveLease).Select(s => s.Id).ToList();
+            var apps = cxt.PropertyLeaseApplications.Where(a => a.IDNo == idNo && !a.IsDeleted)
+                .Select(a => new { a.Id, a.ApplicationReferenceNumber, a.StatusId }).ToList();
+            foreach (var a in apps)
+            {
+                bool onWaitingList = cxt.waitingListQues.Any(w => w.PropertyLeaseApplicationId == a.Id && w.IsActive && !w.IsDeleted);
+                bool activeLease = a.StatusId.HasValue && activeLeaseIds.Contains(a.StatusId.Value);
+                if (onWaitingList || activeLease) return a.ApplicationReferenceNumber ?? a.Id.ToString();
+            }
+            return null;
+        }
+
+        public static string Br01Message(string reference)
+        {
+            return string.Format("An application for this ID number already exists ({0}) and is on the waiting list or holds an active lease. Only one application per applicant is allowed (BR01), so this application cannot be submitted.", reference);
+        }
+
         public JsonResult ValidateAgainstWaitingList(string ID)
         {
-            //var Application = db.PropertyLeaseApplications.FirstOrDefault(x => x.IDNo == ID);
-            //var waiting = db.waitingListQues.FirstOrDefault(x => x.PropertyLeaseApplicationId == Application.Id);
-            return Json(true, JsonRequestBehavior.AllowGet);
+            using (var cxt = new eServicesDbContext())
+            {
+                var reference = FindOpenApplicationForId(cxt, ID);
+                if (reference == null) return Json(new { allowed = true }, JsonRequestBehavior.AllowGet);
+                return Json(new { allowed = false, message = Br01Message(reference) }, JsonRequestBehavior.AllowGet);
+            }
         }
 
 
@@ -10889,6 +10902,13 @@ Activating your billing account and debit order mandate is required before occup
                     var Statuses = cxt.Status;
                     PropertyLeaseApplication PLA = new PropertyLeaseApplication();
                     PLA = capture.PropertyLeaseApplication;
+                    // BR01 / D017: refuse a second open application for the same ID, with a message (server-side guard)
+                    var br01Reference = FindOpenApplicationForId(cxt, PLA?.IDNo);
+                    if (br01Reference != null)
+                    {
+                        TempData["BR01Message"] = Br01Message(br01Reference);
+                        return RedirectToAction("Capture");
+                    }
                     var result = SecondApplicantBool == true ? PLA.SecondApplicant = true : PLA.SecondApplicant = false;
                     ////PLA.BType = (int)capture.PropertyLeaseApplication.BType;
                     ////PLA.BUsage = (int)capture.PropertyLeaseApplication.BUsage;
@@ -11842,7 +11862,7 @@ Activating your billing account and debit order mandate is required before occup
                             }
                         }
 
-                        Session["TimeslotScheduledSession"] = string.Format($"Timeslot(s) has been scheduled for application reference ,{departments.PropertyLeaseApplication.ApplicationReferenceNumber}");
+                        Session["TimeslotScheduledSession"] = string.Format($"Timeslot(s) has been scheduled for application reference {departments.PropertyLeaseApplication.ApplicationReferenceNumber}");
 
                     }
                     return RedirectToAction("ScheduleInspectionSlots", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + departments.PropertyLeaseApplication.Id.ToString()) });
@@ -11883,7 +11903,7 @@ Activating your billing account and debit order mandate is required before occup
                     int emailboodyId = context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UnitInspectionScheduleMail).Id;
                     EmailHelper.CustomerEmailNotification(context, Id, emailboodyId);
                     var plmApps = db.PropertyLeaseApplications.Where(x => x.Id == Id).FirstOrDefault();
-                    Session["UnitInspectionScheduledSession"] = string.Format($"Unit inspection schedule has been completed successfully for application reference ,{plmApps.ApplicationReferenceNumber}");
+                    Session["UnitInspectionScheduledSession"] = string.Format($"Unit inspection schedule has been completed successfully for application reference {plmApps.ApplicationReferenceNumber}");
                 }
             }
             return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
@@ -13311,7 +13331,7 @@ Activating your billing account and debit order mandate is required before occup
                     }
                     else
                     {
-                        Session["Message"] = "The Reference Number " + ApprovalStatusddl + " Did Not Fid A Match, Try Again!";
+                        Session["Message"] = "The Reference Number " + ApprovalStatusddl + " did not find a match. Please try again.";
                         Session["Display"] = "Display";
                         return RedirectToAction("Termination", "propertyLeaseApplication");
                     }
@@ -13375,7 +13395,7 @@ Activating your billing account and debit order mandate is required before occup
                 }
                 else
                 {
-                    Session["Message"] = "The Reference Number " + ApprovalStatusddl + " Did Not Fid A Match, Try Again!";
+                    Session["Message"] = "The Reference Number " + ApprovalStatusddl + " did not find a match. Please try again.";
                     Session["Display"] = "Display";
                     return RedirectToAction("ApplicationEviction", "propertyLeaseApplication");
                 }
@@ -13616,7 +13636,7 @@ Activating your billing account and debit order mandate is required before occup
                     var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                     var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationApproved).Description.ToString();
                     MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
-                    Session["BOAccountValidationSession"] = string.Format($"Account validation approved for application ref ,{LeaseApplication.LeaseReferenceNo}");
+                    Session["BOAccountValidationSession"] = string.Format($"Account validation approved for application ref {LeaseApplication.LeaseReferenceNo}");
                 }
                 else if (ApprovalStatusddl == RCSActionTypeKeys.Rejected)
                 {
@@ -13644,7 +13664,7 @@ Activating your billing account and debit order mandate is required before occup
                     var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                     var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.TerminationRejected).Description.ToString();
                     MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
-                    Session["BOAccountValidationSession"] = string.Format($"Account validation approved for application ref ,{LeaseApplication.LeaseReferenceNo}");
+                    Session["BOAccountValidationSession"] = string.Format($"Account validation approved for application ref {LeaseApplication.LeaseReferenceNo}");
                 }
                 return RedirectToAction("PropertyLeaseApplicationTerminations");
 
@@ -14844,13 +14864,29 @@ Activating your billing account and debit order mandate is required before occup
 
         #region UC026 — Manage Disputes
 
+        // D052: each dispute step belongs to one role, enforced on the action and not only in the menu,
+        // so one officer can no longer review, resolve and take the CEO decision on the same dispute.
+        public const string DisputeReviewRoles = "Client Services Officer,Housing Supervisor,Letting Officer";
+        public const string DisputeResolveRoles = "Revenue Manager";
+        public const string DisputeCloseRoles = "CEO,Property Manager";
+
         public ActionResult LeaseDisputes()
         {
             using (var _conx = new eServicesDbContext())
             {
                 Initialise();
-                var disputes = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
-                    .Where(x => !x.IsDeleted).OrderByDescending(x => x.Id).ToList();
+                var disputeQuery = _conx.LeaseDisputes.Include(r => r.PropertyLeaseApplication).Include(r => r.Status)
+                    .Where(x => !x.IsDeleted);
+                // A tenant sees only disputes on their own applications, never other tenants'.
+                bool isStaff = User.IsInRole("Client Services Officer") || User.IsInRole("Housing Supervisor") || User.IsInRole("Letting Officer")
+                    || User.IsInRole("Revenue Manager") || User.IsInRole("CEO") || User.IsInRole("Property Manager")
+                    || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators");
+                if (!isStaff)
+                {
+                    int customerId = Customer != null ? Customer.Id : -1;
+                    disputeQuery = disputeQuery.Where(x => x.PropertyLeaseApplication.CustomerId == customerId);
+                }
+                var disputes = disputeQuery.OrderByDescending(x => x.Id).ToList();
 
                 foreach (var d in disputes)
                     d.Data = new AesCrypto().Encrypt(string.Format("id={0}", d.Id));
@@ -14947,6 +14983,7 @@ Activating your billing account and debit order mandate is required before occup
         }
 
         [DecryptParameter]
+        [Authorize(Roles = DisputeReviewRoles)]
         public ActionResult ReviewLeaseDispute(int? id)
         {
             using (var _conx = new eServicesDbContext())
@@ -14968,6 +15005,7 @@ Activating your billing account and debit order mandate is required before occup
 
         [HttpPost]
         [DecryptParameter]
+        [Authorize(Roles = DisputeReviewRoles)]
         public ActionResult ReviewLeaseDispute(int? id, string ApprovalStatusddl, string RiskClassification,
             string ReviewComment, string OfficialNumber)
         {
@@ -15002,6 +15040,7 @@ Activating your billing account and debit order mandate is required before occup
         }
 
         [DecryptParameter]
+        [Authorize(Roles = DisputeResolveRoles)]
         public ActionResult ResolveLeaseDispute(int? id)
         {
             using (var _conx = new eServicesDbContext())
@@ -15023,6 +15062,7 @@ Activating your billing account and debit order mandate is required before occup
 
         [HttpPost]
         [DecryptParameter]
+        [Authorize(Roles = DisputeResolveRoles)]
         public ActionResult ResolveLeaseDispute(int? id, string ApprovalStatusddl, string ResolutionOutcomeType,
             string ResolutionSummary, string NotResolvedReason, string RevenueManagerSignature)
         {
@@ -15071,6 +15111,7 @@ Activating your billing account and debit order mandate is required before occup
         }
 
         [DecryptParameter]
+        [Authorize(Roles = DisputeCloseRoles)]
         public ActionResult CloseLeaseDispute(int? id)
         {
             using (var _conx = new eServicesDbContext())
@@ -15092,6 +15133,7 @@ Activating your billing account and debit order mandate is required before occup
 
         [HttpPost]
         [DecryptParameter]
+        [Authorize(Roles = DisputeCloseRoles)]
         public ActionResult CloseLeaseDispute(int? id, string ApprovalStatusddl, string ClosureOutcome,
             string ClosureSummary, string RejectionOption, string RejectionReason, string CEOSignature)
         {
@@ -15260,7 +15302,7 @@ Activating your billing account and debit order mandate is required before occup
                     var Keys = _context.Status;
                     var LeaseApplication = _context.LeaseDetails.OrderByDescending(x=>x.Id).Where(x => x.Id == vm.LeaseDetails.Id && x.IsDeleted == false).FirstOrDefault();
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.VacatingConfirmation).FirstOrDefault();
-                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
+                    // D051: the vacating-confirmation task is only finished when the tenant has actually vacated (below).
 
                     if (ApprovalStatusddl == RCSActionTypeKeys.Vacated)
                     {
@@ -15293,18 +15335,21 @@ Activating your billing account and debit order mandate is required before occup
 
                         //                      1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17     18   19
                         EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
-                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant vacated successfully for application reference ,{LeaseApplication.LeaseReferenceNo}");
+                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant vacated successfully for application reference {LeaseApplication.LeaseReferenceNo}");
 
                     }
                     else if (ApprovalStatusddl == RCSActionTypeKeys.NotVacated)
                     {
+                        // D051: "Not Vacated" used to drop the lease out of every queue. The vacating-confirmation task now
+                        // stays open with the same officer and the Move-Out queue lists s_applicant_not_vacated_unit, so the
+                        // officer can re-check and confirm the move-out later (or escalate to eviction).
                         MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantNotVacated).Id, (int)LeaseApplication.Id);
-                        //MatchingHelper.ChangeApplicationStatus(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantNotVacated).Id, (int)LeaseApplication.PropertyLeaseApplicationId);
+                        MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, "Tenant has not vacated the unit; move-out to be re-confirmed", Customer.Id);
                         //    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
                         //    var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
                         //    var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.EvictionCommitteeActionsTermination).Description.ToString();
                         //    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
-                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant not vacated for application reference ,{LeaseApplication.LeaseReferenceNo}");
+                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant not vacated for application reference {LeaseApplication.LeaseReferenceNo}");
                     }
                     return RedirectToAction("LeaseTerminated", "leaseDetails");
                 }
@@ -17523,7 +17568,7 @@ Activating your billing account and debit order mandate is required before occup
                     
                     confirmationEmail.GenerateEmail(emailAddress, subject, body, userID.SystemUser.Id.ToString(CultureInfo.InvariantCulture), false, AppSettingKeys.EservicesDefaultEmailTemplate, "");
 
-                    Session["StartRefundProcessSession"] = string.Format($"Email for refund has been sent successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                    Session["StartRefundProcessSession"] = string.Format($"Email for refund has been sent successfully for application reference {rcsApps.ApplicationReferenceNumber}");
                     return RedirectToAction("DepositRefunds", "PropertyLeaseApplication");
                 }
                 catch (Exception e)
@@ -17734,7 +17779,7 @@ Activating your billing account and debit order mandate is required before occup
                     var ActivityTrackerMessage = _context.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UpdateRefundResponse).Description.ToString();
                     MatchingHelper.ActivityTrackerAudit(_context, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
 
-                    Session["UpdateResponseForRefundSession"] = string.Format($"Refund response updated successfully for application reference ,{rcsApps.ApplicationReferenceNumber}");
+                    Session["UpdateResponseForRefundSession"] = string.Format($"Refund response updated successfully for application reference {rcsApps.ApplicationReferenceNumber}");
                     return RedirectToAction("UpdateRefundResponse", "PropertyLeaseApplication");
                 }
                 catch (Exception e)

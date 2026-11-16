@@ -462,9 +462,11 @@ namespace C8.eServices.Mvc.Controllers
                     Initialise();
 
                     // Load applications waiting for CEO (Status 55)
-                    var status = context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved");
+                    // D028: new key s_awaiting_ceo_risk_approval; the legacy key is still accepted for applications
+                    // forwarded before the upgrade.
+                    var ceoStatusIds = context.Status.Where(x => x.Key == StatusKeys.AwaitingCEORiskApproval || x.Key == "s_incentive_policy_application_approved").Select(x => x.Id).ToList();
 
-                    if (status == null) return View(new List<PropertyLeaseApplication>());
+                    if (ceoStatusIds.Count == 0) return View(new List<PropertyLeaseApplication>());
 
                     var applications = context.PropertyLeaseApplications
                         .Include(r => r.CreatedBySystemUser)
@@ -472,7 +474,7 @@ namespace C8.eServices.Mvc.Controllers
                         .Include(r => r.HumanEHCOptions)
                         .Include(r => r.PreferredComplexArea)
                         .Include(r => r.Status)
-                        .Where(x => x.StatusId == status.Id && x.IsDeleted == false)
+                        .Where(x => x.StatusId.HasValue && ceoStatusIds.Contains(x.StatusId.Value) && x.IsDeleted == false)
                         .OrderByDescending(x => x.CreatedDateTime)
                         .ToList();
 
@@ -631,6 +633,8 @@ namespace C8.eServices.Mvc.Controllers
                         // D. ADD TO GLOBAL ENGINE QUEUE
                         MatchingHelper.SaveToWaitingListQueue(context, rcsAppId, app.CustomerId);
 
+                        // D029: the CEO approval is now recorded in the application history
+                        MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment approved by CEO; application added to the waiting list.", MatchingHelper.HistoryEntity.PropertyLease);
                         Session["ConductRiskAssessmentSession"] = "Application Approved & Added to Waiting List Queue.";
                     }
                 }
@@ -655,6 +659,7 @@ namespace C8.eServices.Mvc.Controllers
                         context.SaveChanges();
                     }
 
+                    MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment not approved by CEO; returned to CSO. Reason: " + capture?.RiskAssessmentOutcome?.CEO_Reason, MatchingHelper.HistoryEntity.PropertyLease);
                     Session["ConductRiskAssessmentSession"] = "Application Returned to CSO.";
                 }
 
@@ -875,8 +880,10 @@ namespace C8.eServices.Mvc.Controllers
                 if (ApprovalStatusddl == "Supported")
                 {
                     // Move to CEO
-                    var status = context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved"); // Ensure Key matches DB
+                    var status = context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingCEORiskApproval)
+                              ?? context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved");
                     MatchingHelper.ChangeApplicationStatus(context, status.Id, rcsAppId);
+                    MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment supported by Revenue Manager; awaiting CEO approval.", MatchingHelper.HistoryEntity.PropertyLease);
 
                     // Assign to CEO Role (Round Robin)
                     //var ceoRole = context.ResponsibilityTypes.FirstOrDefault(x => x.Key == "CEO");
@@ -1011,7 +1018,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentApproved).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.Rejected:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.CreditScoreRejected)?.Id, rcsAppId);
@@ -1019,7 +1026,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.RejectedUnaffordability:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedUnaffordability)?.Id, rcsAppId);
@@ -1028,7 +1035,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectDocuments).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}"+ " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}"+ " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
                     case RCSActionTypeKeys.RejectedITC:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedITCCheck)?.Id, rcsAppId);
@@ -1037,7 +1044,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectITC).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
                     case RCSActionTypeKeys.RejectedDocuments:
@@ -1047,7 +1054,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectUnaffordability).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
 
@@ -1069,7 +1076,7 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
                         C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference {property.ApplicationReferenceNumber}");
                         break;
                 }
 
@@ -1186,7 +1193,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentApproved).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.Rejected:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.CreditScoreRejected)?.Id, rcsAppId);
@@ -1194,7 +1201,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.RejectedUnaffordability:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedUnaffordability)?.Id, rcsAppId);
@@ -1203,7 +1210,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectDocuments).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
                     case RCSActionTypeKeys.RejectedITC:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedITCCheck)?.Id, rcsAppId);
@@ -1212,7 +1219,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectITC).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
                     case RCSActionTypeKeys.RejectedDocuments:
@@ -1222,7 +1229,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectUnaffordability).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
 
@@ -1244,7 +1251,7 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
                         C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference {property.ApplicationReferenceNumber}");
                         break;
                 }
 
