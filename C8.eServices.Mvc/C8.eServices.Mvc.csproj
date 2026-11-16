@@ -1318,6 +1318,8 @@
     <Content Include="Scripts\jquery-2.2.0.js" />
     <Content Include="Scripts\jquery-2.2.0.min.js" />
     <Content Include="Scripts\jquery-steps.js" />
+    <Content Include="Scripts\ehc-upload-guard.js" />
+    <Content Include="Content\ehc-theme.css" />
     <Content Include="Scripts\jquery.datetimepicker.js" />
     <Content Include="Scripts\jquery-steps.js.map" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />

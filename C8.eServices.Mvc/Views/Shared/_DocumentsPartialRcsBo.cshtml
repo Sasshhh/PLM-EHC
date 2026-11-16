@@ -302,8 +302,8 @@
                     $(id).html('');
                 }
                 else {
-                    if (fileSize > (1024 * 1024 * 1)) {
-                        bootbox.alert("File(s) size should not exceed 1MB.");
+                    if (fileSize > (1024 * 1024 * 5)) {
+                        bootbox.alert("File(s) size should not exceed 5MB.");
                         $(fileInput).val('');
                         $(id).html('');
                     }
