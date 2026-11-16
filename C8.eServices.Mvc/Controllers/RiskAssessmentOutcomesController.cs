@@ -1299,100 +1299,25 @@ namespace C8.eServices.Mvc.Controllers
         public ActionResult RunAutoAllocation()
         {
             Initialise();
-            var db = new eServicesDbContext();
-            var log = new System.Text.StringBuilder();
-            int matchCount = 0;
-
             try
             {
-                // 1. GET ALL AVAILABLE UNITS
-                // We verify IsTaken is false (Available) and IsActive is true (Valid)
-                var availableUnits = db.ApplicationAllocatedProperty
-                                       .Where(u => u.IsTaken == false && u.IsActive == true)
-                                       .ToList();
-
-                log.AppendLine($"Found {availableUnits.Count} available units.");
-
-                foreach (var unit in availableUnits)
-                {
-                    // 2. CHECK DATA INTEGRITY
-                    // We use your specific columns: OfferedComplexId and HumanEHCOptionId
-                    if (unit.OfferedComplexId == null || unit.HumanEHCOptionId == null)
-                    {
-                        log.AppendLine($"Skipping Unit {unit.Id}: Missing Complex or Typology.");
-                        continue;
-                    }
-
-                    // 3. FIND THE #1 WAITING APPLICANT (FIFO)
-                    // We match the Unit's Complex/Typology to the Person's Preferences
-                    var bestCandidate = db.PropertyLeaseWaitingLists
-                                          .Where(w => w.PreferredComplexId == unit.OfferedComplexId
-                                                   && w.PreferredTypologyId == unit.HumanEHCOptionId
-                                                   && w.QueueStatus == "Waiting")
-                                          .OrderBy(w => w.DateAdded) // Critical: Oldest Date = Priority #1
-                                          .FirstOrDefault();
-
-                    if (bestCandidate != null)
-                    {
-                        try
-                        {
-                            OfferUnitToWaitingApplicant(db, bestCandidate, unit, "Unit Auto-Allocated");
-
-                            matchCount++;
-                            log.AppendLine($"MATCH: Unit {unit.Id} assigned to App {bestCandidate.PropertyLeaseApplicationId}");
-                        }
-                        catch (Exception ex)
-                        {
-                            log.AppendLine($"Error assigning Unit {unit.Id}: {ex.Message}");
-                        }
-                    }
-                }
-
-                TempData["Success"] = $"Auto-Allocation Complete. {matchCount} matches made.";
-                TempData["AllocationLog"] = log.ToString(); // <--- Add this line to pass the full text
+                var result = UnitMatchingEngine.Run(SystemUser.Id);
+                if (result.AlreadyRunning)
+                    TempData["Error"] = "Allocation is already running (started by someone else or by an Inbox). Refresh in a minute.";
+                else
+                    TempData["Success"] = string.Format("Auto-Allocation Complete. {0} unit(s) offered{1}.", result.Offered,
+                        result.Failed > 0 ? ", " + result.Failed + " skipped (see log)" : "");
+                TempData["AllocationLog"] = result.ToString();
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Critical Error: " + ex.Message;
+                TempData["Error"] = "Auto-Allocation failed: " + ex.Message;
             }
-
-            return RedirectToAction("WaitingListIndex");
+            return RedirectToAction("WaitingListIndex", new { show = "All" });
         }
+
         // Who may see the waiting list and offer units (Property Manager acts as the EHC CEO).
         private const string WaitingListRoles = "Property Manager,CEO,Back Office System Administrator,Super Administrators";
-
-        // Offers one free unit to one waiting-list applicant. Used by Run Auto-Allocate and Manual Allocate,
-        // and marks the matching queue too, so the Inbox matcher does not offer a second unit.
-        private void OfferUnitToWaitingApplicant(eServicesDbContext db, PropertyLeaseWaitingList entry, ApplicationAllocatedProperty unit, string historyText)
-        {
-            unit.AllocatedByUserId = SystemUser.Id;
-            unit.PropertyLeaseApplicationId = entry.PropertyLeaseApplicationId;
-            unit.IsTaken = true;
-
-            db.MatchedUnits.Add(new MatchedUnits
-            {
-                ApplicationAllocatedPropertyId = unit.Id,
-                PropertyLeaseApplicationId = entry.PropertyLeaseApplicationId,
-                IsAccepted = false,
-                RejectedProperty = false
-            });
-
-            entry.QueueStatus = "Offered";
-            entry.OfferedUnitId = unit.Id;
-
-            var awaitedStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.awaited);
-            if (awaitedStatus != null)
-                MatchingHelper.ChangeApplicationStatus(db, awaitedStatus.Id, entry.PropertyLeaseApplicationId);
-
-            MatchingHelper.SaveUnitHistory(db, entry.PropertyLeaseApplicationId, historyText, unit.Id, SystemUser.Id);
-
-            var emailContent = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.AtUnitMatchApplication);
-            if (emailContent != null)
-                EmailHelper.CustomerEmailNotification(db, entry.PropertyLeaseApplicationId, emailContent.Id);
-
-            db.SaveChanges();
-            MatchingHelper.MarkQueueAsMatched(db, entry.PropertyLeaseApplicationId, unit.Id);
-        }
 
         // Waiting List > Manual Allocate: pick one free unit in the applicant's preferred complex(es) and typology.
         [HttpGet]
@@ -1439,9 +1364,9 @@ namespace C8.eServices.Mvc.Controllers
                     TempData["Error"] = "That unit has just been taken. Pick another one.";
                 else
                 {
-                    OfferUnitToWaitingApplicant(db, entry, unit, "Unit Manually Allocated");
+                    var unitNo = UnitMatchingEngine.OfferUnit(id, unitId, SystemUser.Id, "Unit Manually Allocated");
                     TempData["Success"] = string.Format("Unit {0} offered to application {1}. The applicant sees the offer in their Inbox.",
-                        unit.SpaceUnitNumber, entry.PropertyLeaseApplication?.ApplicationReferenceNumber);
+                        unitNo, entry.PropertyLeaseApplication?.ApplicationReferenceNumber);
                 }
             }
             catch (Exception ex)

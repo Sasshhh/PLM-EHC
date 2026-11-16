@@ -32,37 +32,17 @@ namespace C8.eServices.Mvc.Helpers
         }
         public static void MatchUnitParallelProcessor(eServicesDbContext core)
         {
-
-            var finfItem = core.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.WaitingListSorting);
-            finfItem.Value = "1";
-            core.SaveChanges();
-
-            var waitingQueue = core.waitingListQues.OrderBy(x => x.Position).Where(x => !x.IsMatched && x.IsActive && !x.IsDeleted && x.Position != null).ToList() ?? null;
-
-            // Performance: this runs on every Inbox load. Only call DoWork for applications that could
-            // actually match a free unit (same complex option 1 or 2 and same unit type); the rest are skipped
-            // without the per-item queries. DoWork still applies the full rules (rejected units etc).
-            var freeSlots = new HashSet<string>(core.ApplicationAllocatedProperty
-                .Where(u => !u.IsTaken && u.HumanEHCOptionId != null)
-                .Select(u => new { u.OfferedComplexId, u.HumanEHCOptionId })
-                .Distinct().ToList()
-                .Select(u => u.OfferedComplexId + ":" + u.HumanEHCOptionId));
-            var appIds = waitingQueue.Where(q => q.PropertyLeaseApplicationId != null).Select(q => (int)q.PropertyLeaseApplicationId).Distinct().ToList();
-            var prefs = core.PropertyLeaseApplications.Where(a => appIds.Contains(a.Id))
-                .Select(a => new { a.Id, a.PreferredComplexAreaId, a.PreferredComplexArea2Id, a.HumanEHCOptionsId })
-                .ToList().ToDictionary(a => a.Id);
-
-            foreach (var item in waitingQueue)
+            // Runs on Inbox / My Applications loads. The waiting list engine does the matching
+            // (at most once a minute, never blocks the page if a run is already busy).
+            int systemUserId = 1;
+            try
             {
-                if (freeSlots.Count == 0) break;
-                if (item.PropertyLeaseApplicationId == null || !prefs.TryGetValue((int)item.PropertyLeaseApplicationId, out var pref)) continue;
-                if (!freeSlots.Contains(pref.PreferredComplexAreaId + ":" + pref.HumanEHCOptionsId)
-                    && !freeSlots.Contains(pref.PreferredComplexArea2Id + ":" + pref.HumanEHCOptionsId)) continue;
-                DoWork(core, item);
+                BaseHelper baseHelper = new BaseHelper();
+                baseHelper.Initialise(core);
+                if (baseHelper.SystemUser != null) systemUserId = baseHelper.SystemUser.Id;
             }
-
-            finfItem.Value = "0";
-            core.SaveChanges();
+            catch { }
+            UnitMatchingEngine.RunIfDue(systemUserId);
         }
         public static DocumentsViewModel DocumentCaptureApplication(DocumentsViewModel dvm, eServicesDbContext core, int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, string returnUrl, int rcsappId, bool IsUpload)
         {
