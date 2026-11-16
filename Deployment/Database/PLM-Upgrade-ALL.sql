@@ -68316,6 +68316,11 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_lease_renewal_rejected
     INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'Lease Renewal Rejected', N'Lease renewal rejected', N's_lease_renewal_rejected', @rcs, 1, 0, GETDATE());
 
+-- D028: Revenue Manager supports a risk assessment -> RiskAssessmentOutcomesController -> StatusKeys.AwaitingCEORiskApproval
+IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_ceo_risk_approval')
+    INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Awaiting CEO Approval', N'Risk assessment supported by the Revenue Manager, awaiting CEO approval', N's_awaiting_ceo_risk_approval', @rcs, 1, 0, GETDATE());
+
 -- CEO rejects a risk assessment: RiskAssessmentOutcomesController finishes the round-robin job with ResponsibilityTypes.Key = 'CEO'
 IF NOT EXISTS (SELECT 1 FROM dbo.ResponsibilityTypes WHERE [Key] = N'CEO')
     INSERT dbo.ResponsibilityTypes ([Name], [Description], [Key], IsActive, IsDeleted, CreatedDateTime)
@@ -76320,6 +76325,7 @@ INSERT @need (TableName, KeyValue) VALUES
   (N'Status', N's_awaiting_application_fee_upload'),
   (N'Status', N's_awaiting_application_fee_validation'),
   (N'Status', N's_awaiting_application_lease_renrewal'),
+  (N'Status', N's_awaiting_ceo_risk_approval'),
   (N'Status', N's_awaiting_committee_eviction'),
   (N'Status', N's_awaiting_cso_termination_review'),
   (N'Status', N's_awaiting_department_comments'),

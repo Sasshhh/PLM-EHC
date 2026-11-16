@@ -690,6 +690,7 @@ INSERT @need (TableName, KeyValue) VALUES
   (N'Status', N's_awaiting_application_fee_upload'),
   (N'Status', N's_awaiting_application_fee_validation'),
   (N'Status', N's_awaiting_application_lease_renrewal'),
+  (N'Status', N's_awaiting_ceo_risk_approval'),
   (N'Status', N's_awaiting_committee_eviction'),
   (N'Status', N's_awaiting_cso_termination_review'),
   (N'Status', N's_awaiting_department_comments'),
