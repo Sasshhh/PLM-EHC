@@ -55,6 +55,11 @@ UPDATE dbo.AspNetUsers SET LockoutEndDateUtc = NULL, AccessFailedCount = 0
 WHERE UserName IN (N'Sash38', N'zanelem', N'Dimakatsol', N'madimetjak', N'richadt', N'SolarTest05',
                    N'tshepangm', N'susans', N'SolarTest02', N'SolarTest03');
 
+-- Uploads: with EDRMSACTIVE = 'on' every uploaded file is also pushed to the city's EDRMS (WSO2).
+-- A test server that cannot reach it made each upload wait minutes. Files are still stored in PLM.
+UPDATE dbo.AppSettings SET [Value] = N'off' WHERE [Key] = N'EDRMSACTIVE' AND [Value] <> N'off';
+PRINT CONCAT('EDRMS upload switched off: ', @@ROWCOUNT, ' row(s)');
+
 -- BR01 stays off while testing (several applications per ID allowed).
 UPDATE dbo.AppSettings SET [Value] = N'false' WHERE [Key] = N'ehc_enforce_one_application_per_id';
 

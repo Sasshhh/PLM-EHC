@@ -44,14 +44,24 @@
         <div class="row">
             @using (Html.BeginForm("WaitingListIndex", "RiskAssessmentOutcomes", FormMethod.Get, new { @class = "form-inline", style = "display:inline;" }))
             {
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label style="margin-right:10px;">Filter by Complex:</label>
                     @Html.DropDownList("complexId", ViewBag.Complexes as SelectList, "-- All Complexes --", new { @class = "form-control", onchange = "this.form.submit()" })
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label style="margin-right:10px;">Filter by Typology:</label>
                     @Html.DropDownList("typologyId", ViewBag.Typologies as SelectList, "-- All Unit Types --", new { @class = "form-control", onchange = "this.form.submit()" })
+                </div>
+
+                <div class="col-md-2">
+                    <label style="margin-right:10px;">Show:</label>
+                    @Html.DropDownList("show", new SelectList(new[] { "Waiting", "Offered", "All" }, (string)ViewBag.Show), new { @class = "form-control", onchange = "this.form.submit()" })
+                </div>
+
+                <div class="col-md-2">
+                    <label style="margin-right:10px;">Reference, name or ID:</label>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control" />
                 </div>
 
                 <div class="col-md-2">
@@ -59,7 +69,7 @@
                         <i class="fa fa-refresh"></i> Reset
                     </a>
                 </div>
-            } <div class="col-md-4 text-right">
+            } <div class="col-md-2 text-right">
                 @using (Html.BeginForm("RunAutoAllocation", "RiskAssessmentOutcomes", FormMethod.Post, new { style = "display:inline;" }))
                 {
                     @Html.AntiForgeryToken()
@@ -102,7 +112,7 @@
         <div class="panel-heading">
             <h3 class="panel-title">
                 <i class="fa fa-users"></i> Current Queue
-                <span class="pull-right badge">@Model.Count() Waiting</span>
+                <span class="pull-right badge">@Model.Count() @ViewBag.Show</span>
             </h3>
         </div>
         <div class="panel-body">
@@ -123,11 +133,12 @@
                             <th>Reference No</th>
                             <th>Preferred Complex</th>
                             <th>Typology</th>
+                            <th>Status</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @{ int position = 1; }
+                        @{ int position = 1; var firstInQueue = (HashSet<int>)ViewBag.FirstInQueue; var offeredUnits = (Dictionary<int, string>)ViewBag.OfferedUnits; }
                         @foreach (var item in Model)
                         {
                             <tr class="@(position == 1 ? "success" : "")">
@@ -173,14 +184,22 @@
                                     }
                                 </td>
 
+                                <td style="vertical-align:middle;">
+                                    @item.QueueStatus
+                                    @if (item.OfferedUnitId.HasValue)
+                                    {
+                                        <br /><small class="text-muted">Unit @(offeredUnits.ContainsKey(item.OfferedUnitId.Value) ? offeredUnits[item.OfferedUnitId.Value] : item.OfferedUnitId.ToString())</small>
+                                    }
+                                </td>
+
                                 <td align="center" style="vertical-align:middle;">
                                     @if (item.QueueStatus == "Offered")
                                     {
                                         <span class="label label-info" style="font-size: 100%;">Offer Sent</span>
                                     }
-                                    else if (position == 1)
+                                    else if (item.QueueStatus == "Waiting" && firstInQueue.Contains(item.Id))
                                     {
-                                        <a href="@Url.Action("AllocateUnit", "Allocations", new { id = item.Id })" class="btn btn-success btn-sm">
+                                        <a href="@Url.Action("ManualAllocate", "RiskAssessmentOutcomes", new { id = item.Id })" class="btn btn-success btn-sm">
                                             <i class="fa fa-key"></i> Manual Allocate
                                         </a>
                                     }

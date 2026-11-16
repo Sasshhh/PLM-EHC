@@ -737,7 +737,8 @@ namespace C8.eServices.Mvc.Controllers
         // WAITING LIST DASHBOARD (Updated with Correct Tables)
         // ==========================================================================
         [HttpGet]
-        public ActionResult WaitingListIndex(int? complexId, int? typologyId)
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult WaitingListIndex(int? complexId, int? typologyId, string show = "Waiting", string search = null)
         {
             var db = new eServicesDbContext();
 
@@ -746,7 +747,18 @@ namespace C8.eServices.Mvc.Controllers
                 .Include("PropertyLeaseApplication")
                 .Include("PreferredComplexArea")
                 .Include("HumanEHCOption") // Must match the property name above
-                .Where(w => w.QueueStatus == "Waiting");
+                .Where(w => w.IsActive && !w.IsDeleted);
+            // Show: Waiting (default) / Offered (unit already given) / All
+            show = (show == "Offered" || show == "All") ? show : "Waiting";
+            if (show != "All") query = query.Where(w => w.QueueStatus == show);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(w => w.PropertyLeaseApplication.ApplicationReferenceNumber.Contains(term)
+                                      || w.PropertyLeaseApplication.FirstName.Contains(term)
+                                      || w.PropertyLeaseApplication.LastName.Contains(term)
+                                      || w.PropertyLeaseApplication.IDNo.Contains(term));
+            }
             // 2. Apply Filters (if user selected them)
             if (complexId.HasValue)
             {
@@ -760,6 +772,19 @@ namespace C8.eServices.Mvc.Controllers
 
             // 3. SORTING: Critical FIFO Logic (Oldest DateAdded = First)
             var model = query.OrderBy(w => w.DateAdded).ToList();
+
+            // FIFO is per complex + unit type: the oldest Waiting entry in each queue may be allocated manually.
+            var firstInQueue = db.PropertyLeaseWaitingLists
+                .Where(w => w.IsActive && !w.IsDeleted && w.QueueStatus == "Waiting")
+                .GroupBy(w => new { w.PreferredComplexId, w.PreferredTypologyId })
+                .Select(g => g.OrderBy(w => w.DateAdded).Select(w => w.Id).FirstOrDefault())
+                .ToList();
+            ViewBag.FirstInQueue = new HashSet<int>(firstInQueue);
+            var offeredIds = model.Where(w => w.OfferedUnitId.HasValue).Select(w => w.OfferedUnitId.Value).ToList();
+            ViewBag.OfferedUnits = db.ApplicationAllocatedProperty.Where(u => offeredIds.Contains(u.Id))
+                .ToDictionary(u => u.Id, u => u.SpaceUnitNumber);
+            ViewBag.Show = show;
+            ViewBag.Search = search;
 
             // ----------------------------------------------------------------------
             // 4. POPULATE DROPDOWNS (Updated with your specific queries)
@@ -1269,7 +1294,8 @@ namespace C8.eServices.Mvc.Controllers
         // AUTO-ALLOCATION BATCH ENGINE (SINGLE TABLE OPTIMIZED)
         // ==========================================================================
         [HttpPost]
-        // [Authorize(Roles = "Admin,CEO")] // Security: specific roles only
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = WaitingListRoles)]
         public ActionResult RunAutoAllocation()
         {
             Initialise();
@@ -1310,45 +1336,7 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         try
                         {
-                            // 4. PERFORM ALLOCATION (The Match)
-
-                            // A. Lock the Unit
-                            unit.AllocatedByUserId = SystemUser.Id; // Current Admin User
-                            unit.PropertyLeaseApplicationId = bestCandidate.PropertyLeaseApplicationId;
-                            unit.IsTaken = true; // Mark as taken so next loop skips it
-
-                            // B. Create the Offer Record (MatchedUnits)
-                            var matchedUnit = new MatchedUnits
-                            {
-                                ApplicationAllocatedPropertyId = unit.Id,
-                                PropertyLeaseApplicationId = bestCandidate.PropertyLeaseApplicationId,
-                                IsAccepted = false,
-                                RejectedProperty = false
-                            };
-                            db.MatchedUnits.Add(matchedUnit);
-
-                            // C. Update Waiting List Status
-                            bestCandidate.QueueStatus = "Offered";
-                            bestCandidate.OfferedUnitId = unit.Id;
-
-                            // D. Update Main Application Status -> "Awaited" (Waiting for customer)
-                            var awaitedStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.awaited);
-                            if (awaitedStatus != null)
-                            {
-                                MatchingHelper.ChangeApplicationStatus(db, awaitedStatus.Id, bestCandidate.PropertyLeaseApplicationId);
-                            }
-
-                            // E. History & Email
-                            MatchingHelper.SaveUnitHistory(db, bestCandidate.PropertyLeaseApplicationId, "Unit Auto-Allocated", unit.Id, SystemUser.Id);
-
-                            var emailContent = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.AtUnitMatchApplication);
-                            if (emailContent != null)
-                            {
-                                EmailHelper.CustomerEmailNotification(db, bestCandidate.PropertyLeaseApplicationId, emailContent.Id);
-                            }
-
-                            // Commit match immediately
-                            db.SaveChanges();
+                            OfferUnitToWaitingApplicant(db, bestCandidate, unit, "Unit Auto-Allocated");
 
                             matchCount++;
                             log.AppendLine($"MATCH: Unit {unit.Id} assigned to App {bestCandidate.PropertyLeaseApplicationId}");
@@ -1370,6 +1358,99 @@ namespace C8.eServices.Mvc.Controllers
 
             return RedirectToAction("WaitingListIndex");
         }
+        // Who may see the waiting list and offer units (Property Manager acts as the EHC CEO).
+        private const string WaitingListRoles = "Property Manager,CEO,Back Office System Administrator,Super Administrators";
+
+        // Offers one free unit to one waiting-list applicant. Used by Run Auto-Allocate and Manual Allocate,
+        // and marks the matching queue too, so the Inbox matcher does not offer a second unit.
+        private void OfferUnitToWaitingApplicant(eServicesDbContext db, PropertyLeaseWaitingList entry, ApplicationAllocatedProperty unit, string historyText)
+        {
+            unit.AllocatedByUserId = SystemUser.Id;
+            unit.PropertyLeaseApplicationId = entry.PropertyLeaseApplicationId;
+            unit.IsTaken = true;
+
+            db.MatchedUnits.Add(new MatchedUnits
+            {
+                ApplicationAllocatedPropertyId = unit.Id,
+                PropertyLeaseApplicationId = entry.PropertyLeaseApplicationId,
+                IsAccepted = false,
+                RejectedProperty = false
+            });
+
+            entry.QueueStatus = "Offered";
+            entry.OfferedUnitId = unit.Id;
+
+            var awaitedStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.awaited);
+            if (awaitedStatus != null)
+                MatchingHelper.ChangeApplicationStatus(db, awaitedStatus.Id, entry.PropertyLeaseApplicationId);
+
+            MatchingHelper.SaveUnitHistory(db, entry.PropertyLeaseApplicationId, historyText, unit.Id, SystemUser.Id);
+
+            var emailContent = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.AtUnitMatchApplication);
+            if (emailContent != null)
+                EmailHelper.CustomerEmailNotification(db, entry.PropertyLeaseApplicationId, emailContent.Id);
+
+            db.SaveChanges();
+            MatchingHelper.MarkQueueAsMatched(db, entry.PropertyLeaseApplicationId, unit.Id);
+        }
+
+        // Waiting List > Manual Allocate: pick one free unit in the applicant's preferred complex(es) and typology.
+        [HttpGet]
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult ManualAllocate(int id)
+        {
+            Initialise();
+            var db = new eServicesDbContext();
+            var entry = db.PropertyLeaseWaitingLists
+                .Include("PropertyLeaseApplication").Include("PreferredComplexArea").Include("HumanEHCOption")
+                .FirstOrDefault(w => w.Id == id);
+            if (entry == null || entry.QueueStatus != "Waiting")
+            {
+                TempData["Error"] = "This waiting-list entry is no longer waiting for a unit.";
+                return RedirectToAction("WaitingListIndex");
+            }
+
+            int complex2 = entry.PropertyLeaseApplication?.PreferredComplexArea2Id ?? 0;
+            var units = db.ApplicationAllocatedProperty.Include(u => u.OfferedComplex).Include(u => u.HumanEHCOption)
+                .Where(u => !u.IsTaken && u.IsActive && !u.IsDeleted
+                         && u.HumanEHCOptionId == entry.PreferredTypologyId
+                         && (u.OfferedComplexId == entry.PreferredComplexId || u.OfferedComplexId == complex2))
+                .OrderBy(u => u.OfferedComplexId).ThenBy(u => u.SpaceUnitNumber)
+                .ToList();
+
+            ViewBag.Entry = entry;
+            return View(units);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult ManualAllocate(int id, int unitId)
+        {
+            Initialise();
+            var db = new eServicesDbContext();
+            try
+            {
+                var entry = db.PropertyLeaseWaitingLists.Include("PropertyLeaseApplication").FirstOrDefault(w => w.Id == id);
+                var unit = db.ApplicationAllocatedProperty.FirstOrDefault(u => u.Id == unitId);
+                if (entry == null || entry.QueueStatus != "Waiting")
+                    TempData["Error"] = "This waiting-list entry is no longer waiting for a unit.";
+                else if (unit == null || unit.IsTaken || !unit.IsActive || unit.IsDeleted)
+                    TempData["Error"] = "That unit has just been taken. Pick another one.";
+                else
+                {
+                    OfferUnitToWaitingApplicant(db, entry, unit, "Unit Manually Allocated");
+                    TempData["Success"] = string.Format("Unit {0} offered to application {1}. The applicant sees the offer in their Inbox.",
+                        unit.SpaceUnitNumber, entry.PropertyLeaseApplication?.ApplicationReferenceNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Manual allocation failed: " + ex.Message;
+            }
+            return RedirectToAction("WaitingListIndex");
+        }
+
         public ActionResult ValidateUnit(String SpaceUnitNumber, String SolarReference)
         {
             ApplicationAllocatedProperty collection = dbContext.ApplicationAllocatedProperty.FirstOrDefault(a => a.SolarReference == SolarReference && a.SpaceUnitNumber == SpaceUnitNumber);

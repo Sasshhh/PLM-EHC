@@ -1,0 +1,69 @@
+@model IEnumerable<C8.eServices.Mvc.Models.ApplicationAllocatedProperty>
+@{
+    ViewBag.Title = "Manual Allocate";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var entry = (C8.eServices.Mvc.Models.PropertyLeaseWaitingList)ViewBag.Entry;
+}
+
+<div class="container-fluid">
+    <h2 class="text-center">Manual Allocate</h2>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <strong>Applicant:</strong> @entry.PropertyLeaseApplication.FullName
+            &nbsp;|&nbsp; <strong>Reference:</strong> @entry.PropertyLeaseApplication.ApplicationReferenceNumber
+            &nbsp;|&nbsp; <strong>Preferred complex:</strong> @(entry.PreferredComplexArea != null ? entry.PreferredComplexArea.Name : entry.PreferredComplexId.ToString())
+            &nbsp;|&nbsp; <strong>Unit type:</strong> @(entry.HumanEHCOption != null ? entry.HumanEHCOption.Name : entry.PreferredTypologyId.ToString())
+            &nbsp;|&nbsp; <strong>On the list since:</strong> @entry.DateAdded.ToString("yyyy-MM-dd")
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning text-center">
+            No free units of this type in the applicant's preferred complexes. Free a unit or change the applicant's unit requirements, then try again.
+        </div>
+    }
+    else
+    {
+        <p>Pick the unit to offer. The applicant sees the offer in their Inbox and accepts or rejects it there.</p>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Complex</th>
+                    <th>Unit no.</th>
+                    <th>Building</th>
+                    <th>Type</th>
+                    <th class="text-right">Monthly rental</th>
+                    <th class="text-right">Deposit</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var unit in Model)
+                {
+                    <tr>
+                        <td>@(unit.OfferedComplex != null ? unit.OfferedComplex.Name : "")</td>
+                        <td>@unit.SpaceUnitNumber</td>
+                        <td>@unit.BuildingName</td>
+                        <td>@(unit.HumanEHCOption != null ? unit.HumanEHCOption.Name : "")</td>
+                        <td class="text-right">@unit.MonthlyRentalAmount.ToString("N2")</td>
+                        <td class="text-right">@unit.RequiedDepositAmount.ToString("N2")</td>
+                        <td class="text-center">
+                            @using (Html.BeginForm("ManualAllocate", "RiskAssessmentOutcomes", new { id = entry.Id, unitId = unit.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success btn-sm"
+                                        onclick="return confirm('Offer unit @unit.SpaceUnitNumber to @entry.PropertyLeaseApplication.ApplicationReferenceNumber?');">
+                                    <i class="fa fa-key"></i> Offer this unit
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a href="@Url.Action("WaitingListIndex", "RiskAssessmentOutcomes")" class="btn btn-default">Back to waiting list</a>
+</div>

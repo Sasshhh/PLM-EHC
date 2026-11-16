@@ -1764,6 +1764,7 @@
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentRM.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\InboxRM.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\InboxCEO.cshtml" />
+    <Content Include="Views\RiskAssessmentOutcomes\ManualAllocate.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentCEO.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\WaitingListIndex.cshtml" />
     <Content Include="Views\TenantTraining\Index.cshtml" />

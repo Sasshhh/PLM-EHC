@@ -111,6 +111,10 @@ namespace C8.eServices.Mvc.Helpers
                 return null;
             }
         }
+        // EDRMS is called while the user waits for an upload. RestSharp waits 100 s by default when the
+        // endpoint cannot be reached; fail after 15 s instead (the document is already saved in PLM).
+        private const int EdrmsTimeoutMs = 15000;
+
         public static string ws02gentokenApiCall(string keyst, string secretst)
         {
             try
@@ -119,7 +123,7 @@ namespace C8.eServices.Mvc.Helpers
 
                 var token = string.Empty;
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
                 ServicePointManager.Expect100Continue = true;
@@ -166,7 +170,7 @@ namespace C8.eServices.Mvc.Helpers
 
                 string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.GetAccessCodeEDRMS);
                 //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/account/AuthenticatePost";
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
 
@@ -224,7 +228,7 @@ namespace C8.eServices.Mvc.Helpers
                     string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.DocTypesEDRMS) + AccessId;
                     //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/docustore/documents/get-document-types?AccessToken=" + AccessId;
 
-                    RestClient client = new RestClient(tokenendpoint);
+                    RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
                     ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
@@ -270,7 +274,7 @@ namespace C8.eServices.Mvc.Helpers
                 //string tokenendpoint = db.AppSettings.FirstOrDefault(r => r.Key == EDRMsKeys.UploadEndPointEDRMS).Value;
                 //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/docustore/documents/upload-documents";
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
                 ServicePointManager.Expect100Continue = true;
@@ -323,7 +327,7 @@ namespace C8.eServices.Mvc.Helpers
                 //string tokenendpoint = "https://10.2.2.238:8243/Documents/1.0.0/api/docustore/documents/get-uploaded-documents?Accesstoken=" + GetEDRMSAuth + "&GroupId=" + GroupId;
                 string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.GetBackDocs) + GetEDRMSAuth + "&GroupId=" + GroupId;
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
