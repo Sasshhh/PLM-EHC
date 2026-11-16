@@ -284,7 +284,8 @@ db.RCSApplicationHistoryLogs.Where(d => d.RefundApplicationId == refund.Id && d.
 
                   
                     Session["ApplicationRefNo"] = refundApplications.ApplicationReferenceNumber;
-                    Session["MessageBody"] = db.RCSUserMessages.Where(x => x.Key == RCSUserMessageKeys.RefundApplicationSuccessMessage).FirstOrDefault().Body + refundApplications.ApplicationReferenceNumber;
+                    Session["MessageBody"] = (db.RCSUserMessages.Where(x => x.Key == RCSUserMessageKeys.RefundApplicationSuccessMessage).Select(x => x.Body).FirstOrDefault()
+                        ?? "Your deposit refund application has been submitted successfully. Your reference number is ") + refundApplications.ApplicationReferenceNumber;
 
 
                     return RedirectToAction("Index");

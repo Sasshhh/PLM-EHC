@@ -77,5 +77,16 @@ IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'ehc_enforce_one_app
     INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'EHC one application per ID (BR01)', N'true = refuse a second application while the ID is on the waiting list or holds an active lease; false = allow (testing)', N'ehc_enforce_one_application_per_id', N'false', 1, 0, GETDATE());
 
+-- CEO role: dispute close (D052), CEO renewal decision, refund authorisation menu (D038) check User.IsInRole("CEO").
+-- Only the role is created here; give it to the real CEO with PLM-CEO-Setup.sql (or 40-EHC-Test-Routing.sql on test copies).
+IF NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = N'CEO')
+    INSERT dbo.AspNetRoles (Id, Name) VALUES (CONVERT(nvarchar(128), NEWID()), N'CEO');
+
+-- Deposit refund application submitted: RefundApplicationsController shows this text + the reference number.
+IF NOT EXISTS (SELECT 1 FROM dbo.RCSUserMessages WHERE [Key] = N'r_rcs_refund_success_message')
+    INSERT dbo.RCSUserMessages ([Name], [Description], [Key], [Title], [Body], [DepartmentId], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Refund application submitted', N'Shown after a tenant submits a deposit refund application', N'r_rcs_refund_success_message',
+            N'Refund Application Submitted', N'Your deposit refund application has been submitted successfully. Your reference number is ', (SELECT Id FROM dbo.ApplicationEntities WHERE Id = 4), 1, 0, GETDATE());
+
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';
