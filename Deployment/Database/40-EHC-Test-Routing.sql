@@ -46,6 +46,15 @@ SELECT u.Id, r.Id FROM dbo.AspNetUsers u CROSS JOIN dbo.AspNetRoles r
 WHERE u.UserName = N'SolarTest05' AND r.Name = N'CEO'
   AND NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles x WHERE x.UserId = u.Id AND x.RoleId = r.Id);
 
+-- Test logins: no forced password change on first login.
+UPDATE su SET IsTemporaryPassword = 0
+FROM dbo.SystemUsers su JOIN dbo.AspNetUsers u ON u.SystemUserId = su.Id
+WHERE u.UserName IN (N'Sash38', N'zanelem', N'Dimakatsol', N'madimetjak', N'richadt', N'SolarTest05',
+                     N'tshepangm', N'susans', N'SolarTest02', N'SolarTest03');
+UPDATE dbo.AspNetUsers SET LockoutEndDateUtc = NULL, AccessFailedCount = 0
+WHERE UserName IN (N'Sash38', N'zanelem', N'Dimakatsol', N'madimetjak', N'richadt', N'SolarTest05',
+                   N'tshepangm', N'susans', N'SolarTest02', N'SolarTest03');
+
 -- BR01 stays off while testing (several applications per ID allowed).
 UPDATE dbo.AppSettings SET [Value] = N'false' WHERE [Key] = N'ehc_enforce_one_application_per_id';
 
