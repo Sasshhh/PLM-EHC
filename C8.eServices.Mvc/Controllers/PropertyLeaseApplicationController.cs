@@ -10738,6 +10738,9 @@ Activating your billing account and debit order mandate is required before occup
         public static string FindOpenApplicationForId(eServicesDbContext cxt, string idNo)
         {
             if (string.IsNullOrWhiteSpace(idNo)) return null;
+            // Switchable so testers can submit several applications with one ID; set to "true" for go-live.
+            var enforce = cxt.AppSettings.FirstOrDefault(s => s.Key == AppSettingKeys.EhcEnforceOneApplicationPerId)?.Value;
+            if (!string.Equals((enforce ?? "").Trim(), "true", StringComparison.OrdinalIgnoreCase)) return null;
             idNo = idNo.Trim();
             var activeLeaseIds = cxt.Status.Where(s => s.Key == StatusKeys.ActiveLease).Select(s => s.Id).ToList();
             var apps = cxt.PropertyLeaseApplications.Where(a => a.IDNo == idNo && !a.IsDeleted)

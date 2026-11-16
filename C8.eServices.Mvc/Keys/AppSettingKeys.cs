@@ -286,6 +286,8 @@ namespace C8.eServices.Mvc.Keys
         public const string LA_TEMP_PDF = "pdf_location_path_la";
         public const string waiting_list_notification_in_munites = "waiting_list_notification_in_munites";
         public const string renewal_notification_in_minutes = "renewal_notification_in_minutes";
+        // BR01: "true" = one open application per ID (go-live); anything else = allowed (testing)
+        public const string EhcEnforceOneApplicationPerId = "ehc_enforce_one_application_per_id";
 
 
         public const string USER_CHECK_RELATIONSHIP = "USER_CHECK_RELATIONSHIP";

@@ -72,5 +72,10 @@ IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N's_ceo')
     INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'CEO', N'Customer Id of the CEO who authorises deposit refunds (0 = not set)', N's_ceo', N'0', 1, 0, GETDATE());
 
+-- BR01 switch: PropertyLeaseApplicationController.FindOpenApplicationForId. false while testing; set to true for go-live.
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'ehc_enforce_one_application_per_id')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'EHC one application per ID (BR01)', N'true = refuse a second application while the ID is on the waiting list or holds an active lease; false = allow (testing)', N'ehc_enforce_one_application_per_id', N'false', 1, 0, GETDATE());
+
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';

@@ -49,3 +49,8 @@ IF COL_LENGTH('dbo.Status', 'DepartmentId') IS NOT NULL
     EXEC(N'UPDATE n SET DepartmentId = o.DepartmentId FROM dbo.Status n
            CROSS APPLY (SELECT TOP (1) DepartmentId FROM dbo.Status WHERE [Key] = N''s_incentive_policy_application_approved'' ORDER BY Id) o
            WHERE n.[Key] = N''s_awaiting_ceo_risk_approval'' AND n.DepartmentId IS NULL;');
+
+-- BR01 switch: allow several applications per ID while testing. Set to 'true' for go-live.
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'ehc_enforce_one_application_per_id')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'EHC one application per ID (BR01)', N'true = refuse a second application while the ID is on the waiting list or holds an active lease; false = allow (testing)', N'ehc_enforce_one_application_per_id', N'false', 1, 0, GETDATE());
