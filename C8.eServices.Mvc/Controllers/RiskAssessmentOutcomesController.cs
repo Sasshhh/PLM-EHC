@@ -672,6 +672,10 @@ namespace C8.eServices.Mvc.Controllers
                 //    MatchingHelper.RoundRobinMarkJobAsFinished(context, rcsAppId, null, ceoRole.Id, Customer.Id);
                 //}
 
+                // Approved by the CEO: offer a free unit straight away (no need to press Run Auto-Allocate).
+                if (ApprovalStatusddl == "Approved")
+                    Session["ConductRiskAssessmentSession"] = Convert.ToString(Session["ConductRiskAssessmentSession"]) + OfferUnitNow(rcsAppId);
+
                 return RedirectToAction("InboxCEO");
             }
             catch (Exception ex)
@@ -685,6 +689,30 @@ namespace C8.eServices.Mvc.Controllers
         // ==========================================================================
         // PRIVATE METHODS (Paste these below the POST method above)
         // ==========================================================================
+
+        /// <summary>
+        /// Runs unit matching right after an approval put the applicant on the waiting list and returns a
+        /// sentence for the confirmation message. Never throws: if matching cannot run now, the applicant
+        /// simply stays on the waiting list for the next run.
+        /// </summary>
+        private string OfferUnitNow(int rcsAppId)
+        {
+            try
+            {
+                var result = UnitMatchingEngine.Run(SystemUser != null ? SystemUser.Id : 1);
+                if (result.AlreadyRunning)
+                    return " Unit matching is busy right now; it will offer a unit on its next run.";
+                string unitNo;
+                if (result.OfferedUnits.TryGetValue(rcsAppId, out unitNo))
+                    return " Unit " + unitNo + " has been offered to the applicant.";
+                return " No free unit of the requested type in the preferred complexes yet, so the applicant stays on the waiting list.";
+            }
+            catch (Exception ex)
+            {
+                try { EventLogHelper.LogSystemError("OfferUnitNow " + rcsAppId + ": " + ex.GetBaseException().Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog); } catch { }
+                return " Unit matching could not run now; use PLM Applications > Waiting List > Run Auto-Allocate.";
+            }
+        }
 
         /// <summary>
         /// Adds the applicant to the PropertyLeaseWaitingList table if not already present.
@@ -1108,6 +1136,9 @@ namespace C8.eServices.Mvc.Controllers
 
                 MatchingHelper.RoundRobinMarkJobAsFinished(dbContext, rcsAppId, null, ResponsibilityTypeId.Id, Customer.Id);
                 MatchingHelper.ActivityTrackerAudit(dbContext, rcsAppId, ActivityTrackerMessage, Customer.Id);
+                // Approved applicants are on the waiting list now: offer a free unit straight away.
+                if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    Session["ConductRiskAssessmentSession"] = Convert.ToString(Session["ConductRiskAssessmentSession"]) + OfferUnitNow(rcsAppId);
                 return RedirectToAction("ApplicantRiskAssessment", "PropertyLeaseApplication");
             }
             catch(Exception IO)

@@ -46,6 +46,8 @@ namespace C8.eServices.Mvc.Helpers
             public int Failed { get; set; }
             public bool AlreadyRunning { get; set; }
             public List<string> Log { get; } = new List<string>();
+            /// <summary>Application id -> unit number offered in this run.</summary>
+            public Dictionary<int, string> OfferedUnits { get; } = new Dictionary<int, string>();
             public override string ToString() { return string.Join(Environment.NewLine, Log); }
         }
 
@@ -104,6 +106,7 @@ namespace C8.eServices.Mvc.Helpers
                     string unitNo;
                     int appId = OfferUnitCore(p.WaitingListId, p.UnitId, systemUserId, how, out unitNo);
                     offeredApps.Add(appId);
+                    result.OfferedUnits[appId] = unitNo;
                     result.Offered++;
                     result.Log.Add(string.Format("Unit {0} offered to application id {1}.", unitNo, appId));
                 }

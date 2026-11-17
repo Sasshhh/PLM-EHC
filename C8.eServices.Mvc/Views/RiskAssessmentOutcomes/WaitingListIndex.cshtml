@@ -70,12 +70,11 @@
                     </a>
                 </div>
             } <div class="col-md-2 text-right">
-                @using (Html.BeginForm("RunAutoAllocation", "RiskAssessmentOutcomes", FormMethod.Post, new { style = "display:inline;" }))
+                @using (Html.BeginForm("RunAutoAllocation", "RiskAssessmentOutcomes", FormMethod.Post, new { style = "display:inline;", @class = "js-confirm", data_title = "Run Auto-Allocate?", data_text = "Every waiting applicant who has a free unit of their type in their preferred complex will be offered that unit now, oldest first. They will get an e-mail/SMS.", data_ok = "Run Auto-Allocate", data_busy = "Matching waiting applicants to free units..." }))
                 {
                     @Html.AntiForgeryToken()
 
-                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 20px;"
-                            onclick="return confirm('Ready to run Auto-Allocation?');">
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 20px;">
                         <i class="fa fa-magic"></i> Run Auto-Allocate
                     </button>
                 }
@@ -84,6 +83,14 @@
     </div>
 
     @* --- 3. LOG DISPLAY (Shows results after button click) --- *@
+    @if (TempData["Success"] != null || TempData["Error"] != null)
+    {
+        bool allocOk = TempData["Error"] == null;
+        <span id="allocation-result" style="display:none;"
+              data-title="@(allocOk ? "Done" : "Not done")"
+              data-text="@(allocOk ? TempData["Success"] : TempData["Error"])"
+              data-icon="@(allocOk ? "success" : "error")"></span>
+    }
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success">
@@ -217,3 +224,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Confirm with a styled dialog (SweetAlert) instead of the browser's plain confirm box,
+    // then keep a busy overlay up while the server works so nobody clicks twice.
+    (function ($) {
+        function busy(msg) { try { HoldOn.open({ message: msg, textColor: 'white' }); } catch (e) { } }
+        $(document).on('submit', 'form.js-confirm', function (e) {
+            var form = this;
+            if (form.getAttribute('data-confirmed') === '1') { busy(form.getAttribute('data-busy') || 'Please wait...'); return true; }
+            e.preventDefault();
+            var title = form.getAttribute('data-title'), text = form.getAttribute('data-text'), ok = form.getAttribute('data-ok') || 'Yes';
+            var go = function () { form.setAttribute('data-confirmed', '1'); $(form).find('button[type=submit]').prop('disabled', true); busy(form.getAttribute('data-busy') || 'Please wait...'); form.submit(); };
+            if (window.swal) {
+                swal({ title: title, text: text, icon: 'info', buttons: { cancel: { text: 'Cancel', visible: true }, confirm: { text: ok } } })
+                    .then(function (yes) { if (yes) go(); });
+            } else if (window.confirm(title + '\n\n' + text)) { go(); }
+        });
+        // Show the result of the last action as a dialog too (the panel below keeps the details).
+        $(function () {
+            var box = document.getElementById('allocation-result');
+            if (!box || !window.swal) return;
+            swal({ title: box.getAttribute('data-title'), text: box.getAttribute('data-text'), icon: box.getAttribute('data-icon') });
+        });
+    })(jQuery);
+</script>
