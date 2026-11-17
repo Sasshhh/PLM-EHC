@@ -187,22 +187,15 @@ body.ehc-theme .page-item.active .page-link {
 }
 
 /* ---------- Forms ---------- */
-body.ehc-theme .form-control {
-    border: 1px solid #cdd5dc;
-    border-radius: 4px;
-    box-shadow: none;
-    transition: border-color .15s ease, box-shadow .15s ease;
+/* Text boxes keep the template's light underline style (no box); only the focus colour changes to green. */
+body.ehc-theme .form-control:focus {
+    border-bottom-color: var(--ehc-green);
+    box-shadow: inset 0 -1px var(--ehc-green);
+    outline: 0;
 }
-
-    body.ehc-theme .form-control:focus {
-        border-color: var(--ehc-green);
-        box-shadow: 0 0 0 3px rgba(30, 132, 73, .15);
-        outline: 0;
-    }
 
     body.ehc-theme .form-control[readonly],
     body.ehc-theme .form-control[disabled] {
-        background-color: #f1f4f6;
         color: var(--ehc-muted);
     }
 
