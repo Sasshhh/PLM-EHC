@@ -123,7 +123,7 @@ Commit     : $commit$dirty
 Config     : $Configuration
 "@ | Set-Content (Join-Path $publish 'VERSION.txt') -Encoding UTF8
 
-$zip = Join-Path $OutputDir ("PLM-EHC_{0}_{1}_{2}.zip" -f ($branch -replace '[\\/]', '-'), $commit, $stamp)
+$zip = Join-Path $OutputDir ("PLM-EHC_{0}_{1}.zip" -f $stamp, $commit)
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::CreateFromDirectory($publish, $zip, [IO.Compression.CompressionLevel]::Optimal, $false)
