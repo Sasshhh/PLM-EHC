@@ -68377,6 +68377,13 @@ IF NOT EXISTS (SELECT 1 FROM dbo.RCSUserMessages WHERE [Key] = N'r_rcs_refund_su
     VALUES (N'Refund application submitted', N'Shown after a tenant submits a deposit refund application', N'r_rcs_refund_success_message',
             N'Refund Application Submitted', N'Your deposit refund application has been submitted successfully. Your reference number is ', (SELECT Id FROM dbo.ApplicationEntities WHERE Id = 4), 1, 0, GETDATE());
 
+-- EDRMS (city document store) is not used by EHC: keep every upload in PLM only.
+-- FileController only calls EDRMS when this is 'on'.
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'EDRMSACTIVE')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'EDRMSACTIVE', N'on = also push uploaded documents to EDRMS; off = PLM only (EHC default)', N'EDRMSACTIVE', N'off', 1, 0, GETDATE());
+UPDATE dbo.AppSettings SET [Value] = N'off' WHERE [Key] = N'EDRMSACTIVE' AND ISNULL([Value], N'') <> N'off';
+
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';
 INSERT #upgrade_ok VALUES (10);
