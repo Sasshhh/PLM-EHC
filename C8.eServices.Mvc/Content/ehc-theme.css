@@ -84,14 +84,18 @@ body.ehc-theme .panel-group .panel + .panel {
     margin-top: 8px;
 }
 
+/* The admin template (main.min.css) gives .panel-default .panel-heading "margin: 0 22px", which left the
+   green heading bar short of the panel edges. The bar now spans the full panel width. */
 body.ehc-theme .panel-default > .panel-heading,
+body.ehc-theme .panel-default .panel-heading,
 body.ehc-theme .card-header {
+    margin: 0;
     background-color: var(--ehc-green-soft);
     border-bottom: 1px solid var(--ehc-line);
     color: var(--ehc-ink);
     border-top-left-radius: var(--ehc-radius);
     border-top-right-radius: var(--ehc-radius);
-    padding: 10px 15px;
+    padding: 10px 18px;
 }
 
 body.ehc-theme .panel-title,
