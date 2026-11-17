@@ -64,8 +64,8 @@
                 if (isConfirm) {
                     var statuskey = document.getElementById('ApprovalStatus').value;
                     var comment = document.getElementById('Comments').value;
-                    if (statuskey == "Rcs_Rejected" && (!comment || comment.trim() === "")) {
-                        swal("Validation Error", "Please enter a reason for rejecting the renewal.", "warning");
+                    if (!comment || comment.trim() === "") { // BR05: approvals too
+                        swal("Validation Error", "A reason/comment is required for every outcome (BR05)", "warning");
                     } else {
                         document.getElementById("btnApproval").click();
                     }

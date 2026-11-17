@@ -14,6 +14,7 @@ Deployment/
   Database/10-Upgrade-Schema.sql          SQL: adds missing tables/columns (generated, additive only)
   Database/20-Upgrade-MasterData.sql      SQL: adds missing master data (generated, insert-only)
   Database/25-EHC-Gap-MasterData.sql      SQL: EHC keys the code needs that no repo script created
+  Database/40-EHC-Test-Routing.sql        OPTIONAL, test copies only: queues/complexes -> factory test users
   Database/30-Verify-MasterData.sql       SQL: lists keys the code looks up that the DB lacks
   Database/90-Verify-Schema.sql           SQL: compares the DB with the tables/columns this code expects
   Database/tools/                         generators for 10, 20, 30 and 90
@@ -137,6 +138,10 @@ For a database that already exists (a dev copy, a restored backup), the simplest
 database in the drop-down, Execute. It runs 10, 20 and 25 and then both checks, stops at the first
 error, refuses to run against master or a non-PLM database, and is safe to run again. Rebuild it with
 `python3 Deployment/Database/tools/build_single_script.py` whenever 10/20/25/30/90 change.
+
+On a TEST copy, run `Database/40-EHC-Test-Routing.sql` afterwards so every EHC queue (and every
+complex without a Letting Officer, Housing Supervisor or Maintenance Manager) points at the factory
+test users and SolarTest05 holds the CEO role. It changes existing rows, so never run it on production.
 
 Or from PowerShell, with an automatic backup and log files:
 

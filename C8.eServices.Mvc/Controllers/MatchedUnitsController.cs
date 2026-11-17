@@ -146,7 +146,7 @@ namespace C8.eServices.Mvc.Controllers
 
             // Log rejection reason in application history
             string logMessage = string.IsNullOrWhiteSpace(reason) ? "Unit Offer Rejected." : $"Unit Offer Rejected. Reason: {reason}";
-            MatchingHelper.AddHistoryLog(db, rcsApps.Id, custmusers.Id, logMessage);
+            MatchingHelper.AddHistoryLog(db, rcsApps.Id, custmusers.Id, logMessage, MatchingHelper.HistoryEntity.PropertyLease);
 
             return Json(output, JsonRequestBehavior.AllowGet);
         }

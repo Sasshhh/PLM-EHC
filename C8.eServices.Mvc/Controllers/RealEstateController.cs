@@ -675,7 +675,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 // Accept the scheduled slot
                 app.InspectionStatus = "Confirmed";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Applicant accepted/confirmed scheduled inspection slot.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Applicant accepted/confirmed scheduled inspection slot.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Inspection slot confirmed successfully.";
             }
             else if (actionType == "Propose")
@@ -690,7 +690,7 @@ namespace C8.eServices.Mvc.Controllers
                 app.InspectionDate = proposedDate;
                 app.InspectionTime = proposedTime;
                 app.InspectionStatus = "Proposed";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Applicant proposed new inspection slot: {0:yyyy-MM-dd} at {1}.", proposedDate.Value, proposedTime));
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Applicant proposed new inspection slot: {0:yyyy-MM-dd} at {1}.", proposedDate.Value, proposedTime), MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Proposed slot submitted. Property officer will review.";
             }
 
@@ -808,7 +808,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Applicant requested early Permission to Occupy.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Applicant requested early Permission to Occupy.", MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "PTO request submitted successfully! Ref: " + app.PtoReferenceNumber;
             return RedirectToAction("MyApplications");
         }
@@ -911,7 +911,7 @@ namespace C8.eServices.Mvc.Controllers
             int refTypeId = db.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.RealEstateApplication)?.Id ?? 16;
             SaveAndLinkFile(signedLeaseFile, "Signed Lease/User Agreement", id, 18, refTypeId);
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Tenant signed and uploaded the User Agreement.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Tenant signed and uploaded the User Agreement.", MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Lease agreement signed and uploaded successfully! Pending final authorization.";
             return RedirectToAction("MyApplications");
         }

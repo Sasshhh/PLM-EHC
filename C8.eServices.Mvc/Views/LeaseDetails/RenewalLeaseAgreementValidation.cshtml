@@ -199,7 +199,7 @@
                 <br />
                 <br />
 
-                <div id="divComment" style="display:none">
+                <div id="divComment" style="display:block">
                     <div class="form-group">
                         <span> @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
                         <div class="col-md-4">
@@ -473,7 +473,7 @@
         if (status == "Rcs_Rejected") {
             jQuery('#divComment').css("display", "block")
         } else {
-            jQuery('#divComment').css("display", "none")
+            jQuery('#divComment').css("display", "block") /* BR05: reason always required */
 
         }
     }
@@ -498,9 +498,9 @@
             if (isConfirm) {
                 var status = document.getElementById("ApprovalStatus").value;
                 var Comment = document.getElementById("Comment").value;
-                if (status == "Rcs_Rejected") {
-                    if (Comment == "" || Comment == null) {
-                        swal("Error", "Comment required when rejecting", "warning");
+                if (true) { // BR05: reason mandatory on approvals as well as rejections
+                    if (Comment == null || Comment.trim() == "") {
+                        swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
                     } else
                     {
                         document.getElementById("btnApproval").click();

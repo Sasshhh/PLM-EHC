@@ -241,7 +241,7 @@
                         </div>
                     </div>
 
-                    <div id="rejectReasonDiv" style="display:none;">
+                    <div id="rejectReasonDiv" style="display:block;">
                         <div class="form-group">
                             @Html.Label("Comments / Reason", htmlAttributes: new { @class = "control-label col-md-2" })
                             <div class="col-md-6">
@@ -294,8 +294,8 @@
         }
 
         // 4. Check Forced Rejection Comment
-        if (statusval === '@RCSActionTypeKeys.Rejected' && comment == "") {
-            swal("Error", "A reason is mandatory when rejecting.", "warning");
+        if (!comment || comment.trim() == "") {
+            swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
             document.getElementById("RejectComment").focus();
             return;
         }
@@ -321,7 +321,7 @@
             if (selectedValue === '@RCSActionTypeKeys.Rejected') {
                 $('#rejectReasonDiv').show();
             } else {
-                $('#rejectReasonDiv').hide();
+                $('#rejectReasonDiv').show(); // BR05: reason always required
             }
         });
 

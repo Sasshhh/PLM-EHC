@@ -1,0 +1,426 @@
+/*
+ * EHC / PLM look and feel - one stylesheet loaded last by the layouts so every screen gets the
+ * same polish without editing each view. Only colour, spacing, borders and shadows change here;
+ * no widths, floats or grid rules, so existing screen layouts stay where they are.
+ * Every rule is scoped to body.ehc-theme so it can be switched off by removing that class.
+ */
+
+:root {
+    --ehc-green: #1e8449;
+    --ehc-green-dark: #186a3b;
+    --ehc-green-soft: #e9f5ee;
+    --ehc-gold: #af7b0b;
+    --ehc-ink: #1f2933;
+    --ehc-muted: #5f6b76;
+    --ehc-line: #dfe5ea;
+    --ehc-page: #f4f6f8;
+    --ehc-card: #ffffff;
+    --ehc-radius: 6px;
+    --ehc-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+}
+
+/* ---------- Page ---------- */
+body.ehc-theme {
+    color: var(--ehc-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+body.ehc-theme.app .main-container,
+body.ehc-theme.app .content-container {
+    background-color: var(--ehc-page);
+}
+
+body.ehc-theme h1, body.ehc-theme h2, body.ehc-theme h3, body.ehc-theme h4 {
+    color: var(--ehc-ink);
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+body.ehc-theme hr {
+    border-top-color: var(--ehc-line);
+}
+
+body.ehc-theme a {
+    color: var(--ehc-green);
+}
+
+    body.ehc-theme a:hover, body.ehc-theme a:focus {
+        color: var(--ehc-green-dark);
+    }
+
+/* ---------- Header and side menu ---------- */
+body.ehc-theme .site-head {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+}
+
+body.ehc-theme .nav-wrap .site-nav .nav-list > li > a {
+    transition: background-color .15s ease, color .15s ease;
+}
+
+    body.ehc-theme .nav-wrap .site-nav .nav-list > li > a:hover,
+    body.ehc-theme .nav-wrap .site-nav .nav-list > li.open > a {
+        background-color: rgba(30, 132, 73, .12);
+    }
+
+body.ehc-theme .nav-wrap .site-nav .inner-drop a:hover {
+    color: var(--ehc-green);
+}
+
+/* ---------- Panels and cards ---------- */
+body.ehc-theme .panel,
+body.ehc-theme .card,
+body.ehc-theme .cards {
+    border: 1px solid var(--ehc-line);
+    border-radius: var(--ehc-radius);
+    box-shadow: var(--ehc-shadow);
+    background-color: var(--ehc-card);
+}
+
+body.ehc-theme .panel {
+    margin-bottom: 18px;
+}
+
+body.ehc-theme .panel-group .panel + .panel {
+    margin-top: 8px;
+}
+
+/* The admin template (main.min.css) gives .panel-default .panel-heading "margin: 0 22px", which left the
+   green heading bar short of the panel edges. The bar now spans the full panel width. */
+body.ehc-theme .panel-default > .panel-heading,
+body.ehc-theme .panel-default .panel-heading,
+body.ehc-theme .card-header {
+    margin: 0;
+    background-color: var(--ehc-green-soft);
+    border-bottom: 1px solid var(--ehc-line);
+    color: var(--ehc-ink);
+    border-top-left-radius: var(--ehc-radius);
+    border-top-right-radius: var(--ehc-radius);
+    padding: 10px 18px;
+}
+
+body.ehc-theme .panel-title,
+body.ehc-theme .panel-title > a {
+    font-weight: 600;
+    color: var(--ehc-ink);
+    text-decoration: none;
+}
+
+    body.ehc-theme .panel-title > a:hover {
+        color: var(--ehc-green);
+    }
+
+body.ehc-theme .panel-body,
+body.ehc-theme .card-body {
+    padding: 16px 18px;
+}
+
+/* ---------- Tables ---------- */
+body.ehc-theme .table {
+    background-color: #fff;
+    margin-bottom: 16px;
+}
+
+    body.ehc-theme .table > thead > tr > th,
+    body.ehc-theme table.dataTable thead th,
+    body.ehc-theme th {
+        background-color: var(--ehc-green);
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        border-color: var(--ehc-green-dark);
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    body.ehc-theme .table > tbody > tr > td {
+        vertical-align: middle;
+        border-color: var(--ehc-line);
+    }
+
+body.ehc-theme .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f8faf9;
+}
+
+body.ehc-theme .table-hover > tbody > tr:hover,
+body.ehc-theme table.dataTable tbody tr:hover {
+    background-color: var(--ehc-green-soft);
+}
+
+body.ehc-theme .table-bordered {
+    border-color: var(--ehc-line);
+}
+
+body.ehc-theme .table-responsive {
+    border: 0;
+}
+
+/* DataTables controls */
+body.ehc-theme .dataTables_wrapper .dataTables_filter input,
+body.ehc-theme .dataTables_wrapper .dataTables_length select {
+    border: 1px solid var(--ehc-line);
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-left: 6px;
+}
+
+body.ehc-theme .dataTables_wrapper .dataTables_info {
+    color: var(--ehc-muted);
+    font-size: 13px;
+}
+
+body.ehc-theme .pagination > li > a,
+body.ehc-theme .pagination > li > span {
+    color: var(--ehc-green);
+    border-color: var(--ehc-line);
+}
+
+body.ehc-theme .pagination > .active > a,
+body.ehc-theme .pagination > .active > span,
+body.ehc-theme .pagination > .active > a:hover,
+body.ehc-theme .pagination > .active > span:hover,
+body.ehc-theme .pagination > .active > a:focus,
+body.ehc-theme .pagination > .active > span:focus,
+body.ehc-theme .page-item.active .page-link {
+    background-color: var(--ehc-green);
+    border-color: var(--ehc-green);
+    color: #fff;
+}
+
+/* ---------- Forms ---------- */
+/* Text boxes keep the template's light underline style (no box); only the focus colour changes to green. */
+body.ehc-theme .form-control:focus {
+    border-bottom-color: var(--ehc-green);
+    box-shadow: inset 0 -1px var(--ehc-green);
+    outline: 0;
+}
+
+    body.ehc-theme .form-control[readonly],
+    body.ehc-theme .form-control[disabled] {
+        color: var(--ehc-muted);
+    }
+
+body.ehc-theme .control-label,
+body.ehc-theme label {
+    font-weight: 600;
+    color: #344150;
+}
+
+body.ehc-theme .field-validation-error,
+body.ehc-theme .text-danger {
+    color: #c0392b;
+    font-size: 12.5px;
+}
+
+body.ehc-theme .input-validation-error {
+    border-color: #c0392b !important;
+}
+
+body.ehc-theme input[type=file] {
+    padding: 6px;
+    border: 1px dashed #b8c4ce;
+    border-radius: 4px;
+    background-color: #fafbfc;
+    max-width: 100%;
+}
+
+    body.ehc-theme input[type=file]:hover {
+        border-color: var(--ehc-green);
+        background-color: var(--ehc-green-soft);
+    }
+
+/* ---------- Buttons ---------- */
+body.ehc-theme .btn {
+    border-radius: 4px;
+    font-weight: 600;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+    body.ehc-theme .btn:hover {
+        border-color: var(--ehc-green);
+    }
+
+    body.ehc-theme .btn:focus {
+        box-shadow: 0 0 0 3px rgba(30, 132, 73, .2);
+    }
+
+    body.ehc-theme .btn[disabled],
+    body.ehc-theme .btn.disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+body.ehc-theme .btn-primary,
+body.ehc-theme .btn-success {
+    color: #fff;
+    background-color: var(--ehc-green);
+    border-color: var(--ehc-green);
+}
+
+    body.ehc-theme .btn-primary:hover,
+    body.ehc-theme .btn-success:hover,
+    body.ehc-theme .btn-primary:focus,
+    body.ehc-theme .btn-success:focus {
+        color: #fff;
+        background-color: var(--ehc-green-dark);
+        border-color: var(--ehc-green-dark);
+    }
+
+body.ehc-theme .btn-danger {
+    color: #fff;
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+    body.ehc-theme .btn-danger:hover {
+        color: #fff;
+        background-color: #a93226;
+        border-color: #a93226;
+    }
+
+body.ehc-theme .btn-warning {
+    color: #fff;
+    background-color: var(--ehc-gold);
+    border-color: var(--ehc-gold);
+}
+
+body.ehc-theme .button1,
+body.ehc-theme .buttonIcon {
+    border-radius: 4px;
+    font-weight: 600;
+    padding: 9px 22px;
+    font-size: 15px;
+    box-shadow: var(--ehc-shadow);
+    transition: background-color .15s ease, transform .05s ease;
+}
+
+    body.ehc-theme .button1:hover,
+    body.ehc-theme .buttonIcon:hover {
+        background-color: var(--ehc-green-dark) !important;
+        color: #fff;
+    }
+
+    body.ehc-theme .button1:active,
+    body.ehc-theme .buttonIcon:active {
+        transform: translateY(1px);
+    }
+
+    body.ehc-theme .button1[disabled],
+    body.ehc-theme .buttonIcon[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+/* ---------- Alerts ---------- */
+body.ehc-theme .alert {
+    border-radius: var(--ehc-radius);
+    border-width: 1px;
+    border-left-width: 4px;
+}
+
+body.ehc-theme .alert-success {
+    background-color: var(--ehc-green-soft);
+    border-color: var(--ehc-green);
+    color: #145a32;
+}
+
+body.ehc-theme .alert-info {
+    border-left-color: #2e86c1;
+}
+
+body.ehc-theme .alert-warning {
+    border-left-color: var(--ehc-gold);
+}
+
+body.ehc-theme .alert-danger {
+    border-left-color: #c0392b;
+}
+
+/* ---------- Modals ---------- */
+body.ehc-theme .modal-content {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(16, 24, 40, .25);
+}
+
+/* The admin template gives .modal-header "margin: 0 20px" and parks the close button at right:-20px;
+   the green title bar now spans the whole popup and the close button sits inside it. */
+body.ehc-theme .modal-header {
+    margin: 0;
+    padding: 12px 44px 12px 18px;
+    background-color: var(--ehc-green);
+    color: #fff;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 0;
+}
+
+    body.ehc-theme .modal-header .modal-title,
+    body.ehc-theme .modal-header h4,
+    body.ehc-theme .modal-header h5 {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    body.ehc-theme .modal-header .close,
+    body.ehc-theme .modal-header > .close {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        margin-top: -12px;
+        padding: 0 6px;
+        background: transparent;
+        color: #fff;
+        font-size: 22px;
+        line-height: 24px;
+        opacity: .85;
+        text-shadow: none;
+    }
+
+        body.ehc-theme .modal-header > .close:hover {
+            opacity: 1;
+        }
+
+body.ehc-theme .modal-footer {
+    border-top: 1px solid var(--ehc-line);
+    background-color: #fafbfc;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* ---------- Wizard steps (application capture) ---------- */
+body.ehc-theme .step-app > .step-steps > li > a {
+    border-radius: 4px;
+}
+
+body.ehc-theme .step-app > .step-steps > li.active a {
+    background-color: var(--ehc-green) !important;
+    color: #fff;
+}
+
+body.ehc-theme .step-app > .step-steps > li.done a {
+    background-color: #7dbb94 !important;
+    color: #fff;
+}
+
+/* ---------- Busy overlay ---------- */
+#holdon-overlay {
+    background-color: rgba(17, 24, 39, .72) !important;
+}
+
+#holdon-message {
+    font-size: 17px !important;
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 767px) {
+    body.ehc-theme .panel-body,
+    body.ehc-theme .card-body {
+        padding: 12px;
+    }
+
+    body.ehc-theme .table > thead > tr > th {
+        white-space: normal;
+    }
+}

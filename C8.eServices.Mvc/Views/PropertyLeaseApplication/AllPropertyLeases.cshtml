@@ -103,6 +103,44 @@
             </div>
         </div>
         <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            @* FR4.1 / D058: visual summary of the lease portfolio by status, built from the same rows as the table *@
+            @{
+                var leaseStatusSummary = (Model ?? Enumerable.Empty<C8.eServices.Mvc.ViewModels.LeaseDetailsViewModel>())
+                    .GroupBy(x => string.IsNullOrWhiteSpace(x.StatusName) ? "No status" : x.StatusName)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count).ToList();
+                var leaseTotal = leaseStatusSummary.Sum(x => x.Count);
+                var leaseMax = leaseStatusSummary.Count > 0 ? leaseStatusSummary.Max(x => x.Count) : 1;
+                var barColours = new[] { "#1b5e20", "#2e7d32", "#43a047", "#66bb6a", "#0277bd", "#0288d1", "#f9a825", "#ef6c00", "#c62828", "#6a1b9a", "#546e7a" };
+            }
+            <div class="lease-dashboard" style="padding:15px 20px 5px 20px;">
+                <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+                    <div style="border:1px solid #ddd; border-radius:6px; padding:10px 16px; min-width:140px;">
+                        <div class="text-muted" style="font-size:12px;">Total leases</div>
+                        <div style="font-size:24px; font-weight:bold;">@leaseTotal</div>
+                    </div>
+                    @foreach (var s in leaseStatusSummary.Take(3))
+                    {
+                        <div style="border:1px solid #ddd; border-radius:6px; padding:10px 16px; min-width:140px;">
+                            <div class="text-muted" style="font-size:12px;">@s.Status</div>
+                            <div style="font-size:24px; font-weight:bold;">@s.Count</div>
+                        </div>
+                    }
+                </div>
+                <div style="font-weight:bold; margin-bottom:6px;">Leases by status</div>
+                @for (int i = 0; i < leaseStatusSummary.Count; i++)
+                {
+                    var s = leaseStatusSummary[i];
+                    var pct = (int)Math.Round(100.0 * s.Count / leaseMax);
+                    <div style="display:flex; align-items:center; margin-bottom:4px;" title="@s.Status: @s.Count">
+                        <div style="width:260px; font-size:12px; padding-right:8px; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@s.Status</div>
+                        <div style="flex:1; background:#f1f1f1; border-radius:3px;">
+                            <div style="width:@(Math.Max(pct, 1))%; background:@barColours[i % barColours.Length]; height:16px; border-radius:3px;"></div>
+                        </div>
+                        <div style="width:50px; font-size:12px; padding-left:8px;">@s.Count</div>
+                    </div>
+                }
+            </div>
             <br />
             <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
                 <thead>

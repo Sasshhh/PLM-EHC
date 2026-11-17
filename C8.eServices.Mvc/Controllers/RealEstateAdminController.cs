@@ -483,7 +483,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment approved.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment approved.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Payment validated successfully! Application status updated to Awaiting Risk Assessment.";
             }
             else if (decision == "Reject")
@@ -518,7 +518,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment rejected. Reason: " + comment);
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Application fee payment rejected. Reason: " + comment, MatchingHelper.HistoryEntity.RealEstate);
 
                 // Notify applicant via Email
                 try
@@ -674,7 +674,7 @@ namespace C8.eServices.Mvc.Controllers
                 db.Entry(app).State = EntityState.Modified;
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Risk assessment completed and Recommended.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Risk assessment completed and Recommended.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Risk assessment outcome saved. Application status is now Verified.";
             }
             else if (recommendation == "Not Recommended")
@@ -697,7 +697,7 @@ namespace C8.eServices.Mvc.Controllers
                 db.Entry(app).State = EntityState.Modified;
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Risk assessment completed and Not Recommended. Reason: " + reason);
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Risk assessment completed and Not Recommended. Reason: " + reason, MatchingHelper.HistoryEntity.RealEstate);
 
                 // Notify applicant via Email
                 try
@@ -809,7 +809,7 @@ namespace C8.eServices.Mvc.Controllers
 
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease application initiated for Departmental Review.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease application initiated for Departmental Review.", MatchingHelper.HistoryEntity.RealEstate);
 
             TempData["SuccessMessage"] = "Departmental review initiated successfully! Application status is now In Circulation for Evaluation.";
             return RedirectToAction("DepartmentalReviews");
@@ -1035,7 +1035,7 @@ namespace C8.eServices.Mvc.Controllers
 
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Departmental comment captured by {0} ({1}). Outcome: {2}", representativeName, departmentName, outcome));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Departmental comment captured by {0} ({1}). Outcome: {2}", representativeName, departmentName, outcome), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Departmental review comment captured successfully.";
             return RedirectToAction("DepartmentalQueue");
         }
@@ -1160,7 +1160,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Departmental feedback consolidated and submitted for Committee Review.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Departmental feedback consolidated and submitted for Committee Review.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Departmental comments consolidated. Routed to DPRE Evaluation Committee.";
             }
             else if (decision == "Escalate")
@@ -1179,7 +1179,7 @@ namespace C8.eServices.Mvc.Controllers
 
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Conflicting feedback escalated to Head of Department (HoD).");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Conflicting feedback escalated to Head of Department (HoD).", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Application escalated to HoD for decision due to conflicting feedback.";
             }
 
@@ -1317,7 +1317,7 @@ namespace C8.eServices.Mvc.Controllers
 
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Committee outcome captured: {0}. Notes: {1}", decision, comments));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Committee outcome captured: {0}. Notes: {1}", decision, comments), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Committee decision and resolution captured successfully.";
             return RedirectToAction("CommitteeReviews");
         }
@@ -1434,7 +1434,7 @@ namespace C8.eServices.Mvc.Controllers
 
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Final authorisation outcome: {0}. Comments: {1}", outcome, comments));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Final authorisation outcome: {0}. Comments: {1}", outcome, comments), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Application authorization completed and finalized.";
             return RedirectToAction("FinalAuthorisation");
         }
@@ -1501,7 +1501,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Pre-Occupation inspection scheduled for {0:yyyy-MM-dd} at {1}.", date.Value, time));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Pre-Occupation inspection scheduled for {0:yyyy-MM-dd} at {1}.", date.Value, time), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Inspection slot scheduled successfully. Applicant notified.";
             return RedirectToAction("InspectionSchedules");
         }
@@ -1593,7 +1593,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Unit pre-occupancy inspection completed.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Unit pre-occupancy inspection completed.", MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Inspection report saved successfully.";
             return RedirectToAction("ConductInspections");
         }
@@ -1662,7 +1662,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Works order review completed. Decision: {0}. Assign: {1}", decision, assignmentType));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Works order review completed. Decision: {0}. Assign: {1}", decision, assignmentType), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Work order authorization completed successfully.";
             return RedirectToAction("WorkOrders");
         }
@@ -1720,7 +1720,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Work order assigned to technician: {0}.", technicianName));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Work order assigned to technician: {0}.", technicianName), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Work order assigned to technician successfully.";
             return RedirectToAction("WorkOrders");
         }
@@ -1760,7 +1760,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Technician allocation request: {0}.", decision));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Technician allocation request: {0}.", decision), MatchingHelper.HistoryEntity.RealEstate);
             return RedirectToAction("TechnicianAllocation");
         }
 
@@ -1811,7 +1811,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Technician updated work order status.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Technician updated work order status.", MatchingHelper.HistoryEntity.RealEstate);
             return RedirectToAction("TechnicianAllocation");
         }
 
@@ -1859,7 +1859,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Work order closure review. Decision: {0}.", decision));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Work order closure review. Decision: {0}.", decision), MatchingHelper.HistoryEntity.RealEstate);
             return RedirectToAction("WorkOrders");
         }
 
@@ -1939,7 +1939,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("PTO review completed. Recommendation: {0}.", recommendation));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("PTO review completed. Recommendation: {0}.", recommendation), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "PTO review recommendation submitted successfully.";
             return RedirectToAction("PtoReviews");
         }
@@ -2007,7 +2007,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("PTO authorization completed. Outcome: {0}.", decision));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("PTO authorization completed. Outcome: {0}.", decision), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "PTO authorization completed successfully.";
             return RedirectToAction("PtoAuthorisations");
         }
@@ -2297,7 +2297,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate drafted and submitted for HOD signature.");
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate drafted and submitted for HOD signature.", MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "PTO certificate drafted successfully and submitted for signature.";
             return RedirectToAction("PtoApprovals");
         }
@@ -2353,7 +2353,7 @@ namespace C8.eServices.Mvc.Controllers
                 var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePendingActivation);
                 if (status != null) app.StatusId = status.Id;
                 app.PtoStatus = "Pending Activation";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate authorized and signed by HOD.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate authorized and signed by HOD.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "PTO certificate authorized and activated successfully.";
             }
             else
@@ -2361,7 +2361,7 @@ namespace C8.eServices.Mvc.Controllers
                 var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePtoApproved); // Send back to officer
                 if (status != null) app.StatusId = status.Id;
                 app.PtoStatus = "Rejected by HOD";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate signature rejected by HOD: " + comments);
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO certificate signature rejected by HOD: " + comments, MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "PTO certificate signature rejected and returned to queue.";
             }
 
@@ -2455,7 +2455,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO revocation request submitted by Property Officer: " + reason);
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "PTO revocation request submitted by Property Officer: " + reason, MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "PTO revocation initiated successfully and sent to terminations queue.";
             return RedirectToAction("ActivePto");
         }
@@ -2565,7 +2565,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Standardized User Agreement ({0} Months) generated, reviewed, and submitted for Tenant signature.", durationMonths));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Standardized User Agreement ({0} Months) generated, reviewed, and submitted for Tenant signature.", durationMonths), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = "Lease agreement generated, reviewed, and submitted to tenant for signature successfully.";
             return RedirectToAction("NewLeases");
         }
@@ -2620,7 +2620,7 @@ namespace C8.eServices.Mvc.Controllers
                 var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.RePendingActivation);
                 if (status != null) app.StatusId = status.Id;
                 app.LeaseStatus = "Pending Activation";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorized and signed by HOD.");
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorized and signed by HOD.", MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Lease agreement signed and activated by HOD successfully.";
             }
             else
@@ -2628,7 +2628,7 @@ namespace C8.eServices.Mvc.Controllers
                 var status = db.Status.FirstOrDefault(s => s.Key == StatusKeys.ReAwaitingAgreementConclusion);
                 if (status != null) app.StatusId = status.Id;
                 app.LeaseStatus = "Rejected by HOD";
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorization rejected by HOD: " + comments);
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Lease agreement authorization rejected by HOD: " + comments, MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Lease agreement authorization rejected and returned to queue.";
             }
 
@@ -2732,7 +2732,7 @@ namespace C8.eServices.Mvc.Controllers
                 db.Entry(app).State = EntityState.Modified;
                 db.SaveChanges();
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Space allocated: Unit Type '{0}' of Facility ID {1}.", unit.UnitType, unit.FacilityId));
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, string.Format("Space allocated: Unit Type '{0}' of Facility ID {1}.", unit.UnitType, unit.FacilityId), MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Space allocated successfully. Unit status updated to Allocated.";
             }
             else
@@ -2743,7 +2743,7 @@ namespace C8.eServices.Mvc.Controllers
                     return RedirectToAction("AllocateSpace", new { id = id });
                 }
 
-                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Space allocation delayed: " + reason);
+                MatchingHelper.AddHistoryLog(db, app.Id, _systemUser.Id, "Space allocation delayed: " + reason, MatchingHelper.HistoryEntity.RealEstate);
                 TempData["SuccessMessage"] = "Space allocation marked Delayed.";
             }
 
@@ -2809,7 +2809,7 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
-            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser?.Id ?? 1, string.Format("Lease details captured. Category: {0}. Tenancy Number: {1}.", leaseCategory, app.UniqueTenancyLeaseNumber));
+            MatchingHelper.AddHistoryLog(db, app.Id, _systemUser?.Id ?? 1, string.Format("Lease details captured. Category: {0}. Tenancy Number: {1}.", leaseCategory, app.UniqueTenancyLeaseNumber), MatchingHelper.HistoryEntity.RealEstate);
             TempData["SuccessMessage"] = string.Format("Lease details captured successfully. Tenancy Number: {0}.", app.UniqueTenancyLeaseNumber);
             return RedirectToAction("ActiveOccupancy");
         }

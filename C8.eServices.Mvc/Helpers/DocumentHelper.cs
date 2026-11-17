@@ -167,6 +167,8 @@ namespace C8.eServices.Mvc.Helpers
         public static void WriteToTextFile(string textFileName, string textValue)
         {
             var root = HttpContext.Current.Server.MapPath("~/Logs/");
+            // D032: a fresh deployment has no Logs folder; create it so the logger never hides the real error.
+            System.IO.Directory.CreateDirectory(root);
             string fileName = FormatTextFileName(textFileName);
             var path = System.IO.Path.Combine(root, fileName);
             path = System.IO.Path.GetFullPath(path);

@@ -133,7 +133,7 @@
                         </div>
                     </div>
 
-                    <div id="rejectReasonDiv" style="display:none;">
+                    <div id="rejectReasonDiv" style="display:block;">
                         <div class="form-group">
                             @Html.Label("Comments / Reason", htmlAttributes: new { @class = "control-label col-md-2" })
                             <div class="col-md-6">
@@ -172,8 +172,8 @@
                 var comment = document.getElementById('RejectComment').value;
                 if (statuskey === '') {
                     swal("Error", "Please select an action", "warning");
-                } else if (statuskey === '@RCSActionTypeKeys.Rejected' && (comment == null || comment === '')) {
-                    swal("Error", "Please enter reason for not supporting termination", "warning");
+                } else if (comment == null || comment.trim() === "") {
+                    swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
                 } else {
                     document.getElementById('csoReviewForm').submit();
                 }
@@ -187,7 +187,7 @@
             if (selectedValue === '@RCSActionTypeKeys.Rejected') {
                 $('#rejectReasonDiv').show();
             } else {
-                $('#rejectReasonDiv').hide();
+                $('#rejectReasonDiv').show(); // BR05: reason always required
             }
         });
     });

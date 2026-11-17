@@ -1318,6 +1318,8 @@
     <Content Include="Scripts\jquery-2.2.0.js" />
     <Content Include="Scripts\jquery-2.2.0.min.js" />
     <Content Include="Scripts\jquery-steps.js" />
+    <Content Include="Scripts\ehc-upload-guard.js" />
+    <Content Include="Content\ehc-theme.css" />
     <Content Include="Scripts\jquery.datetimepicker.js" />
     <Content Include="Scripts\jquery-steps.js.map" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -1764,6 +1766,7 @@
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentRM.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\InboxRM.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\InboxCEO.cshtml" />
+    <Content Include="Views\RiskAssessmentOutcomes\ManualAllocate.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\RiskAssessmentCEO.cshtml" />
     <Content Include="Views\RiskAssessmentOutcomes\WaitingListIndex.cshtml" />
     <Content Include="Views\TenantTraining\Index.cshtml" />
@@ -2065,6 +2068,7 @@
     <Compile Include="Helpers\LIMSHelper.cs" />
     <Compile Include="Helpers\LinkedAccountHelper.cs" />
     <Compile Include="Helpers\MatchingHelper.cs" />
+    <Compile Include="Helpers\UnitMatchingEngine.cs" />
     <Compile Include="Helpers\OfflineActionFilter.cs" />
     <Compile Include="Helpers\OfflineData.cs" />
     <Compile Include="Helpers\otpSMS.cs" />

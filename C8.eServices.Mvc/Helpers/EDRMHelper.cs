@@ -18,15 +18,66 @@ namespace C8.eServices.Mvc.Helpers
 {
     public class EDRMHelper
     {
-        private static eServicesDbContext db = new eServicesDbContext();
+        // One shared DbContext across all requests is not thread safe and goes stale; each call now
+        // opens its own context (see EDRMSCore).
+
+        // EDRMS is called while the user waits for an upload. If it is down, every upload used to hang for
+        // minutes. Now: the whole EDRMS round trip is capped at EdrmsBudgetMs, and after a failure EDRMS is
+        // skipped for EdrmsCoolDownMinutes so later uploads are instant. The document is always saved in PLM.
+        private const int EdrmsBudgetMs = 12000;
+        private const int EdrmsCoolDownMinutes = 10;
+        private static DateTime _edrmsDownUntil = DateTime.MinValue;
+
+        public static bool EdrmsTemporarilyDown { get { return DateTime.Now < _edrmsDownUntil; } }
+
+        private static ResultDocs RunWithBudget(Func<ResultDocs> call, string documentName)
+        {
+            if (EdrmsTemporarilyDown) return null;
+            try
+            {
+                var task = System.Threading.Tasks.Task.Run(call);
+                if (task.Wait(EdrmsBudgetMs) && task.Result != null) return task.Result;
+                _edrmsDownUntil = DateTime.Now.AddMinutes(EdrmsCoolDownMinutes);
+                LogEdrms("EDRMS did not answer for " + documentName + "; skipping EDRMS for " + EdrmsCoolDownMinutes + " minutes. The document is saved in PLM.");
+            }
+            catch (Exception ex)
+            {
+                _edrmsDownUntil = DateTime.Now.AddMinutes(EdrmsCoolDownMinutes);
+                LogEdrms("EDRMS failed for " + documentName + ": " + (ex.GetBaseException().Message));
+            }
+            return null;
+        }
+
+        private static void LogEdrms(string message)
+        {
+            try { System.Diagnostics.Trace.TraceWarning(message); } catch { }
+        }
+
+        public static ResultDocs EDRMS(byte[] content, string DocumentName, Int64 FileSize, string mimeType, string Extent, string SystemName)
+        {
+            return RunWithBudget(() => EDRMSCore(content, DocumentName, FileSize, mimeType, Extent, SystemName, "Ekurhuleni Housing Company"), DocumentName);
+        }
+
+        public static ResultDocs EDRMS2(byte[] content, string DocumentName, Int64 FileSize, string mimeType, string Extent, string SystemName)
+        {
+            return RunWithBudget(() => EDRMSCore(content, DocumentName, FileSize, mimeType, Extent, SystemName, "Human Settlement Development"), DocumentName);
+        }
 
 
         static bool CheckIfValueExist(string x, string y, List<Datum> t) => (!String.IsNullOrEmpty(x) && !String.IsNullOrEmpty(y) && t != null) ? true : false;
-        static string FindKeyForEDRMS(eServicesDbContext db, string KeyVale) => (!String.IsNullOrEmpty(KeyVale) ? db.AppSettings.FirstOrDefault(x => x.Key == KeyVale).Value : null);
-        public static ResultDocs EDRMS(byte[] content, string DocumentName, Int64 FileSize, string mimeType, string Extent, string SystemName)
+        static string FindKeyForEDRMS(eServicesDbContext db, string KeyVale) => (!String.IsNullOrEmpty(KeyVale) ? db.AppSettings.Where(x => x.Key == KeyVale).Select(x => x.Value).FirstOrDefault() : null);
+        static string FindKeyForEDRMS(string KeyVale)
         {
-            string Key = FindKeyForEDRMS(db, EDRMsKeys.Ws02KeyQA);
-            string secret = FindKeyForEDRMS(db, EDRMsKeys.Ws02SecretQA);
+            using (var db = new eServicesDbContext()) return FindKeyForEDRMS(db, KeyVale);
+        }
+        private static ResultDocs EDRMSCore(byte[] content, string DocumentName, Int64 FileSize, string mimeType, string Extent, string SystemName, string department)
+        {
+            string Key, secret;
+            using (var db = new eServicesDbContext())
+            {
+                Key = FindKeyForEDRMS(db, EDRMsKeys.Ws02KeyQA);
+                secret = FindKeyForEDRMS(db, EDRMsKeys.Ws02SecretQA);
+            }
             var GetWS02Token =  ws02gentokenApiCall(Key, secret);
             var GetEDRMSAuth = eDRMAuth(GetWS02Token);
             var GetEDRMSDocTypes = ReturnDocId(GetEDRMSAuth, GetWS02Token);
@@ -43,10 +94,10 @@ namespace C8.eServices.Mvc.Helpers
                     DateReceived = DateTime.Now.ToString(),
                     DateSubmission = DateTime.Now.ToString(),
                     DateTimeStamp = DateTime.Now.ToString(),
-                    Department = "Ekurhuleni Housing Company",
+                    Department = department,
                     DocumentName = DocumentName,
                     DocumentTypeExtensionForm = "",
-                    DocumentTypeID = GetEDRMSDocTypes.FirstOrDefault(r => r.documentType == "PROPERTY LEASE").id.ToString() ?? "d821a1ad-d594-43de-8578-ea311ad74c34",
+                    DocumentTypeID = (GetEDRMSDocTypes.FirstOrDefault(r => r.documentType == "PROPERTY LEASE")?.id) ?? "d821a1ad-d594-43de-8578-ea311ad74c34",
                     Extension = Extent,
                     File = content,
                     Filename = DocumentName,
@@ -67,59 +118,19 @@ namespace C8.eServices.Mvc.Helpers
                 return null;
             }
         }
-        public static ResultDocs EDRMS2(byte[] content, string DocumentName, Int64 FileSize, string mimeType, string Extent, string SystemName)
-        {
-            string Key = FindKeyForEDRMS(db, EDRMsKeys.Ws02KeyQA);
-            string secret = FindKeyForEDRMS(db, EDRMsKeys.Ws02SecretQA);
-            var GetWS02Token = ws02gentokenApiCall(Key, secret);
-            var GetEDRMSAuth = eDRMAuth(GetWS02Token);
-            var GetEDRMSDocTypes = ReturnDocId(GetEDRMSAuth, GetWS02Token);
-            var Result = CheckIfValueExist(GetWS02Token, GetEDRMSAuth, GetEDRMSDocTypes);
+        // EDRMS is called while the user waits for an upload. RestSharp waits 100 s by default when the
+        // endpoint cannot be reached; fail each call after 10 s instead (the document is already saved in PLM).
+        private const int EdrmsTimeoutMs = 10000;
 
-            List<DocumentVM> Docs = new List<DocumentVM>();
-            UploadDoc uploadDoc = new UploadDoc();
-            if (Result == true)
-            {
-                Docs.Add(new DocumentVM
-                {
-                    Author = "Propery Lease Management",
-                    DateCreation = DateTime.Now.ToString(),
-                    DateReceived = DateTime.Now.ToString(),
-                    DateSubmission = DateTime.Now.ToString(),
-                    DateTimeStamp = DateTime.Now.ToString(),
-                    Department = "Human Settlement Development",
-                    DocumentName = DocumentName,
-                    DocumentTypeExtensionForm = "",
-                    DocumentTypeID = GetEDRMSDocTypes.FirstOrDefault(r => r.documentType == "PROPERTY LEASE").id.ToString() ?? "d821a1ad-d594-43de-8578-ea311ad74c34",
-                    Extension = Extent,
-                    File = content,
-                    Filename = DocumentName,
-                    MimeDocType = mimeType,
-                    Organisation = "Ekurhuleni",
-                    SubmittedBy = SystemName,
-                    SystemName = SystemName
-
-                });
-                uploadDoc.AccessToken = GetEDRMSAuth;
-                uploadDoc.DocumentsUpload = Docs;
-
-                return UploadDocs(uploadDoc, GetWS02Token);
-
-            }
-            else
-            {
-                return null;
-            }
-        }
         public static string ws02gentokenApiCall(string keyst, string secretst)
         {
             try
             {
-                string tokenendpoint = FindKeyForEDRMS(db , EDRMsKeys.Ws02EndpointCon);
+                string tokenendpoint = FindKeyForEDRMS(EDRMsKeys.Ws02EndpointCon);
 
                 var token = string.Empty;
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
                 ServicePointManager.Expect100Continue = true;
@@ -164,9 +175,9 @@ namespace C8.eServices.Mvc.Helpers
                 path = System.IO.Path.GetFullPath(path);
                 var json = System.IO.File.ReadAllText(path, Encoding.UTF8);
 
-                string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.GetAccessCodeEDRMS);
+                string tokenendpoint = FindKeyForEDRMS(EDRMsKeys.GetAccessCodeEDRMS);
                 //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/account/AuthenticatePost";
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
 
@@ -221,10 +232,10 @@ namespace C8.eServices.Mvc.Helpers
                     //string tokenendpoint = /*"https://10.2.2.238:8243/Api/1.0.0/api/docustore/documents/get-document-types?AccessToken="+*/db.AppSettings.FirstOrDefault(r => r.Key == EDRMsKeys.ReturnDocEDRMSId)?.Value + AccessId ?? null;
                     //string tokenendpoint = "https://10.2.2.238:8243/Documents/1.0.0/api/docustore/documents/get-document-types?AccessToken=" + AccessId;
                     //string tokenendpoint = "https://wso2apimanager.ekurhuleni.gov.za:8243/Documents/1.0.0/api/docustore/documents/get-document-types?AccessToken=" + AccessId;
-                    string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.DocTypesEDRMS) + AccessId;
+                    string tokenendpoint = FindKeyForEDRMS(EDRMsKeys.DocTypesEDRMS) + AccessId;
                     //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/docustore/documents/get-document-types?AccessToken=" + AccessId;
 
-                    RestClient client = new RestClient(tokenendpoint);
+                    RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
                     ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
@@ -266,11 +277,11 @@ namespace C8.eServices.Mvc.Helpers
                 var ReplaceName = SerJson.Replace("DocumentsUpload", "Documents");
                 //string tokenendpoint = "https://wso2apimanager.ekurhuleni.gov.za:8243/Documents/1.0.0/api/docustore/documents/upload-documents";
                 // string tokenendpoint = "https://10.2.2.238:8243/Documents/1.0.0/api/docustore/documents/upload-documents";
-                string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.UploadEndPointEDRMS);
+                string tokenendpoint = FindKeyForEDRMS(EDRMsKeys.UploadEndPointEDRMS);
                 //string tokenendpoint = db.AppSettings.FirstOrDefault(r => r.Key == EDRMsKeys.UploadEndPointEDRMS).Value;
                 //tokenendpoint = "https://coewso2qa02.ekurhuleni.gov.za:8243/documents/1.0.0/api/docustore/documents/upload-documents";
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
                 ServicePointManager.Expect100Continue = true;
@@ -311,8 +322,8 @@ namespace C8.eServices.Mvc.Helpers
         {
             try
             {
-                string Key = FindKeyForEDRMS(db, EDRMsKeys.Ws02KeyQA);
-                string secret = FindKeyForEDRMS(db, EDRMsKeys.Ws02SecretQA);
+                string Key = FindKeyForEDRMS(EDRMsKeys.Ws02KeyQA);
+                string secret = FindKeyForEDRMS(EDRMsKeys.Ws02SecretQA);
                 var GetWS02Token = ws02gentokenApiCall(Key, secret);
                 var GetEDRMSAuth = eDRMAuth(GetWS02Token);
 
@@ -321,9 +332,9 @@ namespace C8.eServices.Mvc.Helpers
 
                 //string tokenendpoint = "https://wso2apimanager.ekurhuleni.gov.za:8243/Documents/1.0.0/api/docustore/documents/get-uploaded-documents?Accesstoken=" + GetEDRMSAuth + "&GroupId=" + GroupId;
                 //string tokenendpoint = "https://10.2.2.238:8243/Documents/1.0.0/api/docustore/documents/get-uploaded-documents?Accesstoken=" + GetEDRMSAuth + "&GroupId=" + GroupId;
-                string tokenendpoint = FindKeyForEDRMS(db, EDRMsKeys.GetBackDocs) + GetEDRMSAuth + "&GroupId=" + GroupId;
+                string tokenendpoint = FindKeyForEDRMS(EDRMsKeys.GetBackDocs) + GetEDRMSAuth + "&GroupId=" + GroupId;
 
-                RestClient client = new RestClient(tokenendpoint);
+                RestClient client = new RestClient(tokenendpoint) { Timeout = EdrmsTimeoutMs };
 
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;

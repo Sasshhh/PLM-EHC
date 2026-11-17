@@ -462,9 +462,11 @@ namespace C8.eServices.Mvc.Controllers
                     Initialise();
 
                     // Load applications waiting for CEO (Status 55)
-                    var status = context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved");
+                    // D028: new key s_awaiting_ceo_risk_approval; the legacy key is still accepted for applications
+                    // forwarded before the upgrade.
+                    var ceoStatusIds = context.Status.Where(x => x.Key == StatusKeys.AwaitingCEORiskApproval || x.Key == "s_incentive_policy_application_approved").Select(x => x.Id).ToList();
 
-                    if (status == null) return View(new List<PropertyLeaseApplication>());
+                    if (ceoStatusIds.Count == 0) return View(new List<PropertyLeaseApplication>());
 
                     var applications = context.PropertyLeaseApplications
                         .Include(r => r.CreatedBySystemUser)
@@ -472,7 +474,7 @@ namespace C8.eServices.Mvc.Controllers
                         .Include(r => r.HumanEHCOptions)
                         .Include(r => r.PreferredComplexArea)
                         .Include(r => r.Status)
-                        .Where(x => x.StatusId == status.Id && x.IsDeleted == false)
+                        .Where(x => x.StatusId.HasValue && ceoStatusIds.Contains(x.StatusId.Value) && x.IsDeleted == false)
                         .OrderByDescending(x => x.CreatedDateTime)
                         .ToList();
 
@@ -631,6 +633,8 @@ namespace C8.eServices.Mvc.Controllers
                         // D. ADD TO GLOBAL ENGINE QUEUE
                         MatchingHelper.SaveToWaitingListQueue(context, rcsAppId, app.CustomerId);
 
+                        // D029: the CEO approval is now recorded in the application history
+                        MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment approved by CEO; application added to the waiting list.", MatchingHelper.HistoryEntity.PropertyLease);
                         Session["ConductRiskAssessmentSession"] = "Application Approved & Added to Waiting List Queue.";
                     }
                 }
@@ -655,6 +659,7 @@ namespace C8.eServices.Mvc.Controllers
                         context.SaveChanges();
                     }
 
+                    MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment not approved by CEO; returned to CSO. Reason: " + capture?.RiskAssessmentOutcome?.CEO_Reason, MatchingHelper.HistoryEntity.PropertyLease);
                     Session["ConductRiskAssessmentSession"] = "Application Returned to CSO.";
                 }
 
@@ -666,6 +671,10 @@ namespace C8.eServices.Mvc.Controllers
                 //{
                 //    MatchingHelper.RoundRobinMarkJobAsFinished(context, rcsAppId, null, ceoRole.Id, Customer.Id);
                 //}
+
+                // Approved by the CEO: offer a free unit straight away (no need to press Run Auto-Allocate).
+                if (ApprovalStatusddl == "Approved")
+                    Session["ConductRiskAssessmentSession"] = Convert.ToString(Session["ConductRiskAssessmentSession"]) + OfferUnitNow(rcsAppId);
 
                 return RedirectToAction("InboxCEO");
             }
@@ -680,6 +689,30 @@ namespace C8.eServices.Mvc.Controllers
         // ==========================================================================
         // PRIVATE METHODS (Paste these below the POST method above)
         // ==========================================================================
+
+        /// <summary>
+        /// Runs unit matching right after an approval put the applicant on the waiting list and returns a
+        /// sentence for the confirmation message. Never throws: if matching cannot run now, the applicant
+        /// simply stays on the waiting list for the next run.
+        /// </summary>
+        private string OfferUnitNow(int rcsAppId)
+        {
+            try
+            {
+                var result = UnitMatchingEngine.Run(SystemUser != null ? SystemUser.Id : 1);
+                if (result.AlreadyRunning)
+                    return " Unit matching is busy right now; it will offer a unit on its next run.";
+                string unitNo;
+                if (result.OfferedUnits.TryGetValue(rcsAppId, out unitNo))
+                    return " Unit " + unitNo + " has been offered to the applicant.";
+                return " No free unit of the requested type in the preferred complexes yet, so the applicant stays on the waiting list.";
+            }
+            catch (Exception ex)
+            {
+                try { EventLogHelper.LogSystemError("OfferUnitNow " + rcsAppId + ": " + ex.GetBaseException().Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog); } catch { }
+                return " Unit matching could not run now; use PLM Applications > Waiting List > Run Auto-Allocate.";
+            }
+        }
 
         /// <summary>
         /// Adds the applicant to the PropertyLeaseWaitingList table if not already present.
@@ -732,7 +765,8 @@ namespace C8.eServices.Mvc.Controllers
         // WAITING LIST DASHBOARD (Updated with Correct Tables)
         // ==========================================================================
         [HttpGet]
-        public ActionResult WaitingListIndex(int? complexId, int? typologyId)
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult WaitingListIndex(int? complexId, int? typologyId, string show = "Waiting", string search = null)
         {
             var db = new eServicesDbContext();
 
@@ -741,7 +775,18 @@ namespace C8.eServices.Mvc.Controllers
                 .Include("PropertyLeaseApplication")
                 .Include("PreferredComplexArea")
                 .Include("HumanEHCOption") // Must match the property name above
-                .Where(w => w.QueueStatus == "Waiting");
+                .Where(w => w.IsActive && !w.IsDeleted);
+            // Show: Waiting (default) / Offered (unit already given) / All
+            show = (show == "Offered" || show == "All") ? show : "Waiting";
+            if (show != "All") query = query.Where(w => w.QueueStatus == show);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(w => w.PropertyLeaseApplication.ApplicationReferenceNumber.Contains(term)
+                                      || w.PropertyLeaseApplication.FirstName.Contains(term)
+                                      || w.PropertyLeaseApplication.LastName.Contains(term)
+                                      || w.PropertyLeaseApplication.IDNo.Contains(term));
+            }
             // 2. Apply Filters (if user selected them)
             if (complexId.HasValue)
             {
@@ -755,6 +800,19 @@ namespace C8.eServices.Mvc.Controllers
 
             // 3. SORTING: Critical FIFO Logic (Oldest DateAdded = First)
             var model = query.OrderBy(w => w.DateAdded).ToList();
+
+            // FIFO is per complex + unit type: the oldest Waiting entry in each queue may be allocated manually.
+            var firstInQueue = db.PropertyLeaseWaitingLists
+                .Where(w => w.IsActive && !w.IsDeleted && w.QueueStatus == "Waiting")
+                .GroupBy(w => new { w.PreferredComplexId, w.PreferredTypologyId })
+                .Select(g => g.OrderBy(w => w.DateAdded).Select(w => w.Id).FirstOrDefault())
+                .ToList();
+            ViewBag.FirstInQueue = new HashSet<int>(firstInQueue);
+            var offeredIds = model.Where(w => w.OfferedUnitId.HasValue).Select(w => w.OfferedUnitId.Value).ToList();
+            ViewBag.OfferedUnits = db.ApplicationAllocatedProperty.Where(u => offeredIds.Contains(u.Id))
+                .ToDictionary(u => u.Id, u => u.SpaceUnitNumber);
+            ViewBag.Show = show;
+            ViewBag.Search = search;
 
             // ----------------------------------------------------------------------
             // 4. POPULATE DROPDOWNS (Updated with your specific queries)
@@ -875,8 +933,10 @@ namespace C8.eServices.Mvc.Controllers
                 if (ApprovalStatusddl == "Supported")
                 {
                     // Move to CEO
-                    var status = context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved"); // Ensure Key matches DB
+                    var status = context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingCEORiskApproval)
+                              ?? context.Status.FirstOrDefault(x => x.Key == "s_incentive_policy_application_approved");
                     MatchingHelper.ChangeApplicationStatus(context, status.Id, rcsAppId);
+                    MatchingHelper.AddHistoryLog(context, rcsAppId, Customer?.Id, "Risk assessment supported by Revenue Manager; awaiting CEO approval.", MatchingHelper.HistoryEntity.PropertyLease);
 
                     // Assign to CEO Role (Round Robin)
                     //var ceoRole = context.ResponsibilityTypes.FirstOrDefault(x => x.Key == "CEO");
@@ -1011,7 +1071,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentApproved).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.Rejected:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.CreditScoreRejected)?.Id, rcsAppId);
@@ -1019,7 +1079,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.RejectedUnaffordability:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedUnaffordability)?.Id, rcsAppId);
@@ -1028,7 +1088,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectDocuments).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}"+ " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}"+ " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
                     case RCSActionTypeKeys.RejectedITC:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedITCCheck)?.Id, rcsAppId);
@@ -1037,7 +1097,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectITC).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
                     case RCSActionTypeKeys.RejectedDocuments:
@@ -1047,7 +1107,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectUnaffordability).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
 
@@ -1069,13 +1129,16 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
                         C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference {property.ApplicationReferenceNumber}");
                         break;
                 }
 
 
                 MatchingHelper.RoundRobinMarkJobAsFinished(dbContext, rcsAppId, null, ResponsibilityTypeId.Id, Customer.Id);
                 MatchingHelper.ActivityTrackerAudit(dbContext, rcsAppId, ActivityTrackerMessage, Customer.Id);
+                // Approved applicants are on the waiting list now: offer a free unit straight away.
+                if (ApprovalStatusddl == RCSActionTypeKeys.Approved)
+                    Session["ConductRiskAssessmentSession"] = Convert.ToString(Session["ConductRiskAssessmentSession"]) + OfferUnitNow(rcsAppId);
                 return RedirectToAction("ApplicantRiskAssessment", "PropertyLeaseApplication");
             }
             catch(Exception IO)
@@ -1186,7 +1249,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentApproved).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment approved for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.Rejected:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.CreditScoreRejected)?.Id, rcsAppId);
@@ -1194,7 +1257,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.ApplicationRiskAssessmentRejected).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}");
                         break;
                     case RCSActionTypeKeys.RejectedUnaffordability:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedUnaffordability)?.Id, rcsAppId);
@@ -1203,7 +1266,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectDocuments).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to unaffordability,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
                     case RCSActionTypeKeys.RejectedITC:
                         MatchingHelper.ChangeApplicationStatus(dbContext, (Int32)dbContext.Status.FirstOrDefault(x => x.Key == StatusKeys.RiskAssesmentRejectedITCCheck)?.Id, rcsAppId);
@@ -1212,7 +1275,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectITC).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to ITC Check,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
                     case RCSActionTypeKeys.RejectedDocuments:
@@ -1222,7 +1285,7 @@ namespace C8.eServices.Mvc.Controllers
                         //Send e-mail and SMS notification
                         emailboodyId = dbContext.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.RiskAssessmentRejectUnaffordability).Id;
                         EmailHelper.CustomerEmailNotification(dbContext, rcsAppId, emailboodyId);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference ,{property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment rejected for application reference {property.ApplicationReferenceNumber}" + " due to documents,  reason: " + capture.RiskAssessmentOutcome.Reason);
                         break;
 
 
@@ -1244,7 +1307,7 @@ namespace C8.eServices.Mvc.Controllers
                         roundRobinQueue.ClerkId = reallocateTo.Id;
                         unitAllocationService.Save(roundRobinQueue);
                         C8.eServices.Mvc.Helpers.EHCWorkflowEngine.BackOfficeNotification(dbContext, rcsAppId, reallocateTo.Id, ResponsibilityTypeId.Name);
-                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference ,{property.ApplicationReferenceNumber}");
+                        Session["ConductRiskAssessmentSession"] = string.Format($"Risk assessment reallocated for application reference {property.ApplicationReferenceNumber}");
                         break;
                 }
 
@@ -1262,107 +1325,88 @@ namespace C8.eServices.Mvc.Controllers
         // AUTO-ALLOCATION BATCH ENGINE (SINGLE TABLE OPTIMIZED)
         // ==========================================================================
         [HttpPost]
-        // [Authorize(Roles = "Admin,CEO")] // Security: specific roles only
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = WaitingListRoles)]
         public ActionResult RunAutoAllocation()
         {
             Initialise();
-            var db = new eServicesDbContext();
-            var log = new System.Text.StringBuilder();
-            int matchCount = 0;
-
             try
             {
-                // 1. GET ALL AVAILABLE UNITS
-                // We verify IsTaken is false (Available) and IsActive is true (Valid)
-                var availableUnits = db.ApplicationAllocatedProperty
-                                       .Where(u => u.IsTaken == false && u.IsActive == true)
-                                       .ToList();
-
-                log.AppendLine($"Found {availableUnits.Count} available units.");
-
-                foreach (var unit in availableUnits)
-                {
-                    // 2. CHECK DATA INTEGRITY
-                    // We use your specific columns: OfferedComplexId and HumanEHCOptionId
-                    if (unit.OfferedComplexId == null || unit.HumanEHCOptionId == null)
-                    {
-                        log.AppendLine($"Skipping Unit {unit.Id}: Missing Complex or Typology.");
-                        continue;
-                    }
-
-                    // 3. FIND THE #1 WAITING APPLICANT (FIFO)
-                    // We match the Unit's Complex/Typology to the Person's Preferences
-                    var bestCandidate = db.PropertyLeaseWaitingLists
-                                          .Where(w => w.PreferredComplexId == unit.OfferedComplexId
-                                                   && w.PreferredTypologyId == unit.HumanEHCOptionId
-                                                   && w.QueueStatus == "Waiting")
-                                          .OrderBy(w => w.DateAdded) // Critical: Oldest Date = Priority #1
-                                          .FirstOrDefault();
-
-                    if (bestCandidate != null)
-                    {
-                        try
-                        {
-                            // 4. PERFORM ALLOCATION (The Match)
-
-                            // A. Lock the Unit
-                            unit.AllocatedByUserId = SystemUser.Id; // Current Admin User
-                            unit.PropertyLeaseApplicationId = bestCandidate.PropertyLeaseApplicationId;
-                            unit.IsTaken = true; // Mark as taken so next loop skips it
-
-                            // B. Create the Offer Record (MatchedUnits)
-                            var matchedUnit = new MatchedUnits
-                            {
-                                ApplicationAllocatedPropertyId = unit.Id,
-                                PropertyLeaseApplicationId = bestCandidate.PropertyLeaseApplicationId,
-                                IsAccepted = false,
-                                RejectedProperty = false
-                            };
-                            db.MatchedUnits.Add(matchedUnit);
-
-                            // C. Update Waiting List Status
-                            bestCandidate.QueueStatus = "Offered";
-                            bestCandidate.OfferedUnitId = unit.Id;
-
-                            // D. Update Main Application Status -> "Awaited" (Waiting for customer)
-                            var awaitedStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.awaited);
-                            if (awaitedStatus != null)
-                            {
-                                MatchingHelper.ChangeApplicationStatus(db, awaitedStatus.Id, bestCandidate.PropertyLeaseApplicationId);
-                            }
-
-                            // E. History & Email
-                            MatchingHelper.SaveUnitHistory(db, bestCandidate.PropertyLeaseApplicationId, "Unit Auto-Allocated", unit.Id, SystemUser.Id);
-
-                            var emailContent = db.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.AtUnitMatchApplication);
-                            if (emailContent != null)
-                            {
-                                EmailHelper.CustomerEmailNotification(db, bestCandidate.PropertyLeaseApplicationId, emailContent.Id);
-                            }
-
-                            // Commit match immediately
-                            db.SaveChanges();
-
-                            matchCount++;
-                            log.AppendLine($"MATCH: Unit {unit.Id} assigned to App {bestCandidate.PropertyLeaseApplicationId}");
-                        }
-                        catch (Exception ex)
-                        {
-                            log.AppendLine($"Error assigning Unit {unit.Id}: {ex.Message}");
-                        }
-                    }
-                }
-
-                TempData["Success"] = $"Auto-Allocation Complete. {matchCount} matches made.";
-                TempData["AllocationLog"] = log.ToString(); // <--- Add this line to pass the full text
+                var result = UnitMatchingEngine.Run(SystemUser.Id);
+                if (result.AlreadyRunning)
+                    TempData["Error"] = "Allocation is already running (started by someone else or by an Inbox). Refresh in a minute.";
+                else
+                    TempData["Success"] = string.Format("Auto-Allocation Complete. {0} unit(s) offered{1}.", result.Offered,
+                        result.Failed > 0 ? ", " + result.Failed + " skipped (see log)" : "");
+                TempData["AllocationLog"] = result.ToString();
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Critical Error: " + ex.Message;
+                TempData["Error"] = "Auto-Allocation failed: " + ex.Message;
+            }
+            return RedirectToAction("WaitingListIndex", new { show = "All" });
+        }
+
+        // Who may see the waiting list and offer units (Property Manager acts as the EHC CEO).
+        private const string WaitingListRoles = "Property Manager,CEO,Back Office System Administrator,Super Administrators";
+
+        // Waiting List > Manual Allocate: pick one free unit in the applicant's preferred complex(es) and typology.
+        [HttpGet]
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult ManualAllocate(int id)
+        {
+            Initialise();
+            var db = new eServicesDbContext();
+            var entry = db.PropertyLeaseWaitingLists
+                .Include("PropertyLeaseApplication").Include("PreferredComplexArea").Include("HumanEHCOption")
+                .FirstOrDefault(w => w.Id == id);
+            if (entry == null || entry.QueueStatus != "Waiting")
+            {
+                TempData["Error"] = "This waiting-list entry is no longer waiting for a unit.";
+                return RedirectToAction("WaitingListIndex");
             }
 
+            int complex2 = entry.PropertyLeaseApplication?.PreferredComplexArea2Id ?? 0;
+            var units = db.ApplicationAllocatedProperty.Include(u => u.OfferedComplex).Include(u => u.HumanEHCOption)
+                .Where(u => !u.IsTaken && u.IsActive && !u.IsDeleted
+                         && u.HumanEHCOptionId == entry.PreferredTypologyId
+                         && (u.OfferedComplexId == entry.PreferredComplexId || u.OfferedComplexId == complex2))
+                .OrderBy(u => u.OfferedComplexId).ThenBy(u => u.SpaceUnitNumber)
+                .ToList();
+
+            ViewBag.Entry = entry;
+            return View(units);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = WaitingListRoles)]
+        public ActionResult ManualAllocate(int id, int unitId)
+        {
+            Initialise();
+            var db = new eServicesDbContext();
+            try
+            {
+                var entry = db.PropertyLeaseWaitingLists.Include("PropertyLeaseApplication").FirstOrDefault(w => w.Id == id);
+                var unit = db.ApplicationAllocatedProperty.FirstOrDefault(u => u.Id == unitId);
+                if (entry == null || entry.QueueStatus != "Waiting")
+                    TempData["Error"] = "This waiting-list entry is no longer waiting for a unit.";
+                else if (unit == null || unit.IsTaken || !unit.IsActive || unit.IsDeleted)
+                    TempData["Error"] = "That unit has just been taken. Pick another one.";
+                else
+                {
+                    var unitNo = UnitMatchingEngine.OfferUnit(id, unitId, SystemUser.Id, "Unit Manually Allocated");
+                    TempData["Success"] = string.Format("Unit {0} offered to application {1}. The applicant sees the offer in their Inbox.",
+                        unitNo, entry.PropertyLeaseApplication?.ApplicationReferenceNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Manual allocation failed: " + ex.Message;
+            }
             return RedirectToAction("WaitingListIndex");
         }
+
         public ActionResult ValidateUnit(String SpaceUnitNumber, String SolarReference)
         {
             ApplicationAllocatedProperty collection = dbContext.ApplicationAllocatedProperty.FirstOrDefault(a => a.SolarReference == SolarReference && a.SpaceUnitNumber == SpaceUnitNumber);

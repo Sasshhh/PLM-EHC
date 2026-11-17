@@ -16,8 +16,29 @@ namespace C8.eServices.Mvc.DataAccessLayer
         }
 
         public CesarDbContext()
-            : base("CesarDbContext")
-        { }
+            : base(BuildConnectionString())
+        {
+            // Emails and SMS are queued in this separate database while the user waits (uploads, submits,
+            // approvals). If it cannot be reached the request must not hang, so fail fast.
+            Database.CommandTimeout = 15;
+        }
+
+        private static string BuildConnectionString()
+        {
+            try
+            {
+                var cs = System.Configuration.ConfigurationManager.ConnectionStrings["CesarDbContext"];
+                if (cs == null || string.IsNullOrWhiteSpace(cs.ConnectionString)) return "name=CesarDbContext";
+                if (!string.IsNullOrEmpty(cs.ProviderName) && cs.ProviderName != "System.Data.SqlClient") return "name=CesarDbContext";
+                var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(cs.ConnectionString);
+                if (builder.ConnectTimeout > 5 || builder.ConnectTimeout <= 0) builder.ConnectTimeout = 5;
+                return builder.ConnectionString;
+            }
+            catch
+            {
+                return "name=CesarDbContext";
+            }
+        }
 
         public override int SaveChanges()
         {

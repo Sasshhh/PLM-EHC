@@ -32,20 +32,17 @@ namespace C8.eServices.Mvc.Helpers
         }
         public static void MatchUnitParallelProcessor(eServicesDbContext core)
         {
-
-            var finfItem = core.AppSettings.FirstOrDefault(x => x.Key == AppSettingKeys.WaitingListSorting);
-            finfItem.Value = "1";
-            core.SaveChanges();
-
-            var waitingQueue = core.waitingListQues.OrderBy(x => x.Position).Where(x => !x.IsMatched && x.IsActive && !x.IsDeleted && x.Position != null).ToList() ?? null;
-
-            foreach (var item in waitingQueue)
+            // Runs on Inbox / My Applications loads. The waiting list engine does the matching
+            // (at most once a minute, never blocks the page if a run is already busy).
+            int systemUserId = 1;
+            try
             {
-                DoWork(core, item);
+                BaseHelper baseHelper = new BaseHelper();
+                baseHelper.Initialise(core);
+                if (baseHelper.SystemUser != null) systemUserId = baseHelper.SystemUser.Id;
             }
-
-            finfItem.Value = "0";
-            core.SaveChanges();
+            catch { }
+            UnitMatchingEngine.RunIfDue(systemUserId);
         }
         public static DocumentsViewModel DocumentCaptureApplication(DocumentsViewModel dvm, eServicesDbContext core, int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, string returnUrl, int rcsappId, bool IsUpload)
         {
@@ -2696,6 +2693,27 @@ namespace C8.eServices.Mvc.Helpers
 
 
 
+        // D044 / BR09 / BR19: the renewal scan and the two expiry checks used to run only from the admin
+        // Tools screen, so in normal operation no lease was ever flagged for renewal and no offer or unsigned
+        // lease ever expired. They now run as a side effect of the EHC work queues being opened, at most once
+        // per interval per application pool. They need the request context (round robin, e-mail), which is why
+        // this is request-driven rather than a background timer.
+        private static readonly object _scheduledChecksLock = new object();
+        private static DateTime _scheduledChecksLastRun = DateTime.MinValue;
+        public static readonly TimeSpan ScheduledChecksInterval = TimeSpan.FromHours(1);
+
+        public static void RunScheduledEhcChecksIfDue(eServicesDbContext core)
+        {
+            lock (_scheduledChecksLock)
+            {
+                if (DateTime.Now - _scheduledChecksLastRun < ScheduledChecksInterval) return;
+                _scheduledChecksLastRun = DateTime.Now;
+            }
+            try { RenewalNotificationAtEndOfTime(core); } catch (Exception) { }
+            try { CheckUnitOfferExpiry(core); } catch (Exception) { }
+            try { CheckLeaseSigningExpiry(core); } catch (Exception) { }
+        }
+
         public static void RenewalNotificationAtEndOfTime(eServicesDbContext core)
         {
             try
@@ -3854,11 +3872,16 @@ namespace C8.eServices.Mvc.Helpers
             }
         }
         
-        public static void AddHistoryLog(eServicesDbContext core, int applicationId, int? clerkId, string actionMessage)
+        public enum HistoryEntity { PropertyLease, RealEstate, HumanSettlement }
+
+        // D004: PropertyLeaseApplications, RE_Applications and HumanSettlementApplications have independent identity
+        // sequences, so inferring the table from the id mis-filed EHC history against Real Estate applications with
+        // the same id. Callers now say which table the id belongs to; the inference is only a fallback.
+        public static void AddHistoryLog(eServicesDbContext core, int applicationId, int? clerkId, string actionMessage, HistoryEntity? entity = null)
         {
             try
             {
-                bool isRealEstate = core.RE_Applications.Any(x => x.Id == applicationId);
+                bool isRealEstate = entity.HasValue ? entity.Value == HistoryEntity.RealEstate : core.RE_Applications.Any(x => x.Id == applicationId);
                 int validUserId = 1;
 
                 if (clerkId.HasValue && core.Customers.Any(c => c.Id == clerkId.Value))
@@ -3874,7 +3897,7 @@ namespace C8.eServices.Mvc.Helpers
                     }
                     else
                     {
-                        var hsApp = core.HumanSettlementApplications.FirstOrDefault(x => x.Id == applicationId);
+                        var hsApp = entity == HistoryEntity.PropertyLease ? null : core.HumanSettlementApplications.FirstOrDefault(x => x.Id == applicationId);
                         if (hsApp != null)
                         {
                             validUserId = hsApp.CustomerId;
@@ -3902,7 +3925,7 @@ namespace C8.eServices.Mvc.Helpers
                 }
                 else
                 {
-                    bool isHumanSettlement = core.HumanSettlementApplications.Any(x => x.Id == applicationId);
+                    bool isHumanSettlement = entity.HasValue ? entity.Value == HistoryEntity.HumanSettlement : core.HumanSettlementApplications.Any(x => x.Id == applicationId);
                     if (isHumanSettlement)
                     {
                         log.HumanSettlementApplicationId = applicationId;
@@ -4101,20 +4124,20 @@ namespace C8.eServices.Mvc.Helpers
             MasterLease.ApplicantFullName = property.FirstName + " " + property.LastName;
             MasterLease.ApplicantIdentityNumber = property.IDNo;
             MasterLease.UnitNumber = Unit.SpaceUnitNumber + " " + Unit.BuildingName;
-            MasterLease.PreparationFee = (double)lease.PreparationFee;
-            MasterLease.CreditCheckFee = (double)lease.CreditCheckFee;
-            MasterLease.CalculatedAsFolllows = (double)lease.CalculatedAsFolllows;
-            MasterLease.InitialDepositPremises = (double)lease.InitialDepositPremises;
+            MasterLease.PreparationFee = (double)(lease.PreparationFee ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.CreditCheckFee = (double)(lease.CreditCheckFee ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.CalculatedAsFolllows = (double)(lease.CalculatedAsFolllows ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.InitialDepositPremises = (double)(lease.InitialDepositPremises ?? 0); // D031: empty money field = 0, not a crash
             MasterLease.DepositTenantContribution = Unit.RequiedDepositAmount;
             MasterLease.MonthlyUnitRental = Unit.MonthlyRentalAmount;
-            MasterLease.ShadePortParking = (double)lease.ShadePortParking;
-            MasterLease.OpenParking = (double)lease.OpenParking;
-            MasterLease.StoreRooms = (double)lease.StoreRooms;
+            MasterLease.ShadePortParking = (double)(lease.ShadePortParking ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.OpenParking = (double)(lease.OpenParking ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.StoreRooms = (double)(lease.StoreRooms ?? 0); // D031: empty money field = 0, not a crash
             MasterLease.Electricity = lease.Electricity != null ? (double)lease.Electricity : 0;
-            MasterLease.Refuse = (double)lease.Refuse;
-            MasterLease.SecurityFee = (double)lease.SecurityFee;
-            MasterLease.Sewerage = (double)lease.Sewerage;
-            MasterLease.Water = (double)lease.Water;
+            MasterLease.Refuse = (double)(lease.Refuse ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.SecurityFee = (double)(lease.SecurityFee ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.Sewerage = (double)(lease.Sewerage ?? 0); // D031: empty money field = 0, not a crash
+            MasterLease.Water = (double)(lease.Water ?? 0); // D031: empty money field = 0, not a crash
             MasterLease.SPP = lease.SPP;
             MasterLease.OPP = lease.OPP;
             MasterLease.STR = lease.STR;

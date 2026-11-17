@@ -468,8 +468,8 @@
         }
 
         // 4. Check Forced Rejection Comment
-        if (statusval == "Rejected" && comment == "") {
-            swal("Error", "A reason is mandatory when rejecting.", "warning");
+        if (!comment || comment.trim() == "") {
+            swal("Error", "A reason/comment is required for every outcome (BR05)", "warning");
             document.getElementById("Comments").focus();
             return;
         }

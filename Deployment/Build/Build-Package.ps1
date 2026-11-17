@@ -23,10 +23,12 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = 'Release',
-    [string]$OutputDir = (Join-Path $PSScriptRoot '..\out')
+    [string]$OutputDir = ''
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+# $PSScriptRoot is empty inside param() defaults under Windows PowerShell 5.1 with -File, so default it here.
+if (-not $OutputDir) { $OutputDir = Join-Path $PSScriptRoot '..\out' }
 
 $repo    = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $proj    = Join-Path $repo 'C8.eServices.Mvc\C8.eServices.Mvc.csproj'
@@ -121,7 +123,7 @@ Commit     : $commit$dirty
 Config     : $Configuration
 "@ | Set-Content (Join-Path $publish 'VERSION.txt') -Encoding UTF8
 
-$zip = Join-Path $OutputDir ("PLM-EHC_{0}_{1}_{2}.zip" -f ($branch -replace '[\\/]', '-'), $commit, $stamp)
+$zip = Join-Path $OutputDir ("PLM-EHC_{0}_{1}.zip" -f $stamp, $commit)
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [IO.Compression.ZipFile]::CreateFromDirectory($publish, $zip, [IO.Compression.CompressionLevel]::Optimal, $false)

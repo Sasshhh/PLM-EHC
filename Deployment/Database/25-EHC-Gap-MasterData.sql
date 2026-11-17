@@ -27,6 +27,11 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_lease_renewal_rejected
     INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'Lease Renewal Rejected', N'Lease renewal rejected', N's_lease_renewal_rejected', @rcs, 1, 0, GETDATE());
 
+-- D028: Revenue Manager supports a risk assessment -> RiskAssessmentOutcomesController -> StatusKeys.AwaitingCEORiskApproval
+IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_ceo_risk_approval')
+    INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Awaiting CEO Approval', N'Risk assessment supported by the Revenue Manager, awaiting CEO approval', N's_awaiting_ceo_risk_approval', @rcs, 1, 0, GETDATE());
+
 -- CEO rejects a risk assessment: RiskAssessmentOutcomesController finishes the round-robin job with ResponsibilityTypes.Key = 'CEO'
 IF NOT EXISTS (SELECT 1 FROM dbo.ResponsibilityTypes WHERE [Key] = N'CEO')
     INSERT dbo.ResponsibilityTypes ([Name], [Description], [Key], IsActive, IsDeleted, CreatedDateTime)
@@ -66,6 +71,29 @@ IF NOT EXISTS (SELECT 1 FROM dbo.DocumentTypes WHERE [Key] = N'dt_water_meter_re
 IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N's_ceo')
     INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'CEO', N'Customer Id of the CEO who authorises deposit refunds (0 = not set)', N's_ceo', N'0', 1, 0, GETDATE());
+
+-- BR01 switch: PropertyLeaseApplicationController.FindOpenApplicationForId. false while testing; set to true for go-live.
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'ehc_enforce_one_application_per_id')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'EHC one application per ID (BR01)', N'true = refuse a second application while the ID is on the waiting list or holds an active lease; false = allow (testing)', N'ehc_enforce_one_application_per_id', N'false', 1, 0, GETDATE());
+
+-- CEO role: dispute close (D052), CEO renewal decision, refund authorisation menu (D038) check User.IsInRole("CEO").
+-- Only the role is created here; give it to the real CEO with PLM-CEO-Setup.sql (or 40-EHC-Test-Routing.sql on test copies).
+IF NOT EXISTS (SELECT 1 FROM dbo.AspNetRoles WHERE Name = N'CEO')
+    INSERT dbo.AspNetRoles (Id, Name) VALUES (CONVERT(nvarchar(128), NEWID()), N'CEO');
+
+-- Deposit refund application submitted: RefundApplicationsController shows this text + the reference number.
+IF NOT EXISTS (SELECT 1 FROM dbo.RCSUserMessages WHERE [Key] = N'r_rcs_refund_success_message')
+    INSERT dbo.RCSUserMessages ([Name], [Description], [Key], [Title], [Body], [DepartmentId], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Refund application submitted', N'Shown after a tenant submits a deposit refund application', N'r_rcs_refund_success_message',
+            N'Refund Application Submitted', N'Your deposit refund application has been submitted successfully. Your reference number is ', (SELECT Id FROM dbo.ApplicationEntities WHERE Id = 4), 1, 0, GETDATE());
+
+-- EDRMS (city document store) is not used by EHC: keep every upload in PLM only.
+-- FileController only calls EDRMS when this is 'on'.
+IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'EDRMSACTIVE')
+    INSERT dbo.AppSettings ([Name], [Description], [Key], [Value], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'EDRMSACTIVE', N'on = also push uploaded documents to EDRMS; off = PLM only (EHC default)', N'EDRMSACTIVE', N'off', 1, 0, GETDATE());
+UPDATE dbo.AppSettings SET [Value] = N'off' WHERE [Key] = N'EDRMSACTIVE' AND ISNULL([Value], N'') <> N'off';
 
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';

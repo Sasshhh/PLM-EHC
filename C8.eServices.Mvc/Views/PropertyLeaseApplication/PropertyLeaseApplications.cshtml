@@ -78,7 +78,40 @@
             </div>
         </div>
         <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
-            <br />
+@{
+    int plPage = ViewBag.Page ?? 1, plPages = ViewBag.Pages ?? 1, plSize = ViewBag.PageSize ?? 100, plTotal = ViewBag.Total ?? 0;
+    string plSearch = ViewBag.Search as string;
+}
+<div class="row" style="margin:10px 5px;">
+    @using (Html.BeginForm("PropertyLeaseApplications", "PropertyLeaseApplication", FormMethod.Get, new { @class = "form-inline" }))
+    {
+        <input type="text" name="search" value="@plSearch" class="form-control" placeholder="Reference, name, surname or ID number" style="min-width:280px;" />
+        <select name="pageSize" class="form-control">
+            @foreach (var n in new[] { 50, 100, 200, 500 })
+            {
+                <option value="@n" @(n == plSize ? "selected" : "")>@n per page</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+        if (!string.IsNullOrWhiteSpace(plSearch))
+        {
+            @Html.ActionLink("Clear", "PropertyLeaseApplications", null, new { @class = "btn btn-default" })
+        }
+    }
+    <div style="margin-top:8px;">
+        @plTotal application(s) &middot; page @plPage of @plPages
+        @if (plPage > 1)
+        {
+            @Html.ActionLink("« First", "PropertyLeaseApplications", new { page = 1, pageSize = plSize, search = plSearch }, new { @class = "btn btn-default btn-sm" })
+            @Html.ActionLink("‹ Previous", "PropertyLeaseApplications", new { page = plPage - 1, pageSize = plSize, search = plSearch }, new { @class = "btn btn-default btn-sm" })
+        }
+        @if (plPage < plPages)
+        {
+            @Html.ActionLink("Next ›", "PropertyLeaseApplications", new { page = plPage + 1, pageSize = plSize, search = plSearch }, new { @class = "btn btn-default btn-sm" })
+            @Html.ActionLink("Last »", "PropertyLeaseApplications", new { page = plPages, pageSize = plSize, search = plSearch }, new { @class = "btn btn-default btn-sm" })
+        }
+    </div>
+</div>
             <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
                 <thead>
                     <tr>
