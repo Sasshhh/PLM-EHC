@@ -500,6 +500,17 @@ body.ehc-theme .table .btn-default.btn-xs {
         border-color: var(--ehc-green-dark);
     }
 
+/* Header cells down the left of a details table (a th in a row that also has td cells) are labels, not a header row:
+   light green with dark text, instead of the solid green header colour (which left dark label text
+   on green on the refund and renewal summary tables). */
+body.ehc-theme .page-wrap tbody > tr:has(> td) > th {
+    background-color: var(--ehc-green-soft);
+    color: var(--ehc-ink) !important;
+    border-color: var(--ehc-line);
+    font-weight: 600;
+    white-space: normal;
+}
+
 /* Signature pads get a visible frame so they line up with the text boxes around them. */
 body.ehc-theme canvas#signature-pad,
 body.ehc-theme canvas.signature-pad {
