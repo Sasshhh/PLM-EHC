@@ -3349,6 +3349,18 @@ namespace C8.eServices.Mvc.Helpers
 
             var Result = ActivityTrackerAudit(core, PropertyLeaseId, ActivityTrackerMessage, custid);
         }
+        /// <summary>
+        /// History logs are written with Customer.Id by most callers, but
+        /// CreatedBySystemUserId is a FK to SystemUsers. Map the customer to its
+        /// SystemUser; fall back to the id itself only if it is a real SystemUser.
+        /// </summary>
+        private static int? ResolveHistorySystemUserId(eServicesDbContext core, int id)
+        {
+            var suId = core.Customers.Where(c => c.Id == id).Select(c => c.SystemUserId).FirstOrDefault();
+            if (suId.HasValue && core.SystemUsers.Any(u => u.Id == suId.Value)) return suId;
+            if (core.SystemUsers.Any(u => u.Id == id)) return id;
+            return null;
+        }
         public static bool ActivityTrackerAudit(eServicesDbContext core, int? PropertyId, string ActivityTrackerMessage, int CustomerID)
         {
             try
@@ -3362,10 +3374,20 @@ namespace C8.eServices.Mvc.Helpers
                 newlog.IsActive = true;
                 newlog.IsDeleted = false;
                 newlog.IsLocked = false;
-                newlog.CreatedBySystemUserId = CustomerID;
+                newlog.CreatedBySystemUserId = ResolveHistorySystemUserId(core, CustomerID);
 
                 core.PLMApplicationHistortyLogs.Add(newlog);
-                core.SaveChanges();
+                try
+                {
+                    core.SaveChanges();
+                }
+                catch
+                {
+                    // Never leave a failed log row tracked: the caller's next SaveChanges
+                    // would retry it and throw (yellow screen on renewal approve).
+                    core.Entry(newlog).State = System.Data.Entity.EntityState.Detached;
+                    throw;
+                }
                 return true;
             }
             catch (Exception IO)
@@ -3387,10 +3409,20 @@ namespace C8.eServices.Mvc.Helpers
                 newlog.IsActive = true;
                 newlog.IsDeleted = false;
                 newlog.IsLocked = false;
-                newlog.CreatedBySystemUserId = CustomerID;
+                newlog.CreatedBySystemUserId = ResolveHistorySystemUserId(core, CustomerID);
 
                 core.PLMApplicationHistortyLogs.Add(newlog);
-                core.SaveChanges();
+                try
+                {
+                    core.SaveChanges();
+                }
+                catch
+                {
+                    // Never leave a failed log row tracked: the caller's next SaveChanges
+                    // would retry it and throw (yellow screen on renewal approve).
+                    core.Entry(newlog).State = System.Data.Entity.EntityState.Detached;
+                    throw;
+                }
                 return true;
             }
             catch (Exception IO)
