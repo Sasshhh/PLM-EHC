@@ -15,6 +15,8 @@ Deployment/
   Database/20-Upgrade-MasterData.sql      SQL: adds missing master data (generated, insert-only)
   Database/25-EHC-Gap-MasterData.sql      SQL: EHC keys the code needs that no repo script created
   Database/40-EHC-Test-Routing.sql        OPTIONAL, test copies only: queues/complexes -> factory test users
+  Database/42-EHC-Clear-Renewal-Blockers.sql      OPTIONAL, one ref: close transgressions/complaints that block CSO renewal
+  Database/43-EHC-Finish-CSO-Renewal-Recommend.sql OPTIONAL, one ref: finish a CSO renewal recommend that crashed half way
   Database/30-Verify-MasterData.sql       SQL: lists keys the code looks up that the DB lacks
   Database/90-Verify-Schema.sql           SQL: compares the DB with the tables/columns this code expects
   Database/tools/                         generators for 10, 20, 30 and 90
