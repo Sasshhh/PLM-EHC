@@ -125,6 +125,126 @@ namespace C8.eServices.Mvc.Helpers
             return new Customer { Id = 0 };
         }
 
+        #region UC031 / UC032 deposit refund routing
+
+        /// <summary>Creates the UC031 status and task type when the database does not have them yet (older upgrade script).</summary>
+        public static void EnsureRefundProcessingMasterData(eServicesDbContext db)
+        {
+            bool changed = false;
+            if (!db.Status.Any(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing))
+            {
+                var like = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse);
+                if (like != null)
+                {
+                    db.Status.Add(new C8.eServices.Mvc.Models.Status
+                    {
+                        Name = "Awaiting Deposit Refund Processing",
+                        Description = "Refund started by the CSO; Client Services Supervisor to process deductions",
+                        Key = StatusKeys.AwaitingDepositRefundProcessing,
+                        StatusTypeId = like.StatusTypeId,
+                        IsActive = true,
+                        IsDeleted = false,
+                        CreatedDateTime = DateTime.Now
+                    });
+                    changed = true;
+                }
+            }
+            if (!db.ResponsibilityTypes.Any(x => x.Key == ResponsibilityTypeKeys.DepositRefundProcessing))
+            {
+                db.ResponsibilityTypes.Add(new ResponsibilityType
+                {
+                    Name = "Deposit Refund Processing",
+                    Description = "Client Services Supervisor processes the deposit refund / deductions (UC031)",
+                    Key = ResponsibilityTypeKeys.DepositRefundProcessing,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedDateTime = DateTime.Now
+                });
+                changed = true;
+            }
+            if (changed) db.SaveChanges();
+        }
+
+        private static int AppSettingInt(eServicesDbContext db, string key)
+        {
+            int value;
+            int.TryParse(db.AppSettings.Where(x => x.Key == key).Select(x => x.Value).FirstOrDefault(), out value);
+            return value;
+        }
+
+        /// <summary>Client Services Supervisor of the tenant's complex (PreferredComplexAreas.HousingSuperId), else AppSettings u_housing_super_visor.</summary>
+        public static int RefundSupervisorId(eServicesDbContext db, int appId)
+        {
+            try
+            {
+                var sup = GetHousingSupervisorId(db, appId);
+                if (sup != null && sup.Id != 0) return sup.Id;
+            }
+            catch { }
+            return AppSettingInt(db, AppSettingKeys.HousingSupervisor);
+        }
+
+        public static int RefundRevenueManagerId(eServicesDbContext db) { return AppSettingInt(db, AppSettingKeys.RevenueManager); }
+        public static int RefundCeoId(eServicesDbContext db) { return AppSettingInt(db, AppSettingKeys.CEO); }
+
+        /// <summary>CSO / Letting Officer of the tenant's complex, else AppSettings u_letting_officer.</summary>
+        public static int RefundCsoId(eServicesDbContext db, int appId)
+        {
+            try
+            {
+                var lo = GetBackOfficeId(db, appId, true);
+                if (lo != null && lo.Id != 0) return lo.Id;
+            }
+            catch { }
+            return AppSettingInt(db, AppSettingKeys.LettingOfficer);
+        }
+
+        /// <summary>Opens one refund task (round-robin row) for the given user on the application's latest lease row and e-mails them.</summary>
+        public static void OpenRefundTask(eServicesDbContext db, int appId, string responsibilityKey, int clerkId)
+        {
+            if (clerkId == 0) throw new Exception("No user is set up for the refund step '" + responsibilityKey + "'. Check the complex supervisor / AppSettings.");
+            var resp = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == responsibilityKey);
+            if (resp == null) throw new Exception("Missing ResponsibilityTypes row " + responsibilityKey + ".");
+            var submittedId = db.Status.First(x => x.Key == StatusKeys.Submitted).Id;
+            var lease = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == appId && !x.IsDeleted);
+            db.RoundRobinQueues.Add(new RoundRobinQueue
+            {
+                PropertyLeaseApplicationId = appId,
+                LeaseDetailsId = lease != null ? lease.Id : (int?)null,
+                ResponsibilityTypeId = resp.Id,
+                CurrentTaskDateTime = DateTime.Now,
+                ClerkId = clerkId,
+                StatusId = submittedId
+            });
+            db.SaveChanges();
+            BackOfficeNotification(db, appId, clerkId, resp.Name);
+        }
+
+        /// <summary>Plain e-mail (and SMS where a number exists) to each customer id: tenant or staff. Failures are logged, never thrown.</summary>
+        public static void NotifyRefundParties(eServicesDbContext db, int appId, IEnumerable<int> customerIds, string subject, string message)
+        {
+            var app = db.PropertyLeaseApplications.FirstOrDefault(x => x.Id == appId);
+            foreach (var id in customerIds.Where(x => x != 0).Distinct())
+            {
+                try
+                {
+                    var c = db.Customers.Include(x => x.SystemUser).FirstOrDefault(x => x.Id == id);
+                    if (c == null) continue;
+                    var email = !string.IsNullOrEmpty(c.EmailAddress) ? c.EmailAddress : (c.SystemUser != null ? c.SystemUser.EmailAddress : null);
+                    if (string.IsNullOrEmpty(email)) continue;
+                    var name = (c.FirstName + " " + c.LastName).Trim();
+                    var body = message + (app != null ? "<br/>Application reference: " + app.ApplicationReferenceNumber : "");
+                    new Email().GenerateEmailSMS(message, c.CellPhoneNumber, appId, id, body, email, subject, body, "1", false, AppSettingKeys.EservicesDefaultEmailTemplate, name);
+                }
+                catch (Exception ex)
+                {
+                    EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                }
+            }
+        }
+
+        #endregion
+
         public static bool BackOfficeNotification(eServicesDbContext db, int RCSAppID, int CustomerID, string QueueName)
         {
             if (CustomerID == 0) return false;

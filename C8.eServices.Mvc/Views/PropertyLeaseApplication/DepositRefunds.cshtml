@@ -157,9 +157,19 @@
                                 @Html.DisplayFor(modelItem => item.Status.Name)
                             </td>
                             <td>
-                                @if (item.Status.Key != null)
+                                @if (item.Status != null && item.Status.Key == StatusKeys.ApplicantVacated)
                                 {
-                                    @Html.ActionLink("Start Refund Process ", "StartRefundProcess", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                    @* UC031: CSO starts the refund; it goes to the Client Services Supervisor *@
+                                    using (Html.BeginForm("StartRefund", "PropertyLeaseApplication", FormMethod.Post, new { @class = "start-refund-form", style = "display:inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="button" class="btn btn-primary" onclick="confirmStartRefund(this)">Start Refund</button>
+                                    }
+                                }
+                                else if (item.Status != null && item.Status.Key == StatusKeys.AwaitingDepositRefundProcessing)
+                                {
+                                    @Html.ActionLink("Process Refund", "StartRefundProcess", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
                             </td>
                         </tr>
@@ -173,6 +183,14 @@
 
 
 <script type="text/javascript">
+    function confirmStartRefund(btn) {
+        swal({
+            icon: "info",
+            title: "Start the deposit refund?",
+            text: "It will be sent to the Client Services Supervisor to process the deductions.",
+            buttons: ['No', 'Yes, I am sure']
+        }).then(function (ok) { if (ok) { $(btn).closest('form').submit(); } });
+    }
     $(document).ready(function () {
         debugger;
         if ('@ViewBag.StartRefundProcessSession' !== null && '@ViewBag.StartRefundProcessSession' !== '') {

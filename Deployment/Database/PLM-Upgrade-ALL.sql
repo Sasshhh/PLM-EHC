@@ -68384,6 +68384,17 @@ IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'EDRMSACTIVE')
     VALUES (N'EDRMSACTIVE', N'on = also push uploaded documents to EDRMS; off = PLM only (EHC default)', N'EDRMSACTIVE', N'off', 1, 0, GETDATE());
 UPDATE dbo.AppSettings SET [Value] = N'off' WHERE [Key] = N'EDRMSACTIVE' AND ISNULL([Value], N'') <> N'off';
 
+-- UC031: CSO "Start Refund" hands the lease to the Client Services Supervisor (Housing Supervisor role),
+-- who captures the deductions/recommendation (PropertyLeaseApplicationController.StartRefund / StartRefundProcess).
+IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_deposit_refund_processing')
+    INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Awaiting Deposit Refund Processing', N'Refund started by the CSO; Client Services Supervisor to process deductions',
+            N's_awaiting_deposit_refund_processing',
+            ISNULL((SELECT TOP (1) StatusTypeId FROM dbo.Status WHERE [Key] = N's_awaiting_refund_response'), @rcs), 1, 0, GETDATE());
+IF NOT EXISTS (SELECT 1 FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_deposit_refund_processing')
+    INSERT dbo.ResponsibilityTypes ([Name], [Description], [Key], IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Deposit Refund Processing', N'Client Services Supervisor processes the deposit refund / deductions (UC031)', N'r_deposit_refund_processing', 1, 0, GETDATE());
+
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';
 INSERT #upgrade_ok VALUES (10);

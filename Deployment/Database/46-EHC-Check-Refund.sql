@@ -2,21 +2,26 @@
    46-EHC-Check-Refund.sql
    Why is a moved-out lease not under Refund > Start Refund Process?
 
-   Refund flow after move-out (code as of PR #8):
+   Refund flow after move-out (UC031 / UC032, PR #8):
      1. CSO confirms move-out "Vacated" (Termination > Move-Out Confirmation)
-          lease -> s_applicant_vacated_unit, unit released,
-          queue row r_deposit_refund -> the complex's Letting Officer (CSO,
-          e.g. zanelem) or AppSettings u_letting_officer.
-     2. CSO: Refund > Start Refund Process (DepositRefunds). Lists a lease only
-          when it is on s_applicant_vacated_unit AND the logged-in user owns an
-          open (s_rcs_Submitted) r_deposit_refund row for that lease row.
-          Submit -> lease s_awaiting_refund_response,
-          queue r_awaiting_deposit_refund_response -> Revenue Manager.
-     3. Revenue Manager (madimetjak): Refund > Update Refund Response.
-          Supported -> s_awaiting_refund_authorisation, queue
-          r_refund_authorisation -> AppSettings s_ceo (SolarTest05).
-     4. CEO: Termination > Refund Authorisations > approve + sign
-          -> lease l_terminated_lease, tenant = former tenant.
+          lease -> s_applicant_vacated_unit, task r_deposit_refund -> the
+          complex's Letting Officer (CSO, e.g. zanelem) or u_letting_officer.
+     2. CSO: Refund > Start Refund > "Start Refund"
+          lease -> s_awaiting_deposit_refund_processing, task
+          r_deposit_refund_processing -> Client Services Supervisor of the
+          complex (PreferredComplexAreas.HousingSuperId, e.g. tshepangm) or
+          AppSettings u_housing_super_visor.
+     3. Supervisor: Refund > Process Deposit Refund > deductions, recommend /
+          not recommend (+reason), proof of banking, Submit
+          lease -> s_awaiting_refund_response, task
+          r_awaiting_deposit_refund_response -> r_revenue_manager (madimetjak).
+     4. Revenue Manager: Refund > Update Refund Response
+          Supported -> s_awaiting_refund_authorisation, task
+            r_refund_authorisation -> s_ceo (SolarTest05).
+          Not Supported (+reason) -> back to step 3 (supervisor).
+     5. CEO: Termination > Refund Authorisations > Full / Partial / No Refund
+          + signature -> l_terminated_lease, tenant = former tenant.
+          Reject (+reason) -> back to step 4 (Revenue Manager).
 
    Part 1 (always): report + diagnosis. Part 2 (@Fix = 1): give the step the
    lease is on an open queue row for the right user, so it shows up.
@@ -26,13 +31,14 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
 DECLARE @Ref       nvarchar(50)  = N'EHC2026111600001';  -- application OR lease reference
-DECLARE @CsoUser   nvarchar(100) = N'zanelem';           -- who should do Start Refund Process
+DECLARE @CsoUser   nvarchar(100) = N'zanelem';           -- who clicks Start Refund (step 2)
+DECLARE @SupUser   nvarchar(100) = N'tshepangm';         -- Client Services Supervisor (step 3)
 DECLARE @Fix       bit = 0;
 DECLARE @Commit    bit = 0;
 
 DECLARE @AppId int, @LeaseId int, @LeaseStatus nvarchar(100), @Submitted int, @Archived int,
         @RtRefund int, @RtResponse int, @RtAuth int, @RtVacate int,
-        @CsoCust int, @RmCust int, @CeoCust int, @NeedRt int, @NeedClerk int, @Step nvarchar(200);
+        @CsoCust int, @SupCust int, @RtProc int, @RmCust int, @CeoCust int, @NeedRt int, @NeedClerk int, @Step nvarchar(200);
 
 SELECT TOP 1 @AppId = a.Id FROM dbo.PropertyLeaseApplications a
  WHERE a.ApplicationReferenceNumber = @Ref
@@ -50,6 +56,9 @@ SELECT TOP 1 @Archived  = Id FROM dbo.Status WHERE [Key] = N's_rcs_Archived'  OR
 SELECT TOP 1 @RtRefund   = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_deposit_refund' ORDER BY Id;
 SELECT TOP 1 @RtResponse = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_awaiting_deposit_refund_response' ORDER BY Id;
 SELECT TOP 1 @RtAuth     = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_refund_authorisation' ORDER BY Id;
+SELECT TOP 1 @RtProc     = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_deposit_refund_processing' ORDER BY Id;
+SELECT TOP 1 @SupCust = c.Id FROM dbo.Customers c JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId WHERE su.UserName = @SupUser ORDER BY c.Id;
+IF @RtProc IS NULL PRINT 'NOTE: r_deposit_refund_processing is missing: run PLM-Upgrade-ALL.sql (the new site also creates it on first use of Refund).';
 SELECT TOP 1 @RtVacate   = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_vacating_confirmation' ORDER BY Id;
 SELECT TOP 1 @CsoCust = c.Id FROM dbo.Customers c JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId WHERE su.UserName = @CsoUser ORDER BY c.Id;
 SELECT TOP 1 @RmCust  = TRY_CAST([Value] AS int) FROM dbo.AppSettings WHERE [Key] = N'r_revenue_manager' ORDER BY Id;
@@ -74,11 +83,12 @@ JOIN dbo.ResponsibilityTypes rt ON rt.Id = q.ResponsibilityTypeId
 LEFT JOIN dbo.Status qs ON qs.Id = q.StatusId
 LEFT JOIN dbo.Customers c ON c.Id = q.ClerkId
 LEFT JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId
-WHERE q.PropertyLeaseApplicationId = @AppId AND q.ResponsibilityTypeId IN (@RtVacate, @RtRefund, @RtResponse, @RtAuth)
+WHERE q.PropertyLeaseApplicationId = @AppId AND q.ResponsibilityTypeId IN (@RtVacate, @RtRefund, @RtProc, @RtResponse, @RtAuth)
 ORDER BY q.Id;
 
 PRINT '=== 4. Refund users from AppSettings ===';
-SELECT 'CSO for Start Refund Process (@CsoUser)' AS [Role], @CsoCust AS CustomerId, @CsoUser AS UserName
+SELECT 'CSO for Start Refund (@CsoUser)' AS [Role], @CsoCust AS CustomerId, @CsoUser AS UserName
+UNION ALL SELECT 'Client Services Supervisor (@SupUser)', @SupCust, @SupUser
 UNION ALL SELECT 'Revenue Manager r_revenue_manager', @RmCust, (SELECT TOP 1 su.UserName FROM dbo.Customers c JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId WHERE c.Id = @RmCust)
 UNION ALL SELECT 'CEO s_ceo', @CeoCust, (SELECT TOP 1 su.UserName FROM dbo.Customers c JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId WHERE c.Id = @CeoCust);
 
@@ -87,7 +97,9 @@ PRINT 'Lease ' + CAST(@LeaseId AS varchar) + ' is on ' + ISNULL(@LeaseStatus, '?
 IF @LeaseStatus IN (N's_awaiting_vacating_confirmation', N's_applicant_not_vacated_unit')
     PRINT 'Move-out is NOT confirmed as Vacated yet. CSO: Termination > Move-Out Confirmation > Vacated. Only then does the refund start.';
 ELSE IF @LeaseStatus = N's_applicant_vacated_unit'
-    BEGIN SET @NeedRt = @RtRefund; SET @NeedClerk = @CsoCust; SET @Step = 'CSO ' + @CsoUser + ': Refund > Start Refund Process'; END
+    BEGIN SET @NeedRt = @RtRefund; SET @NeedClerk = @CsoCust; SET @Step = 'CSO ' + @CsoUser + ': Refund > Start Refund'; END
+ELSE IF @LeaseStatus = N's_awaiting_deposit_refund_processing'
+    BEGIN SET @NeedRt = @RtProc; SET @NeedClerk = @SupCust; SET @Step = 'Client Services Supervisor ' + @SupUser + ': Refund > Process Deposit Refund'; END
 ELSE IF @LeaseStatus = N's_awaiting_refund_response'
     BEGIN SET @NeedRt = @RtResponse; SET @NeedClerk = @RmCust; SET @Step = 'Revenue Manager: Refund > Update Refund Response'; END
 ELSE IF @LeaseStatus = N's_awaiting_refund_authorisation'

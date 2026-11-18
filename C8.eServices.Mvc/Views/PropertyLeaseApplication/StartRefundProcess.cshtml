@@ -26,7 +26,7 @@
             </div>
         </div>
         <br />
-        <div class="panel-heading">Upload Proff of Banking Details</div>
+        <div class="panel-heading">Upload Proof of Banking Details</div>
         <div style="width: 90%;margin: 0 auto;">
             <div style="display:block">
                 @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
@@ -90,18 +90,17 @@
                         <div class="col-md-4">
                             @Html.DropDownListFor(model => model.LeaseTermination.DepositRefundRecommended, new List<SelectListItem>
                             {
-                                new SelectListItem { Text = "Refund Full Deposit", Value = "Refund Full Deposit" },
-                                new SelectListItem { Text = "Refund Partial Deposit", Value = "Refund Partial Deposit" },
-                                new SelectListItem { Text = "No Refund", Value = "No Refund" }
-                            }, "-- Select Option --", new { @class = "form-control", @required = "required", @id = "DepositRefundRecommended" })
+                                new SelectListItem { Text = "Recommend Deposit Refund", Value = "Recommend Deposit Refund" },
+                                new SelectListItem { Text = "Deposit Refund Not Recommended", Value = "Deposit Refund Not Recommended" }
+                            }, "-- Select Option --", new { @class = "form-control", @required = "required", @id = "DepositRefundRecommended", @onchange = "recommendationChanged()" })
                             @Html.ValidationMessageFor(model => model.LeaseTermination.DepositRefundRecommended, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
                     <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.FinancialOfficerReason, "Reason for Recommendation", htmlAttributes: new { @class = "control-label col-md-3" })
+                        @Html.LabelFor(model => model.LeaseTermination.FinancialOfficerReason, "Reason (required if not recommended)", htmlAttributes: new { @class = "control-label col-md-3" })
                         <div class="col-md-6">
-                            @Html.TextAreaFor(model => model.LeaseTermination.FinancialOfficerReason, new { @class = "form-control", @id = "FinancialOfficerReason", @rows = "3", @required = "required", @placeholder = "Provide details justifying the recommendation/deductions" })
+                            @Html.TextAreaFor(model => model.LeaseTermination.FinancialOfficerReason, new { @class = "form-control", @id = "FinancialOfficerReason", @rows = "3", @placeholder = "Reason / notes from the bookkeeper (required when the refund is not recommended)" })
                             @Html.ValidationMessageFor(model => model.LeaseTermination.FinancialOfficerReason, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -110,7 +109,7 @@
                 <br />
 
                 <div id="divbtn" style="display:block">
-                    <input type="button" value="Submit Refund Recommendation" name="btnApproval" onclick="clickSubmit()" class="button1" style="background-color:#2b772b; color:white; border-radius:4px; padding:8px 16px;" />
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" style="background-color:#2b772b; color:white; border-radius:4px; padding:8px 16px;" />
                     <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
                     <br />
                     <br />
@@ -123,9 +122,13 @@
 
 <script>
     function clickSubmit() {
+        var rec = $("#DepositRefundRecommended").val();
+        if (!$("#FinancialOfficerOfficialNumber").val()) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        if (!rec) { swal("Validation Error", "Please select a refund recommendation.", "warning"); return; }
+        if (rec === "Deposit Refund Not Recommended" && !$.trim($("#FinancialOfficerReason").val())) { swal("Validation Error", "A reason is required when the refund is not recommended.", "warning"); return; }
         swal({
             icon: "info",
-            title: "Are you sure you want to send email to finance?",
+            title: "Are you sure you want to confirm the outcome?",
             buttons: [
                 'No!',
                 'Yes, I am sure!'
@@ -142,6 +145,11 @@
                 }
             }
         });
+    }
+
+    function recommendationChanged() {
+        var notRec = $("#DepositRefundRecommended").val() === "Deposit Refund Not Recommended";
+        if (notRec) { $("#FinancialOfficerReason").attr("required", "required"); } else { $("#FinancialOfficerReason").removeAttr("required"); }
     }
 
     function calculateRefund() {

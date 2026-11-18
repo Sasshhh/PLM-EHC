@@ -362,6 +362,8 @@ namespace C8.eServices.Mvc.Keys
 
         // UC030 — Refund approvals & Closure
         public const string AwaitingRefundAuthorisation = "s_awaiting_refund_authorisation";
+        // UC031: CSO started the refund; Client Services Supervisor (Housing Supervisor role) processes deductions
+        public const string AwaitingDepositRefundProcessing = "s_awaiting_deposit_refund_processing";
         public const string FormerTenant = "s_former_tenant";
 
         // Real Estate Use Cases (UC 06 to UC 08)

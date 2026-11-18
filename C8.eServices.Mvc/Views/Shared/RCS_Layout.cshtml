@@ -1457,6 +1457,25 @@
                             </ul>
                         </li>
                     }
+                    @if (Request.IsAuthenticated && User.IsInRole("Housing Supervisor"))
+                    {
+                        @* UC031: Client Services Supervisor processes the deposit refund (deductions, recommendation, banking proof). *@
+                        <li>
+                            <a href="javascript:;">
+                                <i class="ion ion-cash"></i>
+                                <span class="text">Refund</span>
+                                <i class="arrow ion-chevron-left"></i>
+                            </a>
+                            <ul class="inner-drop list-unstyled">
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/DepositRefunds">
+                                        <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Process Deposit Refund</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
                     @if (Request.IsAuthenticated && User.IsInRole("Maintenance Manager"))
                     {
                         <li>
@@ -1592,18 +1611,11 @@
                                 <li>
                                     <a href="~/PropertyLeaseApplication/DepositRefunds">
                                         <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Start Refund Process</span>
+                                        <span class="text">Start Refund</span>
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="inner-drop list-unstyled">
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/UpdateRefundResponse">
-                                        <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Update Refund Response</span>
-                                    </a>
-                                </li>
-                            </ul>
+                            @* UC032: the refund response is the Revenue Manager's step (their own Refund menu). *@
                         </li>
                         <li>
                             <a href="javascript:;">

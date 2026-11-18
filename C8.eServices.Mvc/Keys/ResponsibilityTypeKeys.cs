@@ -59,6 +59,7 @@ namespace C8.eServices.Mvc.Keys
         public const string DepositRefund = "r_deposit_refund";
         public const string DepositRefundResponse = "r_awaiting_deposit_refund_response";
         public const string RefundAuthorisation = "r_refund_authorisation";
+        public const string DepositRefundProcessing = "r_deposit_refund_processing";
         public const string AwaitingDocUploadingForMigratedApps = "r_awaiting_doc_upload_migrating_application";
         public const string PropertyFacilitiesManagerReview = "r_property_facilities_manager_review";
 
