@@ -13,8 +13,9 @@
   Steps: NuGet restore -> MSBuild Release file-system publish -> sanity checks
   (views, PDF templates, wkhtmltopdf, no debug compilation) -> zip with VERSION.txt.
 
-  The zip contains the repo's Web.config as-is. Do NOT edit it in the zip: the
-  server-side script IIS\Set-WebConfig.ps1 writes the real connection strings.
+  The zip does NOT contain the root Web.config or any production.json: every
+  server keeps its own. (Views\Web.config stays, Razor needs it.) A new server
+  takes the repo Web.config and runs IIS\Set-WebConfig.ps1 once.
 
 .EXAMPLE
   .\Build-Package.ps1
@@ -109,6 +110,13 @@ if (-not (Test-Path (Join-Path $publish 'bin\C8.eServices.Mvc.dll'))) { $problem
 if ($wc.SelectSingleNode("/configuration/system.web/compilation[@debug='true']")) { $problems += 'Web.config still has compilation debug="true" (Release transform not applied?)' }
 if ($problems) { $problems | ForEach-Object { Write-Error $_ -ErrorAction Continue }; throw 'Package checks failed.' }
 
+# --- 4b. Leave server-owned config out ------------------------------------------
+# Servers keep their own root Web.config and production.json; never overwrite them.
+Step 'Removing server-owned config (root Web.config, production.json)'
+$serverOwned = @(Join-Path $publish 'Web.config') +
+    @(Get-ChildItem $publish -Recurse -File | Where-Object { $_.Name -ieq 'production.json' } | ForEach-Object { $_.FullName })
+foreach ($f in $serverOwned) { if (Test-Path -LiteralPath $f) { Remove-Item -LiteralPath $f -Force; Write-Host "  left out: $($f.Substring($publish.Length + 1))" } }
+
 # --- 5. Version stamp + zip -----------------------------------------------------
 Step 'Writing VERSION.txt and zipping'
 $branch = (git -C $repo rev-parse --abbrev-ref HEAD) 2>$null
@@ -121,6 +129,7 @@ Built      : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz') on $env:COMPUTERNAME 
 Branch     : $branch
 Commit     : $commit$dirty
 Config     : $Configuration
+Excluded   : root Web.config, production.json (servers keep their own)
 "@ | Set-Content (Join-Path $publish 'VERSION.txt') -Encoding UTF8
 
 $zip = Join-Path $OutputDir ("PLM-EHC_{0}_{1}.zip" -f $stamp, $commit)

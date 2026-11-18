@@ -133,6 +133,10 @@ Build a new zip and run `Install-Site.ps1` again. It backs the current site up t
 `C:\inetpub\PLM_backup_<time>`, keeps the live `Web.config` and every upload/generated
 document folder, and replaces the code. Roll back by copying the backup folder back.
 
+The zip never contains the root `Web.config` or any `production.json`: each server keeps its
+own. For a brand-new server, copy `C8.eServices.Mvc\Web.config` from the repo into the site
+folder once and run `IIS/Set-WebConfig.ps1`.
+
 ## Bringing an existing database up to date
 
 For a database that already exists (a dev copy, a restored backup), the simplest route is
