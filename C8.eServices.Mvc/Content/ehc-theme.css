@@ -420,6 +420,13 @@ body.ehc-theme .step-app > .step-steps > li.done a {
    their own button colours (navy cards, red, blue, gold, "premium" buttons). The rules below make every
    screen line up like the application capture / validation screens that already looked right. */
 
+/* A Bootstrap .container has a fixed width (1170px) that does not know about the side menu, so screens
+   wrapped in one (refund review / authorisation) ran off the right edge. Inside the page it fills the width. */
+body.ehc-theme .page-wrap .container {
+    width: auto;
+    max-width: 100%;
+}
+
 /* A form row always clears its floated label/input columns, so rows stack instead of stair-stepping. */
 body.ehc-theme .page-wrap .form-group::before,
 body.ehc-theme .page-wrap .form-group::after {
