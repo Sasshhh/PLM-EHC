@@ -15,6 +15,8 @@ Deployment/
   Database/20-Upgrade-MasterData.sql      SQL: adds missing master data (generated, insert-only)
   Database/25-EHC-Gap-MasterData.sql      SQL: EHC keys the code needs that no repo script created
   Database/40-EHC-Test-Routing.sql        OPTIONAL, test copies only: queues/complexes -> factory test users
+  Database/42-EHC-Clear-Renewal-Blockers.sql      OPTIONAL, one ref: close transgressions/complaints that block CSO renewal
+  Database/43-EHC-Finish-CSO-Renewal-Recommend.sql OPTIONAL, one ref: finish a CSO renewal recommend that crashed half way
   Database/30-Verify-MasterData.sql       SQL: lists keys the code looks up that the DB lacks
   Database/90-Verify-Schema.sql           SQL: compares the DB with the tables/columns this code expects
   Database/tools/                         generators for 10, 20, 30 and 90
@@ -130,6 +132,10 @@ locks `/elmah` to the *Super Administrators* role. It finishes with a live conne
 Build a new zip and run `Install-Site.ps1` again. It backs the current site up to
 `C:\inetpub\PLM_backup_<time>`, keeps the live `Web.config` and every upload/generated
 document folder, and replaces the code. Roll back by copying the backup folder back.
+
+The zip never contains the root `Web.config` or any `production.json`: each server keeps its
+own. For a brand-new server, copy `C8.eServices.Mvc\Web.config` from the repo into the site
+folder once and run `IIS/Set-WebConfig.ps1`.
 
 ## Bringing an existing database up to date
 

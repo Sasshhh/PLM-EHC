@@ -2030,6 +2030,7 @@ namespace C8.eServices.Mvc.Controllers
                     if (ApprovalStatusddl == RCSActionTypeKeys.NotRenew)
                     {
                         MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalRejected).Id, (int)lease.Id);
+                        MatchingHelper.ArchiveCsoRenewalQueues(_conx, (int)lease.PropertyLeaseApplicationId, Customer.Id);
                         var atMsg = string.Format("Lease renewal not recommended by CSO: {0}", lease.LeaseReferenceNo);
                         MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
                         Session["LeaseRenewalSession"] = string.Format("Lease renewal declined for {0}.", lease.LeaseReferenceNo);
@@ -2092,6 +2093,10 @@ namespace C8.eServices.Mvc.Controllers
             ViewBag.Transgressions = context.PaymentTransgressions.Include(p => p.Status).Include(p => p.Category).Include(p => p.Severity).Where(p => p.TenancyReferenceNumber == appRef || p.OfficialNumber == appRef).OrderByDescending(p => p.CreatedDateTime).ToList();
             ViewBag.ServiceRequests = context.ServiceRequests.Include(s => s.Status).Include(s => s.Category).Where(s => s.CreatedByCustomerId == rcsApps.CustomerId && s.IsActive && !s.IsDeleted).OrderByDescending(s => s.CreatedDateTime).ToList();
             ViewBag.RiskAssessment = context.RiskAssessmentOutcomes.Include(r => r.Status).Where(r => r.PropertyLeaseApplicationId == lease.PropertyLeaseApplicationId && r.IsActive && !r.IsDeleted).OrderByDescending(r => r.CreatedDateTime).FirstOrDefault();
+            // _RenewalEvaluationPanels reads these; without them the RM/CEO screens showed BR21/BR39 as FAIL.
+            ViewBag.Is72MonthCapOk = MatchingHelper.IsEligibleForRenewal_72MonthCap(context, rcsApps.Id);
+            ViewBag.IsPaymentCompliant = MatchingHelper.IsEligibleForRenewal_PaymentCompliance(context, rcsApps.Id);
+            ViewBag.LeaseDurationMonths = lease.PeriodInMonths ?? 0;
         }
 
         [DecryptParameter]
@@ -2225,8 +2230,8 @@ namespace C8.eServices.Mvc.Controllers
                         var atMsg = string.Format("Lease renewal rejected by Revenue Manager: {0}. Reason: {1}", lease.LeaseReferenceNo, RejectComment);
                         MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
 
-                        var emailboody = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InActionGenerateLeaseAgreement);
-                        if (emailboody != null) EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboody.Id);
+                        // No tenant e-mail here: the only template used before was "lease agreement generated,
+                        // please action", which is wrong for a rejected renewal. No renewal-rejected template exists yet.
 
                         Session["LeaseRenewalSession"] = string.Format("Renewal rejected for {0}.", lease.LeaseReferenceNo);
                     }
@@ -2394,8 +2399,8 @@ namespace C8.eServices.Mvc.Controllers
                         var atMsg = string.Format("Lease renewal rejected by Director: {0}. Reason: {1}", lease.LeaseReferenceNo, RejectComment);
                         MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
 
-                        var emailboody = _conx.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.InActionGenerateLeaseAgreement);
-                        if (emailboody != null) EmailHelper.CustomerEmailNotification(_conx, (int)lease.PropertyLeaseApplicationId, emailboody.Id);
+                        // No tenant e-mail here: the only template used before was "lease agreement generated,
+                        // please action", which is wrong for a rejected renewal. No renewal-rejected template exists yet.
 
                         Session["LeaseRenewalSession"] = string.Format("Renewal rejected by Director for {0}.", lease.LeaseReferenceNo);
                     }
@@ -2452,14 +2457,14 @@ namespace C8.eServices.Mvc.Controllers
                     var offer = _conx.PropertyLeaseRenewalOffers.FirstOrDefault(x => x.PropertyLeaseApplicationId == lease.PropertyLeaseApplicationId);
                     if (offer != null)
                     {
-                        MatchingHelper.UpdatePropertyLeaseDates(_conx, offer.MonthsOffer, lease.Id);
+                        MatchingHelper.UpdatePropertyLeaseDates(_conx, offer.MonthsOffer, lease.Id, MatchingHelper.RenewalOriginalEndDate(offer));
                     }
 
                     MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalAgreementConcluded).Id, (int)lease.Id);
                     MatchingHelper.ChangeApplicationStatus(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)lease.PropertyLeaseApplicationId);
+                    MatchingHelper.ChangeLeaseStatusII(_conx, _conx.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, (int)lease.Id);
 
-                    var leaseRenewalsResp = _conx.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.LeaseRenewals);
-                    MatchingHelper.RoundRobinMarkJobAsFinished(_conx, (int)lease.PropertyLeaseApplicationId, null, leaseRenewalsResp.Id, Customer.Id);
+                    MatchingHelper.ArchiveCsoRenewalQueues(_conx, (int)lease.PropertyLeaseApplicationId, Customer.Id);
 
                     var atMsg = string.Format("Lease renewal agreement concluded by CSO: {0}", lease.LeaseReferenceNo);
                     MatchingHelper.ActivityTrackerAudit(_conx, lease.PropertyLeaseApplicationId, atMsg, Customer.Id);
@@ -2511,6 +2516,23 @@ namespace C8.eServices.Mvc.Controllers
             if (!lease.StartDate.HasValue) lease.StartDate = lease.EndDate?.AddDays(1) ?? DateTime.Now.Date;
             if (!lease.EndDate.HasValue && lease.StartDate.HasValue) lease.EndDate = lease.StartDate.Value.AddMonths(monthsOffer).AddDays(-1);
 
+            // Renewal not captured yet (end date still the original one): propose the NEW term,
+            // starting the day after the current lease ends. Display only - nothing is saved here.
+            var originalEnd = MatchingHelper.RenewalOriginalEndDate(offer) ?? lease.EndDate;
+            if (originalEnd.HasValue && lease.EndDate.HasValue && lease.EndDate.Value.Date <= originalEnd.Value.Date)
+            {
+                db.Entry(lease).State = System.Data.Entity.EntityState.Detached;
+                lease.StartDate = originalEnd.Value.Date.AddDays(1);
+                lease.EndDate = lease.StartDate.Value.AddMonths(monthsOffer).AddDays(-1);
+                lease.PeriodInMonths = monthsOffer;
+            }
+
+            // Rental / deposit were blank while VAT and total came from the allocated unit: fall back to the unit.
+            if (lease.RentalAmount == 0 && applicationAllocatedProperty != null && applicationAllocatedProperty.MonthlyRentalAmount > 0)
+                lease.RentalAmount = (decimal)applicationAllocatedProperty.MonthlyRentalAmount;
+            if (lease.DepositeAmount == 0 && applicationAllocatedProperty != null && applicationAllocatedProperty.RequiedDepositAmount > 0)
+                lease.DepositeAmount = (decimal)applicationAllocatedProperty.RequiedDepositAmount;
+
             TenantViewModel model = new TenantViewModel
             {
                 PropertyResident = new PropertyResident(),
@@ -2557,6 +2579,18 @@ namespace C8.eServices.Mvc.Controllers
             var lease = db.LeaseDetails.Include(x => x.PropertyLeaseApplication).FirstOrDefault(x => x.Id == model.Lease.Id);
             if (lease == null) return HttpNotFound();
 
+            // Amounts: the form posts "500.00" (invariant) but the server culture may be en-ZA (comma
+            // decimals), so the default binder can turn them into 0. Read them culture-proof.
+            model.Lease.RentalAmount      = ParseAmount(Request.Form["Lease.RentalAmount"], model.Lease.RentalAmount);
+            model.Lease.DepositeAmount    = ParseAmount(Request.Form["Lease.DepositeAmount"], model.Lease.DepositeAmount);
+            model.Lease.VATAmount         = Math.Round(model.Lease.RentalAmount * 0.15m, 2);
+            model.Lease.TotalIncludingVAT = model.Lease.RentalAmount + model.Lease.VATAmount;
+            if (model.Lease.RentalAmount <= 0)
+            {
+                Session["LeaseRenewalSession"] = string.Format("Monthly rental must be more than R0 for {0}. Nothing was saved; open Capture Lease Details again.", lease.LeaseReferenceNo);
+                return RedirectToAction("Renewals");
+            }
+
             // 1. Update lease details
             lease.StartDate = model.Lease.StartDate;
             lease.EndDate = model.Lease.EndDate;
@@ -2583,6 +2617,14 @@ namespace C8.eServices.Mvc.Controllers
 
             Session["LeaseRenewalSession"] = string.Format("Renewal lease details captured successfully for {0}. Please generate the Lease Renewal Agreement now and send it to the tenant for signature.", lease.LeaseReferenceNo);
             return RedirectToAction("Renewals");
+        }
+
+        private static decimal ParseAmount(string raw, decimal fallback)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return fallback;
+            var t = raw.Trim().Replace(" ", "").Replace("\u00A0", "").Replace("R", "").Replace(",", ".");
+            decimal v;
+            return decimal.TryParse(t, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out v) ? v : fallback;
         }
 
         [DecryptParameter]
@@ -3152,7 +3194,7 @@ namespace C8.eServices.Mvc.Controllers
                 var offer = db.PropertyLeaseRenewalOffers.FirstOrDefault(x => x.PropertyLeaseApplicationId == lease.PropertyLeaseApplicationId);
                 if (offer != null)
                 {
-                    MatchingHelper.UpdatePropertyLeaseDates(db, offer.MonthsOffer, lease.Id);
+                    MatchingHelper.UpdatePropertyLeaseDates(db, offer.MonthsOffer, lease.Id, MatchingHelper.RenewalOriginalEndDate(offer));
                 }
 
                 MatchingHelper.ChangeLeaseStatusII(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.LeaseRenewalAgreementConcluded).Id, lease.Id);
@@ -3163,6 +3205,12 @@ namespace C8.eServices.Mvc.Controllers
                 var ceoResp = db.ResponsibilityTypes.FirstOrDefault(x => x.Key == ResponsibilityTypeKeys.RenewalCEOSign);
                 int sysUserId = (int?)Session["SystemUserId"] ?? 0;
                 if (ceoResp != null) MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)lease.PropertyLeaseApplicationId, null, ceoResp.Id, sysUserId);
+
+                // The renewal is done: close the CSO's renewal tasks (the one created when the tenant
+                // uploaded documents stayed open, so the lease never left the CSO's Renewals list)
+                // and put the lease itself back to Active Lease, like the application above.
+                MatchingHelper.ArchiveCsoRenewalQueues(db, (int)lease.PropertyLeaseApplicationId, Customer.Id);
+                MatchingHelper.ChangeLeaseStatusII(db, db.Status.FirstOrDefault(x => x.Key == StatusKeys.ActiveLease).Id, lease.Id);
 
                 Session["LeaseRenewalSession"] = string.Format("Renewal agreement fully signed and concluded for {0}.", lease.LeaseReferenceNo);
             }

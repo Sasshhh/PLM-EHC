@@ -100,7 +100,7 @@ else
             swal({
                 icon: 'info',
                 title: 'Confirm Recommendation',
-                text: 'Are you sure you want to submit this recommendation? This action will notify the Revenue Manager.',
+                text: 'Are you sure you want to submit this recommendation? An approval goes to the Revenue Manager for review; Not Renew closes the renewal.',
                 buttons: ['Cancel', 'Yes, Submit']
             }).then(function (ok) {
                 if (ok) { document.getElementById('btnApproval').click(); }

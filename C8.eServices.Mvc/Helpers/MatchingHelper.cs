@@ -3349,6 +3349,18 @@ namespace C8.eServices.Mvc.Helpers
 
             var Result = ActivityTrackerAudit(core, PropertyLeaseId, ActivityTrackerMessage, custid);
         }
+        /// <summary>
+        /// History logs are written with Customer.Id by most callers, but
+        /// CreatedBySystemUserId is a FK to SystemUsers. Map the customer to its
+        /// SystemUser; fall back to the id itself only if it is a real SystemUser.
+        /// </summary>
+        private static int? ResolveHistorySystemUserId(eServicesDbContext core, int id)
+        {
+            var suId = core.Customers.Where(c => c.Id == id).Select(c => c.SystemUserId).FirstOrDefault();
+            if (suId.HasValue && core.SystemUsers.Any(u => u.Id == suId.Value)) return suId;
+            if (core.SystemUsers.Any(u => u.Id == id)) return id;
+            return null;
+        }
         public static bool ActivityTrackerAudit(eServicesDbContext core, int? PropertyId, string ActivityTrackerMessage, int CustomerID)
         {
             try
@@ -3362,10 +3374,20 @@ namespace C8.eServices.Mvc.Helpers
                 newlog.IsActive = true;
                 newlog.IsDeleted = false;
                 newlog.IsLocked = false;
-                newlog.CreatedBySystemUserId = CustomerID;
+                newlog.CreatedBySystemUserId = ResolveHistorySystemUserId(core, CustomerID);
 
                 core.PLMApplicationHistortyLogs.Add(newlog);
-                core.SaveChanges();
+                try
+                {
+                    core.SaveChanges();
+                }
+                catch
+                {
+                    // Never leave a failed log row tracked: the caller's next SaveChanges
+                    // would retry it and throw (yellow screen on renewal approve).
+                    core.Entry(newlog).State = System.Data.Entity.EntityState.Detached;
+                    throw;
+                }
                 return true;
             }
             catch (Exception IO)
@@ -3387,10 +3409,20 @@ namespace C8.eServices.Mvc.Helpers
                 newlog.IsActive = true;
                 newlog.IsDeleted = false;
                 newlog.IsLocked = false;
-                newlog.CreatedBySystemUserId = CustomerID;
+                newlog.CreatedBySystemUserId = ResolveHistorySystemUserId(core, CustomerID);
 
                 core.PLMApplicationHistortyLogs.Add(newlog);
-                core.SaveChanges();
+                try
+                {
+                    core.SaveChanges();
+                }
+                catch
+                {
+                    // Never leave a failed log row tracked: the caller's next SaveChanges
+                    // would retry it and throw (yellow screen on renewal approve).
+                    core.Entry(newlog).State = System.Data.Entity.EntityState.Detached;
+                    throw;
+                }
                 return true;
             }
             catch (Exception IO)
@@ -4028,16 +4060,49 @@ namespace C8.eServices.Mvc.Helpers
             var Id = core.WaitingListQueueHumans.FirstOrDefault(x => x.HumanSettlementApplicationId == findMatchedItem.HumanSettlementApplicationId).Id;
             HumanRemoveApplicationFromWaitingList(core, Id);
         }
-        public static void UpdatePropertyLeaseDates(eServicesDbContext core, int Months, int LeaseId)
+        /// <summary>
+        /// Moves the lease on to the renewed term when a renewal is concluded.
+        /// originalEndDate = the lease end date before the renewal. If the CSO already captured
+        /// the new term (UC021 Capture Renewal Lease Details sets StartDate/EndDate/notices/period),
+        /// EndDate is already past it and the dates are NOT extended again (that added the months twice).
+        /// PeriodInMonths becomes the new term (it used to be reduced, ending at 0, so the renewal
+        /// scanner (PeriodInMonths >= 12) never picked the lease up again).
+        /// </summary>
+        public static void UpdatePropertyLeaseDates(eServicesDbContext core, int Months, int LeaseId, DateTime? originalEndDate = null)
         {
             var findRecord = core.LeaseDetails.FirstOrDefault(x => x.Id == LeaseId);
-            findRecord.EndDate = Convert.ToDateTime(findRecord.EndDate).AddMonths(Months);
-            findRecord.RenewalNotice = Convert.ToDateTime(findRecord.RenewalNotice).AddMonths(Months);
-            findRecord.TerminationNotice = Convert.ToDateTime(findRecord.TerminationNotice).AddMonths(Months);
-            findRecord.PeriodInMonths -= Months;
+            bool alreadyExtended = originalEndDate.HasValue && findRecord.EndDate.HasValue
+                                   && findRecord.EndDate.Value.Date > originalEndDate.Value.Date;
+            if (!alreadyExtended)
+            {
+                findRecord.EndDate = Convert.ToDateTime(findRecord.EndDate).AddMonths(Months);
+                findRecord.RenewalNotice = Convert.ToDateTime(findRecord.RenewalNotice).AddMonths(Months);
+                findRecord.TerminationNotice = Convert.ToDateTime(findRecord.TerminationNotice).AddMonths(Months);
+                findRecord.PeriodInMonths = Months;
+            }
+            else if ((findRecord.PeriodInMonths ?? 0) < 1)
+            {
+                findRecord.PeriodInMonths = Months;
+            }
             findRecord.IsRenewed = false;
             findRecord.IsNew = true;
             core.SaveChanges();
+        }
+        /// <summary>Lease end date before the renewal, from the offer (ProposedEndDate = original end + months).</summary>
+        public static DateTime? RenewalOriginalEndDate(PropertyLeaseRenewalOffer offer)
+        {
+            if (offer == null || !offer.ProposedEndDate.HasValue) return null;
+            return offer.ProposedEndDate.Value.AddMonths(-offer.MonthsOffer);
+        }
+
+        /// <summary>Closes every open CSO renewal task (r_lease_renewals and r_renewal_tenant_sign) for the application.</summary>
+        public static void ArchiveCsoRenewalQueues(eServicesDbContext core, int propertyLeaseApplicationId, int clerkId)
+        {
+            foreach (var key in new[] { ResponsibilityTypeKeys.LeaseRenewals, ResponsibilityTypeKeys.RenewalTenantSign })
+            {
+                var resp = core.ResponsibilityTypes.FirstOrDefault(x => x.Key == key);
+                if (resp != null) RoundRobinMarkJobAsFinished(core, propertyLeaseApplicationId, null, resp.Id, clerkId);
+            }
         }
         public static void AcceptRenewalOfferPeriod(eServicesDbContext core, int Id)
         {
