@@ -23,6 +23,32 @@
         <div class="panel-heading">Application Lease Eviction</div>
 
         <br />
+        @{ var evictionCases = ViewBag.EvictionCases as List<System.Tuple<string, string, int, string, string>> ?? new List<System.Tuple<string, string, int, string, string>>(); }
+        <div style="width: 90%;margin: 0 auto;">
+            <h5><strong>Eviction cases</strong> (referred for eviction by the Revenue Manager)</h5>
+            <table class="table table-bordered table-hover table-striped">
+                <thead>
+                    <tr><th>Eviction Reference No.</th><th>Application Reference</th><th>Tenant</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    @if (!evictionCases.Any())
+                    {
+                        <tr><td colspan="5">No eviction cases waiting. You can still capture an eviction by application reference below.</td></tr>
+                    }
+                    @foreach (var c in evictionCases)
+                    {
+                        <tr>
+                            <td>@c.Item1</td>
+                            <td>@c.Item2</td>
+                            <td>@c.Item4</td>
+                            <td>@c.Item5</td>
+                            <td>@Html.ActionLink("Capture Outcome", "CaptureEvictionDetails", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + c.Item3.ToString()) }, new { @class = "btn btn-primary" })</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <br />
         <div style="width: 90%;margin: 0 auto;">
             @using (Html.BeginForm())
             {

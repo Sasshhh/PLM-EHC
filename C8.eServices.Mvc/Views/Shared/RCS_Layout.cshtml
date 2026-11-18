@@ -1939,6 +1939,16 @@
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             <ul class="inner-drop list-unstyled">
+                                @if (!User.IsInRole("Property Manager"))
+                                {
+                                    @* UC024-S2 / UC026: eviction authorisation (Property Managers already have Terminations in their menu). *@
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
+                                            <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Terminations &amp; Evictions</span>
+                                        </a>
+                                    </li>
+                                }
                                 <li>
                                     <a href="~/PropertyLeaseApplication/RefundAuthorisation">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>

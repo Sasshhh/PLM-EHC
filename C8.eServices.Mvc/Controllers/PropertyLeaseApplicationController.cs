@@ -2354,12 +2354,12 @@ namespace C8.eServices.Mvc.Controllers
             var rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).FirstOrDefault();
             var leaseApp = db.LeaseDetails.OrderByDescending(x=>x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
             var AppUnit = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsActive && !x.IsDeleted);
-            var Matched = db.MatchedUnits.FirstOrDefault(x => x.Id == AppUnit.MatchedID);
             //var Unit = db.Units.FirstOrDefault(x => x.Id == Matched.UnitsId);
             //var Unit = db.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == Matched.UnitsEkurhuleniHousingCompanyId);
-            var app = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched;
-
-            var Unit = db.ApplicationAllocatedProperty.FirstOrDefault(r => r.Id == app.ApplicationAllocatedPropertyId);
+            // Null-safe: the unit is only needed for "Not habitable" (maintenance job). Habitable must not crash on it.
+            var app = db.ApplicantUnits.Include(r => r.Matched).Where(x => x.PropertyLeaseApplicationId == rcsApps.Id).OrderByDescending(x => x.Id).FirstOrDefault()?.Matched;
+            var allocatedId = app?.ApplicationAllocatedPropertyId;
+            var Unit = allocatedId != null ? db.ApplicationAllocatedProperty.FirstOrDefault(r => r.Id == allocatedId) : null;
 
             //var Units = db.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == Matched.UnitsEkurhuleniHousingCompanyId);
 
@@ -2406,7 +2406,12 @@ namespace C8.eServices.Mvc.Controllers
             {
                 EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
-                var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == app.ApplicationAllocatedPropertyId);
+                if (Unit == null)
+                {
+                    Session["ConductUnitInspectionSession"] = "No allocated unit found for " + rcsApps.ApplicationReferenceNumber + ": cannot log a maintenance job. Please check the unit allocation.";
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+                var findItem = Unit;
                 findItem.Inspection = true;
                 db.Entry(findItem).State = EntityState.Modified;
                 db.SaveChanges();
@@ -2439,6 +2444,9 @@ namespace C8.eServices.Mvc.Controllers
             db.SaveChanges();
 
             Session["ConductUnitInspectionSession"] = string.Format($"Conduct exit unit inspection processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
+            // Termination exit inspections are opened from Termination > Termination Notices: go back there.
+            if (User.IsInRole("Client Services Officer") && !User.IsInRole("Housing Supervisor"))
+                return RedirectToAction("PropertyLeaseApplicationTerminations");
             return RedirectToAction("PropertyLeaseInspections");
         }
 
@@ -5839,7 +5847,7 @@ namespace C8.eServices.Mvc.Controllers
 
             }
         }
-        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director")]
+        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director,CEO")]
         public ActionResult PropertyLeaseApplicationTerminations()
         {
             using (var cxt = new eServicesDbContext())
@@ -13424,7 +13432,30 @@ Activating your billing account and debit order mandate is required before occup
                 ViewBag.EvictionDetailsSession = value;
             }
             Session["EvictionDetailsSession"] = null;
-            
+
+            // UC026 step 1: list the eviction cases (Revenue Manager referred the termination for eviction:
+            // lease at s_legal_referral_pending, eviction reference number on the termination record).
+            try
+            {
+                var legalReferralId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.LegalReferralPending)?.Id ?? -1;
+                var cases = db.LeaseDetails.Include(x => x.PropertyLeaseApplication).Include(x => x.Status)
+                    .Where(x => !x.IsDeleted && x.IsNew && x.StatusId == legalReferralId).ToList();
+                var leaseIds = cases.Select(x => x.Id).ToList();
+                var terminations = db.LeaseTerminations.Where(t => !t.IsDeleted && t.LeaseDetailsId != null && leaseIds.Contains(t.LeaseDetailsId.Value)).ToList();
+                ViewBag.EvictionCases = cases.Select(l => new
+                {
+                    EvictionRef = terminations.Where(t => t.LeaseDetailsId == l.Id).OrderByDescending(t => t.Id).Select(t => t.EvictionReferenceNumber).FirstOrDefault(),
+                    AppRef = l.PropertyLeaseApplication != null ? l.PropertyLeaseApplication.ApplicationReferenceNumber : l.LeaseReferenceNo,
+                    AppId = l.PropertyLeaseApplicationId,
+                    Tenant = (l.FirstNames + " " + l.LastName).Trim(),
+                    Status = l.Status != null ? l.Status.Name : ""
+                }).Select(x => new System.Tuple<string, string, int, string, string>(x.EvictionRef ?? "", x.AppRef ?? "", x.AppId, x.Tenant, x.Status)).ToList();
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+
             return View(vm);
             
         }
@@ -13888,9 +13919,11 @@ Activating your billing account and debit order mandate is required before occup
                 }
 
                 var docdets = db.DocumentTypes.FirstOrDefault(x => x.Key == DocumentTypeKeys.RefundMeterReading);
+                // The Attachments table is empty on fresh databases: FirstOrDefault() gave null and the view crashed
+                // (PropertyEvictionValidation.cshtml, foreach Model.Attachments) for the Property Manager / CEO.
                 List<Attachments> attachments = new List<Attachments>();
                 var atth = db.Attachments.FirstOrDefault();
-                attachments.Add(atth);
+                if (atth != null) attachments.Add(atth);
 
                 var vm = new DepartmentsApprovalViewModel
                 {
@@ -13898,8 +13931,8 @@ Activating your billing account and debit order mandate is required before occup
                     LeaseTermination = termination,
                     Attachments = attachments,
                     PropertyLeaseApplications = rcsApps,
-                    DocName = docdets.Name,
-                    DocDesc = docdets.Description
+                    DocName = docdets?.Name,
+                    DocDesc = docdets?.Description
 
 
                 };
@@ -14567,7 +14600,7 @@ Activating your billing account and debit order mandate is required before occup
         /// UC024-S2 GET — CEO reviews the eviction case and authorizes or rejects.
         /// </summary>
         [DecryptParameter]
-        [Authorize(Roles = "Director,Property Manager")]
+        [Authorize(Roles = "Director,Property Manager,CEO")]
         public ActionResult EvictionCEOAuthorization(int? id)
         {
             try
@@ -14609,7 +14642,7 @@ Activating your billing account and debit order mandate is required before occup
         /// UC024-S2 POST — CEO approves or rejects eviction authorization.
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Director,Property Manager")]
+        [Authorize(Roles = "Director,Property Manager,CEO")]
         public ActionResult EvictionCEOAuthorization(int? id, string ApprovalStatusddl, string RejectComment, string OfficialNumber, string hdnSignatureBlob)
         {
             using (var _conx = new eServicesDbContext())

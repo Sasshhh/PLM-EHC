@@ -283,14 +283,23 @@
                     </thead>
                     <tbody>
 
-                        @foreach (var item in Model.Attachments)
+                        @* Generated Notice to Vacate for this lease (the old row linked a random Attachments record and crashed when there was none). *@
+                        <tr>
+                            <td>
+                                Notice to Vacate (Eviction Notice)
+                            </td>
+                            <td>
+                                @Html.ActionLink("View", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + Model.LeaseDetails.Id.ToString()) }, new { @class = "button1", @target = "_blank" })
+                            </td>
+                        </tr>
+                        @foreach (var item in (Model.Attachments ?? new List<C8.eServices.Mvc.Models.Attachments>()).Where(a => a != null && !string.IsNullOrEmpty(a.FilePath)))
                         {
                             <tr>
                                 <td>
                                     Property Eviction Template
                                 </td>
                                 <td>
-                                    <input type="button" id="btnExternal" class="button1" value="View" onclick="location.href='@item.FilePath'" />
+                                    <input type="button" class="button1" value="View" onclick="location.href='@item.FilePath'" />
                                 </td>
 
                             </tr>

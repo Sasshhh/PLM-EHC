@@ -3254,6 +3254,14 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult ConductExitInspection(int? LeseId)
         {
+            // Exit inspection lives on PropertyLeaseApplication/ConductExitInspection (UC-32: Habitable / Minor defects /
+            // Not habitable). This old screen approved into "Awaiting Property Eviction" (dead end), so forward instead.
+            var forwardLease = db.LeaseDetails.FirstOrDefault(x => x.Id == LeseId);
+            if (forwardLease != null)
+            {
+                return RedirectToAction("ConductExitInspection", "PropertyLeaseApplication",
+                    new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + forwardLease.PropertyLeaseApplicationId.ToString()) });
+            }
             eServicesDbContext context = new eServicesDbContext();
             Initialise();
             var userID = Customer.Id;
