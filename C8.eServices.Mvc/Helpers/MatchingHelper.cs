@@ -4060,16 +4060,49 @@ namespace C8.eServices.Mvc.Helpers
             var Id = core.WaitingListQueueHumans.FirstOrDefault(x => x.HumanSettlementApplicationId == findMatchedItem.HumanSettlementApplicationId).Id;
             HumanRemoveApplicationFromWaitingList(core, Id);
         }
-        public static void UpdatePropertyLeaseDates(eServicesDbContext core, int Months, int LeaseId)
+        /// <summary>
+        /// Moves the lease on to the renewed term when a renewal is concluded.
+        /// originalEndDate = the lease end date before the renewal. If the CSO already captured
+        /// the new term (UC021 Capture Renewal Lease Details sets StartDate/EndDate/notices/period),
+        /// EndDate is already past it and the dates are NOT extended again (that added the months twice).
+        /// PeriodInMonths becomes the new term (it used to be reduced, ending at 0, so the renewal
+        /// scanner (PeriodInMonths >= 12) never picked the lease up again).
+        /// </summary>
+        public static void UpdatePropertyLeaseDates(eServicesDbContext core, int Months, int LeaseId, DateTime? originalEndDate = null)
         {
             var findRecord = core.LeaseDetails.FirstOrDefault(x => x.Id == LeaseId);
-            findRecord.EndDate = Convert.ToDateTime(findRecord.EndDate).AddMonths(Months);
-            findRecord.RenewalNotice = Convert.ToDateTime(findRecord.RenewalNotice).AddMonths(Months);
-            findRecord.TerminationNotice = Convert.ToDateTime(findRecord.TerminationNotice).AddMonths(Months);
-            findRecord.PeriodInMonths -= Months;
+            bool alreadyExtended = originalEndDate.HasValue && findRecord.EndDate.HasValue
+                                   && findRecord.EndDate.Value.Date > originalEndDate.Value.Date;
+            if (!alreadyExtended)
+            {
+                findRecord.EndDate = Convert.ToDateTime(findRecord.EndDate).AddMonths(Months);
+                findRecord.RenewalNotice = Convert.ToDateTime(findRecord.RenewalNotice).AddMonths(Months);
+                findRecord.TerminationNotice = Convert.ToDateTime(findRecord.TerminationNotice).AddMonths(Months);
+                findRecord.PeriodInMonths = Months;
+            }
+            else if ((findRecord.PeriodInMonths ?? 0) < 1)
+            {
+                findRecord.PeriodInMonths = Months;
+            }
             findRecord.IsRenewed = false;
             findRecord.IsNew = true;
             core.SaveChanges();
+        }
+        /// <summary>Lease end date before the renewal, from the offer (ProposedEndDate = original end + months).</summary>
+        public static DateTime? RenewalOriginalEndDate(PropertyLeaseRenewalOffer offer)
+        {
+            if (offer == null || !offer.ProposedEndDate.HasValue) return null;
+            return offer.ProposedEndDate.Value.AddMonths(-offer.MonthsOffer);
+        }
+
+        /// <summary>Closes every open CSO renewal task (r_lease_renewals and r_renewal_tenant_sign) for the application.</summary>
+        public static void ArchiveCsoRenewalQueues(eServicesDbContext core, int propertyLeaseApplicationId, int clerkId)
+        {
+            foreach (var key in new[] { ResponsibilityTypeKeys.LeaseRenewals, ResponsibilityTypeKeys.RenewalTenantSign })
+            {
+                var resp = core.ResponsibilityTypes.FirstOrDefault(x => x.Key == key);
+                if (resp != null) RoundRobinMarkJobAsFinished(core, propertyLeaseApplicationId, null, resp.Id, clerkId);
+            }
         }
         public static void AcceptRenewalOfferPeriod(eServicesDbContext core, int Id)
         {

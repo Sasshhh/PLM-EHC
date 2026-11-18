@@ -78,6 +78,14 @@ BEGIN
     PRINT 'No CSO outcome recorded on a renewal offer for ' + @Ref + '. Nothing to finish: redo the CSO step in the app.';
     RETURN;
 END
+-- Guard: only a lease still at the CSO stage, with no Revenue Manager / Director decision yet.
+IF EXISTS (SELECT 1 FROM dbo.PropertyLeaseRenewalOffers WHERE Id = @OfferId AND (RM_Outcome IS NOT NULL OR CEO_Outcome IS NOT NULL))
+   OR NOT EXISTS (SELECT 1 FROM dbo.LeaseDetails l JOIN dbo.Status s ON s.Id = l.StatusId
+                  WHERE l.Id = @LeaseId AND s.[Key] IN (N's_awaiting_application_lease_renrewal', N's_awaiting_renewal_review_outcome'))
+BEGIN
+    PRINT 'Lease is past the CSO step (RM/Director already decided, or lease status is not up-for-renewal / awaiting review). Nothing changed.';
+    RETURN;
+END
 IF @StReview IS NULL OR @StArchived IS NULL OR @StSubmitted IS NULL OR @RespRm IS NULL OR ISNULL(@RmClerk, 0) = 0
 BEGIN
     SELECT 'MISSING' AS Section,
