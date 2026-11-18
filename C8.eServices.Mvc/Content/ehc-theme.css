@@ -413,6 +413,134 @@ body.ehc-theme .step-app > .step-steps > li.done a {
     letter-spacing: .01em;
 }
 
+/* ---------- Workflow screens: one layout for labels, text boxes and buttons ----------
+   Renewal, termination, eviction and refund screens were written in different styles: some wrap their
+   fields in .form-horizontal (row with negative margins, right-aligned labels), some do not (floated
+   columns that never clear, so the next label/text box drifts up and sideways), and several brought
+   their own button colours (navy cards, red, blue, gold, "premium" buttons). The rules below make every
+   screen line up like the application capture / validation screens that already looked right. */
+
+/* A Bootstrap .container has a fixed width (1170px) that does not know about the side menu, so screens
+   wrapped in one (refund review / authorisation) ran off the right edge. Inside the page it fills the width. */
+body.ehc-theme .page-wrap .container {
+    width: auto;
+    max-width: 100%;
+}
+
+/* A form row always clears its floated label/input columns, so rows stack instead of stair-stepping. */
+body.ehc-theme .page-wrap .form-group::before,
+body.ehc-theme .page-wrap .form-group::after {
+    content: " ";
+    display: table;
+}
+
+body.ehc-theme .page-wrap .form-group::after {
+    clear: both;
+}
+
+/* .form-horizontal rows sit on the same left edge as plain rows, with labels left-aligned like the
+   rest of the site, and every column label lines up with the text in its text box. */
+body.ehc-theme .page-wrap .form-horizontal .form-group {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+body.ehc-theme .page-wrap .form-group > .control-label[class*="col-"],
+body.ehc-theme .page-wrap .form-group > label[class*="col-"] {
+    padding-top: 9px;
+    text-align: left;
+}
+
+/* Old screens put <br /> pairs between form rows to push floated rows apart. Rows clear now, so those
+   breaks only left big uneven gaps; the row margin gives the spacing. */
+body.ehc-theme .page-wrap .form-group ~ br {
+    display: none;
+}
+
+/* Button bar under a form: starts on its own line, lines up with the labels above it. */
+body.ehc-theme .page-wrap #divbtn,
+body.ehc-theme .page-wrap .ehc-actions {
+    clear: both;
+    padding-left: 13px;
+    margin-left: 0;
+}
+
+    body.ehc-theme .page-wrap .ehc-actions .button1,
+    body.ehc-theme .page-wrap .ehc-actions .btn,
+    body.ehc-theme .page-wrap #divbtn .button1,
+    body.ehc-theme .page-wrap #divbtn .btn {
+        vertical-align: middle;
+        margin: 4px 8px 4px 2px;
+    }
+
+/* Secondary action next to a green button (Cancel / Back / Clear): same size, white with a green outline. */
+body.ehc-theme .button1.button1-secondary,
+body.ehc-theme a.button1.button1-secondary {
+    background-color: #fff !important;
+    color: var(--ehc-green) !important;
+    border: 1px solid var(--ehc-green);
+    box-shadow: none;
+    text-decoration: none;
+}
+
+    body.ehc-theme .button1.button1-secondary:hover,
+    body.ehc-theme a.button1.button1-secondary:hover {
+        background-color: var(--ehc-green-soft) !important;
+        color: var(--ehc-green-dark) !important;
+    }
+
+body.ehc-theme a.button1 {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Small table buttons (View / Open / Initiate) are always solid green, never gold, blue or red. */
+body.ehc-theme .table .btn-info,
+body.ehc-theme .table .btn-warning,
+body.ehc-theme .table .btn-default.btn-sm,
+body.ehc-theme .table .btn-default.btn-xs {
+    color: #fff;
+    background-color: var(--ehc-green);
+    border-color: var(--ehc-green);
+}
+
+    body.ehc-theme .table .btn-info:hover,
+    body.ehc-theme .table .btn-warning:hover,
+    body.ehc-theme .table .btn-default.btn-sm:hover,
+    body.ehc-theme .table .btn-default.btn-xs:hover {
+        color: #fff;
+        background-color: var(--ehc-green-dark);
+        border-color: var(--ehc-green-dark);
+    }
+
+/* Header cells down the left of a details table (a th in a row that also has td cells) are labels, not a header row:
+   light green with dark text, instead of the solid green header colour (which left dark label text
+   on green on the refund and renewal summary tables). */
+body.ehc-theme .page-wrap tbody > tr:has(> td) > th {
+    background-color: var(--ehc-green-soft);
+    color: var(--ehc-ink) !important;
+    border-color: var(--ehc-line);
+    font-weight: 600;
+    white-space: normal;
+}
+
+/* Required-field star after a label (same as the application screens' .require). */
+body.ehc-theme label.require::after,
+body.ehc-theme .control-label.require::after {
+    content: " *";
+    color: #c0392b;
+    font-weight: bold;
+}
+
+/* Signature pads get a visible frame so they line up with the text boxes around them. */
+body.ehc-theme canvas#signature-pad,
+body.ehc-theme canvas.signature-pad {
+    border: 1px solid var(--ehc-line);
+    border-radius: 4px;
+    background-color: #fff;
+    max-width: 100%;
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 767px) {
     body.ehc-theme .panel-body,

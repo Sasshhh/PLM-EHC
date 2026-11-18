@@ -36,7 +36,7 @@
     <div class="panel-group">
         <!-- 1. Calculation Details Panel -->
         <div class="panel panel-default">
-            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Refund &amp; Deductions Breakdown</div>
+            <div class="panel-heading">Refund &amp; Deductions Breakdown</div>
             <div class="panel-body">
                 <div style="width: 95%; margin: 0 auto;">
                     <table class="table table-bordered info-table" style="background-color: #ffffff;">
@@ -81,7 +81,7 @@
 
         <!-- 2. Documents Panel -->
         <div class="panel panel-default">
-            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Documents</div>
+            <div class="panel-heading">Documents</div>
             <div class="panel-body">
                 <div style="width: 95%; margin: 0 auto;">
                     @Html.Partial("_DocumentsPartialTerminationLetter", Model.DocumentsViewModelRefundDeposits)
@@ -93,7 +93,7 @@
 
         <!-- 3. Review Outcome Form -->
         <div class="panel panel-default">
-            <div class="panel-heading" style="font-weight: bold; background-color: #f5f5f5;">Capture Outcome</div>
+            <div class="panel-heading">Capture Outcome</div>
             <div class="panel-body">
                 <div style="width: 95%; margin: 0 auto;">
                     <form action="@Request.RawUrl" method="post" id="rmReviewForm" class="form-horizontal">
@@ -126,7 +126,7 @@
                         </div>
 
                         <div class="form-group">
-                            <div class="col-md-offset-3 col-md-6">
+                            <div class="col-md-12">
                                 <input type="button" value="Submit Review" onclick="clickSubmit()" class="button1" style="min-width: 150px;" />
                                 <input type="submit" id="btnRealSubmit" style="display:none;" />
                             </div>

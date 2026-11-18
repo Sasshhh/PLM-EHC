@@ -184,7 +184,7 @@
                 if (ViewBag.ApprovalStatus != null)
                 {
                     <div class="form-group">
-                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
+                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-2">
                             @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", onchange = "ChangeStatus()", @Name = "ApprovalStatusddl", @required = "required", @Id = "ApprovalStatus" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
@@ -198,7 +198,7 @@
                 <div id="divComment" style="display:none">
                     <div class="form-group">
 
-                        <span> @Html.Label("Rejection Comment", htmlAttributes: new { @class = "control-label col-md-1" })<b style="color:red; font-size:x-large;">*</b></span>
+                        @Html.Label("Rejection Comment", htmlAttributes: new { @class = "control-label col-md-2 require" })
                         <div class="col-md-8">
                             @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "RejectComment", @required = true })
                             @Html.ValidationMessage("RejectComment", "", new { @class = "text-danger" })

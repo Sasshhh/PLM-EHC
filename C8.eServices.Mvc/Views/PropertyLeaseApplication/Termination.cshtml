@@ -1,4 +1,4 @@
-@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -103,7 +103,7 @@
                             <td>@item.Lease.FirstNames @item.Lease.LastName</td>
                             <td>@item.Lease.IDNo</td>
                             <td>@item.Lease.SpaceUnitNo</td>
-                            <td>@(item.Lease.PurchaserType?.Name ?? "N/A")</td>
+                            <td>@(item.Lease.PurchaserType != null ? item.Lease.PurchaserType.Name : "N/A")</td>
                             <td>
                                 @if (isNotice)
                                 {
@@ -115,7 +115,7 @@
                                 }
                             </td>
                             <td>
-                                @Html.ActionLink("Initiate Termination", "LeaseTerminationValidation", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Lease.Id.ToString()) }, new { @class = "btn btn-initiate" })
+                                @Html.ActionLink("Initiate Termination", "LeaseTerminationValidation", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Lease.Id.ToString()) }, new { @class = "btn btn-primary btn-sm" })
                             </td>
                         </tr>
                     }

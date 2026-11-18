@@ -338,7 +338,7 @@
                 </div>
 
                 <div class="form-group">
-                    <span> @Html.Label("Termination Reason", htmlAttributes: new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                    @Html.Label("Termination Reason", htmlAttributes: new { @class = "control-label col-md-2 require" })
                     <div class="col-md-4">
                         @Html.TextArea("TerminationReason", new { @class = "form-control", @Id = "Comments", @required = "required" })
                         @Html.ValidationMessage("TerminationReason", "", new { @class = "text-danger" })

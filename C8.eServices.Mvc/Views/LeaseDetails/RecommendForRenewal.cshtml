@@ -14,7 +14,7 @@
 <div class="eval-section">
     <div class="eval-section-hdr"><i class="ion ion-document-text"></i> Supporting Documents</div>
     <div class="eval-section-body" style="padding:16px;">
-        <p style="color:#94a3b8; font-size:12px; margin-bottom:15px;">Upload any supplementary files required for the renewal recommendation.</p>
+        <p class="text-muted" style="font-size:12px; margin-bottom:15px;">Upload any supplementary files required for the renewal recommendation.</p>
         @Html.Partial("_DocumentsPartialDark", Model.DocumentsViewModel)
     </div>
 </div>
@@ -29,8 +29,8 @@
             @Html.AntiForgeryToken()
             <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
                 <div style="flex:1; min-width:220px;">
-                    <label style="font-size:12px; color:#94a3b8; font-weight:600;">RECOMMENDATION OUTCOME <span style="color:#ef4444;">*</span></label>
-                    <select name="ApprovalStatusddl" id="ApprovalStatus" required class="form-control" style="margin-top:6px; background:#1e293b; color:#fff; border:1px solid #334155;">
+                    <label>RECOMMENDATION OUTCOME <span class="text-danger">*</span></label>
+                    <select name="ApprovalStatusddl" id="ApprovalStatus" required class="form-control">
                         <option value="">-- Select Outcome --</option>
                         @if (ViewBag.ApprovalStatus != null)
                         {
@@ -42,8 +42,8 @@
                     </select>
                 </div>
                 <div style="flex:2; min-width:280px;">
-                    <label style="font-size:12px; color:#94a3b8; font-weight:600;">COMMENTS / REASON <span style="color:#ef4444;">*</span></label>
-                    @Html.TextArea("RejectComment", new { @class = "form-control", @id = "Comments", @rows = "3", @required = "required", @placeholder = "Enter your recommendation reason and supporting notes...", @style = "margin-top:6px; background:#1e293b; color:#fff; border:1px solid #334155; resize:vertical;" })
+                    <label>COMMENTS / REASON <span class="text-danger">*</span></label>
+                    @Html.TextArea("RejectComment", new { @class = "form-control", @id = "Comments", @rows = "3", @required = "required", @placeholder = "Enter your recommendation reason and supporting notes...", @style = "resize:vertical;" })
                 </div>
             </div>
 
@@ -51,7 +51,7 @@
                 <button type="button" class="outcome-btn btn-recommend" onclick="submitOutcome()">
                     <i class="ion ion-paper-airplane"></i> Submit Recommendation
                 </button>
-                <a href="@Url.Action("Renewals","LeaseDetails")" class="outcome-btn" style="background:transparent; border:1px solid #475569; color:#94a3b8; text-decoration:none;">
+                <a href="@Url.Action("Renewals","LeaseDetails")" class="outcome-btn">
                     <i class="ion ion-arrow-left-c"></i> Back to Renewals
                 </a>
             </div>

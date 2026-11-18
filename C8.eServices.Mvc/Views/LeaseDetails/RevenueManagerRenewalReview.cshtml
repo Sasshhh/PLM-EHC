@@ -27,26 +27,25 @@
             @if (ViewBag.ApprovalStatus != null)
             {
                 <div style="flex:1; min-width:220px;">
-                    <label style="font-size:12px; color:#94a3b8; font-weight:600;">OUTCOME <span style="color:#ef4444;">*</span></label>
+                    <label>OUTCOME <span class="text-danger">*</span></label>
                     @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new
                     {
                         @class = "form-control", @Name = "ApprovalStatusddl",
                         @required = "required",
-                        @Id = "ApprovalStatus",
-                        @style = "margin-top:6px; background:#1e293b; color:#fff; border:1px solid #334155;"
+                        @Id = "ApprovalStatus"
                     })
                     @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                 </div>
             }
             <div style="flex:2; min-width:280px;">
-                <label style="font-size:12px; color:#94a3b8; font-weight:600;">MANAGERS COMMENT <span style="color:#ef4444;">*</span></label>
-                @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "Comments", @required = "required", @style = "margin-top:6px; background:#1e293b; color:#fff; border:1px solid #334155; resize:vertical;", @rows="3" })
+                <label>MANAGERS COMMENT <span class="text-danger">*</span></label>
+                @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "Comments", @required = "required", @style = "resize:vertical;", @rows="3" })
                 @Html.ValidationMessage("RejectComment", "", new { @class = "text-danger" })
             </div>
         </div>
         <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
             <button type="button" class="outcome-btn btn-recommend" onclick="clickSubmit()"><i class="ion ion-paper-airplane"></i> Submit Decision</button>
-            <a href="@Url.Action("Renewals","LeaseDetails")" class="outcome-btn" style="background:transparent; border:1px solid #475569; color:#94a3b8; text-decoration:none;"><i class="ion ion-arrow-left-c"></i> Back</a>
+            <a href="@Url.Action("Renewals","LeaseDetails")" class="outcome-btn"><i class="ion ion-arrow-left-c"></i> Back</a>
         </div>
         <input type="submit" style="display:none;" hidden name="btnApprovalStatus" id="btnApproval" />
     }

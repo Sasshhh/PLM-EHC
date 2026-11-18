@@ -1,4 +1,4 @@
-@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using C8.eServices.Mvc.Keys
 @{
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
@@ -158,9 +158,9 @@
                 </div>
 
                 <br />
-                <div id="divbtn" class="col-md-offset-2">
-                    <input type="button" value="Cancel" onclick="window.history.back()" class="premium-btn premium-btn-default" />
-                    <input type="button" value="Capture Proof" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
+                <div id="divbtn">
+                    <input type="button" value="Capture Proof" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="button" value="Cancel" onclick="window.history.back()" class="button1 button1-secondary" />
                     <br /><br /><br />
                 </div>
             }

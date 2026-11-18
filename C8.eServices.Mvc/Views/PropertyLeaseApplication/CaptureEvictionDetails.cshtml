@@ -1,4 +1,4 @@
-@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
+﻿@model C8.eServices.Mvc.ViewModels.DepartmentsApprovalViewModel
 @using System.Text;
 @using C8.eServices.Mvc.DataAccessLayer;
 @using C8.eServices.Mvc.Keys
@@ -201,7 +201,7 @@
 
                         <div class="form-group">
                             <div class="col-md-offset-2 col-md-10">
-                                <a href="@Url.Action("GenerateEvictionNotice", "PropertyLeaseApplication", new { id = (Model.PropertyLeaseApplications != null ? Model.PropertyLeaseApplications.Id : 0) })" target="_blank" class="btn btn-warning">
+                                <a href="@Url.Action("GenerateEvictionNotice", "PropertyLeaseApplication", new { id = (Model.PropertyLeaseApplications != null ? Model.PropertyLeaseApplications.Id : 0) })" target="_blank" class="btn btn-default">
                                     <i class="fa fa-file-pdf-o"></i> Generate Eviction Notice PDF
                                 </a>
                             </div>
@@ -210,9 +210,9 @@
                 </div>
 
                 <br />
-                <div id="divbtn" style="display:block" class="col-md-offset-2">
-                    <input type="button" value="Cancel" name="Cancel" onclick="Cancel()" class="premium-btn premium-btn-default" />
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="button" value="Cancel" name="Cancel" onclick="Cancel()" class="button1 button1-secondary" />
                     <br /><br /><br />
                 </div>
             }
