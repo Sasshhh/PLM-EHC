@@ -801,9 +801,17 @@ namespace C8.eServices.Mvc.Helpers
             {
                 var RcsApplication = db.PropertyLeaseApplications.Include(x => x.Status).FirstOrDefault(x => x.Id == RCSAppID);
                 var findItem = db.LeaseDetails.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == RcsApplication.Id);
-                var UserId = GetBackOfficeId(db, RCSAppID, true);
-                var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
-                var activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
+                // UC032: the refund response is the Revenue Manager's step (Refund > Update Refund Response).
+                // It used to go to the complex's Letting Officer, so the Revenue Manager's list stayed empty.
+                int revenueManager = 0;
+                int.TryParse(db.AppSettings.Where(x => x.Key == AppSettingKeys.RevenueManager).Select(x => x.Value).FirstOrDefault(), out revenueManager);
+                var activeDirectoryOn = revenueManager;
+                if (activeDirectoryOn == 0)
+                {
+                    var UserId = GetBackOfficeId(db, RCSAppID, true);
+                    var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
+                    activeDirectoryOn = UserId.Id != 0 ? UserId.Id : StoredUser;
+                }
 
                 var ResponsibilityTypeId = responsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
                 if (activeDirectoryOn != 0)
