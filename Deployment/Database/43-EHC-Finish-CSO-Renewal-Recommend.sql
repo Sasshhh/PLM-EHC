@@ -13,7 +13,7 @@
      1. Lease status -> s_awaiting_renewal_review_outcome
      2. Archive the CSO renewal queue item (r_lease_renewals)
      3. Create the Revenue Manager review task (r_lease_renewal) for the
-        customer in AppSettings 'PLM RevenueManager', if none is open
+        customer in AppSettings 'r_revenue_manager', if none is open
      4. Write the history log line the app failed to write
 
    Only runs if a CSO outcome is recorded on the renewal offer.
@@ -48,7 +48,7 @@ SELECT TOP 1 @StArchived  = Id FROM dbo.Status WHERE [Key] = N's_rcs_Archived'  
 SELECT TOP 1 @StSubmitted = Id FROM dbo.Status WHERE [Key] = N's_rcs_Submitted' ORDER BY Id;
 SELECT TOP 1 @RespCso = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_lease_renewals' ORDER BY Id;
 SELECT TOP 1 @RespRm  = Id FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_lease_renewal'  ORDER BY Id;
-SELECT TOP 1 @RmClerk = TRY_CAST([Value] AS int) FROM dbo.AppSettings WHERE [Key] = N'PLM RevenueManager' ORDER BY Id;
+SELECT TOP 1 @RmClerk = TRY_CAST([Value] AS int) FROM dbo.AppSettings WHERE [Key] = N'r_revenue_manager' ORDER BY Id;
 SELECT TOP 1 @CsoCustomerId = Id FROM dbo.Customers WHERE SystemUserId = @CsoSu ORDER BY Id;
 
 /* ---------------- PREVIEW ---------------- */
@@ -80,7 +80,13 @@ BEGIN
 END
 IF @StReview IS NULL OR @StArchived IS NULL OR @StSubmitted IS NULL OR @RespRm IS NULL OR ISNULL(@RmClerk, 0) = 0
 BEGIN
-    RAISERROR('Missing status / responsibility / PLM RevenueManager setting. Nothing changed.', 16, 1);
+    SELECT 'MISSING' AS Section,
+           CASE WHEN @StReview    IS NULL THEN 'Status s_awaiting_renewal_review_outcome' END AS M1,
+           CASE WHEN @StArchived  IS NULL THEN 'Status s_rcs_Archived' END AS M2,
+           CASE WHEN @StSubmitted IS NULL THEN 'Status s_rcs_Submitted' END AS M3,
+           CASE WHEN @RespRm      IS NULL THEN 'ResponsibilityType r_lease_renewal' END AS M4,
+           CASE WHEN ISNULL(@RmClerk, 0) = 0 THEN 'AppSettings r_revenue_manager (Revenue Manager customer id)' END AS M5;
+    RAISERROR('Missing status / responsibility / r_revenue_manager setting (see MISSING row). Nothing changed.', 16, 1);
     RETURN;
 END
 
