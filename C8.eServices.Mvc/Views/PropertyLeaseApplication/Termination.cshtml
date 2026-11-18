@@ -103,7 +103,7 @@
                             <td>@item.Lease.FirstNames @item.Lease.LastName</td>
                             <td>@item.Lease.IDNo</td>
                             <td>@item.Lease.SpaceUnitNo</td>
-                            <td>@(item.Lease.PurchaserType?.Name ?? "N/A")</td>
+                            <td>@(item.Lease.PurchaserType != null ? item.Lease.PurchaserType.Name : "N/A")</td>
                             <td>
                                 @if (isNotice)
                                 {
