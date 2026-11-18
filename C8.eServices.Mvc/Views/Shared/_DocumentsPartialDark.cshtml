@@ -64,8 +64,8 @@
 <div id="documentResponseModal" class="modal fade" role="dialog" style="z-index:9999;">
     <div class="modal-dialog">
         <!-- Modal content-->
-        <div class="modal-content" style="background:#1e293b; color:#fff; border:1px solid #334155;">
-            <div class="modal-header" style="background:#1e3a5f; color:#fff; border-bottom:1px solid #334155;">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h4 class="modal-title">Progress</h4>
             </div>
             <div class="modal-body">
@@ -73,7 +73,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal" style="background:#3b82f6; border:none;">OK</button>
+                <button id="processResponseBtn" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
@@ -124,7 +124,7 @@
                                 </td>
                                 <td>
                     <dt class="dtAlign">
-                        <span class="btn btn-file" style="background:#f8fafc; color:#1e293b; border:1px solid #cbd5e1; font-weight:600; font-size:13px; padding:6px 14px; border-radius:4px; cursor:pointer;"><i class="ion ion-folder"></i> Browse
+                        <span class="btn btn-default btn-file"><i class="ion ion-folder"></i> Browse
                             <input type="file" autocomplete="new-password" id="@Html.Raw( string.Format( "docUpload_{0}", doc.Id ) )" name="@Html.Raw( string.Format( "_{0}", doc.Id ) )" class="docUpload" multiple>
                         </span>
                     </dt>
@@ -159,7 +159,7 @@
 
                     <br />
                     <br />
-                    <div class="form-group" style="margin-top:16px; margin-bottom:0;"><div class="col-md-12"><button type="button" class="btn btn-primary" id="uploadFiles" style="background:#0ea5e9; color:#fff; border:none; padding:8px 24px; border-radius:6px; font-weight:600; box-shadow:0 2px 4px rgba(14,165,233,0.2);"><i class="ion ion-upload"></i> Upload Selected Files</button><input type="password" style="display:none;" autocomplete="new-password" tabindex="-1" /></div></div>
+                    <div class="form-group" style="margin-top:16px; margin-bottom:0;"><div class="col-md-12"><button type="button" class="button1" id="uploadFiles"><i class="ion ion-upload"></i> Upload Selected Files</button><input type="password" style="display:none;" autocomplete="new-password" tabindex="-1" /></div></div>
                 </text>
 
             }

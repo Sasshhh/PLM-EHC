@@ -154,7 +154,7 @@
                                     @* UC023: CSO initial termination notice review *@
                                     if (item.Status.Key == StatusKeys.AwaitingCSOTerminationReview)
                                     {
-                                        @Html.ActionLink("Review Notice", "TerminationCSOReviewDetails", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                        @Html.ActionLink("Review Notice", "TerminationCSOReviewDetails", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }
 
                                     if (item.Status.Key == StatusKeys.TerminationLeaseByTenant)
@@ -192,29 +192,29 @@
                                         @Html.ActionLink("Schedule Exit Inspection", "ScheduleInspectionSlots", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
                                         @* UC-32 exit inspection (Habitable -> move-out confirmation). The old leaseDetails screen sent the lease to
                                            "Awaiting Property Eviction" and on to a Property Manager eviction step that crashed. *@
-                                        @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-warning" })
-                                        @Html.ActionLink("Cancellation PDF", "GenerateCancellationOfLease", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info", @target = "_blank" })
+                                        @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
+                                        @Html.ActionLink("Cancellation PDF", "GenerateCancellationOfLease", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-default", @target = "_blank" })
                                     }
 
                                     if (item.Status.Key == StatusKeys.AwaitingTerminationAppraisal)
                                     {
-                                        @Html.ActionLink("Authorize Termination", "PropertyEvictionValidation", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-success" })
+                                        @Html.ActionLink("Authorize Termination", "PropertyEvictionValidation", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }
 
                                     if (item.Status.Key == StatusKeys.LegalReferralPending || item.Status.Key == StatusKeys.AwaitingEvictionCEOAuth)
                                     {
-                                        @Html.ActionLink("CEO Authorization", "EvictionCEOAuthorization", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-danger" })
+                                        @Html.ActionLink("CEO Authorization", "EvictionCEOAuthorization", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                     }
 
                                     if (item.Status.Key == StatusKeys.AwaitingEvictionService)
                                     {
-                                        @Html.ActionLink("Serve Eviction Notice", "ServeEvictionNotice", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
-                                        @Html.ActionLink("Eviction Notice PDF", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info", @target = "_blank" })
+                                        @Html.ActionLink("Serve Eviction Notice", "ServeEvictionNotice", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
+                                        @Html.ActionLink("Eviction Notice PDF", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-default", @target = "_blank" })
                                     }
 
                                     if (item.Status.Key == StatusKeys.EvictionNoticeServed)
                                     {
-                                        @Html.ActionLink("Capture Proof of Service", "CaptureProofOfService", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info" })
+                                        @Html.ActionLink("Capture Proof of Service", "CaptureProofOfService", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                         @Html.ActionLink("Eviction Notice PDF", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-default", @target = "_blank" })
                                     }
 

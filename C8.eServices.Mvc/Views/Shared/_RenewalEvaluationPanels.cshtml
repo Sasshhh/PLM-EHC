@@ -30,8 +30,9 @@
         --plm-bg:    #f1f5f9;
     }
 
+    /* Site green (same as the panel headings and buttons on the other EHC screens), not navy. */
     .eval-hero {
-        background: linear-gradient(135deg, var(--plm-dark) 0%, var(--plm-navy) 100%);
+        background: #1e8449;
         border-radius: 10px;
         padding: 22px 28px;
         margin-bottom: 24px;
@@ -43,26 +44,29 @@
         gap: 12px;
     }
     .eval-hero-title { font-size: 20px; font-weight: 700; margin: 0; }
-    .eval-hero-sub   { font-size: 12px; opacity: .7; margin-top: 2px; }
+    .eval-hero-title, .eval-hero-title i { color: #fff; }
+    .eval-hero-sub   { font-size: 12px; opacity: .85; margin-top: 2px; }
     .eval-pill {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 5px 14px; border-radius: 30px; font-size: 12px; font-weight: 700;
     }
-    .pill-green { background: rgba(34,197,94,.2); color: #16a34a; border:1px solid #16a34a; }
-    .pill-red   { background: rgba(239,68,68,.2);  color: #b91c1c; border:1px solid #b91c1c; }
-    .pill-amber { background: rgba(245,158,11,.2); color: #92400e; border:1px solid #d97706; }
-    .pill-blue  { background: rgba(14,165,233,.15); color: #0369a1; border:1px solid #0369a1; }
+    .pill-green { background: #fff; color: #186a3b; border:1px solid #fff; }
+    .pill-red   { background: #fdecea; color: #b91c1c; border:1px solid #fdecea; }
+    .pill-amber { background: #fff7e6; color: #92400e; border:1px solid #fff7e6; }
+    .pill-blue  { background: rgba(255,255,255,.15); color: #fff; border:1px solid rgba(255,255,255,.6); }
 
     .eval-section {
         background: var(--plm-card);
-        border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        border: 1px solid #dfe5ea;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
         margin-bottom: 18px;
         overflow: hidden;
     }
     .eval-section-hdr {
-        background: var(--plm-navy);
-        color: #fff;
+        background: #e9f5ee;
+        border-bottom: 1px solid #dfe5ea;
+        color: #1f2933;
         padding: 10px 18px;
         font-weight: 700;
         font-size: 13px;
@@ -84,31 +88,43 @@
     .rule-fail { background: #fef2f2; border-left: 4px solid #ef4444; }
 
     .eval-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .eval-table th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align:left; }
+    .eval-table th { background: #1e8449; color: #fff; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align:left; }
     .eval-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #1e293b; }
     .eval-table tr:last-child td { border-bottom: none; }
     .eval-table tr:hover td { background: #f8fafc; }
     .no-data { text-align:center; color:#94a3b8; padding: 20px; font-style: italic; font-size: 13px; }
 
+    /* Decision card: white card with the standard light-green heading, normal text boxes and the
+       standard green Submit / outlined Back buttons (was a navy card with dark text boxes). */
     .outcome-card {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-        border-radius: 10px;
-        padding: 24px 28px;
-        color: #fff;
+        background: #fff;
+        border: 1px solid #dfe5ea;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+        padding: 0 18px 18px;
+        color: #1f2933;
         margin-top: 24px;
+        overflow: hidden;
     }
-    .outcome-card h5 { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+    .outcome-card h5 {
+        margin: 0 -18px 16px; padding: 10px 18px; font-size: 14px; font-weight: 700;
+        background: #e9f5ee; border-bottom: 1px solid #dfe5ea; color: #1f2933;
+    }
+    .outcome-card label { font-size: 12px; color: #344150; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+    .outcome-card .form-control { margin-top: 6px; }
     .outcome-btn {
-        display: inline-block; padding: 12px 28px; border-radius: 6px;
-        font-weight: 700; font-size: 14px; cursor: pointer; border: 2px solid transparent;
-        margin-right: 10px; margin-bottom: 10px; transition: all .2s;
+        display: inline-block; padding: 9px 22px; border-radius: 4px;
+        font-weight: 600; font-size: 15px; cursor: pointer; border: 1px solid #1e8449;
+        margin: 4px 8px 4px 0; text-decoration: none; vertical-align: middle;
+        background: #fff; color: #1e8449; transition: background-color .15s ease, color .15s ease;
     }
-    .btn-recommend  { background: #22c55e; color:#fff; }
-    .btn-recommend:hover  { background: #16a34a; }
-    .btn-not-recommend { background: #ef4444; color:#fff; }
-    .btn-not-recommend:hover { background: #dc2626; }
-    .btn-review { background: transparent; color:#f59e0b; border-color: #f59e0b; }
-    .btn-review:hover { background: #f59e0b; color:#fff; }
+    .outcome-btn:hover, .outcome-btn:focus { background: #e9f5ee; color: #186a3b; text-decoration: none; }
+    .btn-recommend  { background: #1e8449; color:#fff; }
+    .btn-recommend:hover, .btn-recommend:focus  { background: #186a3b; color:#fff; }
+    .btn-not-recommend { background: #c0392b; border-color: #c0392b; color:#fff; }
+    .btn-not-recommend:hover { background: #a93226; color:#fff; }
+    .btn-review { background: #fff; color:#1e8449; }
+    .btn-review:hover { background: #e9f5ee; color:#186a3b; }
 </style>
 
 @* -- Hero Header -- *@

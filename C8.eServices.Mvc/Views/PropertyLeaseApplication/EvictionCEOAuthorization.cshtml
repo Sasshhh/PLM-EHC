@@ -197,7 +197,7 @@
                             <tr>
                                 <td>Eviction Notice</td>
                                 <td>
-                                    <input type="button" class="btn btn-warning btn-sm" value="View" onclick="location.href='@item.FilePath'" />
+                                    <input type="button" class="btn btn-primary btn-sm" value="View" onclick="location.href='@item.FilePath'" />
                                 </td>
                             </tr>
                         }
@@ -235,7 +235,7 @@
                         <div class="col-md-5">
                             <canvas id="signature-pad"></canvas>
                             <div style="margin-top:5px;">
-                                <button type="button" class="premium-btn-clear" onclick="clearSignature()">Clear Signature</button>
+                                <button type="button" class="btn btn-default btn-sm" onclick="clearSignature()">Clear Signature</button>
                             </div>
                             <input type="hidden" id="hdnSignatureBlob" name="hdnSignatureBlob" value="" />
                         </div>
@@ -252,9 +252,9 @@
                 </div>
 
                 <br />
-                <div id="divbtn" style="display:block" class="col-md-offset-2">
-                    <input type="button" value="Submit Authorization" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
-                    @Html.ActionLink("Cancel", "PropertyLeaseApplicationTerminations", null, new { @class = "premium-btn premium-btn-default" })
+                <div id="divbtn" style="display:block">
+                    <input type="button" value="Submit Authorization" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    @Html.ActionLink("Cancel", "PropertyLeaseApplicationTerminations", null, new { @class = "button1 button1-secondary" })
                     <br /><br /><br />
                 </div>
             </form>

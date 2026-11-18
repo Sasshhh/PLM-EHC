@@ -84,7 +84,7 @@
                             <td>
                                 @if (item.Status != null && item.Status.Key == StatusKeys.AwaitingCSOTerminationReview)
                                 {
-                                    @Html.ActionLink("Review", "TerminationCSOReviewDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                    @Html.ActionLink("Review", "TerminationCSOReviewDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }
                             </td>
                         </tr>

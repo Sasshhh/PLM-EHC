@@ -195,7 +195,7 @@
         @if (isVoluntary)
         {
             <div style="width: 90%; margin: 0 auto; margin-top: 15px;">
-                <button type="button" class="btn btn-info btn-md" id="btnAccountValidation" onclick="toggleAccountValidation()">
+                <button type="button" class="btn btn-default" id="btnAccountValidation" onclick="toggleAccountValidation()">
                     <span class="fa fa-university"></span> Account Validation
                 </button>
                 
@@ -325,7 +325,7 @@
                     @if (ViewBag.ApprovalStatus != null)
                     {
                         <div class="form-group">
-                            <label class="control-label col-md-1">Approval Status</label>
+                            <label class="control-label col-md-2">Approval Status</label>
                             <div class="col-md-2">
                                 @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @Name = "ApprovalStatusddl", @required = "required", @id = "ApprovalStatus" })
                                 @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
@@ -336,14 +336,14 @@
                     @if (isVoluntary)
                     {
                         <div class="form-group">
-                            <label class="control-label col-md-1 required" for="OfficialNumber">Official Number *</label>
+                            <label class="control-label col-md-2 required" for="OfficialNumber">Official Number *</label>
                             <div class="col-md-3">
                                 <input type="text" name="OfficialNumber" id="OfficialNumber" class="form-control" placeholder="Enter Official Number" required />
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label col-md-1 require">Signature</label>
+                            <label class="control-label col-md-2 require">Signature</label>
                             <div class="col-md-5">
                                 <canvas id="signature-pad"></canvas>
                                 <div style="margin-top:5px;">
@@ -356,7 +356,7 @@
 
                     <div id="divComment" style="display:block">
                         <div class="form-group">
-                            <label class="control-label col-md-1" id="lblComments">Comment</label>
+                            <label class="control-label col-md-2" id="lblComments">Comment</label>
                             <div class="col-md-4">
                                 @Html.TextArea("RejectComment", new { @class = "form-control", @Id = "Comments" })
                                 @Html.ValidationMessage("RejectComment", "", new { @class = "text-danger" })

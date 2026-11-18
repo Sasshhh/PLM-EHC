@@ -116,7 +116,9 @@
         @Html.Partial("_DocumentsPartialConductUnitInspection", Model.DocumentsViewModel)
 
         <div class="panel-heading">Upload Exit Interview Form</div>
-        @Html.Partial("_DocumentsPartialExitInterviewForm", Model.DocumentsViewModelExitInterviewForm)
+        <div style="width: 90%;margin: 0 auto;">
+            @Html.Partial("_DocumentsPartialExitInterviewForm", Model.DocumentsViewModelExitInterviewForm)
+        </div>
 
         <br />
 
@@ -130,7 +132,7 @@
                 if (ViewBag.ApprovalStatus != null)
                 {
                     <div class="form-group">
-                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-1" })
+                        @Html.Label("Approval Status", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-3">
                             @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", onchange = "ChangeStatus()", @Name = "ApprovalStatusddl", @required = "required" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
@@ -142,7 +144,7 @@
 
                 <div id="divCommentRequired" style="display:none">
                     <div class="form-group">
-                        @Html.Label("Inspection Comment", htmlAttributes: new { @class = "control-label col-md-1" })
+                        @Html.Label("Inspection Comment", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-8">
                             @Html.TextArea("UnitInspectionComment", null, new { @class = "form-control" })
                             @Html.ValidationMessage("UnitInspectionComment", "", new { @class = "text-danger" })

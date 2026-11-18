@@ -122,7 +122,7 @@
                     <tr>
                         <td>Notice to Vacate / Eviction Notice (System Generated)</td>
                         <td>
-                            @Html.ActionLink("Download / View Notice", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + (app != null ? app.Id.ToString() : "0")) }, new { @class = "btn btn-info btn-sm", @target = "_blank" })
+                            @Html.ActionLink("Download / View Notice", "GenerateNoticeToVacate", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + (app != null ? app.Id.ToString() : "0")) }, new { @class = "btn btn-default btn-sm", @target = "_blank" })
                         </td>
                     </tr>
                 </tbody>
@@ -167,9 +167,9 @@
                 </div>
 
                 <br />
-                <div id="divbtn" class="col-md-offset-2">
-                    <input type="button" value="Cancel" onclick="window.history.back()" class="premium-btn premium-btn-default" />
-                    <input type="button" value="Serve Notice" name="btnApproval" onclick="clickSubmit()" class="premium-btn premium-btn-primary" />
+                <div id="divbtn">
+                    <input type="button" value="Serve Notice" name="btnApproval" onclick="clickSubmit()" class="button1" />
+                    <input type="button" value="Cancel" onclick="window.history.back()" class="button1 button1-secondary" />
                     <br /><br /><br />
                 </div>
             }
