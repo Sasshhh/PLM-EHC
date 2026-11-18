@@ -136,7 +136,12 @@
                                 @Html.DisplayFor(modelItem => item.Status.Name)
                             </td>
                             <td>
-                                @if (item.Status.Key != null)
+                                @if (item.Status.Key == StatusKeys.AwaitingCSOTerminationReview)
+                                {
+                                    @* Tenant notice: the CSO verifies it first (Termination > Termination Notices > Review Notice). *@
+                                    <span class="label label-warning">Waiting for CSO review</span>
+                                }
+                                else if (item.Status.Key != null)
                                 {
                                     @Html.ActionLink("Termination Validation ", "LeaseTerminationValidation", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-primary" })
                                 }

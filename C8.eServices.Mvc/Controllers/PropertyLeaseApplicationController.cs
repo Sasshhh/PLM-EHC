@@ -5066,12 +5066,17 @@ namespace C8.eServices.Mvc.Controllers
                     var rrq = p.Select(x => x.Id).ToList();
 
                     var rr = ReturnStatusList();
+                    // Only the current lease of each application. Old lease rows (replaced by a renewal or a
+                    // re-capture: IsNew = 0 / status s_deactivated_lease) stayed IsActive and were listed too.
+                    // A notice served on such a row never reached the CSO (staff lists only show IsNew leases).
+                    int deactivatedLeaseId = core.Status.FirstOrDefault(x => x.Key == StatusKeys.DeactivateLeaseNewCaptured)?.Id ?? -1;
+                    rr.Add(deactivatedLeaseId);
 
                     var rCSApplicationStatus = core.LeaseDetails
                         .Include(r => r.PurchaserType)
                         .Include(r => r.PropertyLeaseApplication)
                         .Include(r => r.Status)
-                        .Where(x => rrq.Contains(x.PropertyLeaseApplicationId) && !rr.Contains((int)x.StatusId) && x.IsActive && x.NoticeDate == null).ToList();
+                        .Where(x => rrq.Contains(x.PropertyLeaseApplicationId) && !rr.Contains((int)x.StatusId) && x.IsActive && x.IsNew && !x.IsDeleted && x.NoticeDate == null).ToList();
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
@@ -13119,6 +13124,26 @@ Activating your billing account and debit order mandate is required before occup
                     var userID = Customer;
                     var Keys = _context.Status;
                     var LeaseApplication = _context.LeaseDetails.Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                    if (LeaseApplication == null)
+                    {
+                        Session["TenantServeNoticeSession"] = "Lease not found. Please try again.";
+                        return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                    }
+                    // The notice must land on the CURRENT lease row of the application (IsNew). An old row
+                    // (replaced by a renewal) is invisible to the CSO, so the termination would never be reviewed.
+                    if (!LeaseApplication.IsNew)
+                    {
+                        var deactivatedId = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.DeactivateLeaseNewCaptured)?.Id ?? -1;
+                        var current = _context.LeaseDetails
+                            .Where(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId && x.IsNew && !x.IsDeleted && x.StatusId != deactivatedId)
+                            .OrderByDescending(x => x.Id).FirstOrDefault();
+                        if (current == null || current.NoticeDate != null)
+                        {
+                            Session["TenantServeNoticeSession"] = "This lease has been replaced or already has a notice. Please contact the Client Services Officer.";
+                            return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                        }
+                        LeaseApplication = current;
+                    }
 
                     var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
 

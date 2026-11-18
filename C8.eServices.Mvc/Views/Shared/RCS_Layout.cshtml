@@ -1428,19 +1428,30 @@
                                 <span class="text">Termination</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
+                            @* One Termination menu for the CSO (the Letting Officer menu below no longer repeats it for CSOs):
+                               Terminate a Lease = CSO starts a termination; Termination Notices = tenant notices to verify
+                               and terminations in progress; Move-Out Confirmation = approved terminations waiting for the
+                               tenant to vacate (was "Terminated Leases"). *@
                             <ul class="inner-drop list-unstyled">
+                                @if (User.IsInRole("Client Services Officer"))
+                                {
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/Termination">
+                                            <i class="ion ion-android-cancel" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Terminate a Lease</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
+                                            <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Termination Notices</span>
+                                        </a>
+                                    </li>
+                                }
                                 <li>
                                     <a href="~/leaseDetails/LeaseTerminated">
-                                        <i class="ion ion-bug" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Terminated Leases</span>
-                                    </a>
-                                </li>
-                            </ul>
-                            <ul class="inner-drop list-unstyled">
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
-                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Terminations</span>
+                                        <i class="ion ion-log-out" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Move-Out Confirmation</span>
                                     </a>
                                 </li>
                             </ul>
@@ -1655,27 +1666,31 @@
 
                             </ul>
                         </li>
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-android-cancel"></i>
-                                <span class="text">Termination</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
-                                <li>
-                                    <a href="~/LeaseDetails/TerminationQueued">
-                                        <i class="ion ion-android-cancel" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Termination Queued</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/Termination">
-                                        <i class="ion ion-android-cancel" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Terminate</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        if (!User.IsInRole("Client Services Officer"))
+                        {
+                            @* CSOs use the single Termination menu above. *@
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="ion ion-android-cancel"></i>
+                                    <span class="text">Termination</span>
+                                    <i class="arrow ion-chevron-left"></i>
+                                </a>
+                                <ul class="inner-drop list-unstyled">
+                                    <li>
+                                        <a href="~/LeaseDetails/TerminationQueued">
+                                            <i class="ion ion-android-cancel" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Termination Queued</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/Termination">
+                                            <i class="ion ion-android-cancel" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Terminate</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
                     }
 
                     @if (Request.IsAuthenticated && (User.IsInRole("Lease Official")) || (User.IsInRole("Letting Officer")) || (User.IsInRole("Client Services Officer")))
