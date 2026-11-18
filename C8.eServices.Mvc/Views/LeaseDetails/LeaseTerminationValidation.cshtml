@@ -383,8 +383,9 @@
                 }
 
 
+                <div class="form-group">
                 @Html.LabelFor(model => model.LeaseTermination.TerminationDate, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
+                <div class="col-md-3">
                     @Html.EditorFor(model => model.LeaseTermination.TerminationDate, "Date", new
                {
                    htmlAttributes = new
@@ -397,6 +398,7 @@
                })
                     @Html.ValidationMessageFor(model => model.LeaseTermination.TerminationDate, "", new { @class = "text-danger" })
                 </div>
+                </div>
 
 
                 @if (ViewBag.ApprovalStatus != null)
@@ -405,7 +407,7 @@
                     <br />
                     <div class="form-group">
                         @Html.Label("Termination Reason", htmlAttributes: new { @class = "control-label col-md-2" })
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             @Html.DropDownList("ApprovalStatus", null, "-- Select Option --", htmlAttributes: new { @class = "form-control", @onchange = "ChangeStatus()", @Id = "ApprovalStatusId", @Name = "ApprovalStatusddl", @required = "required" })
                             @Html.ValidationMessage("ApprovalStatus", "", new { @class = "text-danger" })
                         </div>
@@ -425,7 +427,7 @@
                  <br />
                  <div class="form-group">
                      @Html.Label("Notice Period (Months)", htmlAttributes: new { @class = "control-label col-md-2" })
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                          @Html.TextBox("NoticePeriod", null, new { @class = "form-control", @type = "number", @required = "required", @min = "1", @placeholder = "e.g. 1" })
                      </div>
                  </div>
@@ -450,7 +452,7 @@
             <br />
 
 
-            <div id="divbtn" style="display:block" class="col-md-offset-2">
+            <div id="divbtn" style="display:block">
                 <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" />
                 <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
                 <br />

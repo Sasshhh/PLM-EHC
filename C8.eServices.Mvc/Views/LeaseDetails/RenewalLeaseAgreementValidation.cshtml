@@ -201,7 +201,7 @@
 
                 <div id="divComment" style="display:block">
                     <div class="form-group">
-                        <span> @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-2" })<b style="color:red; font-size:x-large;">*</b></span>
+                        @Html.Label("Comment", htmlAttributes: new { @class = "control-label col-md-2 require" })
                         <div class="col-md-4">
                             @Html.TextArea("Comment", new { @class = "form-control", @Id = "Comment" })
                             @Html.ValidationMessage("Comment", "", new { @class = "text-danger" })
