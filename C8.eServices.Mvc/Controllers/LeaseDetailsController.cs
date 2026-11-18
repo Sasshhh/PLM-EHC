@@ -2579,6 +2579,18 @@ namespace C8.eServices.Mvc.Controllers
             var lease = db.LeaseDetails.Include(x => x.PropertyLeaseApplication).FirstOrDefault(x => x.Id == model.Lease.Id);
             if (lease == null) return HttpNotFound();
 
+            // Amounts: the form posts "500.00" (invariant) but the server culture may be en-ZA (comma
+            // decimals), so the default binder can turn them into 0. Read them culture-proof.
+            model.Lease.RentalAmount      = ParseAmount(Request.Form["Lease.RentalAmount"], model.Lease.RentalAmount);
+            model.Lease.DepositeAmount    = ParseAmount(Request.Form["Lease.DepositeAmount"], model.Lease.DepositeAmount);
+            model.Lease.VATAmount         = Math.Round(model.Lease.RentalAmount * 0.15m, 2);
+            model.Lease.TotalIncludingVAT = model.Lease.RentalAmount + model.Lease.VATAmount;
+            if (model.Lease.RentalAmount <= 0)
+            {
+                Session["LeaseRenewalSession"] = string.Format("Monthly rental must be more than R0 for {0}. Nothing was saved; open Capture Lease Details again.", lease.LeaseReferenceNo);
+                return RedirectToAction("Renewals");
+            }
+
             // 1. Update lease details
             lease.StartDate = model.Lease.StartDate;
             lease.EndDate = model.Lease.EndDate;
@@ -2605,6 +2617,14 @@ namespace C8.eServices.Mvc.Controllers
 
             Session["LeaseRenewalSession"] = string.Format("Renewal lease details captured successfully for {0}. Please generate the Lease Renewal Agreement now and send it to the tenant for signature.", lease.LeaseReferenceNo);
             return RedirectToAction("Renewals");
+        }
+
+        private static decimal ParseAmount(string raw, decimal fallback)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return fallback;
+            var t = raw.Trim().Replace(" ", "").Replace("\u00A0", "").Replace("R", "").Replace(",", ".");
+            decimal v;
+            return decimal.TryParse(t, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out v) ? v : fallback;
         }
 
         [DecryptParameter]
