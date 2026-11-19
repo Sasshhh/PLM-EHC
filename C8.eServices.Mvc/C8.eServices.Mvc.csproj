@@ -1862,7 +1862,6 @@
     <Compile Include="ApiServices\PaymentDetailsApi.cs" />
     <Compile Include="Controllers\TestingToolsController.cs" />
     <Compile Include="Helpers\EHCWorkflowEngine.cs" />
-    <Compile Include="Helpers\RoleAliases.cs" />
     <Compile Include="ApiServices\PropertyOwnerDetailsApi.cs" />
     <Compile Include="ApiServices\RCSAttorneyApi.cs" />
     <Compile Include="ApiServices\ReturnStandUnitNumber.cs" />
@@ -2092,6 +2091,7 @@
     <Compile Include="Helpers\UnitEngine\Concrete\UnitAllocation.cs" />
     <Compile Include="Helpers\WebHepler.cs" />
     <Compile Include="Helpers\RealEstateWorkAllocationHelper.cs" />
+    <Compile Include="Helpers\RoleEquivalence.cs" />
     <Compile Include="Helpers\RealEstateUserAgreementHelper.cs" />
     <Compile Include="Helpers\WorkAllocationHumanHelper.cs" />
     <Compile Include="Helpers\Wso2Helper.cs" />

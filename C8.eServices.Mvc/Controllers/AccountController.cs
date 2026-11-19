@@ -484,7 +484,7 @@ namespace C8.eServices.Mvc.Controllers
                                 await SignInAsync(user, model.RememberMe);
                                 return RedirectToAction("UpdateLeaseDetails", "PropertyLeaseApplication");
                             }
-                            if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
+                            if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "CEO")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
                             {
                                 await SignInAsync(user, model.RememberMe);
                                 if (user.UserName.Equals("re_property_officer", StringComparison.OrdinalIgnoreCase))
@@ -2578,7 +2578,7 @@ systemUser.Id.ToString(CultureInfo.InvariantCulture), statusIdSms, systemUser.Fu
                                     await SignInAsync(user, model.RememberMe);
                                     return RedirectToAction("UpdateLeaseDetails", "PropertyLeaseApplication");
                                 }
-                                if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
+                                if ((UserManager.IsInRole(user.Id, "Property Manager")) || (UserManager.IsInRole(user.Id, "CEO")) || (UserManager.IsInRole(user.Id, "Revenue Manager")))
                                 {
                                     await SignInAsync(user, model.RememberMe);
                                     if (user.UserName.Equals("re_property_officer", StringComparison.OrdinalIgnoreCase))

@@ -226,13 +226,6 @@ namespace C8.eServices.Mvc.Helpers
         public static int RefundRevenueManagerId(eServicesDbContext db) { return AppSettingInt(db, AppSettingKeys.RevenueManager); }
         public static int RefundCeoId(eServicesDbContext db) { return AppSettingInt(db, AppSettingKeys.CEO); }
 
-        /// <summary>Queue owners for CEO-step tasks: AppSettings s_ceo and r_property_manager (CEO and Property Manager are the same role).</summary>
-        public static List<int> CeoQueueOwnerIds(eServicesDbContext db)
-        {
-            return new[] { AppSettingInt(db, AppSettingKeys.CEO), AppSettingInt(db, AppSettingKeys.PropertyManager) }
-                .Where(x => x != 0).Distinct().ToList();
-        }
-
         /// <summary>CSO / Letting Officer of the tenant's complex, else AppSettings u_letting_officer.</summary>
         public static int RefundCsoId(eServicesDbContext db, int appId)
         {

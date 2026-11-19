@@ -4670,8 +4670,10 @@ namespace C8.eServices.Mvc.Controllers
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
 
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.CommitteeOutcomes).FirstOrDefault().Id;
+                    // CEO / Property Manager share one queue (RoleEquivalence).
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, UserId);
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId &&x.ClerkId== UserId && x.StatusId == SubmittedId).ToList();
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && clerkIds.Contains(x.ClerkId) && x.StatusId == SubmittedId).ToList();
 
                     var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
 
@@ -5418,7 +5420,9 @@ namespace C8.eServices.Mvc.Controllers
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RiskAssessment).FirstOrDefault().Id;
                     var ResponsibilityTypeId2 = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RenewalRiskAssessment).FirstOrDefault().Id;
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId || x.ResponsibilityTypeId == ResponsibilityTypeId2) && x.ClerkId == UserId && x.EndTaskDateTime == null).ToList();
+                    // CEO / Property Manager share one queue (RoleEquivalence).
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, UserId);
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId || x.ResponsibilityTypeId == ResponsibilityTypeId2) && clerkIds.Contains(x.ClerkId) && x.EndTaskDateTime == null).ToList();
 
                     var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
                     var list2 = rrq.Select(x => x.LeaseDetailsId).ToList();
@@ -17484,19 +17488,11 @@ Activating your billing account and debit order mandate is required before occup
                     var respIds = cxt.ResponsibilityTypes.Where(x => respKeys.Contains(x.Key)).Select(x => x.Id).ToList();
                     var statusIds = cxt.Status.Where(x => statusKeys.Contains(x.Key)).Select(x => x.Id).ToList();
 
-                    // CEO and Property Manager are the same role: either one sees the CEO-step tasks queued
-                    // for the s_ceo or the r_property_manager user (they can be different people).
-                    var sharedOwnerIds = new List<int>();
-                    int sharedRespId = 0;
-                    if (User.IsInRole("CEO") || User.IsInRole("Property Manager"))
-                    {
-                        sharedOwnerIds = EHCWorkflowEngine.CeoQueueOwnerIds(cxt);
-                        sharedRespId = cxt.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).Select(x => x.Id).FirstOrDefault();
-                    }
-
+                    // CEO / Property Manager share one queue (RoleEquivalence): refund authorisations routed to s_ceo
+                    // show for every user in either role.
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, userId);
                     var tasks = cxt.RoundRobinQueues
-                        .Where(x => respIds.Contains(x.ResponsibilityTypeId) && x.StatusId == submittedId
-                                 && (x.ClerkId == userId || (x.ResponsibilityTypeId == sharedRespId && sharedOwnerIds.Contains(x.ClerkId))))
+                        .Where(x => respIds.Contains(x.ResponsibilityTypeId) && clerkIds.Contains(x.ClerkId) && x.StatusId == submittedId)
                         .Select(x => new { x.LeaseDetailsId, x.PropertyLeaseApplicationId }).ToList();
                     var leaseIds = tasks.Where(x => x.LeaseDetailsId != null).Select(x => (int)x.LeaseDetailsId).ToList();
                     var appIds = tasks.Where(x => x.PropertyLeaseApplicationId != null).Select(x => (int)x.PropertyLeaseApplicationId).ToList();

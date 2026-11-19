@@ -31,7 +31,7 @@ namespace C8.eServices.Mvc.Filters
             cancellationToken.ThrowIfCancellationRequested(); // Unfortunately, IClaimsIdenityFactory doesn't support CancellationTokens.
             ClaimsIdentity identity = await userManager.ClaimsIdentityFactory.CreateAsync(userManager, user, "Basic");
             var principal = new ClaimsPrincipal(identity);
-            C8.eServices.Mvc.Helpers.RoleAliases.Apply(principal);
+            C8.eServices.Mvc.Helpers.RoleEquivalence.Apply(principal);
             return principal;
         }
 
