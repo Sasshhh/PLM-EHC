@@ -1425,7 +1425,7 @@
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-android-cancel"></i>
-                                <span class="text">Termination</span>
+                                <span class="text">Terminations</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             @* One Termination menu for the CSO (the Letting Officer menu below no longer repeats it for CSOs):
@@ -1454,25 +1454,16 @@
                                         <span class="text">Move-Out Confirmation</span>
                                     </a>
                                 </li>
-                            </ul>
-                        </li>
-                    }
-                    @if (Request.IsAuthenticated && User.IsInRole("Housing Supervisor"))
-                    {
-                        @* UC031: Client Services Supervisor processes the deposit refund (deductions, recommendation, banking proof). *@
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-cash"></i>
-                                <span class="text">Refund</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/DepositRefunds">
-                                        <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Process Deposit Refund</span>
-                                    </a>
-                                </li>
+                                @if (User.IsInRole("Housing Supervisor"))
+                                {
+                                    @* UC031: Client Services Supervisor - Awaiting Deposit Refund Processing *@
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/TerminatedLeases">
+                                            <i class="ion ion-cash" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Terminated Leases</span>
+                                        </a>
+                                    </li>
+                                }
                             </ul>
                         </li>
                     }
@@ -1600,22 +1591,6 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-ios-paper-outline"></i>
-                                <span class="text">Refund</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/DepositRefunds">
-                                        <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Start Refund</span>
-                                    </a>
-                                </li>
-                            </ul>
-                            @* UC032: the refund response is the Revenue Manager's step (their own Refund menu). *@
                         </li>
                         <li>
                             <a href="javascript:;">
@@ -1914,7 +1889,7 @@
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-android-cancel"></i>
-                                <span class="text">Termination</span>
+                                <span class="text">Terminations</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             <ul class="inner-drop list-unstyled">
@@ -1924,19 +1899,11 @@
                                         <span class="text">Terminations</span>
                                     </a>
                                 </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-cash"></i>
-                                <span class="text">Refund</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
+                                @* UC032: Revenue Manager - Awaiting Deposit Refund Response *@
                                 <li>
-                                    <a href="~/PropertyLeaseApplication/UpdateRefundResponse">
-                                        <i class="ion ion-ios-gear" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Update Refund Response</span>
+                                    <a href="~/PropertyLeaseApplication/TerminatedLeases">
+                                        <i class="ion ion-cash" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Terminated Leases</span>
                                     </a>
                                 </li>
                             </ul>
@@ -1947,7 +1914,7 @@
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-android-cancel"></i>
-                                <span class="text">Termination</span>
+                                <span class="text">Terminations</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             <ul class="inner-drop list-unstyled">
@@ -1962,9 +1929,9 @@
                                     </li>
                                 }
                                 <li>
-                                    <a href="~/PropertyLeaseApplication/RefundAuthorisation">
+                                    <a href="~/PropertyLeaseApplication/TerminatedLeases">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Refund Authorisations</span>
+                                        <span class="text">Terminated Leases</span>
                                     </a>
                                 </li>
                             </ul>

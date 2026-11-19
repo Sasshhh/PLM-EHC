@@ -38,7 +38,7 @@
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 
 <div class="container" style="margin-top: 20px;">
-    <h2 class="header-centered">CEO - Refund Authorization &amp; Sign-off</h2>
+    <h2 class="header-centered">Refund Authorisation</h2>
 
     <div class="panel-group">
         <!-- 1. Calculation Details Panel -->
@@ -145,48 +145,64 @@
                          @Html.AntiForgeryToken()
                          @Html.HiddenFor(m => m.LeaseDetails.Id)
 
+                         @{ var nettDisplay = Model.LeaseTermination != null && Model.LeaseTermination.NettRefundAmount.HasValue ? Model.LeaseTermination.NettRefundAmount.Value.ToString("F2") : "0.00"; }
+                         <input type="hidden" id="nettCalculated" value="@nettDisplay" />
+
                          <div class="form-group">
-                             <label class="control-label col-md-3">CEO Official Number <span class="text-danger">*</span></label>
+                             <label class="control-label col-md-3">Official Number <span class="text-danger">*</span></label>
                              <div class="col-md-6">
-                                 <input type="text" name="CEORefundOfficialNumber" id="ceoOfficialNumber" class="form-control" required placeholder="Enter CEO Official Number" />
+                                 <input type="text" name="CEORefundOfficialNumber" id="ceoOfficialNumber" class="form-control" required placeholder="Enter your Official Number" />
+                             </div>
+                             <div class="col-md-3">
+                                 <input type="button" value="Authorise" class="button1" onclick="showAuthorise()" />
                              </div>
                          </div>
 
-                         <div class="form-group">
-                             <label class="control-label col-md-3">CEO Signature <span class="text-danger">*</span></label>
-                             <div class="col-md-6">
-                                 <canvas id="signature-pad"></canvas>
-                                 <div style="margin-top:5px;">
-                                     <button type="button" class="btn btn-xs btn-default" onclick="clearSignature()">Clear Signature</button>
+                         <div id="divAuthorise" style="display:none;">
+                             <div class="form-group">
+                                 <label class="control-label col-md-3">Response <span class="text-danger">*</span></label>
+                                 <div class="col-md-6">
+                                     <select name="CEORefundResponse" id="ceoResponse" class="form-control" onchange="StatusChange()">
+                                         <option value="">-- Select Option --</option>
+                                         <option value="Approve Full">Approve Full Refund</option>
+                                         <option value="Approve Partial">Approve Partial Refund</option>
+                                         <option value="No Refund">No Refund</option>
+                                         <option value="Reject">Reject</option>
+                                     </select>
                                  </div>
-                                 <input type="hidden" name="CEORefundSignature" id="hdnSignatureBlob" />
                              </div>
-                         </div>
 
-                         <div class="form-group">
-                             <label class="control-label col-md-3">Authorization Outcome <span class="text-danger">*</span></label>
-                             <div class="col-md-6">
-                                 <select name="CEORefundResponse" id="ceoResponse" class="form-control" required onchange="StatusChange()">
-                                     <option value="">-- Select Option --</option>
-                                     <option value="Approve Full">Approve Full Refund</option>
-                                     <option value="Approve Partial">Approve Partial Refund</option>
-                                     <option value="No Refund">No Refund</option>
-                                     <option value="Reject">Reject / Return to FO</option>
-                                 </select>
+                             <div id="divNett" class="form-group" style="display:none;">
+                                 <label class="control-label col-md-3">Nett Refund Amount (R)</label>
+                                 <div class="col-md-6">
+                                     <input type="text" id="nettShown" class="form-control" readonly value="@nettDisplay" />
+                                     <small class="text-muted">Deposit &minus; (Maintenance Cost + Approved Deductions)</small>
+                                 </div>
                              </div>
-                         </div>
 
-                         <div id="divComment" class="form-group" style="display:none;">
-                             <label class="control-label col-md-3" id="lblReason">Comment / Reason <span class="text-danger">*</span></label>
-                             <div class="col-md-6">
-                                 <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Provide comments or reasons for the decision"></textarea>
+                             <div id="divComment" class="form-group" style="display:none;">
+                                 <label class="control-label col-md-3">Reason <span class="text-danger">*</span></label>
+                                 <div class="col-md-6">
+                                     <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Capture the reason"></textarea>
+                                 </div>
                              </div>
-                         </div>
 
-                         <div class="form-group">
-                             <div class="col-md-offset-3 col-md-6">
-                                 <input type="button" value="Submit Authorization" onclick="clickSubmit()" class="button1" style="min-width: 180px;" />
-                                 <input type="submit" id="btnRealSubmit" style="display:none;" />
+                             <div id="divSignature" class="form-group" style="display:none;">
+                                 <label class="control-label col-md-3">Signature <span class="text-danger">*</span></label>
+                                 <div class="col-md-6">
+                                     <canvas id="signature-pad"></canvas>
+                                     <div style="margin-top:5px;">
+                                         <button type="button" class="btn btn-xs btn-default" onclick="clearSignature()">Clear Signature</button>
+                                     </div>
+                                     <input type="hidden" name="CEORefundSignature" id="hdnSignatureBlob" />
+                                 </div>
+                             </div>
+
+                             <div id="divSubmit" class="form-group" style="display:none;">
+                                 <div class="col-md-offset-3 col-md-6">
+                                     <input type="button" value="Submit" onclick="clickSubmit()" class="button1" style="min-width: 180px;" />
+                                     <input type="submit" id="btnRealSubmit" style="display:none;" />
+                                 </div>
                              </div>
                          </div>
                      </form>
@@ -204,9 +220,14 @@
     var ctx = canvas.getContext('2d');
     var drawing = false;
 
-    // Set canvas dimensions
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    // The canvas is hidden until a response is chosen, so it is sized when it is shown (sizeCanvas).
+    function sizeCanvas() {
+        if (canvas.offsetWidth > 0 && canvas.width !== canvas.offsetWidth) {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            document.getElementById('hdnSignatureBlob').value = "";
+        }
+    }
 
     // --- Mouse Events ---
     canvas.addEventListener('mousedown', function (e) { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
@@ -247,24 +268,21 @@
     // ================================
     // 2. DYNAMIC UX (Comment visibility)
     // ================================
+    function showAuthorise() {
+        if (!$.trim($("#ceoOfficialNumber").val())) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        $("#divAuthorise").show();
+    }
+
+    // UC032: Approve Full / Approve Partial show the nett refund and need a signature; No Refund shows R 0.00 and needs
+    // a reason and a signature; Reject shows the nett refund and needs a reason (no signature).
     function StatusChange() {
-        var responseValue = $("#ceoResponse").val();
-        var label = document.getElementById('lblReason');
-        
-        if (responseValue === "Approve Partial" || responseValue === "No Refund" || responseValue === "Reject") {
-            $("#divComment").show();
-            $("#Comments").attr("required", "required");
-            if (responseValue === "Reject") {
-                label.innerHTML = 'Reason for Rejection <span class="text-danger">*</span>';
-            } else if (responseValue === "No Refund") {
-                label.innerHTML = 'Reason for No Refund <span class="text-danger">*</span>';
-            } else {
-                label.innerHTML = 'Reason for Partial Refund <span class="text-danger">*</span>';
-            }
-        } else {
-            $("#divComment").hide();
-            $("#Comments").removeAttr("required");
-        }
+        var r = $("#ceoResponse").val();
+        $("#divNett").toggle(!!r);
+        $("#nettShown").val(r === "No Refund" ? "0.00" : $("#nettCalculated").val());
+        $("#divComment").toggle(r === "No Refund" || r === "Reject");
+        $("#divSignature").toggle(!!r && r !== "Reject");
+        $("#divSubmit").toggle(!!r);
+        if (r && r !== "Reject") { sizeCanvas(); }
     }
 
     // ================================
@@ -276,30 +294,19 @@
         var response = $("#ceoResponse").val();
         var comment = $("#Comments").val();
 
-        if (!officialNumber) {
-            swal("Validation Error", "Please enter your CEO Official Number.", "warning");
-            return;
-        }
-        if (!signature || signature === "") {
-            swal("Validation Error", "Please sign the document before submitting.", "warning");
+        if (!$.trim(officialNumber)) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        if (!response) { swal("Validation Error", "Please select a response.", "warning"); return; }
+        if ((response === "No Refund" || response === "Reject") && !$.trim(comment)) { swal("Validation Error", "Please capture the reason.", "warning"); return; }
+        if (response !== "Reject" && !signature) {
+            swal("Validation Error", "Please enter your signature in the signature box.", "warning");
             document.getElementById("signature-pad").scrollIntoView({ behavior: "smooth" });
-            return;
-        }
-        if (!response) {
-            swal("Validation Error", "Please select an Authorization Outcome.", "warning");
-            return;
-        }
-        if ((response === "Approve Partial" || response === "No Refund" || response === "Reject") && (!comment || comment.trim() === "")) {
-            swal("Validation Error", "A comment is required for this decision outcome.", "warning");
             return;
         }
 
         swal({
-            title: "Confirm Submission",
-            text: "Are you sure you want to submit this refund authorization?",
             icon: "info",
-            buttons: ["Cancel", "Yes, Submit!"],
-            dangerMode: true,
+            title: "Are you sure you want to confirm the outcome?",
+            buttons: ["No", "Yes, I am sure"]
         }).then(function (isConfirm) {
             if (isConfirm) {
                 $("#btnRealSubmit").click();

@@ -15,9 +15,22 @@
 </head>
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 
+@* UC031 Process Deposit Refund or Deductions (Client Services Supervisor / Bookkeeper):
+   Official Number > Deductions (maintenance, approved deductions, nett) > Authorise > recommendation
+   (reason when not recommended, Proof of Banking Details when recommended) > Submit > "Yes, I am sure". *@
 <div id="bankAccountPanel">
     <div class="panel panel-default">
         <br />
+        <div class="panel-heading">Process Deposit Refund or Deductions</div>
+        <div style="width: 90%;margin: 0 auto;">
+            <table class="table table-bordered" style="margin-top:10px;">
+                <tbody>
+                    <tr><td style="width:35%;"><strong>Lease Reference No.</strong></td><td>@Model.LeaseDetails.LeaseReferenceNo</td></tr>
+                    <tr><td><strong>Tenant Name</strong></td><td>@Model.LeaseDetails.FirstNames @Model.LeaseDetails.LastName</td></tr>
+                    <tr><td><strong>Deposit Amount (R)</strong></td><td>@Model.LeaseDetails.DepositeAmount.ToString("F2")</td></tr>
+                </tbody>
+            </table>
+        </div>
         <div class="panel-heading">Documents</div>
         <div style="width: 90%;margin: 0 auto;">
             <div style="display:block">
@@ -25,147 +38,134 @@
                 <br />
             </div>
         </div>
-        <br />
-        <div class="panel-heading">Upload Proof of Banking Details</div>
+
         <div style="width: 90%;margin: 0 auto;">
-            <div style="display:block">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "refundForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <br />
+                <div class="form-horizontal">
+                    @Html.HiddenFor(model => model.LeaseDetails.Id)
+                    @Html.HiddenFor(model => model.PropertyLeaseApplications.Id)
+                    <input type="hidden" id="OriginalDeposit" value="@Model.LeaseDetails.DepositeAmount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" />
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Official Number <span class="text-danger">*</span></label>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(model => model.LeaseTermination.FinancialOfficerOfficialNumber, new { @class = "form-control", @id = "FinancialOfficerOfficialNumber", @placeholder = "Enter your Official Number" })
+                        </div>
+                        <div class="col-md-3">
+                            <input type="button" value="Deductions" class="button1" onclick="showDeductions()" />
+                        </div>
+                    </div>
+
+                    <div id="divDeductions" style="display:none;">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Maintenance Cost (R)</label>
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.LeaseTermination.MaintenanceCost, new { @class = "form-control", @id = "MaintenanceCost", @type = "number", @step = "0.01", @min = "0", @oninput = "calculateRefund()" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Approved Deductions (R)</label>
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.LeaseTermination.ApprovedDeductions, new { @class = "form-control", @id = "ApprovedDeductions", @type = "number", @step = "0.01", @min = "0", @oninput = "calculateRefund()" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Nett Refund Amount (R)</label>
+                            <div class="col-md-4">
+                                <input type="text" id="NettRefundAmount" class="form-control" readonly />
+                                <small class="text-muted">Deposit &minus; (Maintenance Cost + Approved Deductions)</small>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="button" value="Authorise" class="button1" onclick="showAuthorise()" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divAuthorise" style="display:none;">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Recommendation <span class="text-danger">*</span></label>
+                            <div class="col-md-4">
+                                @Html.DropDownListFor(model => model.LeaseTermination.DepositRefundRecommended, new List<SelectListItem>
+                                {
+                                    new SelectListItem { Text = "Recommend Deposit Refund", Value = "Recommend Deposit Refund" },
+                                    new SelectListItem { Text = "Deposit Refund Not Recommended", Value = "Deposit Refund Not Recommended" }
+                                }, "-- Select Option --", new { @class = "form-control", @id = "DepositRefundRecommended", @onchange = "recommendationChanged()" })
+                            </div>
+                        </div>
+                        <div class="form-group" id="divReason" style="display:none;">
+                            <label class="control-label col-md-3">Reason <span class="text-danger">*</span></label>
+                            <div class="col-md-6">
+                                @Html.TextAreaFor(model => model.LeaseTermination.FinancialOfficerReason, new { @class = "form-control", @id = "FinancialOfficerReason", @rows = "3", @placeholder = "Reason the deposit refund is not recommended" })
+                            </div>
+                        </div>
+                    </div>
+                    <input type="submit" value="Submit" style="display:none;" id="btnApproval" />
+                </div>
+            }
+        </div>
+
+        <div id="divProof" style="display:none;">
+            <div class="panel-heading">Upload Proof of Banking Details</div>
+            <div style="width: 90%;margin: 0 auto;">
                 @Html.Partial("_DocumentsPartialProofOfBankingDetails", Model.DocumentsViewModel)
                 <br />
             </div>
         </div>
 
-
-        <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm())
-            {
-                @Html.AntiForgeryToken()
-
-                <div class="panel-heading">Refund and Deductions Processing</div>
-                <br />
-                <div class="form-horizontal">
-                    @Html.HiddenFor(model => model.LeaseDetails.Id)
-                    @Html.HiddenFor(model => model.PropertyLeaseApplications.Id)
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.FinancialOfficerOfficialNumber, "Financial Officer Official Number", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-4">
-                            @Html.TextBoxFor(model => model.LeaseTermination.FinancialOfficerOfficialNumber, new { @class = "form-control", @required = "required", @id = "FinancialOfficerOfficialNumber", @placeholder = "Enter your Official ID/Number" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.FinancialOfficerOfficialNumber, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-3">Original Deposit Amount (R)</label>
-                        <div class="col-md-4">
-                            <input type="text" id="OriginalDeposit" class="form-control" readonly value="@Model.LeaseDetails.DepositeAmount" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.MaintenanceCost, "Maintenance Deductions (R)", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-4">
-                            @Html.TextBoxFor(model => model.LeaseTermination.MaintenanceCost, new { @class = "form-control", @id = "MaintenanceCost", @type = "number", @step = "0.01", @value = "0.00", @oninput = "calculateRefund()" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.MaintenanceCost, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.ApprovedDeductions, "Approved Other Deductions (R)", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-4">
-                            @Html.TextBoxFor(model => model.LeaseTermination.ApprovedDeductions, new { @class = "form-control", @id = "ApprovedDeductions", @type = "number", @step = "0.01", @value = "0.00", @oninput = "calculateRefund()" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.ApprovedDeductions, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.NettRefundAmount, "Nett Refund Amount (R)", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-4">
-                            @Html.TextBoxFor(model => model.LeaseTermination.NettRefundAmount, new { @class = "form-control", @id = "NettRefundAmount", @readonly = "readonly" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.NettRefundAmount, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.DepositRefundRecommended, "Refund Recommendation", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-4">
-                            @Html.DropDownListFor(model => model.LeaseTermination.DepositRefundRecommended, new List<SelectListItem>
-                            {
-                                new SelectListItem { Text = "Recommend Deposit Refund", Value = "Recommend Deposit Refund" },
-                                new SelectListItem { Text = "Deposit Refund Not Recommended", Value = "Deposit Refund Not Recommended" }
-                            }, "-- Select Option --", new { @class = "form-control", @required = "required", @id = "DepositRefundRecommended", @onchange = "recommendationChanged()" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.DepositRefundRecommended, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.LeaseTermination.FinancialOfficerReason, "Reason (required if not recommended)", htmlAttributes: new { @class = "control-label col-md-3" })
-                        <div class="col-md-6">
-                            @Html.TextAreaFor(model => model.LeaseTermination.FinancialOfficerReason, new { @class = "form-control", @id = "FinancialOfficerReason", @rows = "3", @placeholder = "Reason / notes from the bookkeeper (required when the refund is not recommended)" })
-                            @Html.ValidationMessageFor(model => model.LeaseTermination.FinancialOfficerReason, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                </div>
-                <br />
-                <br />
-
-                <div id="divbtn" style="display:block">
-                    <input type="button" value="Submit" name="btnApproval" onclick="clickSubmit()" class="button1" style="background-color:#2b772b; color:white; border-radius:4px; padding:8px 16px;" />
-                    <input type="submit" value="Submit" style="display:none;" hidden name="btnApprovalStatus" class="button1" id="btnApproval" />
-                    <br />
-                    <br />
-                    <br />
-                </div>
-            }
+        <div id="divbtn" style="display:none; width: 90%; margin: 0 auto;">
+            <br />
+            <input type="button" value="Submit" onclick="clickSubmit()" class="button1" />
+            <br /><br /><br />
         </div>
     </div>
 </div>
 
 <script>
-    function clickSubmit() {
-        var rec = $("#DepositRefundRecommended").val();
-        if (!$("#FinancialOfficerOfficialNumber").val()) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
-        if (!rec) { swal("Validation Error", "Please select a refund recommendation.", "warning"); return; }
-        if (rec === "Deposit Refund Not Recommended" && !$.trim($("#FinancialOfficerReason").val())) { swal("Validation Error", "A reason is required when the refund is not recommended.", "warning"); return; }
-        swal({
-            icon: "info",
-            title: "Are you sure you want to confirm the outcome?",
-            buttons: [
-                'No!',
-                'Yes, I am sure!'
-            ]
+    function showDeductions() {
+        if (!$.trim($("#FinancialOfficerOfficialNumber").val())) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        $("#divDeductions").show();
+        calculateRefund();
+    }
 
-        }).then(function (isConfirm) {
-            if (isConfirm) {
-                var comment = "ss";
-                if (comment == null || comment == "") {
-                    document.getElementById("btnApproval").click();
-                }
-                else {
-                    document.getElementById("btnApproval").click();
-                }
-            }
-        });
+    function showAuthorise() {
+        $("#divAuthorise").show();
+        recommendationChanged();
     }
 
     function recommendationChanged() {
-        var notRec = $("#DepositRefundRecommended").val() === "Deposit Refund Not Recommended";
-        if (notRec) { $("#FinancialOfficerReason").attr("required", "required"); } else { $("#FinancialOfficerReason").removeAttr("required"); }
+        var rec = $("#DepositRefundRecommended").val();
+        $("#divReason").toggle(rec === "Deposit Refund Not Recommended");
+        $("#divProof").toggle(rec === "Recommend Deposit Refund");
+        $("#divbtn").toggle(!!rec);
+    }
+
+    function clickSubmit() {
+        var rec = $("#DepositRefundRecommended").val();
+        if (!$.trim($("#FinancialOfficerOfficialNumber").val())) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        if (!rec) { swal("Validation Error", "Please select a recommendation.", "warning"); return; }
+        if (rec === "Deposit Refund Not Recommended" && !$.trim($("#FinancialOfficerReason").val())) { swal("Validation Error", "Please capture the reason the deposit refund is not recommended.", "warning"); return; }
+        swal({
+            icon: "info",
+            title: "Are you sure you want to confirm the outcome?",
+            buttons: ["No", "Yes, I am sure"]
+        }).then(function (isConfirm) {
+            if (isConfirm) {
+                document.getElementById("btnApproval").click();
+            }
+        });
     }
 
     function calculateRefund() {
         var deposit = parseFloat(document.getElementById("OriginalDeposit").value) || 0;
         var maint = parseFloat(document.getElementById("MaintenanceCost").value) || 0;
         var ded = parseFloat(document.getElementById("ApprovedDeductions").value) || 0;
-        
         var net = deposit - (maint + ded);
         if (net < 0) net = 0;
-        
         document.getElementById("NettRefundAmount").value = net.toFixed(2);
     }
-
-    $(document).ready(function() {
-        calculateRefund();
-    });
 
     function opendocumentUploadDiv() {
         $("#documentuploadModal").modal('show');

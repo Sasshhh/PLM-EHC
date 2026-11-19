@@ -1737,6 +1737,7 @@
     <Content Include="Views\PropertyLeaseApplication\DepositRefunds.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\StartRefundProcess.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\UpdateRefundResponse.cshtml" />
+    <Content Include="Views\PropertyLeaseApplication\TerminatedLeases.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\UpdateResponseForRefund.cshtml" />
     <Content Include="Views\PropertyLeaseApplication\Test2.cshtml" />
     <Content Include="Views\OpenLinks\RefundProcessDocuments.cshtml" />
