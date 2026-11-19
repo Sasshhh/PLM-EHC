@@ -139,7 +139,12 @@ BEGIN TRAN;
     LEFT JOIN dbo.Customers c ON c.Id = q.ClerkId
     LEFT JOIN dbo.SystemUsers su ON su.Id = c.SystemUserId
     WHERE q.PropertyLeaseApplicationId = @AppId AND q.ResponsibilityTypeId IN (@RtProc, ISNULL(@RtResponse, -1), ISNULL(@RtAuth, -1), ISNULL(@RtOldStart, -1))
+      AND (q.StatusId = @Submitted OR q.EndTaskDateTime >= DATEADD(MINUTE, -1, GETDATE()))   -- open now, or closed by this run
     ORDER BY q.Id;
+
+    SELECT t.Id AS TerminationId, t.MaintenanceCost, t.ApprovedDeductions, t.NettRefundAmount, t.DepositRefundRecommended,
+           t.FinancialOfficerReason, t.RevenueManagerRefundSupport, t.RevenueManagerRefundReason, t.CEORefundResponse, t.CEORefundReason, t.CEORefundSignDate
+    FROM dbo.LeaseTerminations t WHERE t.PropertyLeaseApplicationId = @AppId AND t.IsDeleted = 0 ORDER BY t.Id;
 
     PRINT 'Supervisor task goes to customer ' + CAST(@SupCust AS varchar) + ' (' + @SupSource + ').';
 IF @Commit = 1 BEGIN COMMIT; PRINT 'COMMITTED. The supervisor sees it under Terminations > Terminated Leases (log out/in if already signed in).'; END
