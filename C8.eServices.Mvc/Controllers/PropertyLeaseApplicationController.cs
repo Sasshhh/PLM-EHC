@@ -18056,7 +18056,10 @@ Activating your billing account and debit order mandate is required before occup
 
                     _context.SaveChanges();
 
-                    Session["TerminatedLeasesMessage"] = string.Format($"Refund authorization processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
+                    Session["TerminatedLeasesMessage"] = CEORefundResponse == "Reject"
+                        ? $"Refund for application reference {rcsApps.ApplicationReferenceNumber} rejected and sent back to the Revenue Manager."
+                        : $"Refund authorised for application reference {rcsApps.ApplicationReferenceNumber}: {CEORefundResponse}, nett refund R "
+                          + (leaseTermination.NettRefundAmount ?? 0m).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + ". The lease is now terminated.";
                     return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
                 }
                 catch (Exception e)
