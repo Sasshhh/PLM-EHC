@@ -40,7 +40,7 @@
         </div>
 
         <div style="width: 90%;margin: 0 auto;">
-            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "refundForm" }))
+            @using (Html.BeginForm(null, null, new { q = Request.QueryString["q"] }, FormMethod.Post, new { id = "refundForm" }))
             {
                 @Html.AntiForgeryToken()
                 <br />
