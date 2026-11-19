@@ -2091,6 +2091,7 @@
     <Compile Include="Helpers\UnitEngine\Concrete\UnitAllocation.cs" />
     <Compile Include="Helpers\WebHepler.cs" />
     <Compile Include="Helpers\RealEstateWorkAllocationHelper.cs" />
+    <Compile Include="Helpers\RoleEquivalence.cs" />
     <Compile Include="Helpers\RealEstateUserAgreementHelper.cs" />
     <Compile Include="Helpers\WorkAllocationHumanHelper.cs" />
     <Compile Include="Helpers\Wso2Helper.cs" />
