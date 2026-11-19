@@ -4863,6 +4863,7 @@ namespace C8.eServices.Mvc.Controllers
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.InAwaitingWaitingListReEntry).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.LeaseAgreementGenerated).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwitingInspectionSchedule).Id);
+                    rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingExitInspectionSlotSelection)?.Id ?? 0); // tenant picks exit inspection slot
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.UploadAssessmentFeePayment).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingApplicationFeeValidation).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingApplicationFeeUpload).Id);
