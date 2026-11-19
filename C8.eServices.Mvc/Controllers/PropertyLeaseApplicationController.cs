@@ -5218,7 +5218,7 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
+        [Authorize(Roles = "Client Services Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
         [HttpGet]
         public ActionResult PropertyTenantCommunication()
         {
@@ -5228,10 +5228,12 @@ namespace C8.eServices.Mvc.Controllers
                  
                 Initialise();
                 var vm = new DepartmentsApprovalViewModel();
-                if (User.IsInRole("Client Services Officer"))
+                if (User.IsInRole("Client Services Officer") || User.IsInRole("Housing Supervisor"))
                 {
                     var UserId = Customer.Id;
-                    var ComplexNames = db.PreferredComplexAreas.Where(x => x.LettingOfficerId == UserId && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
+                    // CSO: complexes where they are the Letting Officer; Client Services Supervisor: complexes they supervise.
+                    bool isCso = User.IsInRole("Client Services Officer");
+                    var ComplexNames = db.PreferredComplexAreas.Where(x => (isCso ? x.LettingOfficerId == UserId : x.HousingSuperId == UserId) && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
                     var cc = ComplexNames.Select(x => x.Id).ToList();
                     var mat = db.MatchedUnits.Include(r => r.UnitsEkurhuleniHousingCompany).Where(x => x.UnitsEkurhuleniHousingCompany.IsTaken && cc.Contains((int)x.UnitsEkurhuleniHousingCompany.PreferredComplexAreaId)).ToList();
                     var m = mat.Select(x => x.Id).ToList();
@@ -5288,7 +5290,7 @@ namespace C8.eServices.Mvc.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
+        [Authorize(Roles = "Client Services Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
         [HttpPost]
         public ActionResult PropertyTenantCommunication(DepartmentsApprovalViewModel vm, string CommunicationType, string Title, string MessageBody, string Title2, string MessageBody2, bool EMAIL, bool SMS, bool POSTAL, int? User, List<PreferredComplexArea> Features, params string[] SelectedRoles)
         {
