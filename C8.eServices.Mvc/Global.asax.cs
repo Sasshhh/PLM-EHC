@@ -49,6 +49,13 @@ namespace C8.eServices.Mvc
         /// NC.20161009
         /// Prevents back button after logout.
         /// </summary>
+        // Old and new role names (e.g. CEO / Property Manager) get the same access. See Helpers/RoleAliases.cs.
+        protected void Application_PostAuthenticateRequest(object sender, EventArgs e)
+        {
+            var ctx = HttpContext.Current;
+            if (ctx != null && ctx.User != null) RoleAliases.Apply(ctx.User);
+        }
+
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
             var app = sender as HttpApplication;

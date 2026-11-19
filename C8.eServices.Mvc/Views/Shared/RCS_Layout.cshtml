@@ -1765,7 +1765,7 @@
                         </li>
                     }
 
-                    @if (Request.IsAuthenticated && User.IsInRole("Property Manager"))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property Manager") || User.IsInRole("CEO")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1836,14 +1836,20 @@
                         <li>
                             <a href="javascript:;">
                                 <i class="ion ion-android-cancel"></i>
-                                <span class="text">Termination</span>
+                                <span class="text">Terminations</span>
                                 <i class="arrow ion-chevron-left"></i>
                             </a>
                             <ul class="inner-drop list-unstyled">
                                 <li>
                                     <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
                                         <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Terminations</span>
+                                        <span class="text">Terminations &amp; Evictions</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="~/PropertyLeaseApplication/TerminatedLeases">
+                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                        <span class="text">Terminated Leases</span>
                                     </a>
                                 </li>
                             </ul>
@@ -1919,34 +1925,7 @@
                             </ul>
                         </li>
                     }
-                    @if (Request.IsAuthenticated && User.IsInRole("CEO"))
-                    {
-                        <li>
-                            <a href="javascript:;">
-                                <i class="ion ion-android-cancel"></i>
-                                <span class="text">Terminations</span>
-                                <i class="arrow ion-chevron-left"></i>
-                            </a>
-                            <ul class="inner-drop list-unstyled">
-                                @if (!User.IsInRole("Property Manager"))
-                                {
-                                    @* UC024-S2 / UC026: eviction authorisation (Property Managers already have Terminations in their menu). *@
-                                    <li>
-                                        <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
-                                            <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                            <span class="text">Terminations &amp; Evictions</span>
-                                        </a>
-                                    </li>
-                                }
-                                <li>
-                                    <a href="~/PropertyLeaseApplication/TerminatedLeases">
-                                        <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                        <span class="text">Terminated Leases</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    }
+                    @* CEO and Property Manager are the same role (Helpers/RoleAliases.cs), so the CEO uses the Property Manager menu above. *@
                     @if (Request.IsAuthenticated && User.IsInRole("Revenue Officer"))
                     {
                         <li>

@@ -1862,6 +1862,7 @@
     <Compile Include="ApiServices\PaymentDetailsApi.cs" />
     <Compile Include="Controllers\TestingToolsController.cs" />
     <Compile Include="Helpers\EHCWorkflowEngine.cs" />
+    <Compile Include="Helpers\RoleAliases.cs" />
     <Compile Include="ApiServices\PropertyOwnerDetailsApi.cs" />
     <Compile Include="ApiServices\RCSAttorneyApi.cs" />
     <Compile Include="ApiServices\ReturnStandUnitNumber.cs" />

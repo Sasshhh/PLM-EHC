@@ -17484,8 +17484,19 @@ Activating your billing account and debit order mandate is required before occup
                     var respIds = cxt.ResponsibilityTypes.Where(x => respKeys.Contains(x.Key)).Select(x => x.Id).ToList();
                     var statusIds = cxt.Status.Where(x => statusKeys.Contains(x.Key)).Select(x => x.Id).ToList();
 
+                    // CEO and Property Manager are the same role: either one sees the CEO-step tasks queued
+                    // for the s_ceo or the r_property_manager user (they can be different people).
+                    var sharedOwnerIds = new List<int>();
+                    int sharedRespId = 0;
+                    if (User.IsInRole("CEO") || User.IsInRole("Property Manager"))
+                    {
+                        sharedOwnerIds = EHCWorkflowEngine.CeoQueueOwnerIds(cxt);
+                        sharedRespId = cxt.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).Select(x => x.Id).FirstOrDefault();
+                    }
+
                     var tasks = cxt.RoundRobinQueues
-                        .Where(x => respIds.Contains(x.ResponsibilityTypeId) && x.ClerkId == userId && x.StatusId == submittedId)
+                        .Where(x => respIds.Contains(x.ResponsibilityTypeId) && x.StatusId == submittedId
+                                 && (x.ClerkId == userId || (x.ResponsibilityTypeId == sharedRespId && sharedOwnerIds.Contains(x.ClerkId))))
                         .Select(x => new { x.LeaseDetailsId, x.PropertyLeaseApplicationId }).ToList();
                     var leaseIds = tasks.Where(x => x.LeaseDetailsId != null).Select(x => (int)x.LeaseDetailsId).ToList();
                     var appIds = tasks.Where(x => x.PropertyLeaseApplicationId != null).Select(x => (int)x.PropertyLeaseApplicationId).ToList();
