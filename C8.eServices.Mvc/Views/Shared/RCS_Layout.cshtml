@@ -1448,6 +1448,16 @@
                                         </a>
                                     </li>
                                 }
+                                @if (User.IsInRole("Housing Supervisor") && !User.IsInRole("Client Services Officer"))
+                                {
+                                    @* Client Services Supervisor: schedule and conduct exit inspections *@
+                                    <li>
+                                        <a href="~/PropertyLeaseApplication/PropertyLeaseApplicationTerminations">
+                                            <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Exit Inspections</span>
+                                        </a>
+                                    </li>
+                                }
                                 <li>
                                     <a href="~/leaseDetails/LeaseTerminated">
                                         <i class="ion ion-log-out" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>

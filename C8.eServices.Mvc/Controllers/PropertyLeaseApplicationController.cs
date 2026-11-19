@@ -5861,7 +5861,7 @@ namespace C8.eServices.Mvc.Controllers
 
             }
         }
-        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director,CEO")]
+        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director,CEO,Housing Supervisor")]
         public ActionResult PropertyLeaseApplicationTerminations()
         {
             using (var cxt = new eServicesDbContext())
@@ -5914,6 +5914,13 @@ namespace C8.eServices.Mvc.Controllers
                             .Include(r => r.PurchaserType)
                             .Include(r => r.Status)
                             .Include(r => r.ModifiedBySystemUser).ToList();
+                    }
+                    else if (User.IsInRole("Housing Supervisor") && !User.IsInRole("Property Manager") && !User.IsInRole("CEO") && !User.IsInRole("Director") && !User.IsInRole("Revenue Manager"))
+                    {
+                        // Client Services Supervisor: exit inspections (schedule slots, then conduct once the tenant picked one).
+                        int awaitingExit = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id;
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && x.IsNew && x.StatusId == awaitingExit)
+                            .Include(r => r.CreatedBySystemUser).Include(r => r.PurchaserType).Include(r => r.Status).Include(r => r.ModifiedBySystemUser).ToList();
                     }
                     else
                     {
