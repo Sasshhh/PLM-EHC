@@ -17634,6 +17634,7 @@ Activating your billing account and debit order mandate is required before occup
                 var recommendation = vm.LeaseTermination != null ? vm.LeaseTermination.DepositRefundRecommended : null;
                 var reason = vm.LeaseTermination != null ? vm.LeaseTermination.FinancialOfficerReason : null;
                 bool recommended = recommendation == "Recommend Deposit Refund";
+                if (recommended) reason = null; // a reason belongs to "Not Recommended" only; never keep an old one
                 if (string.IsNullOrWhiteSpace(recommendation) || (!recommended && string.IsNullOrWhiteSpace(reason)))
                 {
                     Session["TerminatedLeasesMessage"] = "Select a recommendation. A reason is required when the refund is not recommended.";
