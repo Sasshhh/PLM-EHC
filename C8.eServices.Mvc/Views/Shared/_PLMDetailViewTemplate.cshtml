@@ -72,13 +72,13 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>@Model.PropertyLeaseApplications?.ApplicationReferenceNumber</td>
-                        <td>@(Model.PropertyLeaseApplications?.PurchaserType?.Name ?? "N/A")</td>
-                        <td>@(Model.PropertyLeaseApplications?.Status?.Name ?? "N/A")</td>
-                        <td>@Model.PropertyLeaseApplications?.CreatedDateTime</td>
-                        <td>@Model.PropertyLeaseApplications?.Customer?.FullName</td>
+                        <td>@(Model.PropertyLeaseApplications != null ? Model.PropertyLeaseApplications.ApplicationReferenceNumber : null)</td>
+                        <td>@(Model.PropertyLeaseApplications != null && Model.PropertyLeaseApplications.PurchaserType != null ? Model.PropertyLeaseApplications.PurchaserType.Name : "N/A")</td>
+                        <td>@(Model.PropertyLeaseApplications != null && Model.PropertyLeaseApplications.Status != null ? Model.PropertyLeaseApplications.Status.Name : "N/A")</td>
+                        <td>@(Model.PropertyLeaseApplications != null ? (object)Model.PropertyLeaseApplications.CreatedDateTime : null)</td>
+                        <td>@(Model.PropertyLeaseApplications != null && Model.PropertyLeaseApplications.Customer != null ? Model.PropertyLeaseApplications.Customer.FullName : null)</td>
                         <td>
-                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.PropertyLeaseApplications?.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary btn-sm", @target = "_blank" })
+                            @Html.ActionLink("View", "Details", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + (Model.PropertyLeaseApplications != null ? Model.PropertyLeaseApplications.Id.ToString() : "")), target = "_blank" }, new { @class = "btn btn-primary btn-sm", @target = "_blank" })
                         </td>
                     </tr>
                 </tbody>
@@ -106,15 +106,15 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>@Model.LeaseDetails?.LeaseReferenceNo</td>
-                        <td>@(Model.LeaseDetails?.PurchaserType?.Name ?? "N/A")</td>
-                        <td>@(Model.LeaseDetails?.Status?.Name ?? "N/A")</td>
-                        <td>@Model.LeaseDetails?.CreatedDateTime</td>
-                        <td>@Model.LeaseDetails?.FirstNames @Model.LeaseDetails?.LastName</td>
+                        <td>@(Model.LeaseDetails != null ? Model.LeaseDetails.LeaseReferenceNo : null)</td>
+                        <td>@(Model.LeaseDetails != null && Model.LeaseDetails.PurchaserType != null ? Model.LeaseDetails.PurchaserType.Name : "N/A")</td>
+                        <td>@(Model.LeaseDetails != null && Model.LeaseDetails.Status != null ? Model.LeaseDetails.Status.Name : "N/A")</td>
+                        <td>@(Model.LeaseDetails != null ? (object)Model.LeaseDetails.CreatedDateTime : null)</td>
+                        <td>@(Model.LeaseDetails != null ? Model.LeaseDetails.FirstNames + " " + Model.LeaseDetails.LastName : null)</td>
                         <td>
                             @if (Model.LeaseDetails != null)
                             {
-                                @Html.ActionLink("View", "ApplincantDetails", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + Model.LeaseDetails?.Id.ToString()), target = "_blank" }, new { @class = "btn btn-primary btn-sm", @target = "_blank" })
+                                @Html.ActionLink("View", "ApplincantDetails", "LeaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("refNo=" + (Model.LeaseDetails != null ? Model.LeaseDetails.Id.ToString() : "")), target = "_blank" }, new { @class = "btn btn-primary btn-sm", @target = "_blank" })
                             }
                         </td>
                     </tr>
@@ -142,10 +142,10 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>@Model.LeaseTermination?.TerminationDate</td>
-                        <td>@Model.LeaseTermination?.ReasonForTermination</td>
-                        <td>@Model.LeaseTermination?.CreatedDateTime</td>
-                        <td>@Model.Customer?.FullName</td>
+                        <td>@(Model.LeaseTermination != null ? (object)Model.LeaseTermination.TerminationDate : null)</td>
+                        <td>@(Model.LeaseTermination != null ? Model.LeaseTermination.ReasonForTermination : null)</td>
+                        <td>@(Model.LeaseTermination != null ? (object)Model.LeaseTermination.CreatedDateTime : null)</td>
+                        <td>@(Model.Customer != null ? Model.Customer.FullName : null)</td>
                     </tr>
                 </tbody>
             </table>

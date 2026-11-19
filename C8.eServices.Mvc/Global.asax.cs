@@ -66,6 +66,15 @@ namespace C8.eServices.Mvc
             //Response.Cache.SetNoStore();
         }
 
+        /// <summary>
+        /// CEO and Property Manager are one role (old and new name): give a user in either role both,
+        /// so authorisation and menus treat them the same.
+        /// </summary>
+        protected void Application_PostAuthenticateRequest(object sender, EventArgs e)
+        {
+            RoleEquivalence.Apply(Context.User);
+        }
+
         //Secure AntiForgeryTokens
         private static void ConfigureAntiForgeryTokens()
         {

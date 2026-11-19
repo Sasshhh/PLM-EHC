@@ -267,7 +267,7 @@ namespace C8.eServices.Mvc.Controllers
                        
                             return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
                         }
-                        if (UserManager.IsInRole(user.Id, "Property Manager"))
+                        if (UserManager.IsInRole(user.Id, "Property Manager") || UserManager.IsInRole(user.Id, "CEO"))
                         {
                        
                             return RedirectToAction("PropertyLeaseAgreements", "PropertyLeaseApplication");

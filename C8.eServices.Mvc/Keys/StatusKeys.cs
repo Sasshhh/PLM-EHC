@@ -253,6 +253,10 @@ namespace C8.eServices.Mvc.Keys
 
         
         public const string AwaitingExitInspection = "s_awaiting_exit_inspec";
+        // Exit inspection stages on the APPLICATION status (lease stays on s_awaiting_exit_inspec):
+        // slots published -> tenant selects one -> supervisor conducts.
+        public const string AwaitingExitInspectionSlotSelection = "s_awaiting_exit_inspection_slot_selection";
+        public const string ExitInspectionScheduled = "s_exit_inspection_scheduled";
         public const string AwaitingMaintananceJobSheet = "s_customer_query_pending";
         public const string AwaitingUnitInspection = "s_additional_property_owners_pending";
         public const string CreditScoreRejected = "s_credit_score_rejected";
@@ -362,6 +366,8 @@ namespace C8.eServices.Mvc.Keys
 
         // UC030 — Refund approvals & Closure
         public const string AwaitingRefundAuthorisation = "s_awaiting_refund_authorisation";
+        // UC031: CSO started the refund; Client Services Supervisor (Housing Supervisor role) processes deductions
+        public const string AwaitingDepositRefundProcessing = "s_awaiting_deposit_refund_processing";
         public const string FormerTenant = "s_former_tenant";
 
         // Real Estate Use Cases (UC 06 to UC 08)

@@ -279,7 +279,7 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#accordion" href="#userRoleCollapse">
-                                Unit Inspection Schedule
+                                @(ViewBag.IsExitInspection == true ? "Exit Inspection Schedule (moving out)" : "Unit Inspection Schedule")
                             </a>
                         </h4>
                     </div>

@@ -21,7 +21,7 @@
            header row). These label cells are light grey, so without an explicit colour
            the labels were effectively invisible - readable only when highlighted. */
         .info-table th {
-            background-color: #f8f9fa;
+            background-color: #f8f9fa !important;
             color: #2c3e50 !important;
             font-weight: 600;
             width: 35%;
@@ -31,7 +31,7 @@
 <script src="@Url.Content( "~/Scripts/moment.js" )"></script>
 
 <div class="container" style="margin-top: 20px;">
-    <h2 class="header-centered">Revenue Manager - Deposit Refund Review</h2>
+    <h2 class="header-centered">Deposit Refund Response</h2>
 
     <div class="panel-group">
         <!-- 1. Calculation Details Panel -->
@@ -101,14 +101,18 @@
                         @Html.HiddenFor(m => m.LeaseDetails.Id)
 
                         <div class="form-group">
-                            <label class="control-label col-md-3">RM Official Number <span class="text-danger">*</span></label>
+                            <label class="control-label col-md-3">Official Number <span class="text-danger">*</span></label>
                             <div class="col-md-6">
-                                <input type="text" name="RevenueManagerRefundOfficialNumber" id="rmOfficialNumber" class="form-control" required placeholder="Enter RM Official Number" />
+                                <input type="text" name="RevenueManagerRefundOfficialNumber" id="rmOfficialNumber" class="form-control" required placeholder="Enter your Official Number" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="button" value="Authorise" class="button1" onclick="showAuthorise()" />
                             </div>
                         </div>
 
+                        <div id="divAuthorise" style="display:none;">
                         <div class="form-group">
-                            <label class="control-label col-md-3">Review Outcome <span class="text-danger">*</span></label>
+                            <label class="control-label col-md-3">Outcome <span class="text-danger">*</span></label>
                             <div class="col-md-6">
                                 <select name="RevenueManagerRefundSupport" id="rmSupport" class="form-control" required onchange="StatusChange()">
                                     <option value="">-- Select Option --</option>
@@ -119,17 +123,18 @@
                         </div>
 
                         <div id="divComment" class="form-group" style="display:none;">
-                            <label class="control-label col-md-3">Reason / Comment <span class="text-danger">*</span></label>
+                            <label class="control-label col-md-3">Reason <span class="text-danger">*</span></label>
                             <div class="col-md-6">
-                                <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Provide reason for not supporting the recommendations"></textarea>
+                                <textarea name="Comment" id="Comments" class="form-control" rows="4" placeholder="Reason the deposit refund is not supported"></textarea>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div class="col-md-offset-3 col-md-6">
-                                <input type="button" value="Submit Review" onclick="clickSubmit()" class="button1" style="min-width: 150px;" />
+                                <input type="button" value="Submit" onclick="clickSubmit()" class="button1" style="min-width: 150px;" />
                                 <input type="submit" id="btnRealSubmit" style="display:none;" />
                             </div>
+                        </div>
                         </div>
                     </form>
                 </div>
@@ -139,6 +144,11 @@
 </div>
 
 <script>
+    function showAuthorise() {
+        if (!$.trim($("#rmOfficialNumber").val())) { swal("Validation Error", "Please enter your Official Number.", "warning"); return; }
+        $("#divAuthorise").show();
+    }
+
     function StatusChange() {
         var supportValue = $("#rmSupport").val();
         if (supportValue === "False") {
@@ -156,24 +166,22 @@
         var comment = $("#Comments").val();
 
         if (!officialNumber) {
-            swal("Validation Error", "Please enter your RM Official Number.", "warning");
+            swal("Validation Error", "Please enter your Official Number.", "warning");
             return;
         }
         if (!support) {
-            swal("Validation Error", "Please select a Review Outcome.", "warning");
+            swal("Validation Error", "Please select Supported or Not Supported.", "warning");
             return;
         }
         if (support === "False" && (!comment || comment.trim() === "")) {
-            swal("Validation Error", "A comment is required if the refund is Not Supported.", "warning");
+            swal("Validation Error", "Please capture the reason the refund is not supported.", "warning");
             return;
         }
 
         swal({
-            title: "Confirm Submission",
-            text: "Are you sure you want to submit this refund review outcome?",
             icon: "info",
-            buttons: ["Cancel", "Yes, Submit!"],
-            dangerMode: true,
+            title: "Are you sure you want to confirm the outcome?",
+            buttons: ["No", "Yes, I am sure"]
         }).then(function (isConfirm) {
             if (isConfirm) {
                 $("#btnRealSubmit").click();

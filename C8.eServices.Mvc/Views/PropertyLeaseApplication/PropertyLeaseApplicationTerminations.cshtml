@@ -189,8 +189,31 @@
 
                                     if (item.Status.Key == StatusKeys.AwaitingExitInspection)
                                     {
-                                        @Html.ActionLink("Schedule Exit Inspection", "ScheduleInspectionSlots", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
-                                        @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "leaseDetails", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("LeseId=" + item.Id.ToString()) }, new { @class = "btn btn-warning" })
+                                        @* Exit inspection, Client Services Supervisor only:
+                                           1. Schedule Exit Inspection (publish slots)  -> application "Awaiting Applicant to Select Exit Inspection Slots" (no button)
+                                           2. tenant picks a slot                        -> application "Exit Inspection Scheduled"
+                                           3. Conduct Exit Inspection (Habitable -> move-out confirmation) *@
+                                        var exitStages = ViewBag.ExitStage as System.Collections.Generic.Dictionary<int, string>;
+                                        var exitStage = exitStages != null && exitStages.ContainsKey(item.PropertyLeaseApplicationId) ? exitStages[item.PropertyLeaseApplicationId] : "schedule";
+                                        if (exitStage == "select")
+                                        {
+                                            <span class="label label-info" style="display:inline-block; white-space:normal;">Awaiting applicant to select exit inspection slot</span>
+                                        }
+                                        else if (User.IsInRole("Housing Supervisor"))
+                                        {
+                                            if (exitStage == "conduct")
+                                            {
+                                                @Html.ActionLink("Conduct Exit Inspection", "ConductExitInspection", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-warning" })
+                                            }
+                                            else
+                                            {
+                                                @Html.ActionLink("Schedule Exit Inspection", "ScheduleInspectionSlots", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.PropertyLeaseApplicationId.ToString()) }, new { @class = "btn btn-primary" })
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="label label-default" style="display:inline-block; white-space:normal;">@(exitStage == "conduct" ? "Exit inspection scheduled (supervisor)" : "Awaiting exit inspection schedule (supervisor)")</span>
+                                        }
                                         @Html.ActionLink("Cancellation PDF", "GenerateCancellationOfLease", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString()) }, new { @class = "btn btn-info", @target = "_blank" })
                                     }
 

@@ -1,0 +1,166 @@
+﻿
+@model IEnumerable<C8.eServices.Mvc.Models.LeaseDetails>
+@using C8.eServices.Mvc.Keys;
+@{
+    ViewBag.Title = "Terminated Leases";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+
+
+}
+
+@*<h3>Submitted Applications</h3>
+
+    <br />*@
+<style>
+    @@media only screen and (max-width: 1000px) {
+
+
+        .cards tbody tr {
+            float: left;
+            /*width: 20rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+        .cards thead tr {
+            float: left;
+            /*width: 25rem;*/
+            width: 90%;
+            margin: 0.5rem;
+            border: 0.0625rem solid rgba(0,0,0,.125);
+            border-radius: .25rem;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0,0,0,0.25);
+        }
+
+
+        .cards tbody td {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .cards thead th {
+            display: none;
+        }
+
+        .table tbody label {
+            display: block;
+        }
+
+        .cards tbody label {
+            display: inline;
+            position: relative;
+            font-size: 85%;
+            top: -0.5rem;
+            color: #808080;
+            min-width: 4rem;
+            margin-left: 0;
+            margin-right: 1rem;
+            text-align: left;
+        }
+
+        tr.selected label {
+            color: #404040;
+        }
+
+        .table .fa {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .cards .fa {
+            font-size: 7.5rem;
+        }
+    }
+</style>
+
+
+<div id="TerminatedLeasesMessageModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Terminated Leases</h4>
+            </div>
+            <div class="modal-body">
+                <strong>@Html.Raw(ViewBag.TerminatedLeasesMessage)</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+@* UC031 / UC032: Terminations > Terminated Leases. Each user sees only the leases whose refund step is assigned to them:
+   Client Services Supervisor = Awaiting Deposit Refund Processing, Revenue Manager = Awaiting Deposit Refund Response,
+   CEO/CFO = Awaiting Refund Authorisation. *@
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-group" style="margin-bottom: -1px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center">
+                    Terminated Leases
+                </div>
+            </div>
+        </div>
+
+        <div id="accountInfoCollapse" class="panel-collapse collapse in tablecss">
+            <br />
+            <table id="RCSTable" class="table table-bordered table-hover table-striped panel panel-default cards">
+                <thead>
+                    <tr>
+                        <th>Lease Reference No.</th>
+                        <th>Tenant Name</th>
+                        <th>Application Type</th>
+                        <th>Deposit Amount (R)</th>
+                        <th>Lease Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var key = item.Status != null ? item.Status.Key : "";
+                        var q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + item.Id.ToString());
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.LeaseReferenceNo)</td>
+                            <td>@Html.DisplayFor(modelItem => item.FirstNames) @Html.DisplayFor(modelItem => item.LastName)</td>
+                            <td>@(item.PurchaserType != null ? item.PurchaserType.Name : "")</td>
+                            <td>@item.DepositeAmount.ToString("F2")</td>
+                            <td>@(item.CreatedDateTime.HasValue ? item.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "")</td>
+                            <td>@(item.Status != null ? item.Status.Name : "")</td>
+                            <td>
+                                @if (key == StatusKeys.AwaitingDepositRefundProcessing)
+                                {
+                                    @Html.ActionLink("Select", "StartRefundProcess", new { q = q }, new { @class = "btn btn-primary" })
+                                }
+                                else if (key == StatusKeys.AwaitingRefundResponse)
+                                {
+                                    @Html.ActionLink("Select", "UpdateResponseForRefund", new { q = q }, new { @class = "btn btn-primary" })
+                                }
+                                else if (key == StatusKeys.AwaitingRefundAuthorisation)
+                                {
+                                    @Html.ActionLink("Select", "AuthorizeRefund", new { q = q }, new { @class = "btn btn-primary" })
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <br />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#RCSTable').DataTable();
+        var msg = '@Html.Raw(HttpUtility.JavaScriptStringEncode((string)(ViewBag.TerminatedLeasesMessage ?? "")))';
+        if (msg !== '') {
+            $('#TerminatedLeasesMessageModal').modal({ backdrop: 'static', keyboard: false, show: true });
+        }
+    });
+</script>

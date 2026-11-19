@@ -2528,20 +2528,14 @@ namespace C8.eServices.Mvc.Helpers
 
             var app = core.PropertyLeaseApplications.FirstOrDefault(x => x.Id == schedule.PropertyLeaseApplicationId);
             
-            var lease = core.LeaseDetails.FirstOrDefault(l => l.PropertyLeaseApplicationId == app.Id && l.IsActive && !l.IsDeleted);
-            var isExitInspection = false;
-            if (lease != null)
-            {
-                var leaseStatus = core.Status.FirstOrDefault(s => s.Id == lease.StatusId);
-                if (leaseStatus != null && leaseStatus.Key == StatusKeys.AwaitingExitInspection)
-                {
-                    isExitInspection = true;
-                }
-            }
+            // The current lease row decides whether this is an exit inspection (an older row may still be "active").
+            var isExitInspection = EHCWorkflowEngine.IsExitInspection(core, app.Id);
 
             if (isExitInspection)
             {
-                ChangeApplicationStatus(core, (int)core.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection)?.Id, (int)schedule.PropertyLeaseApplicationId);
+                // Exit inspection: the tenant picked a slot, the supervisor can now conduct the exit inspection.
+                EHCWorkflowEngine.EnsureRefundProcessingMasterData(core);
+                ChangeApplicationStatus(core, (int)core.Status.FirstOrDefault(x => x.Key == StatusKeys.ExitInspectionScheduled)?.Id, (int)schedule.PropertyLeaseApplicationId);
             }
             else
             {

@@ -2347,6 +2347,15 @@ namespace C8.eServices.Mvc.Controllers
         {
             Initialise();
             var userID = Customer.Id;
+            // The exit inspection is conducted by the Client Services Supervisor, only after the tenant picked a slot.
+            var exitAppKey = db.PropertyLeaseApplications.Where(x => x.Id == id).Select(x => x.Status.Key).FirstOrDefault();
+            if (exitAppKey != StatusKeys.ExitInspectionScheduled || !User.IsInRole("Housing Supervisor"))
+            {
+                Session["BOAccountValidationSession"] = exitAppKey != StatusKeys.ExitInspectionScheduled
+                    ? "The exit inspection can be conducted once the tenant has selected an inspection slot."
+                    : "Only the Client Services Supervisor conducts the exit inspection.";
+                return RedirectToAction("PropertyLeaseApplicationTerminations");
+            }
             var Keys = db.Status;
             ResponsibilityType ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Inspections).FirstOrDefault();
 
@@ -2354,12 +2363,12 @@ namespace C8.eServices.Mvc.Controllers
             var rcsApps = db.PropertyLeaseApplications.Where(x => x.Id == id && x.IsDeleted == false).Include(x => x.Customer).FirstOrDefault();
             var leaseApp = db.LeaseDetails.OrderByDescending(x=>x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id);
             var AppUnit = db.ApplicantUnits.FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsActive && !x.IsDeleted);
-            var Matched = db.MatchedUnits.FirstOrDefault(x => x.Id == AppUnit.MatchedID);
             //var Unit = db.Units.FirstOrDefault(x => x.Id == Matched.UnitsId);
             //var Unit = db.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == Matched.UnitsEkurhuleniHousingCompanyId);
-            var app = db.ApplicantUnits.Include(r => r.Matched).FirstOrDefault(x => x.PropertyLeaseApplicationId == rcsApps.Id).Matched;
-
-            var Unit = db.ApplicationAllocatedProperty.FirstOrDefault(r => r.Id == app.ApplicationAllocatedPropertyId);
+            // Null-safe: the unit is only needed for "Not habitable" (maintenance job). Habitable must not crash on it.
+            var app = db.ApplicantUnits.Include(r => r.Matched).Where(x => x.PropertyLeaseApplicationId == rcsApps.Id).OrderByDescending(x => x.Id).FirstOrDefault()?.Matched;
+            var allocatedId = app?.ApplicationAllocatedPropertyId;
+            var Unit = allocatedId != null ? db.ApplicationAllocatedProperty.FirstOrDefault(r => r.Id == allocatedId) : null;
 
             //var Units = db.UnitsEkurhuleniHousingCompany.FirstOrDefault(x => x.Id == Matched.UnitsEkurhuleniHousingCompanyId);
 
@@ -2406,7 +2415,12 @@ namespace C8.eServices.Mvc.Controllers
             {
                 EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1);
 
-                var findItem = db.ApplicationAllocatedProperty.FirstOrDefault(x => x.Id == app.ApplicationAllocatedPropertyId);
+                if (Unit == null)
+                {
+                    Session["ConductUnitInspectionSession"] = "No allocated unit found for " + rcsApps.ApplicationReferenceNumber + ": cannot log a maintenance job. Please check the unit allocation.";
+                    return RedirectToAction("PropertyLeaseApplicationTerminations");
+                }
+                var findItem = Unit;
                 findItem.Inspection = true;
                 db.Entry(findItem).State = EntityState.Modified;
                 db.SaveChanges();
@@ -2430,6 +2444,11 @@ namespace C8.eServices.Mvc.Controllers
             }
             //new code configure first
 
+            // Mark the selected exit inspection slot as inspected.
+            foreach (var si in db.ScheduledInspections.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && !x.IsInspected).ToList()) si.IsInspected = true;
+            foreach (var isch in db.InspectionSchedules.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsApproved && !x.IsInspected).ToList()) isch.IsInspected = true;
+            db.SaveChanges();
+
             var ConductInspec = new ConductUnitInspection()
             {
                 PropertyLeaseApplicationId = rcsApps.Id,
@@ -2439,6 +2458,9 @@ namespace C8.eServices.Mvc.Controllers
             db.SaveChanges();
 
             Session["ConductUnitInspectionSession"] = string.Format($"Conduct exit unit inspection processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
+            // Termination exit inspections are opened from Termination > Termination Notices: go back there.
+            if (User.IsInRole("Client Services Officer") && !User.IsInRole("Housing Supervisor"))
+                return RedirectToAction("PropertyLeaseApplicationTerminations");
             return RedirectToAction("PropertyLeaseInspections");
         }
 
@@ -4648,8 +4670,10 @@ namespace C8.eServices.Mvc.Controllers
                     List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
 
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.CommitteeOutcomes).FirstOrDefault().Id;
+                    // CEO / Property Manager share one queue (RoleEquivalence).
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, UserId);
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId &&x.ClerkId== UserId && x.StatusId == SubmittedId).ToList();
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && clerkIds.Contains(x.ClerkId) && x.StatusId == SubmittedId).ToList();
 
                     var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
 
@@ -4841,6 +4865,7 @@ namespace C8.eServices.Mvc.Controllers
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.InAwaitingWaitingListReEntry).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.LeaseAgreementGenerated).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwitingInspectionSchedule).Id);
+                    rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingExitInspectionSlotSelection)?.Id ?? 0); // tenant picks exit inspection slot
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.UploadAssessmentFeePayment).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingApplicationFeeValidation).Id);
                     rrq.Add(db.Status.FirstOrDefault(i => i.Key == StatusKeys.AwaitingApplicationFeeUpload).Id);
@@ -5066,12 +5091,17 @@ namespace C8.eServices.Mvc.Controllers
                     var rrq = p.Select(x => x.Id).ToList();
 
                     var rr = ReturnStatusList();
+                    // Only the current lease of each application. Old lease rows (replaced by a renewal or a
+                    // re-capture: IsNew = 0 / status s_deactivated_lease) stayed IsActive and were listed too.
+                    // A notice served on such a row never reached the CSO (staff lists only show IsNew leases).
+                    int deactivatedLeaseId = core.Status.FirstOrDefault(x => x.Key == StatusKeys.DeactivateLeaseNewCaptured)?.Id ?? -1;
+                    rr.Add(deactivatedLeaseId);
 
                     var rCSApplicationStatus = core.LeaseDetails
                         .Include(r => r.PurchaserType)
                         .Include(r => r.PropertyLeaseApplication)
                         .Include(r => r.Status)
-                        .Where(x => rrq.Contains(x.PropertyLeaseApplicationId) && !rr.Contains((int)x.StatusId) && x.IsActive && x.NoticeDate == null).ToList();
+                        .Where(x => rrq.Contains(x.PropertyLeaseApplicationId) && !rr.Contains((int)x.StatusId) && x.IsActive && x.IsNew && !x.IsDeleted && x.NoticeDate == null).ToList();
 
                     var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
                     var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
@@ -5188,7 +5218,7 @@ namespace C8.eServices.Mvc.Controllers
             }
         }
 
-        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
+        [Authorize(Roles = "Client Services Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
         [HttpGet]
         public ActionResult PropertyTenantCommunication()
         {
@@ -5198,10 +5228,12 @@ namespace C8.eServices.Mvc.Controllers
                  
                 Initialise();
                 var vm = new DepartmentsApprovalViewModel();
-                if (User.IsInRole("Client Services Officer"))
+                if (User.IsInRole("Client Services Officer") || User.IsInRole("Housing Supervisor"))
                 {
                     var UserId = Customer.Id;
-                    var ComplexNames = db.PreferredComplexAreas.Where(x => x.LettingOfficerId == UserId && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
+                    // CSO: complexes where they are the Letting Officer; Client Services Supervisor: complexes they supervise.
+                    bool isCso = User.IsInRole("Client Services Officer");
+                    var ComplexNames = db.PreferredComplexAreas.Where(x => (isCso ? x.LettingOfficerId == UserId : x.HousingSuperId == UserId) && x.Key != "ekurhuleni_complex" && x.IsActive).ToList();
                     var cc = ComplexNames.Select(x => x.Id).ToList();
                     var mat = db.MatchedUnits.Include(r => r.UnitsEkurhuleniHousingCompany).Where(x => x.UnitsEkurhuleniHousingCompany.IsTaken && cc.Contains((int)x.UnitsEkurhuleniHousingCompany.PreferredComplexAreaId)).ToList();
                     var m = mat.Select(x => x.Id).ToList();
@@ -5258,7 +5290,7 @@ namespace C8.eServices.Mvc.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Client Services Officer,Community Development Officer,Property Manager,Revenue Manager,RevenueOfficer")]
+        [Authorize(Roles = "Client Services Officer,Housing Supervisor,Community Development Officer,Property Manager,Revenue Manager,Revenue Officer")]
         [HttpPost]
         public ActionResult PropertyTenantCommunication(DepartmentsApprovalViewModel vm, string CommunicationType, string Title, string MessageBody, string Title2, string MessageBody2, bool EMAIL, bool SMS, bool POSTAL, int? User, List<PreferredComplexArea> Features, params string[] SelectedRoles)
         {
@@ -5390,7 +5422,9 @@ namespace C8.eServices.Mvc.Controllers
                     var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RiskAssessment).FirstOrDefault().Id;
                     var ResponsibilityTypeId2 = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RenewalRiskAssessment).FirstOrDefault().Id;
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId || x.ResponsibilityTypeId == ResponsibilityTypeId2) && x.ClerkId == UserId && x.EndTaskDateTime == null).ToList();
+                    // CEO / Property Manager share one queue (RoleEquivalence).
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, UserId);
+                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => (x.ResponsibilityTypeId == ResponsibilityTypeId || x.ResponsibilityTypeId == ResponsibilityTypeId2) && clerkIds.Contains(x.ClerkId) && x.EndTaskDateTime == null).ToList();
 
                     var list = rrq.Select(x => x.PropertyLeaseApplicationId).ToList();
                     var list2 = rrq.Select(x => x.LeaseDetailsId).ToList();
@@ -5834,7 +5868,7 @@ namespace C8.eServices.Mvc.Controllers
 
             }
         }
-        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director")]
+        [Authorize(Roles = "Revenue Officer,Client Services Officer,Revenue Manager,Property Manager,Director,CEO,Housing Supervisor")]
         public ActionResult PropertyLeaseApplicationTerminations()
         {
             using (var cxt = new eServicesDbContext())
@@ -5888,6 +5922,13 @@ namespace C8.eServices.Mvc.Controllers
                             .Include(r => r.Status)
                             .Include(r => r.ModifiedBySystemUser).ToList();
                     }
+                    else if (User.IsInRole("Housing Supervisor") && !User.IsInRole("Property Manager") && !User.IsInRole("CEO") && !User.IsInRole("Director") && !User.IsInRole("Revenue Manager"))
+                    {
+                        // Client Services Supervisor: exit inspections (schedule slots, then conduct once the tenant picked one).
+                        int awaitingExit = db.Status.FirstOrDefault(r => r.Key == StatusKeys.AwaitingExitInspection).Id;
+                        rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && x.IsNew && x.StatusId == awaitingExit)
+                            .Include(r => r.CreatedBySystemUser).Include(r => r.PurchaserType).Include(r => r.Status).Include(r => r.ModifiedBySystemUser).ToList();
+                    }
                     else
                     {
                         rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && x.IsNew &&
@@ -5913,6 +5954,10 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
                     }
+                    // Exit inspection stage per lease (from the application status): schedule / select / conduct.
+                    var exitAppIds = rCSApplicationStatus.Where(x => x.Status != null && x.Status.Key == StatusKeys.AwaitingExitInspection).Select(x => x.PropertyLeaseApplicationId).ToList();
+                    var exitAppStatus = cxt.PropertyLeaseApplications.Where(x => exitAppIds.Contains(x.Id)).Select(x => new { x.Id, Key = x.Status.Key }).ToList();
+                    ViewBag.ExitStage = exitAppStatus.ToDictionary(x => x.Id, x => EHCWorkflowEngine.ExitInspectionStage(x.Key));
                     if (Session["BOAccountValidationSession"] != null)
                     {
                         var value = Session["BOAccountValidationSession"].ToString();
@@ -6400,13 +6445,15 @@ namespace C8.eServices.Mvc.Controllers
                     int AwaitingInspectionScheduleSlots = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id;
                     int EvictionGranted = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.EvictionGranted).Id;
                     int AwaitingTenantUpdateDetails = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id;
+                    EHCWorkflowEngine.EnsureRefundProcessingMasterData(cxt);
+                    int ExitInspectionScheduled = cxt.Status.Where(x => x.Key == StatusKeys.ExitInspectionScheduled).Select(x => x.Id).FirstOrDefault();
 
 
 
                     //var UM = db.allocatedUnitMaintenanceEHCs.Include(x=>x.Status).Where(x=>x.Status.Key == StatusKeys.Submitted).ToList();
                     //var UMList = UM.Select(x => x.PropertyLeaseApplicationId);
                     //.Select(x => x.PropertyLeaseApplicationId). ||UMList.Contains(x.Id)
-                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted || x.StatusId == AwaitingTenantUpdateDetails) ) )
+                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == ExitInspectionScheduled || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted || x.StatusId == AwaitingTenantUpdateDetails) ) )
                     .Include(r => r.CreatedBySystemUser)
                     .Include(r => r.Customer)
                     .Include(r => r.PurchaserType)
@@ -11787,6 +11834,7 @@ Activating your billing account and debit order mandate is required before occup
             var rrq = rr.Select(r => r.DateToScheduleId).ToList();
 
             vm.InspectionScheduleList = db.InspectionSchedules.Include(r=>r.DateToSchedule).Include(r=>r.TimeSlot).Where(x => x.PropertyLeaseApplicationId == id && !x.IsDeleted && !x.IsInspected).ToList() ?? null;
+            ViewBag.IsExitInspection = EHCWorkflowEngine.IsExitInspection(db, id);
             ViewBag.DateToSchedule = "";
             ViewBag.Id = id;
             ViewBag.PrpId = id;
@@ -11907,9 +11955,15 @@ Activating your billing account and debit order mandate is required before occup
                     // out of that queue the moment the slots went out, so an exit inspection
                     // could be scheduled and confirmed by the tenant and then never conducted:
                     // UC029 was unreachable. A pre-tenancy inspection is unaffected.
-                    var currentStatusKey = context.PropertyLeaseApplications
-                        .Where(x => x.Id == Id).Select(x => x.Status.Key).FirstOrDefault();
-                    if (currentStatusKey != StatusKeys.AwaitingExitInspection)
+                    // Exit inspection: the application waits for the tenant to pick a slot ("Awaiting Applicant to
+                    // Select Exit Inspection Slots"); the supervisor's Schedule button goes away until then.
+                    bool isExit = EHCWorkflowEngine.IsExitInspection(context, Id);
+                    if (isExit)
+                    {
+                        EHCWorkflowEngine.EnsureRefundProcessingMasterData(context);
+                        MatchingHelper.ChangeApplicationStatus(context, context.Status.First(x => x.Key == StatusKeys.AwaitingExitInspectionSlotSelection).Id, Id);
+                    }
+                    else
                     {
                         MatchingHelper.ChangeApplicationStatus(context, (int)db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwitingInspectionSchedule)?.Id, Id);
                     }
@@ -11924,6 +11978,11 @@ Activating your billing account and debit order mandate is required before occup
                     EmailHelper.CustomerEmailNotification(context, Id, emailboodyId);
                     var plmApps = db.PropertyLeaseApplications.Where(x => x.Id == Id).FirstOrDefault();
                     Session["UnitInspectionScheduledSession"] = string.Format($"Unit inspection schedule has been completed successfully for application reference {plmApps.ApplicationReferenceNumber}");
+                    if (isExit)
+                    {
+                        Session["BOAccountValidationSession"] = $"Exit inspection slots sent to the tenant for {plmApps.ApplicationReferenceNumber}. Status: Awaiting Applicant to Select Exit Inspection Slots.";
+                        return RedirectToAction("PropertyLeaseApplicationTerminations", "PropertyLeaseApplication");
+                    }
                 }
             }
             return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
@@ -11964,6 +12023,7 @@ Activating your billing account and debit order mandate is required before occup
             var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
             var applicationProp = db.PropertyLeaseApplications.Include(x => x.SystemUser).Include(x => x.Status).Include(x => x.PurchaserType).Include(r => r.Customer).Include(r => r.SystemUser).Where(x => x.Id == id).FirstOrDefault();
             if (applicationProp.Status.Key == StatusKeys.RatesRebateAdditionalPropertyOwnersPending) return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = applicationProp.Id, appId = "" });
+            ViewBag.IsExitInspection = EHCWorkflowEngine.IsExitInspection(db, applicationProp.Id);
 
             var TimeSlots = db.TimeSlots.Where(r => r.IsActive).ToList();
             var vm = new DepartmentsApprovalViewModel();
@@ -13119,6 +13179,26 @@ Activating your billing account and debit order mandate is required before occup
                     var userID = Customer;
                     var Keys = _context.Status;
                     var LeaseApplication = _context.LeaseDetails.Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+                    if (LeaseApplication == null)
+                    {
+                        Session["TenantServeNoticeSession"] = "Lease not found. Please try again.";
+                        return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                    }
+                    // The notice must land on the CURRENT lease row of the application (IsNew). An old row
+                    // (replaced by a renewal) is invisible to the CSO, so the termination would never be reviewed.
+                    if (!LeaseApplication.IsNew)
+                    {
+                        var deactivatedId = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.DeactivateLeaseNewCaptured)?.Id ?? -1;
+                        var current = _context.LeaseDetails
+                            .Where(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId && x.IsNew && !x.IsDeleted && x.StatusId != deactivatedId)
+                            .OrderByDescending(x => x.Id).FirstOrDefault();
+                        if (current == null || current.NoticeDate != null)
+                        {
+                            Session["TenantServeNoticeSession"] = "This lease has been replaced or already has a notice. Please contact the Client Services Officer.";
+                            return RedirectToAction("ServeNotice", "propertyLeaseApplication");
+                        }
+                        LeaseApplication = current;
+                    }
 
                     var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
 
@@ -13399,7 +13479,30 @@ Activating your billing account and debit order mandate is required before occup
                 ViewBag.EvictionDetailsSession = value;
             }
             Session["EvictionDetailsSession"] = null;
-            
+
+            // UC026 step 1: list the eviction cases (Revenue Manager referred the termination for eviction:
+            // lease at s_legal_referral_pending, eviction reference number on the termination record).
+            try
+            {
+                var legalReferralId = db.Status.FirstOrDefault(x => x.Key == StatusKeys.LegalReferralPending)?.Id ?? -1;
+                var cases = db.LeaseDetails.Include(x => x.PropertyLeaseApplication).Include(x => x.Status)
+                    .Where(x => !x.IsDeleted && x.IsNew && x.StatusId == legalReferralId).ToList();
+                var leaseIds = cases.Select(x => x.Id).ToList();
+                var terminations = db.LeaseTerminations.Where(t => !t.IsDeleted && t.LeaseDetailsId != null && leaseIds.Contains(t.LeaseDetailsId.Value)).ToList();
+                ViewBag.EvictionCases = cases.Select(l => new
+                {
+                    EvictionRef = terminations.Where(t => t.LeaseDetailsId == l.Id).OrderByDescending(t => t.Id).Select(t => t.EvictionReferenceNumber).FirstOrDefault(),
+                    AppRef = l.PropertyLeaseApplication != null ? l.PropertyLeaseApplication.ApplicationReferenceNumber : l.LeaseReferenceNo,
+                    AppId = l.PropertyLeaseApplicationId,
+                    Tenant = (l.FirstNames + " " + l.LastName).Trim(),
+                    Status = l.Status != null ? l.Status.Name : ""
+                }).Select(x => new System.Tuple<string, string, int, string, string>(x.EvictionRef ?? "", x.AppRef ?? "", x.AppId, x.Tenant, x.Status)).ToList();
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+
             return View(vm);
             
         }
@@ -13863,9 +13966,11 @@ Activating your billing account and debit order mandate is required before occup
                 }
 
                 var docdets = db.DocumentTypes.FirstOrDefault(x => x.Key == DocumentTypeKeys.RefundMeterReading);
+                // The Attachments table is empty on fresh databases: FirstOrDefault() gave null and the view crashed
+                // (PropertyEvictionValidation.cshtml, foreach Model.Attachments) for the Property Manager / CEO.
                 List<Attachments> attachments = new List<Attachments>();
                 var atth = db.Attachments.FirstOrDefault();
-                attachments.Add(atth);
+                if (atth != null) attachments.Add(atth);
 
                 var vm = new DepartmentsApprovalViewModel
                 {
@@ -13873,8 +13978,8 @@ Activating your billing account and debit order mandate is required before occup
                     LeaseTermination = termination,
                     Attachments = attachments,
                     PropertyLeaseApplications = rcsApps,
-                    DocName = docdets.Name,
-                    DocDesc = docdets.Description
+                    DocName = docdets?.Name,
+                    DocDesc = docdets?.Description
 
 
                 };
@@ -14542,7 +14647,7 @@ Activating your billing account and debit order mandate is required before occup
         /// UC024-S2 GET — CEO reviews the eviction case and authorizes or rejects.
         /// </summary>
         [DecryptParameter]
-        [Authorize(Roles = "Director,Property Manager")]
+        [Authorize(Roles = "Director,Property Manager,CEO")]
         public ActionResult EvictionCEOAuthorization(int? id)
         {
             try
@@ -14584,7 +14689,7 @@ Activating your billing account and debit order mandate is required before occup
         /// UC024-S2 POST — CEO approves or rejects eviction authorization.
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Director,Property Manager")]
+        [Authorize(Roles = "Director,Property Manager,CEO")]
         public ActionResult EvictionCEOAuthorization(int? id, string ApprovalStatusddl, string RejectComment, string OfficialNumber, string hdnSignatureBlob)
         {
             using (var _conx = new eServicesDbContext())
@@ -15354,8 +15459,14 @@ Activating your billing account and debit order mandate is required before occup
                         MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
 
                         //                      1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17     18   19
-                        EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
-                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant vacated successfully for application reference {LeaseApplication.LeaseReferenceNo}");
+                        // UC031: once the tenant has vacated, the lease goes straight to the Client Services Supervisor
+                        // (Awaiting Deposit Refund Processing). There is no CSO "Start Refund" step.
+                        EHCWorkflowEngine.EnsureRefundProcessingMasterData(_context);
+                        MatchingHelper.ChangeLeaseStatusII(_context, _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing).Id, (int)LeaseApplication.Id);
+                        MatchingHelper.ChangeApplicationStatus(_context, _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing).Id, (int)LeaseApplication.PropertyLeaseApplicationId);
+                        int refundSupId = EHCWorkflowEngine.RefundSupervisorId(_context, (int)LeaseApplication.PropertyLeaseApplicationId);
+                        EHCWorkflowEngine.OpenRefundTask(_context, (int)LeaseApplication.PropertyLeaseApplicationId, ResponsibilityTypeKeys.DepositRefundProcessing, refundSupId);
+                        Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant vacated successfully for application reference {LeaseApplication.LeaseReferenceNo}. The deposit refund is now with the Client Services Supervisor (Terminations > Terminated Leases).");
 
                     }
                     else if (ApprovalStatusddl == RCSActionTypeKeys.NotVacated)
@@ -17356,71 +17467,66 @@ Activating your billing account and debit order mandate is required before occup
         {
             return View();
         }
-        //Use Case 11.36
-        public ActionResult DepositRefunds()
+        /// <summary>
+        /// UC031/UC032: Terminations > Terminated Leases. One list for the three refund roles, showing only the leases
+        /// whose refund task is assigned to the logged-in user:
+        ///   Client Services Supervisor - Awaiting Deposit Refund Processing (r_deposit_refund_processing)
+        ///   Revenue Manager            - Awaiting Deposit Refund Response   (r_awaiting_deposit_refund_response)
+        ///   CEO / CFO                  - Awaiting Refund Authorisation      (r_refund_authorisation)
+        /// </summary>
+        public ActionResult TerminatedLeases()
         {
             using (var cxt = new eServicesDbContext())
             {
                 try
                 {
                     Initialise();
-                    var Keys = cxt.Status;
-                    int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
-                    int UserId = Customer.Id;
-                    List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
+                    EHCWorkflowEngine.EnsureRefundProcessingMasterData(cxt);
+                    int submittedId = cxt.Status.First(x => x.Key == StatusKeys.Submitted).Id;
+                    int userId = Customer.Id;
 
-                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefund).FirstOrDefault().Id;
+                    var respKeys = new[] { ResponsibilityTypeKeys.DepositRefundProcessing, ResponsibilityTypeKeys.DepositRefundResponse, ResponsibilityTypeKeys.RefundAuthorisation };
+                    var statusKeys = new[] { StatusKeys.AwaitingDepositRefundProcessing, StatusKeys.AwaitingRefundResponse, StatusKeys.AwaitingRefundAuthorisation };
+                    var respIds = cxt.ResponsibilityTypes.Where(x => respKeys.Contains(x.Key)).Select(x => x.Id).ToList();
+                    var statusIds = cxt.Status.Where(x => statusKeys.Contains(x.Key)).Select(x => x.Id).ToList();
 
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
+                    // CEO / Property Manager share one queue (RoleEquivalence): refund authorisations routed to s_ceo
+                    // show for every user in either role.
+                    var clerkIds = RoleEquivalence.QueueClerkIds(cxt, User, userId);
+                    var tasks = cxt.RoundRobinQueues
+                        .Where(x => respIds.Contains(x.ResponsibilityTypeId) && clerkIds.Contains(x.ClerkId) && x.StatusId == submittedId)
+                        .Select(x => new { x.LeaseDetailsId, x.PropertyLeaseApplicationId }).ToList();
+                    var leaseIds = tasks.Where(x => x.LeaseDetailsId != null).Select(x => (int)x.LeaseDetailsId).ToList();
+                    var appIds = tasks.Where(x => x.PropertyLeaseApplicationId != null).Select(x => (int)x.PropertyLeaseApplicationId).ToList();
 
-                    var list = rrq.Select(x => x.LeaseDetailsId).ToList();
-                    
-                    int ApplicantVacated = db.Status.FirstOrDefault(x => x.Key == StatusKeys.ApplicantVacated).Id;
-
-                    var rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == ApplicantVacated))
-                        .Include(r => r.CreatedBySystemUser)
+                    // A task may point at an older lease row of the application; the current row (IsNew) is the one shown.
+                    var leases = cxt.LeaseDetails
+                        .Where(x => !x.IsDeleted && x.StatusId != null && statusIds.Contains(x.StatusId.Value) && (leaseIds.Contains(x.Id) || appIds.Contains(x.PropertyLeaseApplicationId)))
                         .Include(r => r.PurchaserType)
-                        .Include(r => r.ModifiedBySystemUser)
-                        .Include(r => r.Status).ToList();
+                        .Include(r => r.Status)
+                        .ToList()
+                        .GroupBy(x => x.PropertyLeaseApplicationId)
+                        .Select(g => g.OrderByDescending(x => x.Id).First())
+                        .ToList();
 
-                    if (Session["Display"] != null)
+                    if (Session["TerminatedLeasesMessage"] != null)
                     {
-                        ViewBag.Display = "True";
-                        ViewBag.MessageTitle3 = "Success!";
-                        ViewBag.MessageBody3 = Session["MessageBody"].ToString();
-
-                        Session["Display"] = null;
-                        Session["ApplicationRefNo"] = null;
-                        Session["MessageTitle"] = null;
-                        Session["MessageBody"] = null;
+                        ViewBag.TerminatedLeasesMessage = Session["TerminatedLeasesMessage"].ToString();
                     }
-
-                    var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
-                    var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
-                    foreach (var item in rCSApplicationStatus)
-                    {
-                        item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
-                    }
-
-                    if (Session["StartRefundProcessSession"] != null)
-                    {
-                        var value = Session["StartRefundProcessSession"].ToString();
-                        Session["StartRefundProcessSession"] = null;
-                        ViewBag.StartRefundProcessSession = value;
-                    }
-                    Session["StartRefundProcessSession"] = null;
-
-                    return View(rCSApplicationStatus);
+                    Session["TerminatedLeasesMessage"] = null;
+                    return View(leases);
                 }
                 catch (Exception io)
                 {
                     EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                 }
-
                 return RedirectToAction("Login", "Account");
             }
         }
 
+        // Old refund list pages (Start Refund / Update Refund Response / Refund Authorisations) now all live under
+        // Terminations > Terminated Leases; old links and bookmarks land there.
+        public ActionResult DepositRefunds() { return RedirectToAction("TerminatedLeases"); }
 
         [DecryptParameter]
         public ActionResult StartRefundProcess(int? id)
@@ -17447,6 +17553,14 @@ Activating your billing account and debit order mandate is required before occup
 
             var LeaseApplication = db.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
 
+            // UC031: this capture screen is the Client Services Supervisor's step (lease at Awaiting Deposit Refund Processing).
+            var processingKey = LeaseApplication == null ? null : db.Status.Where(x => x.Id == LeaseApplication.StatusId).Select(x => x.Key).FirstOrDefault();
+            if (processingKey != StatusKeys.AwaitingDepositRefundProcessing)
+            {
+                Session["TerminatedLeasesMessage"] = "This lease is not waiting for deposit refund processing.";
+                return RedirectToAction("TerminatedLeases");
+            }
+
             PropertyLeaseApplication rcsApps = null;
 
             rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
@@ -17471,7 +17585,8 @@ Activating your billing account and debit order mandate is required before occup
                 MatchingHelper.DocumentUploadBakingDetailsProof(dvm, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, true);
                 MatchingHelper.DocumentDepositRefunds(refundDocs, context, customer.Id, customer.Id, (int)referenceType.Id, (int)application.Id, "", rcsApps.Id, false);
 
-                var termination = db.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
+                var termination = db.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false)
+                               ?? db.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == LeaseApplication.PropertyLeaseApplicationId && x.IsDeleted == false);
 
                 var vm = new DepartmentsApprovalViewModel
                 {
@@ -17510,158 +17625,88 @@ Activating your billing account and debit order mandate is required before occup
         [HttpPost]
         public ActionResult StartRefundProcess(DepartmentsApprovalViewModel vm, int? id)
         {
-
             using (var _context = new eServicesDbContext())
             {
-                try
+                Initialise();
+                EHCWorkflowEngine.EnsureRefundProcessingMasterData(_context);
+                var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == vm.LeaseDetails.Id && x.IsDeleted == false).FirstOrDefault();
+                var processingStatusId = _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing).Id;
+                if (LeaseApplication == null || LeaseApplication.StatusId != processingStatusId)
                 {
-                    Initialise();
-                    var userID = Customer;
-                    var LeaseApplication = _context.LeaseDetails.OrderByDescending(x => x.Id).Where(x => x.Id == vm.LeaseDetails.Id && x.IsDeleted == false).FirstOrDefault();
-                    var LeaseTermination = _context.LeaseTerminations.FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false);
-                    if (LeaseTermination != null)
-                    {
-                        // The amounts are posted from <input type="number"> fields and a
-                        // script-calculated total, which the browser always writes with a
-                        // "." decimal ("229.00"). This server runs en-ZA, where the decimal
-                        // separator is ",", so model binding rejected them and every refund
-                        // was saved with NettRefundAmount = NULL - the Revenue Manager and
-                        // the CEO were then shown, and approved, a nett refund of R 0.00.
-                        // Parse the posted amounts culture-independently, and calculate the
-                        // nett refund here rather than trusting a figure computed in the page.
-                        var maintenance = ParseMoney(Request.Form["LeaseTermination.MaintenanceCost"]) ?? vm.LeaseTermination.MaintenanceCost ?? 0m;
-                        var deductions = ParseMoney(Request.Form["LeaseTermination.ApprovedDeductions"]) ?? vm.LeaseTermination.ApprovedDeductions ?? 0m;
-                        LeaseTermination.MaintenanceCost = maintenance;
-                        LeaseTermination.ApprovedDeductions = deductions;
-                        LeaseTermination.NettRefundAmount = Math.Max(0m, LeaseApplication.DepositeAmount - (maintenance + deductions));
-                        LeaseTermination.FinancialOfficerOfficialNumber = vm.LeaseTermination.FinancialOfficerOfficialNumber;
-                        LeaseTermination.DepositRefundRecommended = vm.LeaseTermination.DepositRefundRecommended;
-                        LeaseTermination.FinancialOfficerReason = vm.LeaseTermination.FinancialOfficerReason;
-                        _context.Entry(LeaseTermination).State = EntityState.Modified;
-                        _context.SaveChanges();
-                    }
-                    PropertyLeaseApplication rcsApps = null;
-                    rcsApps = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false).Include(r => r.CreatedBySystemUser)
-                      .Include(r => r.Customer).Include(r => r.ModifiedBySystemUser)
-                      .Include(r => r.HumanEHCOptions).Include(r => r.Status)
-                      .Where(x => x.Id == LeaseApplication.PropertyLeaseApplicationId).FirstOrDefault();
-
-                    var password = PasswordGenerator.GeneratePassword(true, true, true, false, false, 6);
-                    //rcsApps.RefundProcessPassword = password;
-                    //_context.Entry(rcsApps).State = EntityState.Modified;
-                    //_context.SaveChanges();
-
-                    MatchingHelper.UpdatePasswordForRefundProcess(_context,password,rcsApps.Id);
-
-                    var UserId = Customer.Id;
-                    var custmusers = _context.Customers.FirstOrDefault(x => x.Id == Customer.Id);
-                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefund).FirstOrDefault();
-                    MatchingHelper.ChangeLeaseStatusII(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse).Id, (int)LeaseApplication.Id);
-                    //MatchingHelper.ChangeApplicationStatus(_context, (int)_context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse).Id, (int)LeaseApplication.PropertyLeaseApplicationId);
-                    MatchingHelper.RoundRobinMarkJobAsFinished(db, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
-
-                    //                      1      2       3     4     5       6      7      8      9      10     11     12     13     14     15   16  17     18   19
-                    EHCRoundRobin((int)LeaseApplication.PropertyLeaseApplicationId, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1, true);
-
-                    //ActivityTrackerAudit
-                    var ActivityTrackerMessage = db.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AwaitingRefundResponse).Description.ToString();
-                    MatchingHelper.ActivityTrackerAudit(db, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
-
-                    //Send Email
-                    //Confirmation email
-
-                    //Getting Letting officer
-                    var LettingOfficer = EHCWorkflowEngine.GetBackOfficeId(db, rcsApps.Id, true);
-                    var StoredUser = Convert.ToInt16(db.AppSettings.Where(x => x.Key == AppSettingKeys.LettingOfficer).FirstOrDefault().Value);
-                    var activeDirectoryOn = LettingOfficer.Id != 0 ? LettingOfficer.Id : StoredUser;
-                    var customerLettingOfficer = _context.Customers.Include(s => s.SystemUser).Include(s => s.Status)
-                               .Include(s => s.CustomerType).FirstOrDefault(c => c.Id == activeDirectoryOn);
-                    if (customerLettingOfficer == null) throw new Exception("Invalid Letting Officer");
-
-                    var confirmationEmail = new Email();
-                    var emailAddress = db.AppSettings.FirstOrDefault(r => r.Key == AppSettingKeys.RefundProcessEmail).Value;
-                    string subject = "Property Lease Application Refund Process – " + rcsApps.ApplicationReferenceNumber + " – Letting Officer "+ customerLettingOfficer.FirstName + customerLettingOfficer.LastName;
-                    var body = string.Format("Application is in refund process, please view link below which contains all documents for refund process,: <br/><a href=\"{0}\" title=\"Refund Process\">{0}</a>", Url.Action("RefundProcessDocuments", "OpenLinks", SecureActionLinkExtension.Encrypt(new { id = rcsApps.Id }), HttpContext.Request.Url.Scheme));
-
-                    body += "<br/> Password: " + password;
-                    body += "<br/> Letting officer : " + customerLettingOfficer.FirstName + " " + customerLettingOfficer.LastName + ",<br/> contact number "+customerLettingOfficer.CellPhoneNumber;
-                    
-                    confirmationEmail.GenerateEmail(emailAddress, subject, body, userID.SystemUser.Id.ToString(CultureInfo.InvariantCulture), false, AppSettingKeys.EservicesDefaultEmailTemplate, "");
-
-                    Session["StartRefundProcessSession"] = string.Format($"Email for refund has been sent successfully for application reference {rcsApps.ApplicationReferenceNumber}");
-                    return RedirectToAction("DepositRefunds", "PropertyLeaseApplication");
+                    Session["TerminatedLeasesMessage"] = "This refund is not waiting for processing (it may already have been submitted).";
+                    return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
                 }
-                catch (Exception e)
+                int appId = LeaseApplication.PropertyLeaseApplicationId;
+                var rcsApps = _context.PropertyLeaseApplications.FirstOrDefault(x => x.Id == appId);
+
+                // UC031 step 11: Recommend Deposit Refund / Deposit Refund Not Recommended; reason mandatory when not recommended.
+                var recommendation = vm.LeaseTermination != null ? vm.LeaseTermination.DepositRefundRecommended : null;
+                var reason = vm.LeaseTermination != null ? vm.LeaseTermination.FinancialOfficerReason : null;
+                bool recommended = recommendation == "Recommend Deposit Refund";
+                if (recommended) reason = null; // a reason belongs to "Not Recommended" only; never keep an old one
+                if (string.IsNullOrWhiteSpace(recommendation) || (!recommended && string.IsNullOrWhiteSpace(reason)))
                 {
-
-                    throw;
-                }
-            }
-
-        }
-
-        //Use case 11.37
-        public ActionResult UpdateRefundResponse()
-        {
-            using (var cxt = new eServicesDbContext())
-            { 
-                try
-                {
-                    Initialise();
-                    var Keys = cxt.Status;
-                    int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
-                    int UserId = Customer.Id;
-                    List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
-
-                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault().Id;
-
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
-
-                    var list = rrq.Select(x => x.LeaseDetailsId).ToList();
-
-                    int AwaitingRefundResponse = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse).Id;
-
-
-                    var rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == AwaitingRefundResponse))
-                        .Include(r => r.CreatedBySystemUser)
-                        .Include(r => r.PurchaserType)
-                        .Include(r => r.ModifiedBySystemUser)
-                        .Include(r => r.Status).ToList();
-                    if (Session["Display"] != null)
-                    {
-                        ViewBag.Display = "True";
-                        ViewBag.MessageTitle3 = "Success!";
-                        ViewBag.MessageBody3 = Session["MessageBody"].ToString();
-
-                        Session["Display"] = null;
-                        Session["ApplicationRefNo"] = null;
-                        Session["MessageTitle"] = null;
-                        Session["MessageBody"] = null;
-                    }
-
-                    var referenceType = db.ReferenceTypes.Where(x => x.Key == ReferenceTypeKeys.RCSUpload).FirstOrDefault();
-                    var application = db.Applications.FirstOrDefault(a => a.Key.Equals(ApplicationKeys.RatesClearanceSystem));
-                    foreach (var item in rCSApplicationStatus)
-                    {
-                        item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
-                    }
-                    if (Session["UpdateResponseForRefundSession"] != null)
-                    {
-                        var value = Session["UpdateResponseForRefundSession"].ToString();
-                        Session["UpdateResponseForRefundSession"] = null;
-                        ViewBag.UpdateResponseForRefundSession = value;
-                    }
-                    Session["UpdateResponseForRefundSession"] = null;
-                    return View(rCSApplicationStatus);
-                }
-                catch (Exception io)
-                {
-                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+                    Session["TerminatedLeasesMessage"] = "Select a recommendation. A reason is required when the refund is not recommended.";
+                    return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
                 }
 
-                return RedirectToAction("Login", "Account");
+                var LeaseTermination = _context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.LeaseDetailsId == LeaseApplication.Id && x.IsDeleted == false)
+                                    ?? _context.LeaseTerminations.OrderByDescending(x => x.Id).FirstOrDefault(x => x.PropertyLeaseApplicationId == appId && x.IsDeleted == false);
+                if (LeaseTermination == null)
+                {
+                    LeaseTermination = new LeaseTermination
+                    {
+                        PropertyLeaseApplicationId = appId,
+                        LeaseDetailsId = LeaseApplication.Id,
+                        LeaseReferenceNumber = LeaseApplication.LeaseReferenceNo,
+                        TerminationDate = DateTime.Today,
+                        CreatedDateTime = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false
+                    };
+                    _context.LeaseTerminations.Add(LeaseTermination);
+                }
+                // Amounts are parsed culture-independently (en-ZA server, "." from number inputs) and the nett refund
+                // is calculated here: Nett = Deposit - (Maintenance Cost + Approved Deductions), never below 0.
+                var maintenance = ParseMoney(Request.Form["LeaseTermination.MaintenanceCost"]) ?? (vm.LeaseTermination != null ? vm.LeaseTermination.MaintenanceCost : null) ?? 0m;
+                var deductions = ParseMoney(Request.Form["LeaseTermination.ApprovedDeductions"]) ?? (vm.LeaseTermination != null ? vm.LeaseTermination.ApprovedDeductions : null) ?? 0m;
+                LeaseTermination.MaintenanceCost = maintenance;
+                LeaseTermination.ApprovedDeductions = deductions;
+                LeaseTermination.NettRefundAmount = Math.Max(0m, LeaseApplication.DepositeAmount - (maintenance + deductions));
+                LeaseTermination.FinancialOfficerOfficialNumber = vm.LeaseTermination.FinancialOfficerOfficialNumber;
+                LeaseTermination.DepositRefundRecommended = recommendation;
+                LeaseTermination.FinancialOfficerReason = reason;
+                LeaseTermination.ModifiedBySystemUserId = SystemUser.Id;
+                LeaseTermination.ModifiedDateTime = DateTime.Now;
+                _context.SaveChanges();
+
+                // Close the supervisor's task (and any left-over start task), then hand over to the Revenue Manager.
+                foreach (var key in new[] { ResponsibilityTypeKeys.DepositRefundProcessing, ResponsibilityTypeKeys.DepositRefund })
+                {
+                    var resp = _context.ResponsibilityTypes.FirstOrDefault(x => x.Key == key);
+                    if (resp != null) MatchingHelper.RoundRobinMarkJobAsFinished(_context, appId, null, resp.Id, Customer.Id);
+                }
+                MatchingHelper.ChangeLeaseStatusII(_context, _context.Status.First(x => x.Key == StatusKeys.AwaitingRefundResponse).Id, LeaseApplication.Id);
+                int rmId = EHCWorkflowEngine.RefundRevenueManagerId(_context);
+                EHCWorkflowEngine.OpenRefundTask(_context, appId, ResponsibilityTypeKeys.DepositRefundResponse, rmId);
+
+                var atMsg = _context.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.AwaitingRefundResponse)?.Description ?? "Deposit refund processed, awaiting refund response";
+                MatchingHelper.ActivityTrackerAudit(_context, appId, atMsg + " (" + recommendation + ")", Customer.Id);
+
+                // UC031 step 18: notify the tenant and the Revenue Manager (with the reason when not recommended).
+                var nett = LeaseTermination.NettRefundAmount ?? 0m;
+                var msg = $"The deposit refund for lease {LeaseApplication.LeaseReferenceNo} has been processed: {recommendation}. "
+                        + $"Deposit R {LeaseApplication.DepositeAmount:0.00}, maintenance R {maintenance:0.00}, deductions R {deductions:0.00}, nett refund R {nett:0.00}."
+                        + (!recommended ? " Reason: " + reason : "")
+                        + " Status: Awaiting Deposit Refund Response.";
+                EHCWorkflowEngine.NotifyRefundParties(_context, appId, new[] { rcsApps != null ? rcsApps.CustomerId : 0, rmId }, "Deposit refund - awaiting response", msg);
+
+                Session["TerminatedLeasesMessage"] = string.Format($"Deposit refund submitted for {rcsApps?.ApplicationReferenceNumber}. Status: Awaiting Deposit Refund Response (Revenue Manager).");
+                return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
             }
         }
+        //Use case 11.37 - now Terminations > Terminated Leases
+        public ActionResult UpdateRefundResponse() { return RedirectToAction("TerminatedLeases"); }
         [DecryptParameter]
         public ActionResult UpdateResponseForRefund(int? id)
         {
@@ -17757,9 +17802,23 @@ Activating your billing account and debit order mandate is required before occup
                         throw new Exception("Lease termination record not found.");
                     }
 
+                    // UC032: only a lease waiting for the refund response can be answered; Not Supported needs a reason.
+                    var responseStatusId = _context.Status.First(x => x.Key == StatusKeys.AwaitingRefundResponse).Id;
+                    if (LeaseApplication.StatusId != responseStatusId)
+                    {
+                        Session["TerminatedLeasesMessage"] = "This refund is not waiting for a Revenue Manager response.";
+                        return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
+                    }
+                    bool isSupported = (RevenueManagerRefundSupport == "True" || RevenueManagerRefundSupport == "true");
+                    if (!isSupported && string.IsNullOrWhiteSpace(Comment))
+                    {
+                        Session["TerminatedLeasesMessage"] = "A reason is required when the refund is not supported.";
+                        return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
+                    }
+                    EHCWorkflowEngine.EnsureRefundProcessingMasterData(_context);
+
                     // Save RM inputs
                     leaseTermination.RevenueManagerRefundOfficialNumber = RevenueManagerRefundOfficialNumber;
-                    bool isSupported = (RevenueManagerRefundSupport == "True" || RevenueManagerRefundSupport == "true");
                     leaseTermination.RevenueManagerRefundSupport = isSupported;
                     leaseTermination.RevenueManagerRefundReason = Comment;
                     leaseTermination.ModifiedBySystemUserId = SystemUser.Id;
@@ -17768,39 +17827,36 @@ Activating your billing account and debit order mandate is required before occup
                     var ResponsibilityTypeId = _context.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.DepositRefundResponse).FirstOrDefault();
                     MatchingHelper.RoundRobinMarkJobAsFinished(_context, (int)LeaseApplication.PropertyLeaseApplicationId, null, ResponsibilityTypeId.Id, Customer.Id);
 
+                    _context.SaveChanges();
+                    var nettRm = leaseTermination.NettRefundAmount ?? 0m;
                     if (isSupported)
                     {
-                        // Transition status to awaiting refund authorization (s_awaiting_refund_authorisation)
-                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundAuthorisation);
-                        if (status != null)
-                        {
-                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
-                        }
-
-                        // Send to CEO
-                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, false, 1, null, null, true);
+                        // UC032 step 14: Awaiting Refund Authorisation, task + notification to the CEO (AppSettings s_ceo).
+                        var status = _context.Status.First(x => x.Key == StatusKeys.AwaitingRefundAuthorisation);
+                        MatchingHelper.ChangeLeaseStatusII(_context, status.Id, LeaseApplication.Id);
+                        int ceoId = EHCWorkflowEngine.RefundCeoId(_context);
+                        EHCWorkflowEngine.OpenRefundTask(_context, rcsApps.Id, ResponsibilityTypeKeys.RefundAuthorisation, ceoId);
+                        EHCWorkflowEngine.NotifyRefundParties(_context, rcsApps.Id, new[] { ceoId }, "Deposit refund - awaiting your authorisation",
+                            $"The Revenue Manager supported the deposit refund for lease {LeaseApplication.LeaseReferenceNo} (nett refund R {nettRm:0.00}). Please authorise it under Terminations > Terminated Leases.");
                     }
                     else
                     {
-                        // Transition status back to awaiting refund response (s_awaiting_refund_response)
-                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse);
-                        if (status != null)
-                        {
-                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
-                        }
-
-                        // Send back to Financial Officer
-                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
+                        // UC032 alternative: Not Supported -> back to the Client Services Supervisor to re-process,
+                        // tenant and CSO / supervisor told the reason.
+                        var status = _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing);
+                        MatchingHelper.ChangeLeaseStatusII(_context, status.Id, LeaseApplication.Id);
+                        int supId = EHCWorkflowEngine.RefundSupervisorId(_context, rcsApps.Id);
+                        EHCWorkflowEngine.OpenRefundTask(_context, rcsApps.Id, ResponsibilityTypeKeys.DepositRefundProcessing, supId);
+                        EHCWorkflowEngine.NotifyRefundParties(_context, rcsApps.Id, new[] { rcsApps.CustomerId, supId, EHCWorkflowEngine.RefundCsoId(_context, rcsApps.Id) }, "Deposit refund not supported",
+                            $"The Revenue Manager did not support the deposit refund for lease {LeaseApplication.LeaseReferenceNo}. Reason: {Comment}. The Client Services Supervisor will review the deductions again.");
                     }
-
-                    _context.SaveChanges();
 
                     //ActivityTrackerAudit
                     var ActivityTrackerMessage = _context.ActivityTrackerMessages.FirstOrDefault(x => x.Key == ActivityTrackerMessageKeys.UpdateRefundResponse).Description.ToString();
                     MatchingHelper.ActivityTrackerAudit(_context, LeaseApplication.PropertyLeaseApplicationId, ActivityTrackerMessage, custmusers.Id);
 
-                    Session["UpdateResponseForRefundSession"] = string.Format($"Refund response updated successfully for application reference {rcsApps.ApplicationReferenceNumber}");
-                    return RedirectToAction("UpdateRefundResponse", "PropertyLeaseApplication");
+                    Session["TerminatedLeasesMessage"] = string.Format($"Refund response updated successfully for application reference {rcsApps.ApplicationReferenceNumber}");
+                    return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
                 }
                 catch (Exception e)
                 {
@@ -17809,53 +17865,7 @@ Activating your billing account and debit order mandate is required before occup
             }
         }
 
-        public ActionResult RefundAuthorisation()
-        {
-            using (var cxt = new eServicesDbContext())
-            { 
-                try
-                {
-                    Initialise();
-                    var Keys = cxt.Status;
-                    int SubmittedId = Keys.Where(x => x.Key == StatusKeys.Submitted).FirstOrDefault().Id;
-                    int UserId = Customer.Id;
-                    List<RoundRobinQueue> rrq = new List<RoundRobinQueue>();
-
-                    var ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.RefundAuthorisation).FirstOrDefault().Id;
-
-                    rrq = cxt.RoundRobinQueues.Include(x => x.Clerk).Include(x => x.Clerk.SystemUser).Where(x => x.ResponsibilityTypeId == ResponsibilityTypeId && x.ClerkId == UserId && x.StatusId == SubmittedId).ToList();
-
-                    var list = rrq.Select(x => x.LeaseDetailsId).ToList();
-
-                    int AwaitingRefundAuthorisation = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundAuthorisation).Id;
-
-                    var rCSApplicationStatus = db.LeaseDetails.Where(x => x.IsDeleted == false && list.Contains(x.Id) && (x.StatusId == AwaitingRefundAuthorisation))
-                        .Include(r => r.CreatedBySystemUser)
-                        .Include(r => r.PurchaserType)
-                        .Include(r => r.ModifiedBySystemUser)
-                        .Include(r => r.Status).ToList();
-
-                    foreach (var item in rCSApplicationStatus)
-                    {
-                        item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
-                    }
-                    if (Session["RefundAuthorisationSession"] != null)
-                    {
-                        var value = Session["RefundAuthorisationSession"].ToString();
-                        Session["RefundAuthorisationSession"] = null;
-                        ViewBag.RefundAuthorisationSession = value;
-                    }
-                    Session["RefundAuthorisationSession"] = null;
-                    return View(rCSApplicationStatus);
-                }
-                catch (Exception io)
-                {
-                    EventLogHelper.LogSystemError(io.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
-                }
-
-                return RedirectToAction("Login", "Account");
-            }
-        }
+        public ActionResult RefundAuthorisation() { return RedirectToAction("TerminatedLeases"); }
 
         [DecryptParameter]
         public ActionResult AuthorizeRefund(int? id)
@@ -17938,6 +17948,24 @@ Activating your billing account and debit order mandate is required before occup
                         throw new Exception("Lease termination record not found.");
                     }
 
+                    // UC032 scenario 2: only a lease waiting for authorisation; Reject and No Refund need a reason.
+                    var authStatusId = _context.Status.First(x => x.Key == StatusKeys.AwaitingRefundAuthorisation).Id;
+                    if (LeaseApplication.StatusId != authStatusId)
+                    {
+                        Session["TerminatedLeasesMessage"] = "This refund is not waiting for CEO authorisation.";
+                        return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
+                    }
+                    var allowed = new[] { "Approve Full", "Approve Partial", "No Refund", "Reject" };
+                    // UC032: a signature is captured for Approve Full / Approve Partial / No Refund (not for Reject);
+                    // a reason is captured for No Refund and Reject.
+                    if (!allowed.Contains(CEORefundResponse)
+                        || (CEORefundResponse != "Reject" && string.IsNullOrWhiteSpace(CEORefundSignature))
+                        || ((CEORefundResponse == "Reject" || CEORefundResponse == "No Refund") && string.IsNullOrWhiteSpace(Comment)))
+                    {
+                        Session["TerminatedLeasesMessage"] = "Select an outcome. Approve Full, Approve Partial and No Refund need a signature; No Refund and Reject need a reason.";
+                        return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
+                    }
+
                     // Save CEO inputs
                     leaseTermination.CEORefundResponse = CEORefundResponse;
                     leaseTermination.CEORefundOfficialNumber = CEORefundOfficialNumber;
@@ -17952,18 +17980,26 @@ Activating your billing account and debit order mandate is required before occup
 
                     if (CEORefundResponse == "Reject")
                     {
-                        // Rejection: Send back to Financial Officer for recalculation
-                        var status = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingRefundResponse);
-                        if (status != null)
-                        {
-                            MatchingHelper.ChangeLeaseStatusII(_context, (int)status.Id, (int)LeaseApplication.Id);
-                        }
-
-                        // Send back to Financial Officer
-                        EHCRoundRobin((int)rcsApps.Id, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 1, false, true, 1);
+                        // Reject: back to the Revenue Manager (Awaiting Deposit Refund Response) with the CEO's reason.
+                        var status = _context.Status.First(x => x.Key == StatusKeys.AwaitingRefundResponse);
+                        MatchingHelper.ChangeLeaseStatusII(_context, status.Id, LeaseApplication.Id);
+                        int rmBack = EHCWorkflowEngine.RefundRevenueManagerId(_context);
+                        EHCWorkflowEngine.OpenRefundTask(_context, rcsApps.Id, ResponsibilityTypeKeys.DepositRefundResponse, rmBack);
+                        EHCWorkflowEngine.NotifyRefundParties(_context, rcsApps.Id, new[] { EHCWorkflowEngine.RefundCsoId(_context, rcsApps.Id), EHCWorkflowEngine.RefundSupervisorId(_context, rcsApps.Id), rmBack }, "Deposit refund rejected by the CEO",
+                            $"The CEO rejected the deposit refund for lease {LeaseApplication.LeaseReferenceNo}. Reason: {Comment}. Please review it under Terminations > Terminated Leases.");
                     }
                     else
                     {
+                        // No Refund: nett refund is 0 (UC032 alternative scenario 1).
+                        if (CEORefundResponse == "No Refund") leaseTermination.NettRefundAmount = 0m;
+                        var nettFinal = leaseTermination.NettRefundAmount ?? 0m;
+                        // UC032 step 18 / alternative 1 step 20: the Nett Refund message content.
+                        var finalMsg = CEORefundResponse == "No Refund"
+                            ? $"Please note that you will not be receiving any deposit refund due to {Comment}. Lease {LeaseApplication.LeaseReferenceNo} is now terminated."
+                            : $"The deposit refund for lease {LeaseApplication.LeaseReferenceNo} has been authorised ({(CEORefundResponse == "Approve Full" ? "Approve Full Refund" : "Approve Partial Refund")}). "
+                              + $"Nett Refund Amount: R {nettFinal:0.00}. A due deposit refund will be forfeited if not claimed within 12 months."
+                              + (string.IsNullOrWhiteSpace(Comment) ? "" : " Comment: " + Comment)
+                              + " The lease is now terminated.";
                         // Approval (Approve Full, Approve Partial, No Refund): Close/terminate the lease
                         var statusTerminated = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.TerminatedLease);
                         if (statusTerminated != null)
@@ -18005,19 +18041,26 @@ Activating your billing account and debit order mandate is required before occup
                             {
                                 emailBodyId = _context.EmailContentTypes.FirstOrDefault(x => x.Key == EmailContentKeys.UpdateRefundResponseRefundDue).Id;
                             }
-                            EmailHelper.CustomerEmailNotification(_context, rcsApps.Id, emailBodyId, null, Comment);
+                            EmailHelper.CustomerEmailNotification(_context, rcsApps.Id, emailBodyId, null, finalMsg);
                         }
                         catch (Exception emailEx)
                         {
                             // Log email failure but don't block workflow
                             EventLogHelper.LogSystemError(emailEx.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                         }
+                        // UC032 step 18: also the CSO, the Client Services Supervisor (financial officer step) and the Revenue Manager.
+                        EHCWorkflowEngine.NotifyRefundParties(_context, rcsApps.Id,
+                            new[] { EHCWorkflowEngine.RefundCsoId(_context, rcsApps.Id), EHCWorkflowEngine.RefundSupervisorId(_context, rcsApps.Id), EHCWorkflowEngine.RefundRevenueManagerId(_context) },
+                            "Deposit refund authorised - lease terminated", finalMsg);
                     }
 
                     _context.SaveChanges();
 
-                    Session["RefundAuthorisationSession"] = string.Format($"Refund authorization processed successfully for application reference {rcsApps.ApplicationReferenceNumber}");
-                    return RedirectToAction("RefundAuthorisation", "PropertyLeaseApplication");
+                    Session["TerminatedLeasesMessage"] = CEORefundResponse == "Reject"
+                        ? $"Refund for application reference {rcsApps.ApplicationReferenceNumber} rejected and sent back to the Revenue Manager."
+                        : $"Refund authorised for application reference {rcsApps.ApplicationReferenceNumber}: {CEORefundResponse}, nett refund R "
+                          + (leaseTermination.NettRefundAmount ?? 0m).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + ". The lease is now terminated.";
+                    return RedirectToAction("TerminatedLeases", "PropertyLeaseApplication");
                 }
                 catch (Exception e)
                 {

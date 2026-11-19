@@ -3254,6 +3254,14 @@ namespace C8.eServices.Mvc.Controllers
         [DecryptParameter]
         public ActionResult ConductExitInspection(int? LeseId)
         {
+            // Exit inspection lives on PropertyLeaseApplication/ConductExitInspection (UC-32: Habitable / Minor defects /
+            // Not habitable). This old screen approved into "Awaiting Property Eviction" (dead end), so forward instead.
+            var forwardLease = db.LeaseDetails.FirstOrDefault(x => x.Id == LeseId);
+            if (forwardLease != null)
+            {
+                return RedirectToAction("ConductExitInspection", "PropertyLeaseApplication",
+                    new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("id=" + forwardLease.PropertyLeaseApplicationId.ToString()) });
+            }
             eServicesDbContext context = new eServicesDbContext();
             Initialise();
             var userID = Customer.Id;
@@ -3900,6 +3908,16 @@ namespace C8.eServices.Mvc.Controllers
                 var Keys = _context.Status;
                 var LeaseApplication = _context.LeaseDetails.Include(r=>r.PropertyLeaseApplication).Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
                 var LeaseId = vm.LeaseDetails.Id;
+
+                // A notice the tenant served must be verified by the CSO (Review Notice) before it moves on;
+                // this screen is for terminations the CSO starts, so it may not skip that check.
+                var awaitingCsoReviewId = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingCSOTerminationReview)?.Id ?? -1;
+                if (LeaseApplication != null && LeaseApplication.StatusId == awaitingCsoReviewId)
+                {
+                    Session["Message"] = "The tenant already served a notice for " + LeaseApplication.LeaseReferenceNo + ". Verify it under Termination > Termination Notices > Review Notice.";
+                    Session["Display"] = "Display";
+                    return RedirectToAction("Termination", "propertyLeaseApplication");
+                }
                 
                 var awaitingAppraisalStatusId = _context.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTerminationAppraisal).Id;
 
