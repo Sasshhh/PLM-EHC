@@ -162,7 +162,46 @@ namespace C8.eServices.Mvc.Helpers
                 });
                 changed = true;
             }
+            // Exit inspection stages (application status while the lease is on s_awaiting_exit_inspec).
+            var exitLike = db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingExitInspection);
+            if (exitLike != null)
+            {
+                foreach (var st in new[] {
+                    new { Key = StatusKeys.AwaitingExitInspectionSlotSelection, Name = "Awaiting Applicant to Select Exit Inspection Slots", Desc = "Exit inspection slots published; waiting for the tenant to select one" },
+                    new { Key = StatusKeys.ExitInspectionScheduled, Name = "Exit Inspection Scheduled", Desc = "Tenant selected an exit inspection slot; supervisor to conduct the exit inspection" } })
+                {
+                    if (!db.Status.Any(x => x.Key == st.Key))
+                    {
+                        db.Status.Add(new C8.eServices.Mvc.Models.Status { Name = st.Name, Description = st.Desc, Key = st.Key, StatusTypeId = exitLike.StatusTypeId, IsActive = true, IsDeleted = false, CreatedDateTime = DateTime.Now });
+                        changed = true;
+                    }
+                }
+            }
             if (changed) db.SaveChanges();
+        }
+
+        /// <summary>Latest (current) lease row of an application.</summary>
+        public static LeaseDetails CurrentLease(eServicesDbContext db, int appId)
+        {
+            return db.LeaseDetails.Include(x => x.Status).Where(x => x.PropertyLeaseApplicationId == appId && !x.IsDeleted).OrderByDescending(x => x.Id).FirstOrDefault();
+        }
+
+        /// <summary>True when the application's current lease is waiting for an exit inspection.</summary>
+        public static bool IsExitInspection(eServicesDbContext db, int appId)
+        {
+            var lease = CurrentLease(db, appId);
+            return lease != null && lease.Status != null && lease.Status.Key == StatusKeys.AwaitingExitInspection;
+        }
+
+        /// <summary>
+        /// Exit inspection stage for a lease on s_awaiting_exit_inspec, from the application status:
+        /// "schedule" (supervisor publishes slots), "select" (tenant must pick a slot), "conduct" (slot picked).
+        /// </summary>
+        public static string ExitInspectionStage(string applicationStatusKey)
+        {
+            if (applicationStatusKey == StatusKeys.AwaitingExitInspectionSlotSelection) return "select";
+            if (applicationStatusKey == StatusKeys.ExitInspectionScheduled) return "conduct";
+            return "schedule";
         }
 
         private static int AppSettingInt(eServicesDbContext db, string key)

@@ -2347,6 +2347,15 @@ namespace C8.eServices.Mvc.Controllers
         {
             Initialise();
             var userID = Customer.Id;
+            // The exit inspection is conducted by the Client Services Supervisor, only after the tenant picked a slot.
+            var exitAppKey = db.PropertyLeaseApplications.Where(x => x.Id == id).Select(x => x.Status.Key).FirstOrDefault();
+            if (exitAppKey != StatusKeys.ExitInspectionScheduled || !User.IsInRole("Housing Supervisor"))
+            {
+                Session["BOAccountValidationSession"] = exitAppKey != StatusKeys.ExitInspectionScheduled
+                    ? "The exit inspection can be conducted once the tenant has selected an inspection slot."
+                    : "Only the Client Services Supervisor conducts the exit inspection.";
+                return RedirectToAction("PropertyLeaseApplicationTerminations");
+            }
             var Keys = db.Status;
             ResponsibilityType ResponsibilityTypeId = db.ResponsibilityTypes.Where(x => x.Key == ResponsibilityTypeKeys.Inspections).FirstOrDefault();
 
@@ -2434,6 +2443,11 @@ namespace C8.eServices.Mvc.Controllers
 
             }
             //new code configure first
+
+            // Mark the selected exit inspection slot as inspected.
+            foreach (var si in db.ScheduledInspections.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && !x.IsInspected).ToList()) si.IsInspected = true;
+            foreach (var isch in db.InspectionSchedules.Where(x => x.PropertyLeaseApplicationId == rcsApps.Id && x.IsApproved && !x.IsInspected).ToList()) isch.IsInspected = true;
+            db.SaveChanges();
 
             var ConductInspec = new ConductUnitInspection()
             {
@@ -5926,6 +5940,10 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         item.Data = SecureActionLinkExtension.Encrypt(string.Format("rcsAppId={0}", item.Id));
                     }
+                    // Exit inspection stage per lease (from the application status): schedule / select / conduct.
+                    var exitAppIds = rCSApplicationStatus.Where(x => x.Status != null && x.Status.Key == StatusKeys.AwaitingExitInspection).Select(x => x.PropertyLeaseApplicationId).ToList();
+                    var exitAppStatus = cxt.PropertyLeaseApplications.Where(x => exitAppIds.Contains(x.Id)).Select(x => new { x.Id, Key = x.Status.Key }).ToList();
+                    ViewBag.ExitStage = exitAppStatus.ToDictionary(x => x.Id, x => EHCWorkflowEngine.ExitInspectionStage(x.Key));
                     if (Session["BOAccountValidationSession"] != null)
                     {
                         var value = Session["BOAccountValidationSession"].ToString();
@@ -6413,13 +6431,15 @@ namespace C8.eServices.Mvc.Controllers
                     int AwaitingInspectionScheduleSlots = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingInspectionScheduleSlots).Id;
                     int EvictionGranted = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.EvictionGranted).Id;
                     int AwaitingTenantUpdateDetails = cxt.Status.FirstOrDefault(x => x.Key == StatusKeys.AwaitingTenantUpdateDetails).Id;
+                    EHCWorkflowEngine.EnsureRefundProcessingMasterData(cxt);
+                    int ExitInspectionScheduled = cxt.Status.Where(x => x.Key == StatusKeys.ExitInspectionScheduled).Select(x => x.Id).FirstOrDefault();
 
 
 
                     //var UM = db.allocatedUnitMaintenanceEHCs.Include(x=>x.Status).Where(x=>x.Status.Key == StatusKeys.Submitted).ToList();
                     //var UMList = UM.Select(x => x.PropertyLeaseApplicationId);
                     //.Select(x => x.PropertyLeaseApplicationId). ||UMList.Contains(x.Id)
-                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted || x.StatusId == AwaitingTenantUpdateDetails) ) )
+                    var rCSApplicationStatus = db.PropertyLeaseApplications.Where(x => x.IsDeleted == false && list.Contains(x.Id) && ((x.StatusId == AwaitingExitInspection || x.StatusId == ExitInspectionScheduled || x.StatusId == CustomerQueryPending || x.StatusId == UnitInhabitable || x.StatusId == RatesRebateAdditionalPropertyOwnersPending || x.StatusId == AwaitingInspectionScheduleSlots || x.StatusId == EvictionGranted || x.StatusId == AwaitingTenantUpdateDetails) ) )
                     .Include(r => r.CreatedBySystemUser)
                     .Include(r => r.Customer)
                     .Include(r => r.PurchaserType)
@@ -11800,6 +11820,7 @@ Activating your billing account and debit order mandate is required before occup
             var rrq = rr.Select(r => r.DateToScheduleId).ToList();
 
             vm.InspectionScheduleList = db.InspectionSchedules.Include(r=>r.DateToSchedule).Include(r=>r.TimeSlot).Where(x => x.PropertyLeaseApplicationId == id && !x.IsDeleted && !x.IsInspected).ToList() ?? null;
+            ViewBag.IsExitInspection = EHCWorkflowEngine.IsExitInspection(db, id);
             ViewBag.DateToSchedule = "";
             ViewBag.Id = id;
             ViewBag.PrpId = id;
@@ -11920,9 +11941,15 @@ Activating your billing account and debit order mandate is required before occup
                     // out of that queue the moment the slots went out, so an exit inspection
                     // could be scheduled and confirmed by the tenant and then never conducted:
                     // UC029 was unreachable. A pre-tenancy inspection is unaffected.
-                    var currentStatusKey = context.PropertyLeaseApplications
-                        .Where(x => x.Id == Id).Select(x => x.Status.Key).FirstOrDefault();
-                    if (currentStatusKey != StatusKeys.AwaitingExitInspection)
+                    // Exit inspection: the application waits for the tenant to pick a slot ("Awaiting Applicant to
+                    // Select Exit Inspection Slots"); the supervisor's Schedule button goes away until then.
+                    bool isExit = EHCWorkflowEngine.IsExitInspection(context, Id);
+                    if (isExit)
+                    {
+                        EHCWorkflowEngine.EnsureRefundProcessingMasterData(context);
+                        MatchingHelper.ChangeApplicationStatus(context, context.Status.First(x => x.Key == StatusKeys.AwaitingExitInspectionSlotSelection).Id, Id);
+                    }
+                    else
                     {
                         MatchingHelper.ChangeApplicationStatus(context, (int)db.Status.FirstOrDefault(x => x.Key == StatusKeys.AwitingInspectionSchedule)?.Id, Id);
                     }
@@ -11937,6 +11964,11 @@ Activating your billing account and debit order mandate is required before occup
                     EmailHelper.CustomerEmailNotification(context, Id, emailboodyId);
                     var plmApps = db.PropertyLeaseApplications.Where(x => x.Id == Id).FirstOrDefault();
                     Session["UnitInspectionScheduledSession"] = string.Format($"Unit inspection schedule has been completed successfully for application reference {plmApps.ApplicationReferenceNumber}");
+                    if (isExit)
+                    {
+                        Session["BOAccountValidationSession"] = $"Exit inspection slots sent to the tenant for {plmApps.ApplicationReferenceNumber}. Status: Awaiting Applicant to Select Exit Inspection Slots.";
+                        return RedirectToAction("PropertyLeaseApplicationTerminations", "PropertyLeaseApplication");
+                    }
                 }
             }
             return RedirectToAction("PropertyLeaseInspections", "PropertyLeaseApplication");
@@ -11977,6 +12009,7 @@ Activating your billing account and debit order mandate is required before occup
             var custmusers = db.Customers.FirstOrDefault(x => x.Id == Customer.Id);
             var applicationProp = db.PropertyLeaseApplications.Include(x => x.SystemUser).Include(x => x.Status).Include(x => x.PurchaserType).Include(r => r.Customer).Include(r => r.SystemUser).Where(x => x.Id == id).FirstOrDefault();
             if (applicationProp.Status.Key == StatusKeys.RatesRebateAdditionalPropertyOwnersPending) return RedirectToAction("_Error", "PropertyLeaseApplication", new { Id = applicationProp.Id, appId = "" });
+            ViewBag.IsExitInspection = EHCWorkflowEngine.IsExitInspection(db, applicationProp.Id);
 
             var TimeSlots = db.TimeSlots.Where(r => r.IsActive).ToList();
             var vm = new DepartmentsApprovalViewModel();
@@ -15416,6 +15449,7 @@ Activating your billing account and debit order mandate is required before occup
                         // (Awaiting Deposit Refund Processing). There is no CSO "Start Refund" step.
                         EHCWorkflowEngine.EnsureRefundProcessingMasterData(_context);
                         MatchingHelper.ChangeLeaseStatusII(_context, _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing).Id, (int)LeaseApplication.Id);
+                        MatchingHelper.ChangeApplicationStatus(_context, _context.Status.First(x => x.Key == StatusKeys.AwaitingDepositRefundProcessing).Id, (int)LeaseApplication.PropertyLeaseApplicationId);
                         int refundSupId = EHCWorkflowEngine.RefundSupervisorId(_context, (int)LeaseApplication.PropertyLeaseApplicationId);
                         EHCWorkflowEngine.OpenRefundTask(_context, (int)LeaseApplication.PropertyLeaseApplicationId, ResponsibilityTypeKeys.DepositRefundProcessing, refundSupId);
                         Session["ConfirmVacatingAppicantSession"] = string.Format($"Tenant vacated successfully for application reference {LeaseApplication.LeaseReferenceNo}. The deposit refund is now with the Client Services Supervisor (Terminations > Terminated Leases).");

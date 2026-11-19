@@ -68384,8 +68384,8 @@ IF NOT EXISTS (SELECT 1 FROM dbo.AppSettings WHERE [Key] = N'EDRMSACTIVE')
     VALUES (N'EDRMSACTIVE', N'on = also push uploaded documents to EDRMS; off = PLM only (EHC default)', N'EDRMSACTIVE', N'off', 1, 0, GETDATE());
 UPDATE dbo.AppSettings SET [Value] = N'off' WHERE [Key] = N'EDRMSACTIVE' AND ISNULL([Value], N'') <> N'off';
 
--- UC031: CSO "Start Refund" hands the lease to the Client Services Supervisor (Housing Supervisor role),
--- who captures the deductions/recommendation (PropertyLeaseApplicationController.StartRefund / StartRefundProcess).
+-- UC031: after move-out the lease goes to the Client Services Supervisor (Housing Supervisor role),
+-- who captures the deductions/recommendation (PropertyLeaseApplicationController.StartRefundProcess).
 IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_deposit_refund_processing')
     INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'Awaiting Deposit Refund Processing', N'Refund started by the CSO; Client Services Supervisor to process deductions',
@@ -68394,6 +68394,19 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_deposit_refun
 IF NOT EXISTS (SELECT 1 FROM dbo.ResponsibilityTypes WHERE [Key] = N'r_deposit_refund_processing')
     INSERT dbo.ResponsibilityTypes ([Name], [Description], [Key], IsActive, IsDeleted, CreatedDateTime)
     VALUES (N'Deposit Refund Processing', N'Client Services Supervisor processes the deposit refund / deductions (UC031)', N'r_deposit_refund_processing', 1, 0, GETDATE());
+
+-- Exit inspection stages on the application status (lease stays on s_awaiting_exit_inspec):
+-- supervisor publishes slots -> tenant selects one -> supervisor conducts.
+IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_awaiting_exit_inspection_slot_selection')
+    INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Awaiting Applicant to Select Exit Inspection Slots', N'Exit inspection slots published; waiting for the tenant to select one',
+            N's_awaiting_exit_inspection_slot_selection',
+            ISNULL((SELECT TOP (1) StatusTypeId FROM dbo.Status WHERE [Key] = N's_awaiting_exit_inspec'), @rcs), 1, 0, GETDATE());
+IF NOT EXISTS (SELECT 1 FROM dbo.Status WHERE [Key] = N's_exit_inspection_scheduled')
+    INSERT dbo.Status ([Name], [Description], [Key], StatusTypeId, IsActive, IsDeleted, CreatedDateTime)
+    VALUES (N'Exit Inspection Scheduled', N'Tenant selected an exit inspection slot; supervisor to conduct the exit inspection',
+            N's_exit_inspection_scheduled',
+            ISNULL((SELECT TOP (1) StatusTypeId FROM dbo.Status WHERE [Key] = N's_awaiting_exit_inspec'), @rcs), 1, 0, GETDATE());
 
 COMMIT TRANSACTION;
 PRINT 'EHC gap master data applied.';
