@@ -35,7 +35,7 @@
         {
             if (t.OnlineFormAvailable)
             {
-                <a class="lt-card" href="@Url.Action("Capture", "RealEstate", new { leaseType = t.Name })" id="lease-type-@t.Name.Replace(" ", "-").ToLowerInvariant()">
+                <a class="lt-card" href="@Url.Action(t.RefCode == "BUS" ? "Capture" : "CaptureSite", "RealEstate", new { leaseType = t.Name })" id="lease-type-@t.Name.Replace(" ", "-").ToLowerInvariant()">
                     <h3>@t.Name</h3>
                     <p>@t.Description</p>
                     <span class="go">Apply now <i class="fa fa-arrow-right"></i></span>

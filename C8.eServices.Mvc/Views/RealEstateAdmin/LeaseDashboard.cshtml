@@ -82,6 +82,38 @@
         </table>
     </div>
 
+    @{ var alerts = (List<C8.eServices.Mvc.Models.RE_LeaseAlert>)ViewBag.Alerts; }
+    <div class="admin-card">
+        <h3>Due in the next 90 days</h3>
+        @if (!alerts.Any())
+        {
+            <p style="color:#64748b;">No escalations or lease ends are due in the next 90 days.</p>
+        }
+        else
+        {
+            <table class="admin-table">
+                <thead><tr><th>Due</th><th>Event</th><th>Lease Ref</th><th>Tenant</th><th>CCA</th><th>Alert To</th></tr></thead>
+                <tbody>
+                    @foreach (var a in alerts.Take(50))
+                    {
+                        <tr>
+                            <td style="white-space:nowrap;">@a.DueDate.ToString("yyyy/MM/dd")</td>
+                            <td><span class="re-status @(a.Kind == "Escalation" ? "re-status-Indefinite" : "re-status-NoLease")">@a.Kind</span></td>
+                            <td><a href="@Url.Action("LeaseDetails", new { id = a.Lease.Id })">@a.Lease.LeaseReferenceNumber</a></td>
+                            <td>@a.Lease.TenantName</td>
+                            <td>@a.Lease.Cca</td>
+                            <td>@a.Lease.EscalationAlertsRecipient</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            if (alerts.Count > 50)
+            {
+                <p style="color:#64748b; margin-top:10px;">Showing the first 50 of @alerts.Count.</p>
+            }
+        }
+    </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="admin-card">

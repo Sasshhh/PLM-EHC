@@ -333,7 +333,7 @@
                         }
 
                         <tr>
-                            <td><span class="ref-badge">@app.ApplicationReferenceNumber</span></td>
+                            <td><span class="ref-badge">@(app.ApplicationReferenceNumber != null && app.ApplicationReferenceNumber.StartsWith("DRAFT-") ? "Draft" : app.ApplicationReferenceNumber)</span>@if (!string.IsNullOrEmpty(app.LeaseType)) { <div style="font-size: 12px; color: #64748b;">@app.LeaseType</div> }</td>
                             <td>
                                 <div style="font-weight: 600;">@app.EntityName</div>
                                 <div style="font-size: 12px; color: #64748b;">@app.ApplicantType</div>
@@ -348,9 +348,18 @@
                                 </span>
                             </td>
                             <td style="text-align: center; display: flex; gap: 6px; justify-content: center; align-items: center; border-bottom: 1px solid var(--re-border-color) !important;">
+                                @if (app.Status != null && app.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.ReApplicationDraft)
+                                {
+                                    <a href="@Url.Action("CaptureSite", "RealEstate", new { draftId = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-continue-@app.Id">
+                                        <i class="fa fa-pencil"></i> Continue
+                                    </a>
+                                }
+                                else
+                                {
                                 <button type="button" class="action-btn btn-view-details" data-app-id="@app.Id" id="btn-view-@app.Id">
                                     <i class="fa fa-eye"></i> View
                                 </button>
+                                }
                                 @if (app.Status != null && app.Status.Key == "re_awaiting_inspection" && app.InspectionStatus == "Scheduled")
                                 {
                                     <a href="@Url.Action("SelectInspectionSlot", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-select-slot-@app.Id">

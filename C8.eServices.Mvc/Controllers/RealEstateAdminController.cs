@@ -2805,6 +2805,16 @@ namespace C8.eServices.Mvc.Controllers
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
 
+            // DPRE UCXX: keep the lease register in step with the application workflow
+            try
+            {
+                UpsertLeaseFromApplication(app);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError("Lease register update failed for application " + app.Id + ": " + ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
+
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser?.Id ?? 1, string.Format("Lease details captured. Category: {0}. Tenancy Number: {1}.", leaseCategory, app.UniqueTenancyLeaseNumber));
             TempData["SuccessMessage"] = string.Format("Lease details captured successfully. Tenancy Number: {0}.", app.UniqueTenancyLeaseNumber);
             return RedirectToAction("ActiveOccupancy");

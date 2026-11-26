@@ -36,8 +36,8 @@
                 @Html.ValidationMessageFor(m => m.ContractReferenceNumber, "", new { @class = "text-danger" })
             </div>
             <div class="col-sm-3 form-group">
-                <label for="LeaseReferenceNumber" class="req">Lease Reference Number (Unique)</label>
-                @Html.TextBoxFor(m => m.LeaseReferenceNumber, new { @class = "form-control" })
+                <label for="LeaseReferenceNumber" class="@(isEdit ? "req" : "")">Lease Reference Number (Unique)</label>
+                @Html.TextBoxFor(m => m.LeaseReferenceNumber, new { @class = "form-control", placeholder = isEdit ? "" : "Leave blank to auto-number" })
                 @Html.ValidationMessageFor(m => m.LeaseReferenceNumber, "", new { @class = "text-danger" })
             </div>
             <div class="col-sm-3 form-group">
@@ -462,7 +462,7 @@
         }
         document.getElementById('btnSubmitLease').addEventListener('click', function () {
             var errors = [
-                req('LeaseReferenceNumber', 'Lease Reference Number is required.'),
+                @(isEdit ? Html.Raw("req('LeaseReferenceNumber', 'Lease Reference Number is required.'),") : Html.Raw(""))
                 req('TenantName', 'Tenant Name is required.'),
                 req('LeaseClassification', 'Select a Lease Classification.')
             ].filter(function (e) { return e; });

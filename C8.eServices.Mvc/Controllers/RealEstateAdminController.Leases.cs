@@ -88,6 +88,7 @@ namespace C8.eServices.Mvc.Controllers
                 && (x.Lease.LeaseTerminationDate ?? x.Lease.LeaseEndDate).HasValue
                 && (x.Lease.LeaseTerminationDate ?? x.Lease.LeaseEndDate).Value <= today.AddDays(90));
             ViewBag.AsAt = today;
+            ViewBag.Alerts = RE_LeaseLookups.UpcomingAlerts(leases, today, 90);
             PopulateLeaseLookups();
             return View();
         }
@@ -172,6 +173,11 @@ namespace C8.eServices.Mvc.Controllers
             Initialise();
 
             model.LeaseReferenceNumber = model.LeaseReferenceNumber?.Trim().ToUpperInvariant();
+            if (model.Id == 0 && string.IsNullOrEmpty(model.LeaseReferenceNumber))
+            {
+                model.LeaseReferenceNumber = NextLeaseReferenceFor(model.LeaseClassification, model.AgreementInPlace, model.IsMemorandumOfAgreement);
+                ModelState.Remove("LeaseReferenceNumber");
+            }
             ValidateLease(model);
 
             if (!ModelState.IsValid)
@@ -226,6 +232,90 @@ namespace C8.eServices.Mvc.Controllers
             return RedirectToAction("CaptureLease", new { id = (int?)null });
         }
 
+        private string NextLeaseReferenceFor(string classification, bool agreementInPlace, bool isMoa)
+        {
+            var series = RE_LeaseLookups.LeaseReferenceSeries(classification, agreementInPlace, isMoa);
+            var existing = db.RE_Leases.Where(l => l.LeaseReferenceNumber.StartsWith(series)).Select(l => l.LeaseReferenceNumber).ToList();
+            return RE_LeaseLookups.NextLeaseReference(series, existing);
+        }
+
+        /// <summary>
+        /// ASSUMPTION (DPRE-Q02): UCXX also covers new leases coming out of the application workflow. When the lease details of an
+        /// approved application are captured (RE_UC025), the lease register record is created or updated from the application.
+        /// </summary>
+        private void UpsertLeaseFromApplication(RE_Application app)
+        {
+            var lease = db.RE_Leases.FirstOrDefault(l => l.RE_ApplicationId == app.Id && !l.IsDeleted);
+            bool isNew = lease == null;
+            var site = db.RE_ApplicationSiteDetails.FirstOrDefault(s => s.RE_ApplicationId == app.Id);
+            var classification = RE_LeaseLookups.FindLeaseApplicationType(app.LeaseType)?.Name ?? "Business Hub";
+            var ccc = db.CCCs.Find(app.CCCId);
+
+            if (isNew)
+            {
+                lease = new RE_Lease
+                {
+                    RE_ApplicationId = app.Id,
+                    Source = "Application",
+                    DepartmentId = app.DepartmentId,
+                    RecordStatus = RE_LeaseLookups.StatusActive,
+                    AgreementInPlace = true,
+                    ContactType = "Tenant",
+                    CreatedBySystemUserId = _systemUser?.Id,
+                    CreatedDateTime = DateTime.Now,
+                    LeaseReferenceNumber = NextLeaseReferenceFor(classification, true, false)
+                };
+                db.RE_Leases.Add(lease);
+            }
+
+            lease.ContractReferenceNumber = app.UniqueTenancyLeaseNumber;
+            lease.LeaseClassification = classification;
+            lease.LeaseTerm = "Lease Agreement";
+            lease.PhysicalStreetAddress = app.PropertyAddress;
+            lease.PhysicalBuildingNumberAndName = app.SelectedFacility != null ? app.SelectedFacility.Name : app.ErfFarmNumber;
+            lease.CCCId = app.CCCId;
+            lease.Cca = ccc != null ? ccc.CCCName.ToUpperInvariant() : null;
+            lease.LeaseDetailsAndPurpose = string.Format("{0}. Application {1}.", app.PurposeOfLease, app.ApplicationReferenceNumber);
+            lease.LeasedAreaSqm = site != null ? (site.TotalExtentSqm ?? ((site.AreaGroundSqm ?? 0) + (site.AreaOnStructureSqm ?? 0))) : (decimal?)null;
+            lease.LeaseStartDate = app.LeaseStartDate;
+            lease.LeaseEndDate = app.LeaseEndDate;
+            lease.EscalationDate = app.LeaseStartDate.HasValue ? app.LeaseStartDate.Value.AddYears(1) : (DateTime?)null;
+            lease.EscalationTerms = app.LeaseEscalationTerms;
+            lease.PaymentFrequency = app.LeasePaymentFrequency;
+            lease.MonthlyRental = app.CalculatedMonthlyRental;
+            lease.DepositHeld = app.LeaseDepositAmount;
+            lease.TenantName = string.IsNullOrWhiteSpace(app.EntityName) ? "(Not captured)" : app.EntityName;
+            lease.ApplicantType = app.ApplicantType;
+            lease.RegistrationNumber = app.CompanyRegistrationNumber;
+            lease.VatRegistrationNumber = app.VatRegistrationNumber;
+            lease.DomiciliumStreetAddress = app.EntityRegisteredAddress;
+            lease.DomiciliumPostalCode = app.EntityRegisteredPostalCode;
+            lease.BillingContactName = app.AuthorizedRepresentativeName ?? app.EntityName;
+            lease.BillingStreetAddress = site != null ? site.PostalAddress : app.EntityRegisteredAddress;
+            lease.BillingMobile1 = app.EntityMobile;
+            lease.BillingTelephone1 = app.EntityTelephone;
+            lease.BillingFax1 = app.EntityFax;
+            lease.BillingEmail1 = app.EntityEmail;
+            lease.LeaseContactName = app.AuthorizedRepresentativeName ?? app.EntityName;
+            lease.LeaseContactMobile1 = app.EntityMobile;
+            lease.LeaseContactEmail1 = app.EntityEmail;
+            lease.ModifiedBySystemUserId = _systemUser?.Id;
+            lease.ModifiedDateTime = DateTime.Now;
+            TruncateToMaxLength(lease);   // application fields are longer than some register columns
+            db.SaveChanges();
+        }
+
+        private static void TruncateToMaxLength(object entity)
+        {
+            foreach (var p in entity.GetType().GetProperties().Where(x => x.PropertyType == typeof(string) && x.CanWrite))
+            {
+                var max = p.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.MaxLengthAttribute), true)
+                    .Cast<System.ComponentModel.DataAnnotations.MaxLengthAttribute>().FirstOrDefault();
+                var v = p.GetValue(entity) as string;
+                if (max != null && v != null && v.Length > max.Length) p.SetValue(entity, v.Substring(0, max.Length));
+            }
+        }
+
         private void ValidateLease(RE_Lease model)
         {
             if (string.IsNullOrWhiteSpace(model.LeaseReferenceNumber))
@@ -251,6 +341,18 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("DepositHeld", "Deposit Held cannot be negative.");
             if (model.TerminationNoticePeriodMonths.HasValue && (model.TerminationNoticePeriodMonths < 0 || model.TerminationNoticePeriodMonths > 120))
                 ModelState.AddModelError("TerminationNoticePeriodMonths", "Notice period must be between 0 and 120 months.");
+        }
+
+        /// <summary>
+        /// UC05 Scenarios 2-4: shows the Outdoor Advertising / Telecommunications / Leasehold answers on back-office screens.
+        /// Renders nothing for Business Hub applications.
+        /// </summary>
+        [ChildActionOnly]
+        public ActionResult SiteDetailsPanel(int applicationId)
+        {
+            var site = db.RE_ApplicationSiteDetails.FirstOrDefault(s => s.RE_ApplicationId == applicationId && !s.IsDeleted);
+            if (site == null) return new EmptyResult();
+            return PartialView("_RE_SiteDetailsPanel", site);
         }
     }
 }

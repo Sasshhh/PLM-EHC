@@ -14,7 +14,7 @@ using C8.eServices.Mvc.Keys;
 namespace C8.eServices.Mvc.Controllers
 {
     [AllowAnonymous]
-    public class RealEstateController : Controller
+    public partial class RealEstateController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
         private readonly BaseHelper _base = new BaseHelper();
@@ -87,6 +87,11 @@ namespace C8.eServices.Mvc.Controllers
                 if (selectedType != null)
                     TempData["ErrorMessage"] = selectedType.Name + " applications are not yet available online. Please contact the DPRE office.";
                 return RedirectToAction("LeaseApplications");
+            }
+            if (selectedType.RefCode != "BUS")
+            {
+                // Outdoor Advertising, Telecommunications and Concession/Leasehold use the site form
+                return RedirectToAction("CaptureSite", new { leaseType = selectedType.Name });
             }
 
             // Check if profile is active/approved
@@ -682,7 +687,9 @@ namespace C8.eServices.Mvc.Controllers
             ViewBag.PurposesOfLease = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Retail", Text = "Retail Units (Shops, kiosks, stalls, etc.)" },
-                new SelectListItem { Value = "Office/Professional", Text = "Offices/Professional Units" }
+                new SelectListItem { Value = "Office/Professional", Text = "Offices/Professional Units" },
+                // ASSUMPTION (DPRE-Q37): BR03 also lists workshops, repairs, fabrication and artisanal production
+                new SelectListItem { Value = "Workshop", Text = "Workshops (repairs, fabrication, artisanal production)" }
             };
         }
 
