@@ -61,13 +61,32 @@ namespace C8.eServices.Mvc.Controllers
             return View(applications);
         }
 
-        // GET: RealEstate/Capture
-        public ActionResult Capture()
+        // GET: RealEstate/LeaseApplications  (DPRE UC05 Steps 1-2: choose the lease type)
+        public ActionResult LeaseApplications()
         {
             Initialise();
             if (_customer == null)
             {
                 return RedirectToAction("Login", "Account");
+            }
+            return View(RE_LeaseLookups.LeaseApplicationTypes);
+        }
+
+        // GET: RealEstate/Capture?leaseType=Business%20Hub
+        public ActionResult Capture(string leaseType)
+        {
+            Initialise();
+            if (_customer == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var selectedType = RE_LeaseLookups.FindLeaseApplicationType(leaseType);
+            if (selectedType == null || !selectedType.OnlineFormAvailable)
+            {
+                if (selectedType != null)
+                    TempData["ErrorMessage"] = selectedType.Name + " applications are not yet available online. Please contact the DPRE office.";
+                return RedirectToAction("LeaseApplications");
             }
 
             // Check if profile is active/approved
@@ -84,6 +103,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 Application = new RE_Application
                 {
+                    LeaseType = selectedType.Name,
                     SystemUserId = _systemUser.Id,
                     CustomerId = _customer.Id,
                     EntityEmail = _systemUser.EmailAddress,
@@ -316,8 +336,11 @@ namespace C8.eServices.Mvc.Controllers
 
             try
             {
-                // Generate Reference Number
-                string referenceNumber = GenerateReferenceNumber();
+                // Generate Reference Number per lease type (UC05 Step 20, e.g. DPRE-BUS 2026/0001)
+                var leaseTypeInfo = RE_LeaseLookups.FindLeaseApplicationType(model.Application.LeaseType)
+                                    ?? RE_LeaseLookups.FindLeaseApplicationType("Business Hub");
+                model.Application.LeaseType = leaseTypeInfo.Name;
+                string referenceNumber = GenerateReferenceNumber(leaseTypeInfo.RefCode);
                     model.Application.ApplicationReferenceNumber = referenceNumber;
                     model.Application.SystemUserId = _systemUser.Id;
                     model.Application.CustomerId = _customer.Id;
@@ -579,6 +602,28 @@ namespace C8.eServices.Mvc.Controllers
             db.SaveChanges();
         }
 
+        /// <summary>
+        /// UC05: DPRE-{TYPE} YYYY/#### with a running number per lease type per year (e.g. DPRE-BUS 2026/0001).
+        /// Two submissions of the same type in the same instant could get the same number; volumes are low, so this is accepted for now.
+        /// </summary>
+        private string GenerateReferenceNumber(string typeCode)
+        {
+            string prefix = string.Format("DPRE-{0} {1}/", typeCode, DateTime.Now.Year);
+            var existing = db.RE_Applications
+                .Where(a => a.ApplicationReferenceNumber.StartsWith(prefix))
+                .Select(a => a.ApplicationReferenceNumber)
+                .ToList();
+
+            int max = 0;
+            foreach (var reference in existing)
+            {
+                int n;
+                if (int.TryParse(reference.Substring(prefix.Length), out n) && n > max) max = n;
+            }
+            return prefix + (max + 1).ToString().PadLeft(4, '0');
+        }
+
+        // Previous daily format DPRE-YYYYMMDD-NNNN, kept for reference; no longer called for new applications.
         private string GenerateReferenceNumber()
         {
             var counterSetting = db.AppSettings.FirstOrDefault(o => o.Key == "red_daily_sequence_counter");

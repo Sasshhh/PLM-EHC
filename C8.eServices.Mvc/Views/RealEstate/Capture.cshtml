@@ -374,7 +374,7 @@
 
 <div class="re-container">
     <div class="re-header-card">
-        <h1 class="re-header-title">Submit Lease Application</h1>
+        <h1 class="re-header-title">Submit Lease Application@(string.IsNullOrEmpty(Model.Application.LeaseType) ? "" : ": " + Model.Application.LeaseType)</h1>
         <p class="re-header-subtitle">
             Real Estate Development (RED) Department. Complete the details below, specify your desired facility or letting space details, and upload the mandatory pre-qualification documents.
         </p>
@@ -393,6 +393,7 @@
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.Application.CustomerId)
         @Html.HiddenFor(m => m.Application.SystemUserId)
+        @Html.HiddenFor(m => m.Application.LeaseType)
 
         <!-- Section 1: Applicant Profile -->
         <div class="re-card">

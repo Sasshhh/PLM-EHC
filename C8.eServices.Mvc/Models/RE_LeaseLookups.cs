@@ -44,6 +44,33 @@ namespace C8.eServices.Mvc.Models
             "Organ of State/Government Entity", "Other"
         };
 
+        /// <summary>UC05 Step 2: lease types offered under Lease Applications.</summary>
+        public class LeaseApplicationType
+        {
+            public string Name { get; set; }
+            public string RefCode { get; set; }       // used in the reference number, e.g. DPRE-BUS 2026/0001
+            public string Description { get; set; }
+            public bool OnlineFormAvailable { get; set; }
+        }
+
+        // DPRE-BUS comes from the SDS (UC05 Scenario 1). The other codes are ASSUMPTIONS until confirmed.
+        // ASSUMPTION: Commercial uses the Business/Commercial Hub form; the other types are switched on as their forms are built.
+        public static readonly LeaseApplicationType[] LeaseApplicationTypes =
+        {
+            new LeaseApplicationType { Name = "Business Hub", RefCode = "BUS", OnlineFormAvailable = true, Description = "Retail and office units in a municipal business hub facility." },
+            new LeaseApplicationType { Name = "Commercial", RefCode = "COM", OnlineFormAvailable = true, Description = "Commercial letting space in a municipal facility." },
+            new LeaseApplicationType { Name = "Outdoor Advertising", RefCode = "OA", OnlineFormAvailable = false, Description = "Billboards and other outdoor advertising sites." },
+            new LeaseApplicationType { Name = "Telecommunications", RefCode = "TEL", OnlineFormAvailable = false, Description = "Telecommunication masts, rooftop sites and equipment." },
+            new LeaseApplicationType { Name = "Social", RefCode = "SOC", OnlineFormAvailable = false, Description = "Community, NPO and social-purpose use of municipal property." },
+            new LeaseApplicationType { Name = "Agricultural", RefCode = "AGR", OnlineFormAvailable = false, Description = "Agricultural use of municipal land." },
+            new LeaseApplicationType { Name = "Servitude", RefCode = "SRV", OnlineFormAvailable = false, Description = "Servitudes and road reserve encroachments." },
+        };
+
+        public static LeaseApplicationType FindLeaseApplicationType(string name)
+        {
+            return LeaseApplicationTypes.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static readonly string[] ContactTypes = { "Tenant", "Authorised Representative" };
         public static readonly string[] RecordStatuses = { "Active", "Inactive" };
         public static readonly string[] PaymentFrequencies = { "Monthly", "Quarterly", "Bi-Annually", "Annually" };

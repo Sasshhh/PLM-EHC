@@ -1571,6 +1571,7 @@
     <Content Include="Views\RealEstateAdmin\RevokePto.cshtml" />
     <Content Include="Views\RealEstateAdmin\SignPtoCertificate.cshtml" />
     <Content Include="Views\RealEstate\Capture.cshtml" />
+    <Content Include="Views\RealEstate\LeaseApplications.cshtml" />
     <Content Include="Views\RealEstate\Inbox.cshtml" />
     <Content Include="Views\RealEstate\MyApplications.cshtml" />
     <Content Include="Views\Shared\eThekwini_logo.jpg" />

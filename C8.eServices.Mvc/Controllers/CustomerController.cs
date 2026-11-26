@@ -477,6 +477,63 @@ namespace C8.eServices.Mvc.Controllers
         #endregion
 
 
+        #region Customer Reject Profile (DPRE UC03 Alternate Flow 1)
+        /// <summary>
+        /// Rejects a pending profile with a mandatory reason: the reason is kept as a note on the profile and e-mailed to the applicant.
+        /// ASSUMPTION (DPRE-Q, UC03): there is no "Rejected" profile status yet, so the profile stays Pending Approval and the
+        /// applicant can correct it and be approved later.
+        /// </summary>
+        [HttpPost]
+        public JsonResult RejectCustomerProfile(int customerId, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+                return Json(new { status = "error", message = "A reason for rejection is required." });
+
+            reason = reason.Trim();
+            if (reason.Length > 1000) reason = reason.Substring(0, 1000);
+
+            using (var context = new eServicesDbContext())
+            {
+                _base.Initialise(context);
+
+                var customer = context.Customers.Include(s => s.SystemUser.Department).FirstOrDefault(c => c.Id == customerId);
+                if (customer == null)
+                    return Json(new { status = "error", message = "Customer profile not found." });
+
+                var referenceType = context.ReferenceTypes.FirstOrDefault(r => r.Key == ReferenceTypeKeys.CustomerProfile);
+                var noteType = context.NoteTypes.FirstOrDefault(n => n.Key == NoteTypeKeys.Email);
+                if (referenceType != null && noteType != null)
+                {
+                    context.Notes.Add(new Note
+                    {
+                        ReferenceId = customerId,
+                        ReferenceTypeId = referenceType.Id,
+                        NoteTypeId = noteType.Id,
+                        NoteEntry = "Profile rejected. Reason: " + reason,
+                        IsActive = true,
+                        IsDeleted = false
+                    });
+                    context.SaveChanges();
+                }
+
+                var isRealEstate = customer.SystemUser != null && customer.SystemUser.Department != null &&
+                                   customer.SystemUser.Department.Key == ApplicationEntityKeys.RealEstateDevelopment;
+                var subject = isRealEstate ? "Real Estate Development Profile Not Approved" : "Property Lease Management Profile Not Approved";
+                var body = "Your profile registration could not be approved for the following reason:<br/><br/>"
+                           + HttpUtility.HtmlEncode(reason).Replace("\n", "<br/>")
+                           + "<br/><br/>Please log in, update your profile and documents, and it will be reviewed again.";
+
+                var toAddress = customer.SystemUser != null ? customer.SystemUser.EmailAddress : customer.EmailAddress;
+                if (!string.IsNullOrWhiteSpace(toAddress))
+                {
+                    new Email().GenerateEmail(toAddress, subject, body, customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, customer.FullName);
+                }
+
+                return Json(new { status = "success" });
+            }
+        }
+        #endregion
+
         #region Notify Convayener Docs Missing or Incorrect
         public JsonResult IncompleteDocsMail(int customerId)
         {
