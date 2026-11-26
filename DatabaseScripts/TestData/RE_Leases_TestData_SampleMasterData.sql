@@ -1,4 +1,11 @@
 -- =====================================================================
+-- TEST DATA ONLY. DO NOT RUN ON PRODUCTION.
+-- The BA confirmed on 26 Nov 2026 (DPRE-Q03) that the Lease Dashboard master data workbook is
+-- a sample of the fields, not live data. Real leases are captured through UCXX (Capture Lease
+-- Details) or created when an application's lease agreement is concluded.
+-- Use this script only to fill a test database so the dashboard and register have rows.
+-- =====================================================================
+-- =====================================================================
 -- DPRE UCXX: import of the Lease Dashboard MASTER DATA REPORT (as at 31 Aug 2026)
 -- 684 leases. Generated from the workbook; re-running skips leases already present
 -- (matched on LeaseReferenceNumber). Run RE_Leases_Create.sql first.

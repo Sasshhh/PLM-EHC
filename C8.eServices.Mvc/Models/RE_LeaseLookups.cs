@@ -84,9 +84,10 @@ namespace C8.eServices.Mvc.Models
             "Service Facility Sign", "Small Billboard", "Super Billboard", "Undetermined Sign", "Other"
         };
 
+        // DPRE-Q08 (26 Nov 2026): CCAs come from the CCCs table (current CCC list), not a fixed town list here.
+
         public static readonly string[] SignElevations = { "Single-Sided", "Double-Sided", "Triple-Sided", "Other" };
 
-        public static readonly string[] OaTowns = { "Alberton", "Benoni", "Boksburg", "Brakpan", "Edenvale", "Germiston", "Kempton Park", "Nigel", "Springs" };
 
         public static readonly string[] TelecomInstallationTypes =
         {
@@ -116,12 +117,6 @@ namespace C8.eServices.Mvc.Models
         public static readonly string[] RecordStatuses = { "Active", "Inactive" };
         public static readonly string[] PaymentFrequencies = { "Monthly", "Quarterly", "Bi-Annually", "Annually" };
 
-        // CCA list used by the Lease Dashboard tabs (11 values incl. two portfolio "CCAs").
-        public static readonly string[] Ccas =
-        {
-            "ALBERTON", "BENONI", "BOKSBURG", "BRAKPAN", "EDENVALE", "GERMISTON", "KEMPTON PARK", "NIGEL", "SPRINGS",
-            "OUTDOOR ADVERTISING", "TELECOMMUNICATIONS"
-        };
 
         public const string StatusMoa = "MOA";
         public const string StatusNoLease = "No Lease";

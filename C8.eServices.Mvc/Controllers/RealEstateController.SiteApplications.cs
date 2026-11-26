@@ -60,10 +60,12 @@ namespace C8.eServices.Mvc.Controllers
                 Applies = (f, ind, vat) => true, Mandatory = (f, ind, vat) => true },
             new RE_SiteDocument { Key = "file_Zoning", Name = "Copy of the Zoning Certificate", DocumentTypeId = 18, Hint = "Obtainable from DPRE",
                 Applies = (f, ind, vat) => true, Mandatory = (f, ind, vat) => true },
-            new RE_SiteDocument { Key = "file_Plans", Name = "Plans/Drawings (supporting annexures)", DocumentTypeId = 18, Multiple = true,
-                Applies = (f, ind, vat) => f == "TEL", Mandatory = (f, ind, vat) => f == "TEL" },
-            new RE_SiteDocument { Key = "file_Fee", Name = "Proof of Application Fee Payment", DocumentTypeId = 18,
-                Applies = (f, ind, vat) => true, Mandatory = (f, ind, vat) => true },
+            // DPRE-Q43: plans come from City Planning; several files allowed, not mandatory.
+            new RE_SiteDocument { Key = "file_Plans", Name = "Supporting plans/drawings (from City Planning)", DocumentTypeId = 18, Multiple = true,
+                Hint = "Optional. Upload all plans or drawings you have", Applies = (f, ind, vat) => f == "TEL", Mandatory = (f, ind, vat) => false },
+            // DPRE-Q39: fee is paid after submission; proof can be uploaded now or later from My Applications.
+            new RE_SiteDocument { Key = "file_Fee", Name = ProofOfPaymentDocumentName, DocumentTypeId = 18,
+                Hint = "Optional now. You can upload it after submitting", Applies = (f, ind, vat) => true, Mandatory = (f, ind, vat) => false },
         };
 
         private static string FormTitleFor(string formCode)
@@ -261,7 +263,7 @@ namespace C8.eServices.Mvc.Controllers
                 {
                     referenceNumber = GenerateReferenceNumber(type.RefCode);
                     app.ApplicationReferenceNumber = referenceNumber;
-                    app.StatusId = db.Status.First(s => s.Key == StatusKeys.AwaitingApplicationFeeValidation).Id;
+                    app.StatusId = FeeStageStatusId(HasProofOfPayment(app.Id) || PostedFiles("file_Fee").Any());
                 }
 
                 if (isNewApp) db.RE_Applications.Add(app);
@@ -306,14 +308,16 @@ namespace C8.eServices.Mvc.Controllers
                     return RedirectToAction("CaptureSite", new { draftId = app.Id });
                 }
 
-                RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateVerifyPayment);
+                bool feeUploaded = HasProofOfPayment(app.Id);
+                if (feeUploaded)
+                    RealEstateWorkAllocationHelper.AssignRealEstateTask(db, app.Id, ResponsibilityTypeKeys.RealEstateVerifyPayment);
 
                 try
                 {
                     var email = new Email();
                     string subject = "Real Estate Development: " + type.Name + " Lease Application Submitted";
-                    string body = string.Format("Dear {0},<br/><br/>Your {1} lease application has been submitted successfully. Your Reference Number is: <strong>{2}</strong>.<br/><br/>Status: Application Submitted, Pending Review.",
-                        HttpUtility.HtmlEncode(_systemUser.FullName), HttpUtility.HtmlEncode(type.Name), referenceNumber);
+                    string body = string.Format("Dear {0},<br/><br/>Your {1} lease application has been submitted successfully. Your Reference Number is: <strong>{2}</strong>.<br/><br/>{3}",
+                        HttpUtility.HtmlEncode(_systemUser.FullName), HttpUtility.HtmlEncode(type.Name), referenceNumber, FeeNextStepText(feeUploaded));
                     email.GenerateEmail(_systemUser.EmailAddress, subject, body, _customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, _systemUser.FullName);
                 }
                 catch (Exception ex)
@@ -321,7 +325,8 @@ namespace C8.eServices.Mvc.Controllers
                     EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                 }
 
-                TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber;
+                TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber
+                    + (feeUploaded ? "" : ". Please pay the application fee and upload your proof of payment from this page.");
                 return RedirectToAction("MyApplications");
             }
             catch (Exception ex)
@@ -361,7 +366,6 @@ namespace C8.eServices.Mvc.Controllers
                         // Road reserve: the location is described by street names rather than an erf.
                         app.PropertyAddress = string.Format("Road reserve, {0} (nearest intersection {1})", site.RoadReserveStreetName, site.RoadReserveNearestIntersection);
                     }
-                    if (string.IsNullOrWhiteSpace(app.TownshipSuburbFarmName)) app.TownshipSuburbFarmName = site.Town;
                     break;
                 case "TEL":
                     app.PurposeOfLease = "Telecommunications: " + (site.InstallationType == "Other" ? site.InstallationTypeOther : site.InstallationType);
@@ -387,7 +391,7 @@ namespace C8.eServices.Mvc.Controllers
                 req(site.SignIlluminated.HasValue, "Site.SignIlluminated", "Indicate whether the sign will be illuminated.");
                 req(has(site.SignElevations), "Site.SignElevations", "Select the number of elevations.");
                 req(site.SignElevations != "Other" || has(site.SignElevationsOther), "Site.SignElevationsOther", "Indicate the number of elevations.");
-                req(has(site.Town), "Site.Town", "Select the town where the sign will be erected.");
+                // DPRE-Q08: town no longer captured; the Customer Care Area is used instead.
                 if (site.SignLocationType == RE_LeaseLookups.SignLocationTypes[2])
                 {
                     req(has(site.RoadReserveStreetName), "Site.RoadReserveStreetName", "Street Name is required.");

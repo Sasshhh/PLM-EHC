@@ -857,14 +857,14 @@
                             <!-- Doc 14: Proof of Payment -->
                             <div class="doc-upload-card">
                                 <div class="doc-info">
-                                    <span class="doc-title">Application Fee Proof of Payment<span class="required-badge">*</span></span>
-                                    <p class="doc-desc">Electronic Funds Transfer (EFT) receipt or deposit slip for the RED application fee.</p>
+                                    <span class="doc-title">Application Fee Proof of Payment (optional)</span>
+                                    <p class="doc-desc">EFT receipt or deposit slip for the application fee. You can also pay after submitting and upload this later from My Applications.</p>
                                 </div>
                                 <div class="doc-input-wrapper">
                                     <label class="doc-file-label" id="lblFile_Fee" for="file_Fee">
                                         <i class="fa fa-file-pdf-o"></i> Select File
                                     </label>
-                                    <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
                                         <span id="name_Fee" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
                                         <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Fee" id="remove_Fee" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
@@ -1062,6 +1062,15 @@
             }
 
             function addSelectedUnit(unit) {
+                // DPRE-Q36: one application per facility (several units within that facility are fine)
+                unit.FacilityId = unit.FacilityId || $("#ddlSelectedFacility").val();
+                var otherFacility = $.grep(selectedUnits, function (item) {
+                    return item.FacilityId && unit.FacilityId && item.FacilityId.toString() !== unit.FacilityId.toString();
+                }).length > 0;
+                if (otherFacility) {
+                    swal("One facility per application", "You can select several units, but only within one facility. Remove the other units first, or submit a separate application for this facility.", "warning");
+                    return;
+                }
                 var existingIndex = -1;
                 $.each(selectedUnits, function (index, item) {
                     if (item.UnitId === unit.UnitId) {

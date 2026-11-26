@@ -877,7 +877,7 @@
                     }
 
                     <!-- Back-office Applications Menu -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property Officer") || User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -1011,7 +1011,7 @@
                                 }
 
                                 <!-- Option: Lease Administration (UCXX Lease Dashboard / Register) -->
-                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                 {
                                     <li>
                                         <a href="javascript:;">

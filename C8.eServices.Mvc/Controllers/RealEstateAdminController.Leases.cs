@@ -17,20 +17,21 @@ namespace C8.eServices.Mvc.Controllers
 
         private static readonly string[] LeaseAdminRoles =
         {
-            "Property Manager", "Property Managers", "Back Office System Administrator",
+            "Property Officer", "Property Manager", "Property Managers", "Back Office System Administrator",
             "Super Administrators", "Administrators", "Support Admin"
         };
 
         /// <summary>
         /// The controller is [AllowAnonymous], so lease pages check sign-in and role themselves.
-        /// ASSUMPTION (DPRE-Q: actor "Property/LED Officer" has no role yet): Property Manager and admin roles can use these pages.
+        /// UCXX actor confirmed 26 Nov 2026 as "Property Officer" (role added by DatabaseScripts/RE_PropertyOfficer_Role.sql);
+        /// Property Managers and admin roles keep access.
         /// </summary>
         private ActionResult EnsureLeaseAdmin()
         {
             if (!Request.IsAuthenticated)
                 return RedirectToAction("Login", "Account", new { returnUrl = Request.RawUrl });
             if (!LeaseAdminRoles.Any(r => User.IsInRole(r)))
-                return new HttpStatusCodeResult(403, "Access Denied: Lease Administration is limited to Property Managers and administrators.");
+                return new HttpStatusCodeResult(403, "Access Denied: Lease Administration is limited to Property Officers, Property Managers and administrators.");
             return null;
         }
 
@@ -42,7 +43,10 @@ namespace C8.eServices.Mvc.Controllers
             ViewBag.ContactTypes = RE_LeaseLookups.ContactTypes;
             ViewBag.RecordStatuses = RE_LeaseLookups.RecordStatuses;
             ViewBag.PaymentFrequencies = RE_LeaseLookups.PaymentFrequencies;
-            ViewBag.Ccas = RE_LeaseLookups.Ccas;
+            // DPRE-Q08 (26 Nov 2026): CCA comes from the current CCC list, not the old towns or spreadsheet groups.
+            var cccs = db.CCCs.Where(c => c.IsActive && !c.IsDeleted).OrderBy(c => c.CCCName).ToList();
+            ViewBag.Ccas = cccs.Select(c => c.CCCName).ToArray();
+            ViewBag.CCCList = new SelectList(cccs, "Id", "CCCName");
             ViewBag.DashboardStatuses = RE_LeaseLookups.DashboardStatuses;
         }
 
@@ -62,8 +66,8 @@ namespace C8.eServices.Mvc.Controllers
             var leases = ActiveLeases().ToList();
             var withStatus = leases.Select(l => new { Lease = l, Status = RE_LeaseLookups.DeriveDashboardStatus(l, today) }).ToList();
 
-            // CCA x status grid, same layout as the spreadsheet "LEASE DASHBOARD" pivot
-            var ccas = RE_LeaseLookups.Ccas
+            // CCA x status grid, same layout as the spreadsheet "LEASE DASHBOARD" pivot, one row per current CCC (DPRE-Q08)
+            var ccas = db.CCCs.Where(c => c.IsActive && !c.IsDeleted).OrderBy(c => c.CCCName).Select(c => c.CCCName).ToList()
                 .Union(leases.Select(l => l.Cca).Where(c => !string.IsNullOrWhiteSpace(c)), StringComparer.OrdinalIgnoreCase)
                 .ToList();
             var grid = new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
@@ -187,8 +191,8 @@ namespace C8.eServices.Mvc.Controllers
             }
 
             var realEstateDeptId = db.ApplicationEntities.FirstOrDefault(ae => ae.Key == ApplicationEntityKeys.RealEstateDevelopment)?.Id;
-            if (!string.IsNullOrWhiteSpace(model.Cca))
-                model.CCCId = db.CCCs.Where(c => c.CCCName.ToUpper() == model.Cca.ToUpper()).Select(c => (int?)c.Id).FirstOrDefault();
+            // CCA is picked from the CCC list; Cca keeps the name for the dashboard and register.
+            model.Cca = model.CCCId.HasValue ? db.CCCs.Where(c => c.Id == model.CCCId.Value).Select(c => c.CCCName).FirstOrDefault() : null;
 
             string savedRef;
             bool isNew = model.Id == 0;
@@ -274,7 +278,7 @@ namespace C8.eServices.Mvc.Controllers
             lease.PhysicalStreetAddress = app.PropertyAddress;
             lease.PhysicalBuildingNumberAndName = app.SelectedFacility != null ? app.SelectedFacility.Name : app.ErfFarmNumber;
             lease.CCCId = app.CCCId;
-            lease.Cca = ccc != null ? ccc.CCCName.ToUpperInvariant() : null;
+            lease.Cca = ccc != null ? ccc.CCCName : null;
             lease.LeaseDetailsAndPurpose = string.Format("{0}. Application {1}.", app.PurposeOfLease, app.ApplicationReferenceNumber);
             lease.LeasedAreaSqm = site != null ? (site.TotalExtentSqm ?? ((site.AreaGroundSqm ?? 0) + (site.AreaOnStructureSqm ?? 0))) : (decimal?)null;
             lease.LeaseStartDate = app.LeaseStartDate;
@@ -283,6 +287,11 @@ namespace C8.eServices.Mvc.Controllers
             lease.EscalationTerms = app.LeaseEscalationTerms;
             lease.PaymentFrequency = app.LeasePaymentFrequency;
             lease.MonthlyRental = app.CalculatedMonthlyRental;
+            // DPRE-Q11: escalation % comes from the facility category set up in the Administrator console,
+            // unless the Property Officer has already captured one on the lease.
+            if (lease.EscalationPercentage == null && app.SelectedFacilityUnitId.HasValue)
+                lease.EscalationPercentage = db.RE_FacilityUnits.Where(u => u.Id == app.SelectedFacilityUnitId.Value)
+                    .Select(u => u.FacilityCategory.EscalationPercentage).FirstOrDefault();
             lease.DepositHeld = app.LeaseDepositAmount;
             lease.TenantName = string.IsNullOrWhiteSpace(app.EntityName) ? "(Not captured)" : app.EntityName;
             lease.ApplicantType = app.ApplicantType;

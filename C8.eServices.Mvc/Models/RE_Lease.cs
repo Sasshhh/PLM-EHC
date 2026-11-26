@@ -21,7 +21,7 @@ namespace C8.eServices.Mvc.Models
         [MaxLength(250)] public string PhysicalBuildingNumberAndName { get; set; }
         [MaxLength(250)] public string InvoiceClarification { get; set; }
         [MaxLength(250)] public string PhysicalStreetAddress { get; set; }
-        [MaxLength(50)]  public string Cca { get; set; }                     // Town/CCA used by the dashboard
+        [MaxLength(50)]  public string Cca { get; set; }                     // CCA name (from CCCId) used by the dashboard
         public int? CCCId { get; set; }
         [ForeignKey("CCCId")] public virtual CCC CCC { get; set; }
 

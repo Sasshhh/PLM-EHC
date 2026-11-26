@@ -233,8 +233,8 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("file_References", "Contactable References document is required.");
             if (file_Letters == null || file_Letters.ContentLength == 0)
                 ModelState.AddModelError("file_Letters", "Supporting/Motivational Letter is required.");
-            if (file_Fee == null || file_Fee.ContentLength == 0)
-                ModelState.AddModelError("file_Fee", "Proof of Application Fee Payment is required.");
+            // DPRE-Q39 (26 Nov 2026): the application fee is paid after submission, so proof of payment is optional here.
+            // The applicant can upload it later from My Applications (UploadProofOfPayment).
             if (file_Experience == null || file_Experience.ContentLength == 0)
                 ModelState.AddModelError("file_Experience", "Facilities Management Experience description is required.");
             if (file_Financials == null || file_Financials.ContentLength == 0)
@@ -263,6 +263,13 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.Remove("Application.SelectedUnitCount");
 
                 decimal totalRental = 0;
+
+                // DPRE-Q36 (26 Nov 2026): one application per facility; several units are allowed within that facility.
+                var selectedIds = selectedUnitsList.Select(u => u.UnitId).Distinct().ToList();
+                var facilityCount = db.RE_FacilityUnits.Where(fu => selectedIds.Contains(fu.Id)).Select(fu => fu.FacilityId).Distinct().Count();
+                if (facilityCount > 1)
+                    ModelState.AddModelError("", "Select units from one facility only. Submit a separate application for each facility.");
+
                 foreach (var selUnit in selectedUnitsList)
                 {
                     var facilityUnit = db.RE_FacilityUnits
@@ -349,7 +356,8 @@ namespace C8.eServices.Mvc.Controllers
                     model.Application.ApplicationReferenceNumber = referenceNumber;
                     model.Application.SystemUserId = _systemUser.Id;
                     model.Application.CustomerId = _customer.Id;
-                    model.Application.StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.AwaitingApplicationFeeValidation).Id;
+                    bool feeUploaded = file_Fee != null && file_Fee.ContentLength > 0;
+                    model.Application.StatusId = FeeStageStatusId(feeUploaded);
                     model.Application.DepartmentId = db.ApplicationEntities.FirstOrDefault(ae => ae.Key == ApplicationEntityKeys.RealEstateDevelopment)?.Id;
                     model.Application.IsActive = true;
                     model.Application.IsDeleted = false;
@@ -381,7 +389,8 @@ namespace C8.eServices.Mvc.Controllers
                         SaveAndLinkFile(file_Locality, "Locality Plan of Property", appId, 18, refTypeId);
                     if (file_Zoning != null && file_Zoning.ContentLength > 0)
                         SaveAndLinkFile(file_Zoning, "Copy of Zoning Certificate", appId, 18, refTypeId);
-                    SaveAndLinkFile(file_Fee, "Proof of Application Fee Payment", appId, 18, refTypeId);
+                    if (feeUploaded)
+                        SaveAndLinkFile(file_Fee, ProofOfPaymentDocumentName, appId, 18, refTypeId);
                     SaveAndLinkFile(file_Experience, "Facilities Management Experience", appId, 18, refTypeId);
                     SaveAndLinkFile(file_Financials, "3-years Audited Financial Statements", appId, 59, refTypeId);
                     SaveAndLinkFile(file_BusinessPlan, "Business Plan", appId, 18, refTypeId);
@@ -393,15 +402,16 @@ namespace C8.eServices.Mvc.Controllers
                         SaveAndLinkFile(otherFile, "Other Supporting Document: " + Path.GetFileName(otherFile.FileName), appId, 18, refTypeId);
                     }
 
-                    // Assign Verify Payment task in Round Robin Queue
-                    RealEstateWorkAllocationHelper.AssignRealEstateTask(db, appId, ResponsibilityTypeKeys.RealEstateVerifyPayment);
+                    // Assign Verify Payment task in Round Robin Queue, only once proof of payment is in
+                    if (feeUploaded)
+                        RealEstateWorkAllocationHelper.AssignRealEstateTask(db, appId, ResponsibilityTypeKeys.RealEstateVerifyPayment);
 
                     // Notify customer via Email
                     try
                     {
                         var email = new Email();
                         string subject = "Real Estate Development: Lease Application Captured Successfully";
-                        string body = string.Format("Dear {0},<br/><br/>Your lease application for space has been captured successfully. Your Reference Number is: <strong>{1}</strong>.<br/><br/>Your application will now be processed for evaluation.", _systemUser.FullName, referenceNumber);
+                        string body = string.Format("Dear {0},<br/><br/>Your lease application for space has been captured successfully. Your Reference Number is: <strong>{1}</strong>.<br/><br/>{2}", _systemUser.FullName, referenceNumber, FeeNextStepText(feeUploaded));
                         email.GenerateEmail(_systemUser.EmailAddress, subject, body, _customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, _systemUser.FullName);
                     }
                     catch (Exception ex)
@@ -409,7 +419,8 @@ namespace C8.eServices.Mvc.Controllers
                         EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                     }
 
-                    TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber;
+                    TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber
+                        + (feeUploaded ? "" : ". Please pay the application fee and upload your proof of payment from this page.");
                     return RedirectToAction("MyApplications");
                 }
                 catch (Exception ex)

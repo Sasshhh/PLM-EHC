@@ -68,13 +68,12 @@
             <div class="col-sm-6 form-group">
                 <label for="PhysicalStreetAddress">Street Address (Physical Address)</label>
                 @Html.TextBoxFor(m => m.PhysicalStreetAddress, new { @class = "form-control" })
-                <small><a id="gisLink" href="#" target="_blank" rel="noopener">Open in GIS Viewer</a></small>
                 @Html.ValidationMessageFor(m => m.PhysicalStreetAddress, "", new { @class = "text-danger" })
             </div>
             <div class="col-sm-3 form-group">
-                <label for="Cca">Town/CCA</label>
-                @Html.DropDownListFor(m => m.Cca, new SelectList((string[])ViewBag.Ccas, Model.Cca), "-- Select --", new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.Cca, "", new { @class = "text-danger" })
+                <label for="CCCId">CCA</label>
+                @Html.DropDownListFor(m => m.CCCId, new SelectList(((SelectList)ViewBag.CCCList).Items, "Id", "CCCName", Model.CCCId), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.CCCId, "", new { @class = "text-danger" })
             </div>
             <div class="col-sm-3 form-group">
                 <label for="LeasedAreaSqm">Leased Area (Size, m²)</label>
@@ -489,16 +488,7 @@
             document.getElementById('leaseForm').submit();
         });
 
-        // Street address hyperlinked to the GIS Viewer (IR014). ASSUMPTION: viewer URL not yet supplied, so a map search is used.
-        var gis = document.getElementById('gisLink');
-        var addr = document.getElementById('PhysicalStreetAddress');
-        function syncGis() {
-            var v = addr.value.trim();
-            gis.style.display = v ? 'inline' : 'none';
-            gis.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v + ', Ekurhuleni');
-        }
-        addr.addEventListener('input', syncGis);
-        syncGis();
+        // GIS Viewer link (IR014) deferred until after UC01-05/UCXX (DPRE-Q04/Q22, 26 Nov 2026); it will come through a GIS integration.
 
         // Show "Other, please specify" and Authorised Representative only when relevant
         function toggle(selectId, value, targetId) {

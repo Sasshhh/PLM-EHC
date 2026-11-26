@@ -134,7 +134,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: RealEstateAdmin/AddCategory
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddCategory(string key, string name, decimal tariffPerSqm)
+        public ActionResult AddCategory(string key, string name, decimal tariffPerSqm, decimal? escalationPercentage = null)
         {
             Initialise();
             if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(name))
@@ -157,6 +157,7 @@ namespace C8.eServices.Mvc.Controllers
                 Key = normalizedKey,
                 Name = name.Trim(),
                 TariffPerSqm = tariffPerSqm,
+                EscalationPercentage = escalationPercentage,
                 IsActive = true,
                 IsDeleted = false,
                 CreatedBySystemUserId = _systemUser?.Id,
@@ -175,7 +176,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: RealEstateAdmin/EditCategory
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditCategory(int id, string name, decimal tariffPerSqm)
+        public ActionResult EditCategory(int id, string name, decimal tariffPerSqm, decimal? escalationPercentage = null)
         {
             Initialise();
             var category = db.RE_FacilityCategories.Find(id);
@@ -183,6 +184,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 category.Name = name.Trim();
                 category.TariffPerSqm = tariffPerSqm;
+                category.EscalationPercentage = escalationPercentage;
                 category.ModifiedDateTime = DateTime.Now;
                 category.ModifiedBySystemUserId = _systemUser?.Id;
 
@@ -505,6 +507,9 @@ namespace C8.eServices.Mvc.Controllers
                 }
 
                 app.PaymentValidationComment = comment;
+                // DPRE-Q39: send the application back to the applicant to upload a valid proof of payment
+                var uploadStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.AwaitingApplicationFeeUpload);
+                if (uploadStatus != null) app.StatusId = uploadStatus.Id;
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;

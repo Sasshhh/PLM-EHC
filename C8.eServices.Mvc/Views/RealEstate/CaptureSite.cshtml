@@ -104,11 +104,7 @@
                 @Html.TextBoxFor(m => m.Site.CityPlanningReferenceNumber, new { @class = "form-control" })
                 @Html.ValidationMessageFor(m => m.Site.CityPlanningReferenceNumber, "", new { @class = "text-danger" })
             </div>
-            <div class="col-sm-4 form-group ">
-                <label for="Site_Town" class="req">Town where the sign will be erected</label>
-                @Html.DropDownListFor(m => m.Site.Town, new SelectList(RE_LeaseLookups.OaTowns, Model.Site.Town), "-- Select --", new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.Site.Town, "", new { @class = "text-danger" })
-            </div>
+            @* DPRE-Q08 (26 Nov 2026): the old town list is replaced by the Customer Care Area below. *@
             <div class="col-sm-4 form-group ">
                 <label for="Application_CCCId" class="req">Customer Care Area</label>
                 @Html.DropDownListFor(m => m.Application.CCCId, new SelectList((IEnumerable<SelectListItem>)ViewBag.CCCList, "Value", "Text", Model.Application.CCCId), "-- Select --", new { @class = "form-control" })

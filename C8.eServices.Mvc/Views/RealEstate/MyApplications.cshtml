@@ -360,6 +360,12 @@
                                     <i class="fa fa-eye"></i> View
                                 </button>
                                 }
+                                @if (app.Status != null && app.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.AwaitingApplicationFeeUpload)
+                                {
+                                    <a href="@Url.Action("UploadProofOfPayment", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-upload-pop-@app.Id">
+                                        <i class="fa fa-upload"></i> Upload Proof of Payment
+                                    </a>
+                                }
                                 @if (app.Status != null && app.Status.Key == "re_awaiting_inspection" && app.InspectionStatus == "Scheduled")
                                 {
                                     <a href="@Url.Action("SelectInspectionSlot", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-select-slot-@app.Id">
