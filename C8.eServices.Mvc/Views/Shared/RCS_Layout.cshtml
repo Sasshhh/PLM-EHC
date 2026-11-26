@@ -1010,6 +1010,38 @@
                                     </li>
                                 }
 
+                                <!-- Option: Lease Administration (UCXX Lease Dashboard / Register) -->
+                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="javascript:;">
+                                            <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Lease Administration</span>
+                                            <i class="arrow ion-chevron-left"></i>
+                                        </a>
+                                        <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                            <li>
+                                                <a href="~/RealEstateAdmin/LeaseDashboard">
+                                                    <i class="ion ion-pie-graph" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Lease Dashboard</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/LeaseRegister">
+                                                    <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Lease Register</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/CaptureLease">
+                                                    <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Capture Existing Lease</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+
                                 <!-- Option: Worklists (UC 12, UC 20) -->
                                 @if (User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                 {

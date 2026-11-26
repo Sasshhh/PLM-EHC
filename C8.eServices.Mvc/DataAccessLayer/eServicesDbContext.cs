@@ -148,6 +148,8 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<RE_FacilityCategoryAudit> RE_FacilityCategoryAudits { get; set; }
         public DbSet<RE_FacilityUnitAudit> RE_FacilityUnitAudits { get; set; }
         public DbSet<RE_DepartmentalCommentAudit> RE_DepartmentalCommentAudits { get; set; }
+        public DbSet<RE_Lease> RE_Leases { get; set; }
+        public DbSet<RE_LeaseAudit> RE_LeaseAudits { get; set; }
         //Audits 
         public DbSet<ScheduledInspectionAudit> ScheduledInspectionAudits { get; set; }
         public DbSet<UnitsEkurhuleniHousingCompanyAudit> UnitsEkurhuleniHousingCompanyAudits { get; set; }
@@ -793,6 +795,9 @@ namespace C8.eServices.Mvc.DataAccessLayer
                             break;
                         case "RE_DepartmentalComment":
                             RE_DepartmentalCommentAudits.Add((RE_DepartmentalCommentAudit)audit);
+                            break;
+                        case "RE_Lease":
+                            RE_LeaseAudits.Add((RE_LeaseAudit)audit);
                             break;
                         case "ApplicationRole":
                             ApplicationRoleAudits.Add((ApplicationRoleAudit)audit);

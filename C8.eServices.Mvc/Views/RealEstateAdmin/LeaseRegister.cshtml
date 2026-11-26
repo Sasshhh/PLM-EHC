@@ -1,0 +1,120 @@
+@model List<C8.eServices.Mvc.Models.RE_Lease>
+@{
+    ViewBag.Title = "Lease Register";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    int page = ViewBag.Page;
+    int pageCount = ViewBag.PageCount;
+    string fCca = ViewBag.FilterCca, fStatus = ViewBag.FilterStatus, fClass = ViewBag.FilterClassification, fQ = ViewBag.FilterQ;
+}
+@Html.Partial("_RE_LeaseStyles")
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+
+    <div class="admin-header-card">
+        <h1>Lease Register</h1>
+        <p>All captured and imported leases. @ViewBag.TotalCount lease(s) match the current filter.</p>
+    </div>
+
+    <div class="admin-card">
+        <form method="get" action="@Url.Action("LeaseRegister")" class="row" style="row-gap:10px;">
+            <div class="col-sm-3"><label>Search</label><input type="text" name="q" value="@fQ" class="form-control" placeholder="Lease ref, tenant, property code, address" /></div>
+            <div class="col-sm-2">
+                <label>CCA</label>
+                <select name="cca" class="form-control">
+                    <option value="">All</option>
+                    @foreach (string c in ViewBag.Ccas) { <option value="@c" selected="@(c == fCca)">@c</option> }
+                    <option value="(No CCA)" selected="@(fCca == "(No CCA)")">(No CCA)</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label>Status</label>
+                <select name="status" class="form-control">
+                    <option value="">All</option>
+                    @foreach (string s in ViewBag.DashboardStatuses) { <option value="@s" selected="@(s == fStatus)">@s</option> }
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <label>Classification</label>
+                <select name="classification" class="form-control">
+                    <option value="">All</option>
+                    @foreach (string c in ViewBag.Classifications) { <option value="@c" selected="@(c == fClass)">@c</option> }
+                    <option value="(Not classified)" selected="@(fClass == "(Not classified)")">(Not classified)</option>
+                </select>
+            </div>
+            <div class="col-sm-2" style="padding-top:24px; display:flex; gap:6px;">
+                <button type="submit" class="btn-re-gold"><i class="fa fa-search"></i> Filter</button>
+                <a class="btn-re-outline" href="@Url.Action("LeaseRegister")">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <h3 style="margin-bottom:0;">Leases</h3>
+            <div style="display:flex; gap:8px;">
+                <a class="btn-re-outline" href="@Url.Action("LeaseDashboard")"><i class="fa fa-th"></i> Dashboard</a>
+                <a class="btn-re-gold" href="@Url.Action("CaptureLease")"><i class="fa fa-plus"></i> Capture Lease</a>
+            </div>
+        </div>
+        @if (!Model.Any())
+        {
+            <div style="text-align:center; padding:40px; color:#64748b;">No leases match this filter.</div>
+        }
+        else
+        {
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Lease Ref</th>
+                        <th>Tenant</th>
+                        <th>Property Code</th>
+                        <th>CCA</th>
+                        <th>Classification</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th class="num">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in Model)
+                    {
+                        var st = l.DashboardStatus;
+                        var end = l.LeaseTerminationDate ?? l.LeaseEndDate;
+                        <tr>
+                            <td style="font-weight:700;">@l.LeaseReferenceNumber</td>
+                            <td>@l.TenantName</td>
+                            <td>@l.PropertyCode</td>
+                            <td>@l.Cca</td>
+                            <td>@l.LeaseClassification @if (!string.IsNullOrEmpty(l.SourceClassification) && l.SourceClassification != l.LeaseClassification) { <br /><small style="color:#64748b;">was: @l.SourceClassification</small> }</td>
+                            <td>@(l.LeaseIndefinite ? "Indefinite" : (end.HasValue ? end.Value.ToString("yyyy/MM/dd") : "-"))</td>
+                            <td><span class="re-status re-status-@st.Replace(" ", "")">@st</span></td>
+                            <td class="num" style="white-space:nowrap;">
+                                <a class="btn-re-outline" href="@Url.Action("LeaseDetails", new { id = l.Id })">View</a>
+                                <a class="btn-re-gold" href="@Url.Action("CaptureLease", new { id = l.Id })">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            if (pageCount > 1)
+            {
+                <div style="margin-top:16px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    @if (page > 1)
+                    {
+                        <a class="btn-re-outline" href="@Url.Action("LeaseRegister", new { cca = fCca, status = fStatus, classification = fClass, q = fQ, page = page - 1 })">&laquo; Previous</a>
+                    }
+                    <span style="padding:0 8px; color:#64748b;">Page @page of @pageCount</span>
+                    @if (page < pageCount)
+                    {
+                        <a class="btn-re-outline" href="@Url.Action("LeaseRegister", new { cca = fCca, status = fStatus, classification = fClass, q = fQ, page = page + 1 })">Next &raquo;</a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

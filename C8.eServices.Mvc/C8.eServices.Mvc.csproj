@@ -1548,6 +1548,28 @@
     <Content Include="Views\RealEstateAdmin\InitiateReview.cshtml" />
     <Content Include="Views\RealEstateAdmin\RiskAssessments.cshtml" />
     <Content Include="Views\RealEstateAdmin\VerifyPayment.cshtml" />
+    <Content Include="Views\RealEstateAdmin\_RE_LeaseStyles.cshtml" />
+    <Content Include="Views\RealEstateAdmin\CaptureLease.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseDashboard.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseDetails.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseRegister.cshtml" />
+    <Content Include="Views\RealEstate\LeaseAgreements.cshtml" />
+    <Content Include="Views\RealEstate\SignLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActiveOccupancy.cshtml" />
+    <Content Include="Views\RealEstateAdmin\ActivePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AllocateSpace.cshtml" />
+    <Content Include="Views\RealEstateAdmin\Allocations.cshtml" />
+    <Content Include="Views\RealEstateAdmin\AuthoriseLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\CaptureLeaseDetails.cshtml" />
+    <Content Include="Views\RealEstateAdmin\EvaluationCriteria.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GenerateLeaseAgreement.cshtml" />
+    <Content Include="Views\RealEstateAdmin\GeneratePtoCertificate.cshtml" />
+    <Content Include="Views\RealEstateAdmin\LeaseAgreementApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\NewLeases.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoApprovals.cshtml" />
+    <Content Include="Views\RealEstateAdmin\PtoSignatureQueue.cshtml" />
+    <Content Include="Views\RealEstateAdmin\RevokePto.cshtml" />
+    <Content Include="Views\RealEstateAdmin\SignPtoCertificate.cshtml" />
     <Content Include="Views\RealEstate\Capture.cshtml" />
     <Content Include="Views\RealEstate\Inbox.cshtml" />
     <Content Include="Views\RealEstate\MyApplications.cshtml" />
@@ -1982,6 +2004,9 @@
     <Compile Include="Controllers\RCSController.cs" />
     <Compile Include="Controllers\RealEstateController.cs" />
     <Compile Include="Controllers\RealEstateAdminController.cs" />
+    <Compile Include="Controllers\RealEstateAdminController.Leases.cs">
+      <DependentUpon>RealEstateAdminController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\PLMReportController.cs" />
     <Compile Include="Controllers\RCSReportController.cs" />
     <Compile Include="Controllers\RCSUserMessagesController.cs" />
@@ -2236,6 +2261,7 @@
     <Compile Include="Models\Audits\TrainingSlideAudit.cs" />
     <Compile Include="Models\Audits\RE_ApplicationAudit.cs" />
     <Compile Include="Models\Audits\RE_FacilityAudit.cs" />
+    <Compile Include="Models\Audits\RE_LeaseAudit.cs" />
     <Compile Include="Models\Audits\RE_FacilityCategoryAudit.cs" />
     <Compile Include="Models\Audits\RE_FacilityUnitAudit.cs" />
     <Compile Include="Models\Audits\RE_DepartmentalCommentAudit.cs" />
@@ -2579,6 +2605,8 @@
     <Compile Include="Models\RE_DepartmentalComment.cs" />
     <Compile Include="Models\RE_FacilityCategory.cs" />
     <Compile Include="Models\RE_Facility.cs" />
+    <Compile Include="Models\RE_Lease.cs" />
+    <Compile Include="Models\RE_LeaseLookups.cs" />
     <Compile Include="Models\RE_FacilityUnit.cs" />
     <Compile Include="Models\RatesRebateProperty.cs" />
     <Compile Include="Models\RCSActionType.cs" />

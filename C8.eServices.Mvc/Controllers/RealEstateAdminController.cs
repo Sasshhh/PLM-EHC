@@ -15,7 +15,7 @@ using C8.eServices.Mvc.Keys;
 namespace C8.eServices.Mvc.Controllers
 {
     [AllowAnonymous]
-    public class RealEstateAdminController : Controller
+    public partial class RealEstateAdminController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
         private readonly BaseHelper _base = new BaseHelper();

@@ -1,0 +1,114 @@
+@{
+    ViewBag.Title = "Lease Dashboard";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var grid = (Dictionary<string, Dictionary<string, int>>)ViewBag.Grid;
+    var statuses = (string[])ViewBag.DashboardStatuses;
+    var statusTotals = (Dictionary<string, int>)ViewBag.StatusTotals;
+    var classTotals = (Dictionary<string, int>)ViewBag.ClassificationTotals;
+    int total = ViewBag.TotalLeases;
+}
+@Html.Partial("_RE_LeaseStyles")
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+
+    <div class="admin-header-card">
+        <h1>Lease Dashboard</h1>
+        <p>Lease portfolio per CCA as at @(((DateTime)ViewBag.AsAt).ToString("dd MMM yyyy")). Click any number to open those leases.</p>
+    </div>
+
+    <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn-re-gold" href="@Url.Action("CaptureLease")"><i class="fa fa-plus"></i> Capture Lease</a>
+        <a class="btn-re-outline" href="@Url.Action("LeaseRegister")"><i class="fa fa-list"></i> Lease Register</a>
+    </div>
+
+    <div class="row" style="margin-bottom:10px;">
+        <div class="col-sm-4 col-md-2" style="margin-bottom:10px;">
+            <a class="kpi" href="@Url.Action("LeaseRegister")"><div class="v">@total</div><div class="l">All leases</div></a>
+        </div>
+        @foreach (var s in statuses)
+        {
+            <div class="col-sm-4 col-md-2" style="margin-bottom:10px;">
+                <a class="kpi" href="@Url.Action("LeaseRegister", new { status = s })"><div class="v">@statusTotals[s]</div><div class="l">@s</div></a>
+            </div>
+        }
+    </div>
+
+    <div class="admin-card">
+        <h3>Leases per CCA</h3>
+        @if (total == 0)
+        {
+            <p style="color:#64748b;">No leases captured yet. Capture a lease or run the Master Data import.</p>
+        }
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>CCA</th>
+                    @foreach (var s in statuses) { <th class="num">@s</th> }
+                    <th class="num">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in grid.OrderBy(r => r.Key))
+                {
+                    var rowTotal = row.Value.Values.Sum();
+                    <tr>
+                        <td style="font-weight:600;">@row.Key</td>
+                        @foreach (var s in statuses)
+                        {
+                            <td class="num">
+                                @if (row.Value[s] > 0)
+                                {
+                                    <a href="@Url.Action("LeaseRegister", new { cca = row.Key, status = s })">@row.Value[s]</a>
+                                }
+                                else
+                                {
+                                    <span style="color:#cbd5e1;">0</span>
+                                }
+                            </td>
+                        }
+                        <td class="num" style="font-weight:700;"><a href="@Url.Action("LeaseRegister", new { cca = row.Key })">@rowTotal</a></td>
+                    </tr>
+                }
+                <tr class="total">
+                    <td>Grand Total</td>
+                    @foreach (var s in statuses) { <td class="num">@statusTotals[s]</td> }
+                    <td class="num">@total</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="admin-card">
+                <h3>Leases per Classification</h3>
+                <table class="admin-table">
+                    <thead><tr><th>Classification</th><th class="num">Leases</th></tr></thead>
+                    <tbody>
+                        @foreach (var c in classTotals)
+                        {
+                            <tr>
+                                <td>@c.Key</td>
+                                <td class="num"><a href="@Url.Action("LeaseRegister", new { classification = c.Key })">@c.Value</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="admin-card">
+                <h3>Attention</h3>
+                <p style="font-size:14px; color:#334155;">
+                    <strong>@ViewBag.ExpiringIn90Days</strong> active lease(s) end within the next 90 days.<br />
+                    <strong>@statusTotals["Expired"]</strong> lease(s) have passed their end date.<br />
+                    <strong>@statusTotals["No Lease"]</strong> occupation(s) have no lease end date on record.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
