@@ -35,7 +35,7 @@
         {
             if (t.OnlineFormAvailable)
             {
-                <a class="lt-card" href="@Url.Action("Capture", "RealEstate", new { leaseType = t.Name })" id="lease-type-@t.RefCode">
+                <a class="lt-card" href="@Url.Action("Capture", "RealEstate", new { leaseType = t.Name })" id="lease-type-@t.Name.Replace(" ", "-").ToLowerInvariant()">
                     <h3>@t.Name</h3>
                     <p>@t.Description</p>
                     <span class="go">Apply now <i class="fa fa-arrow-right"></i></span>
@@ -43,7 +43,7 @@
             }
             else
             {
-                <div class="lt-card off" id="lease-type-@t.RefCode">
+                <div class="lt-card off" id="lease-type-@t.Name.Replace(" ", "-").ToLowerInvariant()">
                     <h3>@t.Name</h3>
                     <p>@t.Description</p>
                     <span class="soon">Not yet available online. Please contact the DPRE office.</span>

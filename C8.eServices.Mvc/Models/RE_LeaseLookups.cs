@@ -11,13 +11,13 @@ namespace C8.eServices.Mvc.Models
     public static class RE_LeaseLookups
     {
         // UCXX Step 5 list. The Master Data has no Telecommunications class; the import assigns it to the 57 leases
-        // listed under the TELECOMMUNICATIONS "CCA" in the dashboard tabs (ASSUMPTION, see PR notes).
+        // listed under the TELECOMMUNICATIONS "CCA" in the dashboard tabs (ASSUMPTION, DPRE-Q06).
         public static readonly string[] Classifications =
         {
             "Business Hub", "Commercial", "Outdoor Advertising", "Telecommunications", "Social", "Agricultural", "Servitude"
         };
 
-        // ASSUMPTION: how the 9 spreadsheet classifications map to the 7 UCXX classes until the BA confirms.
+        // ASSUMPTION (DPRE-Q06): how the 9 spreadsheet classifications map to the 7 UCXX classes until the BA confirms.
         // Unmapped/uncertain values keep the original in SourceClassification so nothing is lost.
         public static readonly Dictionary<string, string> SourceClassificationMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -53,17 +53,18 @@ namespace C8.eServices.Mvc.Models
             public bool OnlineFormAvailable { get; set; }
         }
 
-        // DPRE-BUS comes from the SDS (UC05 Scenario 1). The other codes are ASSUMPTIONS until confirmed.
-        // ASSUMPTION: Commercial uses the Business/Commercial Hub form; the other types are switched on as their forms are built.
+        // Codes from the SDS: DPRE-BUS (Business/Commercial Hub), DPRE-OA, DPRE-TEL, DPRE-LH (Concession/Leasehold).
+        // ASSUMPTIONS until DPRE-Q35/Q45 are answered: Commercial uses the Business/Commercial Hub form and DPRE-BUS;
+        // Social, Agricultural and Servitude use DPRE-LH. Types without an online form are switched on as their forms are built.
         public static readonly LeaseApplicationType[] LeaseApplicationTypes =
         {
             new LeaseApplicationType { Name = "Business Hub", RefCode = "BUS", OnlineFormAvailable = true, Description = "Retail and office units in a municipal business hub facility." },
-            new LeaseApplicationType { Name = "Commercial", RefCode = "COM", OnlineFormAvailable = true, Description = "Commercial letting space in a municipal facility." },
+            new LeaseApplicationType { Name = "Commercial", RefCode = "BUS", OnlineFormAvailable = true, Description = "Commercial letting space in a municipal facility." },
             new LeaseApplicationType { Name = "Outdoor Advertising", RefCode = "OA", OnlineFormAvailable = false, Description = "Billboards and other outdoor advertising sites." },
             new LeaseApplicationType { Name = "Telecommunications", RefCode = "TEL", OnlineFormAvailable = false, Description = "Telecommunication masts, rooftop sites and equipment." },
-            new LeaseApplicationType { Name = "Social", RefCode = "SOC", OnlineFormAvailable = false, Description = "Community, NPO and social-purpose use of municipal property." },
-            new LeaseApplicationType { Name = "Agricultural", RefCode = "AGR", OnlineFormAvailable = false, Description = "Agricultural use of municipal land." },
-            new LeaseApplicationType { Name = "Servitude", RefCode = "SRV", OnlineFormAvailable = false, Description = "Servitudes and road reserve encroachments." },
+            new LeaseApplicationType { Name = "Social", RefCode = "LH", OnlineFormAvailable = false, Description = "Community, NPO and social-purpose use of municipal property." },
+            new LeaseApplicationType { Name = "Agricultural", RefCode = "LH", OnlineFormAvailable = false, Description = "Agricultural use of municipal land." },
+            new LeaseApplicationType { Name = "Servitude", RefCode = "LH", OnlineFormAvailable = false, Description = "Servitudes and road reserve encroachments." },
         };
 
         public static LeaseApplicationType FindLeaseApplicationType(string name)
