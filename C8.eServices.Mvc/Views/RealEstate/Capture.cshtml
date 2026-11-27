@@ -371,13 +371,17 @@
         background: transparent !important;
     }
 </style>
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
-<div class="re-container">
+<div class="re-container re-form-page">
     <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-building"></i> Real Estate &middot; Lease application</div>
         <h1 class="re-header-title">Submit Lease Application@(string.IsNullOrEmpty(Model.Application.LeaseType) ? "" : ": " + Model.Application.LeaseType)</h1>
         <p class="re-header-subtitle">
-            Real Estate Development (RED) Department. Complete the details below, specify your desired facility or letting space details, and upload the mandatory pre-qualification documents.
+            Complete your details, choose the facility and units you would like to lease, and upload the pre-qualification documents. The application fee is paid after you submit.
         </p>
+        <span class="re-chip"><i class="fa fa-tag"></i> Reference DPRE-BUS YYYY/#### on submit</span>
+        <span class="re-chip"><i class="fa fa-clock-o"></i> About 15 minutes</span>
     </div>
 
     @if (!ViewData.ModelState.IsValid)
@@ -396,7 +400,7 @@
         @Html.HiddenFor(m => m.Application.LeaseType)
 
         <!-- Section 1: Applicant Profile -->
-        <div class="re-card">
+        <div class="re-card" data-step="Applicant">
             <div class="re-card-header">
                 <i class="fa fa-user" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">1. Applicant & Entity Details</h3>
@@ -483,7 +487,7 @@
         </div>
 
         <!-- Section 2: Space / Lease Details -->
-        <div class="re-card">
+        <div class="re-card" data-step="Space">
             <div class="re-card-header">
                 <i class="fa fa-building" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">2. Space / Lease Specification</h3>
@@ -587,20 +591,20 @@
         </div>
 
         <!-- Section 3: Mandatory Document Uploads -->
-        <div class="re-card">
+        <div class="re-card" data-step="Documents">
             <div class="re-card-header">
                 <i class="fa fa-cloud-upload" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">3. Pre-Qualification Documents</h3>
             </div>
             <div class="re-card-body">
                 <div class="alert alert-warning" style="border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
-                    <i class="fa fa-info-circle"></i> <strong>Mandatory Uploads:</strong> Please upload high-quality PDF/Scanned copies of the following documents. All files are mandatory unless noted as entity-only or optional. Maximum file size per document is 5MB.
+                    <i class="fa fa-info-circle"></i> <strong>Required uploads:</strong> clear PDF or scanned copies, up to 5 MB each. Items marked <span class="required-badge">*</span> are required. Proof of payment can be uploaded later from My Applications.
                 </div>
 
                 <!-- Tabs Header -->
                 <ul class="nav nav-tabs re-nav-tabs" role="tablist">
-                    <li class="active" role="presentation"><a href="#tab-mandatory" aria-controls="tab-mandatory" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Required Documents</a></li>
-                    <li role="presentation"><a href="#tab-other" aria-controls="tab-other" role="tab" data-toggle="tab"><i class="fa fa-folder-open-o"></i> Other Documents</a></li>
+                    <li class="active" role="presentation"><a href="#tab-mandatory" aria-controls="tab-mandatory" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Required</a></li>
+                    <li role="presentation"><a href="#tab-other" aria-controls="tab-other" role="tab" data-toggle="tab"><i class="fa fa-folder-open-o"></i> Other</a></li>
                 </ul>
 
                 <!-- Tabs Content -->
@@ -903,22 +907,27 @@
             </div>
         </div>
 
-        <!-- Section 5: Terms and Submit -->
-        <div class="re-card" style="border-top: 4px solid var(--re-gold);">
-            <div class="re-card-body text-center" style="padding: 30px;">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    By clicking submit, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to immediate rejection of the lease application.
-                </p>
-                <div style="display: flex; gap: 15px; justify-content: center;">
-                    <a href="@Url.Action("Inbox")" class="btn re-btn-secondary">Cancel</a>
-                    <button type="button" id="btnSubmitForm" class="btn re-btn-primary">Submit Application</button>
-                </div>
+        <!-- Section 4: Declaration and Submit -->
+        <div class="re-card" data-step="Submit">
+            <div class="re-card-header">
+                <i class="fa fa-check-square-o"></i>
+                <h3 class="re-card-title">4. Declaration</h3>
             </div>
+            <div class="re-card-body">
+                <p style="font-size: 14px; color: var(--re-ink-2); line-height: 1.55; margin-bottom: 16px;">
+                    By submitting, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to the application being rejected.
+                </p>
+            </div>
+        </div>
+        <div class="re-submit-bar">
+            <a href="@Url.Action("LeaseApplications")" class="btn re-btn-secondary" id="btnCancelForm">Cancel</a>
+            <button type="button" id="btnSubmitForm" class="btn re-btn-primary"><i class="fa fa-paper-plane"></i> Submit Application</button>
         </div>
     }
 </div>
 
 @section Scripts {
+    <script src="~/Scripts/RealEstate/re-forms.js?v=20261127" defer></script>
     <script type="text/javascript">
         $(document).ready(function () {
             // Function to handle the toggles of Applicant Type
@@ -1039,12 +1048,12 @@
                     totalRental += monthlyRental;
 
                     var row = $("<tr>");
-                    row.append($("<td>").text(item.FacilityName).css("padding", "12px").css("font-size", "13px"));
-                    row.append($("<td>").text(item.UnitType).css("padding", "12px").css("font-size", "13px"));
-                    row.append($("<td>").text(item.Size + " m²").css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
-                    row.append($("<td>").text("R" + item.Tariff.toFixed(2)).css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
-                    row.append($("<td>").text(item.Qty).css("padding", "12px").css("font-size", "13px").css("text-align", "center"));
-                    row.append($("<td>").text("R" + monthlyRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).css("padding", "12px").css("font-size", "13px").css("font-weight", "600").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Facility").text(item.FacilityName).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").attr("data-label", "Unit Type").text(item.UnitType).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").attr("data-label", "Size").text(item.Size + " m²").css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Tariff / m²").text("R" + item.Tariff.toFixed(2)).css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Qty").text(item.Qty).css("padding", "12px").css("font-size", "13px").css("text-align", "center"));
+                    row.append($("<td>").attr("data-label", "Monthly rental").text("R" + monthlyRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).css("padding", "12px").css("font-size", "13px").css("font-weight", "600").css("text-align", "right"));
                     
                     var removeBtn = $("<button>").attr("type", "button").addClass("btn btn-danger btn-xs").html("<i class='fa fa-trash'></i>").click(function () {
                         removeSelectedUnit(index);
@@ -1357,8 +1366,14 @@
                         }
                     });
                 } else {
-                    // Trigger native browser validation UI
-                    form[0].reportValidity();
+                    // Required document inputs are hidden behind styled buttons, so the browser can't point at them.
+                    // Name the missing item and scroll to it instead.
+                    var missing = window.reFirstInvalid ? window.reFirstInvalid(form[0]) : null;
+                    if (missing) {
+                        swal("Missing information", "Please complete: " + missing, "warning");
+                    } else {
+                        form[0].reportValidity();
+                    }
                 }
             });
         });

@@ -4,29 +4,22 @@
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
 }
 
-<style>
-    .pop-container { padding: 30px 15px; font-family: 'Inter', sans-serif; max-width: 760px; }
-    .pop-header { background: linear-gradient(135deg, #2e2a27 0%, #1c1917 100%); color: #fff; border-radius: 12px; padding: 25px 30px; margin-bottom: 25px; border-left: 5px solid #c59b27; }
-    .pop-header h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px 0; }
-    .pop-header p { color: #cbd5e1; margin: 0; }
-    .pop-card { background: #fff; border: 1px solid #e7e5e4; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .pop-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e7e5e4; font-size: 14px; }
-    .pop-row span:first-child { color: #64748b; font-weight: 600; }
-    .pop-btn { background-color: #c59b27; border: none; color: #fff; border-radius: 8px; padding: 10px 20px; font-weight: 600; }
-    .pop-btn:hover { background-color: #a37f1c; }
-</style>
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
-<div class="pop-container">
-    <div class="pop-header">
-        <h1><i class="fa fa-upload"></i> Upload Proof of Payment</h1>
-        <p>Pay the application fee, then upload the EFT receipt or deposit slip here so your application can be processed.</p>
+<div class="re-container re-form-page" style="max-width: 760px;">
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-credit-card"></i> Real Estate &middot; Application fee</div>
+        <h1>Upload proof of payment</h1>
+        <p>Pay the application fee, then upload the EFT receipt or deposit slip so your application can be processed.</p>
     </div>
 
-    <div class="pop-card">
+    <div class="re-card">
+        <div class="re-card-header"><i class="fa fa-file-text-o"></i><h3 class="re-card-title">Application details</h3></div>
+        <div class="re-card-body" style="padding-bottom: 18px;">
         <div class="pop-row"><span>Reference Number</span><span>@Model.ApplicationReferenceNumber</span></div>
         <div class="pop-row"><span>Lease Type</span><span>@(string.IsNullOrEmpty(Model.LeaseType) ? "Business Hub" : Model.LeaseType)</span></div>
         <div class="pop-row"><span>Applicant</span><span>@Model.EntityName</span></div>
-        <div class="pop-row"><span>Status</span><span>@(Model.Status != null ? Model.Status.Name : "")</span></div>
+        <div class="pop-row"><span>Status</span><span>@(Model.Status == null ? "" : Model.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.AwaitingApplicationFeeUpload ? "Waiting for proof of payment" : Model.Status.Name)</span></div>
 
         @if (!string.IsNullOrEmpty(Model.PaymentValidationComment))
         {
@@ -42,13 +35,15 @@
             <div class="form-group" style="margin-top: 20px;">
                 <label for="file_Fee" style="font-weight: 600;">Proof of Application Fee Payment <span style="color: #dc2626;">*</span></label>
                 <input type="file" name="file_Fee" id="file_Fee" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required />
-                <small style="color: #64748b;">PDF, PNG or JPG, up to 10 MB.</small>
+                <small class="text-muted">PDF, PNG or JPG, up to 10 MB.</small>
                 @Html.ValidationMessage("file_Fee", "", new { @class = "text-danger", style = "display: block;" })
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <a href="@Url.Action("MyApplications", "RealEstate")" class="btn btn-default" style="border-radius: 8px;" id="btn-pop-cancel">Cancel</a>
-                <button type="submit" class="pop-btn" id="btn-pop-submit"><i class="fa fa-check"></i> Submit Proof of Payment</button>
+            <div class="re-submit-bar" style="position: static; margin: 0; padding: 0; border: 0; background: none;">
+                <a href="@Url.Action("MyApplications", "RealEstate")" class="btn-re-outline" id="btn-pop-cancel">Cancel</a>
+                <button type="submit" class="btn-re-gold" id="btn-pop-submit"><i class="fa fa-check"></i> Submit proof of payment</button>
             </div>
         }
+        </div>
     </div>
 </div>
+<script src="~/Scripts/RealEstate/re-forms.js?v=20261127" defer></script>
