@@ -1,0 +1,53 @@
+@model C8.eServices.Mvc.Models.RE_ApplicationSiteDetail
+@{
+    string title = Model.FormCode == "OA" ? "Outdoor Advertising Details" : Model.FormCode == "TEL" ? "Telecommunications Site Details" : "Concession/Leasehold Details";
+    Func<bool?, string> yn = b => b.HasValue ? (b.Value ? "Yes" : "No") : null;
+    var rows = new List<KeyValuePair<string, string>>
+    {
+        new KeyValuePair<string, string>("Applicant name", ((Model.FirstName ?? "") + " " + (Model.Surname ?? "")).Trim()),
+        new KeyValuePair<string, string>("Other applicant type", Model.ApplicantTypeOther),
+        new KeyValuePair<string, string>("Identification type", Model.IdentificationType),
+        new KeyValuePair<string, string>("Postal address", Model.PostalAddress),
+        new KeyValuePair<string, string>("Sign erected on", Model.SignLocationType),
+        new KeyValuePair<string, string>("Sign type", Model.SignType == "Other" ? "Other: " + Model.SignTypeOther : Model.SignType),
+        new KeyValuePair<string, string>("Illuminated", yn(Model.SignIlluminated)),
+        new KeyValuePair<string, string>("Elevations", Model.SignElevations == "Other" ? "Other: " + Model.SignElevationsOther : Model.SignElevations),
+        new KeyValuePair<string, string>("Advertising sign ref", Model.AdvertisingSignReferenceNumber),
+        new KeyValuePair<string, string>("Real Estate ref", Model.RealEstateReferenceNumber),
+        new KeyValuePair<string, string>("City Planning ref", Model.CityPlanningReferenceNumber),
+        new KeyValuePair<string, string>("Town", Model.Town),
+        new KeyValuePair<string, string>("Farm portion description", Model.FarmPortionDescription),
+        new KeyValuePair<string, string>("Road reserve street", Model.RoadReserveStreetName),
+        new KeyValuePair<string, string>("Nearest intersection", Model.RoadReserveNearestIntersection),
+        new KeyValuePair<string, string>("Adjacent property", Model.RoadReserveAdjacentProperty),
+        new KeyValuePair<string, string>("Site name", Model.SiteName),
+        new KeyValuePair<string, string>("Site number", Model.SiteNumber),
+        new KeyValuePair<string, string>("Coordinates", Model.Latitude.HasValue && Model.Longitude.HasValue ? Model.Latitude.Value.ToString("0.000000") + ", " + Model.Longitude.Value.ToString("0.000000") : null),
+        new KeyValuePair<string, string>("Installation", Model.InstallationType == "Other" ? "Other: " + Model.InstallationTypeOther : Model.InstallationType),
+        new KeyValuePair<string, string>("Area on structure (m²)", Model.AreaOnStructureSqm.HasValue ? Model.AreaOnStructureSqm.Value.ToString("N2") : null),
+        new KeyValuePair<string, string>("Area at ground level (m²)", Model.AreaGroundSqm.HasValue ? Model.AreaGroundSqm.Value.ToString("N2") : null),
+        new KeyValuePair<string, string>("Zoning", Model.Zoning),
+        new KeyValuePair<string, string>("Proposed lease term", Model.ProposedLeaseYears.HasValue || Model.ProposedLeaseMonths.HasValue ? (Model.ProposedLeaseYears ?? 0) + " years " + (Model.ProposedLeaseMonths ?? 0) + " months" : null),
+        new KeyValuePair<string, string>("Option to renew", yn(Model.OptionToRenew)),
+        new KeyValuePair<string, string>("Currently sublet", yn(Model.CurrentlySublet) + (Model.CurrentlySublet == true ? " (" + Model.CurrentCoLocators + " co-locators)" : "")),
+        new KeyValuePair<string, string>("Will be sublet", yn(Model.WillBeSublet) + (Model.WillBeSublet == true ? " (" + Model.AnticipatedCoLocators + " anticipated)" : "")),
+        new KeyValuePair<string, string>("Proposed use", Model.ProposedUse),
+        new KeyValuePair<string, string>("Total extent (m²)", Model.TotalExtentSqm.HasValue ? Model.TotalExtentSqm.Value.ToString("N2") : null),
+        new KeyValuePair<string, string>("Terms accepted", Model.TermsAccepted ? "Yes" + (Model.TermsAcceptedDateTime.HasValue ? " on " + Model.TermsAcceptedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : "") : "No"),
+        new KeyValuePair<string, string>("Signed by", string.IsNullOrEmpty(Model.SignatoryName) ? null : Model.SignatoryName + " (" + Model.SignatoryCapacity + ")"),
+        new KeyValuePair<string, string>("Submitted", Model.SubmittedDateTime.HasValue ? Model.SubmittedDateTime.Value.ToString("yyyy-MM-dd HH:mm") : null),
+    };
+}
+<div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+    <h5 style="color:#c59b27; font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-map-marker"></i> @title</h5>
+    <div class="row" style="font-size:13px; line-height:2.0;">
+        @foreach (var r in rows.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
+        {
+            <div class="col-md-6"><strong>@r.Key:</strong> @r.Value</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.SignatureImage) && Model.SignatureImage.StartsWith("data:image/png;base64,"))
+        {
+            <div class="col-md-12"><strong>Signature:</strong><br /><img src="@Model.SignatureImage" alt="Applicant signature" style="max-width:320px; border:1px solid #e7e5e4; border-radius:6px; background:#fff;" /></div>
+        }
+    </div>
+</div>

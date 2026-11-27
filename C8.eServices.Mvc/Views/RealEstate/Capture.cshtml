@@ -371,13 +371,18 @@
         background: transparent !important;
     }
 </style>
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
-<div class="re-container">
+<div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
     <div class="re-header-card">
-        <h1 class="re-header-title">Submit Lease Application</h1>
+        <div class="re-eyebrow"><i class="fa fa-building"></i> Real Estate &middot; Lease application</div>
+        <h1 class="re-header-title">Submit Lease Application@(string.IsNullOrEmpty(Model.Application.LeaseType) ? "" : ": " + Model.Application.LeaseType)</h1>
         <p class="re-header-subtitle">
-            Real Estate Development (RED) Department. Complete the details below, specify your desired facility or letting space details, and upload the mandatory pre-qualification documents.
+            Complete your details, choose the facility and units you would like to lease, and upload the pre-qualification documents. The application fee is paid after you submit.
         </p>
+        <span class="re-chip"><i class="fa fa-tag"></i> Reference DPRE-BUS YYYY/#### on submit</span>
+        <span class="re-chip"><i class="fa fa-clock-o"></i> About 15 minutes</span>
     </div>
 
     @if (!ViewData.ModelState.IsValid)
@@ -393,9 +398,10 @@
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.Application.CustomerId)
         @Html.HiddenFor(m => m.Application.SystemUserId)
+        @Html.HiddenFor(m => m.Application.LeaseType)
 
         <!-- Section 1: Applicant Profile -->
-        <div class="re-card">
+        <div class="re-card" data-step="Applicant">
             <div class="re-card-header">
                 <i class="fa fa-user" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">1. Applicant & Entity Details</h3>
@@ -482,7 +488,7 @@
         </div>
 
         <!-- Section 2: Space / Lease Details -->
-        <div class="re-card">
+        <div class="re-card" data-step="Space">
             <div class="re-card-header">
                 <i class="fa fa-building" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">2. Space / Lease Specification</h3>
@@ -551,6 +557,16 @@
                     </div>
                 </div>
 
+                <!-- DPRE-Q50 / BR07: no free unit in the chosen area or facility -->
+                <div class="re-waitlist" id="waitingListPanel" style="display: none;" role="status">
+                    <i class="fa fa-hourglass-half" aria-hidden="true"></i>
+                    <div class="re-waitlist-text">
+                        <strong id="waitingListTitle">No units are free here right now</strong>
+                        <span>Join the waiting list and we will let you know when a unit becomes free. Places are kept in the order people join.</span>
+                    </div>
+                    <button type="button" class="btn-re-outline" id="btnJoinWaitingList"><i class="fa fa-list-ol"></i> Join the waiting list</button>
+                </div>
+
                 <!-- Live Selection Grid -->
                 <div id="selectionGridWrapper" style="display: none; margin-top: 25px;">
                     <h5 style="margin-top: 0; margin-bottom: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
@@ -586,20 +602,20 @@
         </div>
 
         <!-- Section 3: Mandatory Document Uploads -->
-        <div class="re-card">
+        <div class="re-card" data-step="Documents">
             <div class="re-card-header">
                 <i class="fa fa-cloud-upload" style="color: var(--re-gold); font-size: 18px;"></i>
                 <h3 class="re-card-title">3. Pre-Qualification Documents</h3>
             </div>
             <div class="re-card-body">
                 <div class="alert alert-warning" style="border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
-                    <i class="fa fa-info-circle"></i> <strong>Mandatory Uploads:</strong> Please upload high-quality PDF/Scanned copies of the following documents. All files are mandatory unless noted as entity-only or optional. Maximum file size per document is 5MB.
+                    <i class="fa fa-info-circle"></i> <strong>Required uploads:</strong> clear PDF or scanned copies, up to 5 MB each. Items marked <span class="required-badge">*</span> are required. Proof of payment can be uploaded later from My Applications.
                 </div>
 
                 <!-- Tabs Header -->
                 <ul class="nav nav-tabs re-nav-tabs" role="tablist">
-                    <li class="active" role="presentation"><a href="#tab-mandatory" aria-controls="tab-mandatory" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Required Documents</a></li>
-                    <li role="presentation"><a href="#tab-other" aria-controls="tab-other" role="tab" data-toggle="tab"><i class="fa fa-folder-open-o"></i> Other Documents</a></li>
+                    <li class="active" role="presentation"><a href="#tab-mandatory" aria-controls="tab-mandatory" role="tab" data-toggle="tab"><i class="fa fa-file-text-o"></i> Required</a></li>
+                    <li role="presentation"><a href="#tab-other" aria-controls="tab-other" role="tab" data-toggle="tab"><i class="fa fa-folder-open-o"></i> Other</a></li>
                 </ul>
 
                 <!-- Tabs Content -->
@@ -856,14 +872,14 @@
                             <!-- Doc 14: Proof of Payment -->
                             <div class="doc-upload-card">
                                 <div class="doc-info">
-                                    <span class="doc-title">Application Fee Proof of Payment<span class="required-badge">*</span></span>
-                                    <p class="doc-desc">Electronic Funds Transfer (EFT) receipt or deposit slip for the RED application fee.</p>
+                                    <span class="doc-title">Application Fee Proof of Payment (optional)</span>
+                                    <p class="doc-desc">EFT receipt or deposit slip for the application fee. You can also pay after submitting and upload this later from My Applications.</p>
                                 </div>
                                 <div class="doc-input-wrapper">
                                     <label class="doc-file-label" id="lblFile_Fee" for="file_Fee">
                                         <i class="fa fa-file-pdf-o"></i> Select File
                                     </label>
-                                    <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" required style="display: none;" />
+                                    <input type="file" name="file_Fee" id="file_Fee" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; width: 100%;">
                                         <span id="name_Fee" class="selected-filename" style="margin-top: 0;"><i class="fa fa-check"></i> <span></span></span>
                                         <a href="javascript:void(0);" class="btn-remove-file" data-input-id="file_Fee" id="remove_Fee" style="display: none; color: #ef4444; font-weight: 600; font-size: 12px; text-decoration: none;"><i class="fa fa-trash"></i> Remove</a>
@@ -902,22 +918,28 @@
             </div>
         </div>
 
-        <!-- Section 5: Terms and Submit -->
-        <div class="re-card" style="border-top: 4px solid var(--re-gold);">
-            <div class="re-card-body text-center" style="padding: 30px;">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    By clicking submit, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to immediate rejection of the lease application.
-                </p>
-                <div style="display: flex; gap: 15px; justify-content: center;">
-                    <a href="@Url.Action("Inbox")" class="btn re-btn-secondary">Cancel</a>
-                    <button type="button" id="btnSubmitForm" class="btn re-btn-primary">Submit Application</button>
-                </div>
+        <!-- Section 4: Declaration and Submit -->
+        <div class="re-card" data-step="Submit">
+            <div class="re-card-header">
+                <i class="fa fa-check-square-o"></i>
+                <h3 class="re-card-title">4. Declaration</h3>
             </div>
+            <div class="re-card-body">
+                <p style="font-size: 14px; color: var(--re-ink-2); line-height: 1.55; margin-bottom: 16px;">
+                    By submitting, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to the application being rejected.
+                </p>
+                @Html.Partial("_SignedPaperFormUpload")
+            </div>
+        </div>
+        <div class="re-submit-bar">
+            <a href="@Url.Action("LeaseApplications")" class="btn re-btn-secondary" id="btnCancelForm">Cancel</a>
+            <button type="button" id="btnSubmitForm" class="btn re-btn-primary"><i class="fa fa-paper-plane"></i> Submit Application</button>
         </div>
     }
 </div>
 
 @section Scripts {
+    <script src="~/Scripts/RealEstate/re-forms.js?v=20261127" defer></script>
     <script type="text/javascript">
         $(document).ready(function () {
             // Function to handle the toggles of Applicant Type
@@ -1038,12 +1060,12 @@
                     totalRental += monthlyRental;
 
                     var row = $("<tr>");
-                    row.append($("<td>").text(item.FacilityName).css("padding", "12px").css("font-size", "13px"));
-                    row.append($("<td>").text(item.UnitType).css("padding", "12px").css("font-size", "13px"));
-                    row.append($("<td>").text(item.Size + " m²").css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
-                    row.append($("<td>").text("R" + item.Tariff.toFixed(2)).css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
-                    row.append($("<td>").text(item.Qty).css("padding", "12px").css("font-size", "13px").css("text-align", "center"));
-                    row.append($("<td>").text("R" + monthlyRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).css("padding", "12px").css("font-size", "13px").css("font-weight", "600").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Facility").text(item.FacilityName).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").attr("data-label", "Unit Type").text(item.UnitType).css("padding", "12px").css("font-size", "13px"));
+                    row.append($("<td>").attr("data-label", "Size").text(item.Size + " m²").css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Tariff / m²").text("R" + item.Tariff.toFixed(2)).css("padding", "12px").css("font-size", "13px").css("text-align", "right"));
+                    row.append($("<td>").attr("data-label", "Qty").text(item.Qty).css("padding", "12px").css("font-size", "13px").css("text-align", "center"));
+                    row.append($("<td>").attr("data-label", "Monthly rental").text("R" + monthlyRental.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })).css("padding", "12px").css("font-size", "13px").css("font-weight", "600").css("text-align", "right"));
                     
                     var removeBtn = $("<button>").attr("type", "button").addClass("btn btn-danger btn-xs").html("<i class='fa fa-trash'></i>").click(function () {
                         removeSelectedUnit(index);
@@ -1061,6 +1083,15 @@
             }
 
             function addSelectedUnit(unit) {
+                // DPRE-Q36: one application per facility (several units within that facility are fine)
+                unit.FacilityId = unit.FacilityId || $("#ddlSelectedFacility").val();
+                var otherFacility = $.grep(selectedUnits, function (item) {
+                    return item.FacilityId && unit.FacilityId && item.FacilityId.toString() !== unit.FacilityId.toString();
+                }).length > 0;
+                if (otherFacility) {
+                    swal("One facility per application", "You can select several units, but only within one facility. Remove the other units first, or submit a separate application for this facility.", "warning");
+                    return;
+                }
                 var existingIndex = -1;
                 $.each(selectedUnits, function (index, item) {
                     if (item.UnitId === unit.UnitId) {
@@ -1134,6 +1165,7 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
+                hideWaitingList();
 
                 if (!cccId) return;
 
@@ -1150,6 +1182,8 @@
                                 }));
                             });
                             $("#ddlSelectedFacility").removeAttr("disabled");
+                        } else {
+                            showWaitingList("No Business Hub facility in this area has a free unit right now", null);
                         }
                     },
                     error: function () {
@@ -1166,6 +1200,7 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
+                hideWaitingList();
 
                 if (!facilityId) return;
 
@@ -1188,11 +1223,40 @@
                                 $("#ddlSelectedUnit").append(option);
                             });
                             $("#ddlSelectedUnit").removeAttr("disabled");
+                        } else {
+                            showWaitingList("No units are free at " + $("#ddlSelectedFacility option:selected").text() + " right now", facilityId);
                         }
                     },
                     error: function () {
                         swal("Error", "Failed to retrieve units for the selected facility.", "error");
                     }
+                });
+            });
+
+            // ---- DPRE-Q50 waiting list ----
+            var waitingFacilityId = null;
+            function showWaitingList(title, facilityId) {
+                waitingFacilityId = facilityId;
+                $("#waitingListTitle").text(title);
+                $("#waitingListPanel").css("display", "");
+            }
+            function hideWaitingList() { waitingFacilityId = null; $("#waitingListPanel").hide(); }
+            $("#btnJoinWaitingList").click(function () {
+                var btn = $(this).prop("disabled", true);
+                $.ajax({
+                    url: '@Url.Action("JoinWaitingList", "RealEstate")',
+                    type: 'POST',
+                    data: {
+                        cccId: $("#Application_CCCId").val(),
+                        facilityId: waitingFacilityId,
+                        purposeOfLease: $("#Application_PurposeOfLease").val(),
+                        __RequestVerificationToken: $("#realEstateForm input[name=__RequestVerificationToken]").val()
+                    },
+                    success: function (r) {
+                        swal(r.ok ? "Added to the waiting list" : "Not added", r.message, r.ok ? "success" : "warning");
+                    },
+                    error: function () { swal("Error", "Could not add you to the waiting list. Please try again.", "error"); },
+                    complete: function () { btn.prop("disabled", false); }
                 });
             });
 
@@ -1347,8 +1411,14 @@
                         }
                     });
                 } else {
-                    // Trigger native browser validation UI
-                    form[0].reportValidity();
+                    // Required document inputs are hidden behind styled buttons, so the browser can't point at them.
+                    // Name the missing item and scroll to it instead.
+                    var missing = window.reFirstInvalid ? window.reFirstInvalid(form[0]) : null;
+                    if (missing) {
+                        swal("Missing information", "Please complete: " + missing, "warning");
+                    } else {
+                        form[0].reportValidity();
+                    }
                 }
             });
         });

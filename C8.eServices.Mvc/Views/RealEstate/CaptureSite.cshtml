@@ -1,0 +1,599 @@
+@model C8.eServices.Mvc.ViewModels.RE_SiteApplicationViewModel
+@using C8.eServices.Mvc.Models
+@{
+    ViewBag.Title = Model.FormTitle;
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var docs = (List<C8.eServices.Mvc.Controllers.RealEstateController.RE_SiteDocument>)ViewBag.SiteDocuments;
+    bool isDraft = Model.Application != null && Model.Application.Id > 0;
+}
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
+
+<div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-file-text-o"></i> Real Estate &middot; @Model.LeaseType</div>
+        <h1>@Model.FormTitle</h1>
+        <p>Fill in each section below. You can save and come back to it at any time. The application fee is paid after you submit.</p>
+        <span class="re-chip"><i class="fa fa-tag"></i> Reference @Model.ReferencePrefix YYYY/#### on submit</span>
+        @if (isDraft)
+        {
+            <span class="re-chip"><i class="fa fa-floppy-o"></i> Saved draft</span>
+        }
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger"><strong>Please correct the errors below:</strong> @Html.ValidationSummary(false, "")</div>
+    }
+
+    @using (Html.BeginForm("CaptureSite", "RealEstate", FormMethod.Post, new { enctype = "multipart/form-data", id = "siteForm", novalidate = "novalidate" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Application.Id)
+        @Html.HiddenFor(m => m.LeaseType)
+        <input type="hidden" name="submitAction" id="submitAction" value="submit" />
+
+        if (Model.FormCode == "OA")
+        {
+        <div class="re-card" data-step="Property">
+            <div class="re-card-header"><i class="fa fa-map-marker"></i><h3 class="re-card-title">Section A: Property Details</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Site_SignLocationType" class="req">Will the advertising sign be erected on</label>
+                @Html.DropDownListFor(m => m.Site.SignLocationType, new SelectList(RE_LeaseLookups.SignLocationTypes, Model.Site.SignLocationType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignLocationType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3 form-group ">
+                <label for="Site_SignType" class="req">Sign Type</label>
+                @Html.DropDownListFor(m => m.Site.SignType, new SelectList(RE_LeaseLookups.SignTypes, Model.Site.SignType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3 form-group " id="wrapSignTypeOther">
+                <label for="Site_SignTypeOther">Other sign type, please specify</label>
+                @Html.TextBoxFor(m => m.Site.SignTypeOther, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignTypeOther, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3 form-group ">
+                <label class="req">Will the sign be illuminated?</label>
+                <div class="re-seg" role="radiogroup">
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.SignIlluminated, true, new { id = "Site_SignIlluminated_Yes" }) Yes</label>
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.SignIlluminated, false, new { id = "Site_SignIlluminated_No" }) No</label>
+                </div>
+                @Html.ValidationMessageFor(m => m.Site.SignIlluminated, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3 form-group ">
+                <label for="Site_SignElevations" class="req">Number of Elevations</label>
+                @Html.DropDownListFor(m => m.Site.SignElevations, new SelectList(RE_LeaseLookups.SignElevations, Model.Site.SignElevations), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignElevations, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3 form-group " id="wrapSignElevationsOther">
+                <label for="Site_SignElevationsOther">Other, indicate number of elevations</label>
+                @Html.TextBoxFor(m => m.Site.SignElevationsOther, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignElevationsOther, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_AdvertisingSignReferenceNumber">Advertising Sign Reference Number</label>
+                @Html.TextBoxFor(m => m.Site.AdvertisingSignReferenceNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.AdvertisingSignReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_RealEstateReferenceNumber">Real Estate Reference Number</label>
+                @Html.TextBoxFor(m => m.Site.RealEstateReferenceNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.RealEstateReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_CityPlanningReferenceNumber">City Planning Reference Number</label>
+                @Html.TextBoxFor(m => m.Site.CityPlanningReferenceNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.CityPlanningReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            @* DPRE-Q08 (26 Nov 2026): the old town list is replaced by the Customer Care Area below. *@
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_CCCId" class="req">Customer Care Area</label>
+                @Html.DropDownListFor(m => m.Application.CCCId, new SelectList((IEnumerable<SelectListItem>)ViewBag.CCCList, "Value", "Text", Model.Application.CCCId), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.CCCId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_ErfFarmNumber" class="req">ERF / Farm Portion / Agricultural Holding Number</label>
+                @Html.TextBoxFor(m => m.Application.ErfFarmNumber, new { @class = "form-control" })
+                <small class="text-muted">For a road reserve, give the ERF number of the adjacent property</small>
+                @Html.ValidationMessageFor(m => m.Application.ErfFarmNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group " id="wrapFarmDescription">
+                <label for="Site_FarmPortionDescription" class="req">Farm Portion/Agricultural Holding Description</label>
+                @Html.TextBoxFor(m => m.Site.FarmPortionDescription, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.FarmPortionDescription, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group " id="wrapPropertyAddress">
+                <label for="Application_PropertyAddress" class="req">Physical Address of the property</label>
+                @Html.TextBoxFor(m => m.Application.PropertyAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group oa-road">
+                <label for="Site_RoadReserveStreetName" class="req">Street Name</label>
+                @Html.TextBoxFor(m => m.Site.RoadReserveStreetName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.RoadReserveStreetName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group oa-road">
+                <label for="Site_RoadReserveNearestIntersection" class="req">Name of Nearest Intersecting Street</label>
+                @Html.TextBoxFor(m => m.Site.RoadReserveNearestIntersection, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.RoadReserveNearestIntersection, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group oa-road">
+                <label for="Site_RoadReserveAdjacentProperty" class="req">Description of Adjacent Property</label>
+                @Html.TextBoxFor(m => m.Site.RoadReserveAdjacentProperty, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.RoadReserveAdjacentProperty, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_TownshipSuburbFarmName" class="req">Township</label>
+                @Html.TextBoxFor(m => m.Application.TownshipSuburbFarmName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.TownshipSuburbFarmName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Application_PropertyPostalCode" class="req">Postal Code</label>
+                @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control", maxlength = "4" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyPostalCode, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+        }
+
+        if (Model.FormCode == "TEL")
+        {
+        <div class="re-card" data-step="Property">
+            <div class="re-card-header"><i class="fa fa-signal"></i><h3 class="re-card-title">Section A: Property Details</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_ErfFarmNumber" class="req">ERF Number / Farm Description</label>
+                @Html.TextBoxFor(m => m.Application.ErfFarmNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.ErfFarmNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_TownshipSuburbFarmName" class="req">Township / Suburb</label>
+                @Html.TextBoxFor(m => m.Application.TownshipSuburbFarmName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.TownshipSuburbFarmName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_CCCId" class="req">Customer Care Area</label>
+                @Html.DropDownListFor(m => m.Application.CCCId, new SelectList((IEnumerable<SelectListItem>)ViewBag.CCCList, "Value", "Text", Model.Application.CCCId), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.CCCId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Application_PropertyAddress" class="req">Property's Physical Address</label>
+                @Html.TextBoxFor(m => m.Application.PropertyAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Application_PropertyPostalCode" class="req">Postal Code</label>
+                @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control", maxlength = "4" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyPostalCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_Zoning" class="req">Zoning</label>
+                @Html.TextBoxFor(m => m.Site.Zoning, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.Zoning, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_SiteName" class="req">Site Name</label>
+                @Html.TextBoxFor(m => m.Site.SiteName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SiteName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_SiteNumber">Site Number</label>
+                @Html.TextBoxFor(m => m.Site.SiteNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SiteNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Site_Latitude" class="req">Latitude (decimal degrees)</label>
+                @Html.TextBoxFor(m => m.Site.Latitude, new { @class = "form-control", type = "number", step = "any", placeholder = "-26.1234" })
+                @Html.ValidationMessageFor(m => m.Site.Latitude, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Site_Longitude" class="req">Longitude (decimal degrees)</label>
+                @Html.TextBoxFor(m => m.Site.Longitude, new { @class = "form-control", type = "number", step = "any", placeholder = "28.1234" })
+                @Html.ValidationMessageFor(m => m.Site.Longitude, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-md-8 form-group ">
+                <label for="Site_InstallationType" class="req">Telecommunications Infrastructure Installation</label>
+                @Html.DropDownListFor(m => m.Site.InstallationType, new SelectList(RE_LeaseLookups.TelecomInstallationTypes, Model.Site.InstallationType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.InstallationType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group " id="wrapInstallationOther">
+                <label for="Site_InstallationTypeOther">Other installation, please specify</label>
+                @Html.TextBoxFor(m => m.Site.InstallationTypeOther, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.InstallationTypeOther, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_AreaOnStructureSqm">Area on top of Water Tower or attached to Mast/Tower (m²)</label>
+                @Html.TextBoxFor(m => m.Site.AreaOnStructureSqm, new { @class = "form-control", type = "number", step = "any" })
+                @Html.ValidationMessageFor(m => m.Site.AreaOnStructureSqm, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_AreaGroundSqm">Area at Ground Level Base Station (m²)</label>
+                @Html.TextBoxFor(m => m.Site.AreaGroundSqm, new { @class = "form-control", type = "number", step = "any" })
+                @Html.ValidationMessageFor(m => m.Site.AreaGroundSqm, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Site_ProposedLeaseYears" class="req">Proposed Lease Term: Years</label>
+                @Html.TextBoxFor(m => m.Site.ProposedLeaseYears, new { @class = "form-control", type = "number", step = "1", min = "0" })
+                @Html.ValidationMessageFor(m => m.Site.ProposedLeaseYears, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Site_ProposedLeaseMonths">Months</label>
+                @Html.TextBoxFor(m => m.Site.ProposedLeaseMonths, new { @class = "form-control", type = "number", step = "1", min = "0", max = "11" })
+                @Html.ValidationMessageFor(m => m.Site.ProposedLeaseMonths, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label class="req">Option to Renew?</label>
+                <div class="re-seg" role="radiogroup">
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.OptionToRenew, true, new { id = "Site_OptionToRenew_Yes" }) Yes</label>
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.OptionToRenew, false, new { id = "Site_OptionToRenew_No" }) No</label>
+                </div>
+                @Html.ValidationMessageFor(m => m.Site.OptionToRenew, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+        }
+
+        if (Model.FormCode == "LH")
+        {
+        <div class="re-card" data-step="Property">
+            <div class="re-card-header"><i class="fa fa-map"></i><h3 class="re-card-title">Section A: Property Details</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_ErfFarmNumber" class="req">ERF Number</label>
+                @Html.TextBoxFor(m => m.Application.ErfFarmNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.ErfFarmNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_TownshipSuburbFarmName" class="req">Township / Suburb</label>
+                @Html.TextBoxFor(m => m.Application.TownshipSuburbFarmName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.TownshipSuburbFarmName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_CCCId" class="req">Customer Care Area</label>
+                @Html.DropDownListFor(m => m.Application.CCCId, new SelectList((IEnumerable<SelectListItem>)ViewBag.CCCList, "Value", "Text", Model.Application.CCCId), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.CCCId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Application_PropertyAddress" class="req">Physical Address</label>
+                @Html.TextBoxFor(m => m.Application.PropertyAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 form-group ">
+                <label for="Application_PropertyPostalCode" class="req">Postal Code</label>
+                @Html.TextBoxFor(m => m.Application.PropertyPostalCode, new { @class = "form-control", maxlength = "4" })
+                @Html.ValidationMessageFor(m => m.Application.PropertyPostalCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_Zoning" class="req">Current Zoning</label>
+                @Html.TextBoxFor(m => m.Site.Zoning, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.Zoning, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 form-group ">
+                <label for="Site_ProposedUse" class="req">Proposed Use (define and explain)</label>
+                @Html.TextAreaFor(m => m.Site.ProposedUse, 3, 0, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.ProposedUse, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_TotalExtentSqm" class="req">Total Extent (Size) Required (m²)</label>
+                @Html.TextBoxFor(m => m.Site.TotalExtentSqm, new { @class = "form-control", type = "number", step = "any" })
+                @Html.ValidationMessageFor(m => m.Site.TotalExtentSqm, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_ProposedLeaseYears" class="req">Proposed Lease Term (Years)</label>
+                @Html.TextBoxFor(m => m.Site.ProposedLeaseYears, new { @class = "form-control", type = "number", step = "1", min = "0" })
+                @Html.ValidationMessageFor(m => m.Site.ProposedLeaseYears, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+        }
+
+        <div class="re-card" data-step="Applicant">
+            <div class="re-card-header"><i class="fa fa-user"></i><h3 class="re-card-title">Section B: Applicant's Details</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_ApplicantType" class="req">Applicant Type</label>
+                @Html.DropDownListFor(m => m.Application.ApplicantType, new SelectList(RE_LeaseLookups.ApplicantTypes, Model.Application.ApplicantType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.ApplicantType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group " id="wrapApplicantTypeOther">
+                <label for="Site_ApplicantTypeOther">Other, please specify</label>
+                @Html.TextBoxFor(m => m.Site.ApplicantTypeOther, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.ApplicantTypeOther, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Site_IdentificationType" class="req">Identification Type</label>
+                @Html.DropDownListFor(m => m.Site.IdentificationType, new SelectList(RE_LeaseLookups.IdentificationTypes, Model.Site.IdentificationType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.IdentificationType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ind-only">
+                <label for="Site_FirstName" class="req">First Name</label>
+                @Html.TextBoxFor(m => m.Site.FirstName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.FirstName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ind-only">
+                <label for="Site_Surname" class="req">Surname</label>
+                @Html.TextBoxFor(m => m.Site.Surname, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.Surname, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ent-only">
+                <label for="Application_EntityName" class="req">Name of Business/Entity</label>
+                @Html.TextBoxFor(m => m.Application.EntityName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.EntityName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ent-only">
+                <label for="Application_AuthorizedRepresentativeName" class="req">Full Name of Authorised Representative</label>
+                @Html.TextBoxFor(m => m.Application.AuthorizedRepresentativeName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.AuthorizedRepresentativeName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_CompanyRegistrationNumber" class="req">ID / Registration Number</label>
+                @Html.TextBoxFor(m => m.Application.CompanyRegistrationNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.CompanyRegistrationNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_VatRegistrationNumber">VAT Registration Number</label>
+                @Html.TextBoxFor(m => m.Application.VatRegistrationNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.VatRegistrationNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_TaxReferenceNumber">Tax Reference Number</label>
+                @Html.TextBoxFor(m => m.Application.TaxReferenceNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.TaxReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_EntityTelephone">Telephone Number</label>
+                @Html.TextBoxFor(m => m.Application.EntityTelephone, new { @class = "form-control", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.Application.EntityTelephone, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_EntityMobile" class="req">Mobile Number</label>
+                @Html.TextBoxFor(m => m.Application.EntityMobile, new { @class = "form-control", maxlength = "10" })
+                @Html.ValidationMessageFor(m => m.Application.EntityMobile, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 form-group ">
+                <label for="Application_EntityEmail" class="req">E-mail Address</label>
+                @Html.TextBoxFor(m => m.Application.EntityEmail, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(m => m.Application.EntityEmail, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Application_EntityRegisteredAddress" class="req">Registered / Residential Address</label>
+                @Html.TextBoxFor(m => m.Application.EntityRegisteredAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Application.EntityRegisteredAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Site_PostalAddress" class="req">Postal Address</label>
+                @Html.TextBoxFor(m => m.Site.PostalAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.PostalAddress, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+
+        if (Model.FormCode == "TEL")
+        {
+        <div class="re-card" data-step="Sharing">
+            <div class="re-card-header"><i class="fa fa-share-alt"></i><h3 class="re-card-title">Section C: Co-Locating / Sub-Letting Details</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label class="req">Is the site/infrastructure currently being sublet?</label>
+                <div class="re-seg" role="radiogroup">
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.CurrentlySublet, true, new { id = "Site_CurrentlySublet_Yes" }) Yes</label>
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.CurrentlySublet, false, new { id = "Site_CurrentlySublet_No" }) No</label>
+                </div>
+                @Html.ValidationMessageFor(m => m.Site.CurrentlySublet, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group " id="wrapCurrentCoLocators">
+                <label for="Site_CurrentCoLocators">Number of Co-Locators/Sub-Lessees</label>
+                @Html.TextBoxFor(m => m.Site.CurrentCoLocators, new { @class = "form-control", type = "number", step = "1", min = "0" })
+                @Html.ValidationMessageFor(m => m.Site.CurrentCoLocators, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label class="req">Will the site/infrastructure be sublet?</label>
+                <div class="re-seg" role="radiogroup">
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.WillBeSublet, true, new { id = "Site_WillBeSublet_Yes" }) Yes</label>
+                    <label class="radio-inline">@Html.RadioButtonFor(m => m.Site.WillBeSublet, false, new { id = "Site_WillBeSublet_No" }) No</label>
+                </div>
+                @Html.ValidationMessageFor(m => m.Site.WillBeSublet, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group " id="wrapAnticipatedCoLocators">
+                <label for="Site_AnticipatedCoLocators">Number of Anticipated Co-Locators/Sub-Lessees</label>
+                @Html.TextBoxFor(m => m.Site.AnticipatedCoLocators, new { @class = "form-control", type = "number", step = "1", min = "0" })
+                @Html.ValidationMessageFor(m => m.Site.AnticipatedCoLocators, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+        }
+
+        <div class="re-card" data-step="Documents">
+            <div class="re-card-header"><i class="fa fa-paperclip"></i><h3 class="re-card-title">Supporting Documents<span class="re-card-sub">PDF, JPG or PNG, up to 10 MB each</span></h3></div>
+            <div class="re-card-body"><div class="row">
+            @foreach (var d in docs.Where(x => x.Applies(Model.FormCode, true, true) || x.Applies(Model.FormCode, false, true)))
+            {
+                bool forInd = d.Applies(Model.FormCode, true, true), forEnt = d.Applies(Model.FormCode, false, true);
+                string scope = forInd && forEnt ? "" : (forInd ? "ind-only" : "ent-only");
+                var done = Model.UploadedDocuments.Where(n => n == d.Name || n.StartsWith(d.Name + ":")).ToList();
+                <div class="col-xs-12 col-sm-6 form-group @scope doc-row" data-key="@d.Key">
+                    <label for="@d.Key" class="@(d.Mandatory(Model.FormCode, forInd && !forEnt, true) && d.Key != "file_Vat" ? "req" : "") doc-label">@d.Name</label>
+                    <input type="file" name="@d.Key" id="@d.Key" class="form-control" accept=".pdf,.jpg,.jpeg,.png" @(d.Multiple ? "multiple" : "") />
+                    @if (!string.IsNullOrEmpty(d.Hint)) { <small class="text-muted">@d.Hint</small> }
+                    @if (done.Any()) { <small class="text-success" style="display:block;"><i class="fa fa-check"></i> Already uploaded: @string.Join(", ", done)</small> }
+                    @Html.ValidationMessage(d.Key, "", new { @class = "text-danger" })
+                </div>
+            }
+            <div class="col-xs-12 col-sm-6 form-group">
+                <label for="file_Other">Other Supporting Documents</label>
+                <input type="file" name="file_Other" id="file_Other" class="form-control" multiple accept=".pdf,.jpg,.jpeg,.png" />
+                <small class="text-muted">PDF, JPG or PNG, up to 10 MB each.</small>
+            </div>
+            </div></div>
+        </div>
+
+        <div class="re-card" data-step="Terms">
+            <div class="re-card-header"><i class="fa fa-gavel"></i><h3 class="re-card-title">Terms and Conditions</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-sm-12">
+                <div class="re-terms-box" tabindex="0" aria-label="Terms and Conditions">
+                <ul class="terms-list">
+                    <li>The Applicant hereby warrants that the information furnished in this application is true and correct.</li>
+                    <li>In the event that the person(s) submitting this application is acting in a representative capacity, he/she warrants that he/she is duly authorised to act herein for and on behalf of the Applicant.</li>
+                    <li>The City of Ekurhuleni reserves the right to call for a NON-REFUNDABLE application fee to be paid before the application can be processed.</li>
+                    <li>The City of Ekurhuleni does not guarantee that the application will be successful; does not guarantee that the application will be processed within a specific time period; and reserves the right to call for additional security or surety-ship in case of a Company or Close Corporation.</li>
+                    <li>The Applicant hereby acknowledges and agrees that the City of Ekurhuleni may perform a Credit Check if the Applicant is an Individual or on the Directors and Members if the Applicant is a Company or Close Corporation.</li>
+                    @if (Model.FormCode != "LH")
+                    {
+                        <li>Should the application progress to the point where a Sworn Appraisal is to be obtained in order to establish a market related rental value of the premises to be leased, the fee for such valuation shall be for the account of the Applicant.</li>
+                    }
+                    <li>The submission of this application and acceptance thereof by an official of the Municipality does not entitle the applicant to occupy the property applied for nor does it create any legitimate expectation that the property will be leased to the applicant.</li>
+                </ul>
+                </div>
+                <label class="re-check" for="Site_TermsAccepted">@Html.CheckBoxFor(m => m.Site.TermsAccepted) <span>I agree with the Terms and Conditions as stipulated above</span></label>
+                @Html.ValidationMessageFor(m => m.Site.TermsAccepted, "", new { @class = "text-danger" })
+            </div>
+            </div></div>
+        </div>
+
+        <div class="re-card" data-step="Sign">
+            <div class="re-card-header"><i class="fa fa-pencil"></i><h3 class="re-card-title">Sign and Submit</h3></div>
+            <div class="re-card-body"><div class="row">
+            <div class="col-sm-12">
+                <div class="alert alert-warning" style="border-radius:8px;">
+                    <strong>PLEASE NOTE:</strong> In terms of the Annual Promulgated Tariffs of the CoE in respect of the Development Planning and Real Estate Department, a NON-REFUNDABLE application fee is payable. This application fee increases annually on 01/07 (please make sure to pay the correct application fee).
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Site_SignatoryName" class="req">Full Name of Applicant / Authorised Representative</label>
+                @Html.TextBoxFor(m => m.Site.SignatoryName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignatoryName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 col-sm-6 form-group ">
+                <label for="Site_SignatoryCapacity" class="req">Capacity</label>
+                @Html.TextBoxFor(m => m.Site.SignatoryCapacity, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Site.SignatoryCapacity, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12 form-group">
+                <label class="req">Signature</label>
+                <div class="sig-wrap" id="sigWrap"><canvas id="sigPad" aria-label="Signature area. Draw your signature with a finger, pen or mouse."></canvas></div>
+                <button type="button" class="btn-re-outline" id="sigClear" style="margin-top:8px; min-height:40px; padding:8px 14px !important; font-size:14px !important;"><i class="fa fa-eraser"></i> Clear signature</button>
+                @Html.HiddenFor(m => m.Site.SignatureImage)
+                @Html.ValidationMessageFor(m => m.Site.SignatureImage, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-12">@Html.Partial("_SignedPaperFormUpload")</div>
+            </div></div>
+        </div>
+
+        <div class="re-actions">
+            <span class="re-actions-note hidden-xs">Not finished? Save it and continue later from My Applications.</span>
+            <a href="@Url.Action("LeaseApplications", "RealEstate")" class="btn-re-outline" style="text-decoration:none;">Cancel</a>
+            <button type="button" class="btn-re-outline" id="btnSaveDraft"><i class="fa fa-floppy-o"></i> Save and Continue Later</button>
+            <button type="button" class="btn-re-gold" id="btnSubmitSite"><i class="fa fa-paper-plane"></i> Submit</button>
+        </div>
+
+        <div class="modal fade" id="confirmSiteModal" tabindex="-1" role="dialog" aria-labelledby="confirmSiteLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="border-radius:12px;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="confirmSiteLabel">Submit application</h4>
+                    </div>
+                    <div class="modal-body">Are you sure you want to submit this application?</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-re-outline" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn-re-gold" id="btnConfirmSite">Yes, I am sure</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/Scripts/RealEstate/re-forms.js?v=20261127" defer></script>
+<script>
+    (function () {
+        function byId(id) { return document.getElementById(id); }
+        function wrapOf(id) { var el = byId(id); return el ? el.closest('.form-group') : null; }
+        function show(el, on) { if (el) { el.style.display = on ? '' : 'none'; } }
+        function bindToggle(selectId, test, targets) {
+            var sel = byId(selectId);
+            if (!sel) { return; }
+            function apply() { targets.forEach(function (t) { (typeof t === 'string' ? document.querySelectorAll(t) : [t]).forEach(function (el) { show(el, test(sel.value)); }); }); }
+            sel.addEventListener('change', apply); apply();
+        }
+        function radioVal(name) { var r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
+        function bindRadio(name, targetWrapId) {
+            var radios = document.querySelectorAll('input[name="' + name + '"]');
+            function apply() { show(byId(targetWrapId), radioVal(name) === 'True'); }
+            radios.forEach(function (r) { r.addEventListener('change', apply); }); apply();
+        }
+
+        // Individual vs entity fields and documents
+        bindToggle('Application_ApplicantType', function (v) { return v === 'Individual/Natural Person'; }, ['.ind-only']);
+        bindToggle('Application_ApplicantType', function (v) { return v !== 'Individual/Natural Person'; }, ['.ent-only']);
+        bindToggle('Application_ApplicantType', function (v) { return v === 'Other'; }, ['#wrapApplicantTypeOther']);
+
+        // Outdoor Advertising
+        bindToggle('Site_SignType', function (v) { return v === 'Other'; }, ['#wrapSignTypeOther']);
+        bindToggle('Site_SignElevations', function (v) { return v === 'Other'; }, ['#wrapSignElevationsOther']);
+        bindToggle('Site_SignLocationType', function (v) { return v.indexOf('Road Reserve') >= 0; }, ['.oa-road']);
+        bindToggle('Site_SignLocationType', function (v) { return v.indexOf('Road Reserve') < 0; }, ['#wrapPropertyAddress']);
+        bindToggle('Site_SignLocationType', function (v) { return v.indexOf('Farm Portion') >= 0; }, ['#wrapFarmDescription']);
+
+        // Telecommunications
+        bindToggle('Site_InstallationType', function (v) { return v === 'Other'; }, ['#wrapInstallationOther']);
+        bindRadio('Site.CurrentlySublet', 'wrapCurrentCoLocators');
+        bindRadio('Site.WillBeSublet', 'wrapAnticipatedCoLocators');
+
+        // Signature pad (mouse, pen and touch)
+        var canvas = byId('sigPad'), hidden = byId('Site_SignatureImage');
+        var ctx = canvas.getContext('2d'), drawing = false, dirty = false;
+        var sigWrap = byId('sigWrap');
+        function resize() {
+            var data = hidden.value, dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.round(canvas.clientWidth * dpr);
+            canvas.height = Math.round(canvas.clientHeight * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#1c1917';
+            if (data) { var img = new Image(); img.onload = function () { ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight); }; img.src = data; }
+            sigWrap.classList.toggle('has-ink', !!data);
+        }
+        function pos(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+        canvas.addEventListener('pointerdown', function (e) { drawing = true; var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); canvas.setPointerCapture(e.pointerId); });
+        canvas.addEventListener('pointermove', function (e) { if (!drawing) { return; } var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); dirty = true; });
+        function end() { if (drawing && dirty) { hidden.value = canvas.toDataURL('image/png'); sigWrap.classList.add('has-ink'); } drawing = false; }
+        canvas.addEventListener('pointerup', end); canvas.addEventListener('pointerleave', end);
+        byId('sigClear').addEventListener('click', function () { ctx.clearRect(0, 0, canvas.width, canvas.height); hidden.value = ''; dirty = false; sigWrap.classList.remove('has-ink'); });
+        resize();
+
+        var form = byId('siteForm');
+        function clearHidden() {
+            // Values in hidden sections are not sent, so a switched-off option does not leave stale answers.
+            form.querySelectorAll('.form-group').forEach(function (g) {
+                if (g.style.display === 'none') { g.querySelectorAll('input[type=text],input[type=number],input[type=file],textarea,select').forEach(function (i) { i.value = ''; }); }
+            });
+        }
+        byId('btnSaveDraft').addEventListener('click', function () {
+            byId('submitAction').value = 'draft';
+            if (!byId('Application_CCCId').value) { alertBox('Select a Customer Care Area before saving.'); return; }
+            clearHidden(); this.disabled = true; form.submit();
+        });
+        byId('btnSubmitSite').addEventListener('click', function () {
+            var terms = byId('Site_TermsAccepted');
+            if (!terms.checked) { alertBox('Please tick the checkbox or abandon the application.'); terms.focus(); return; }
+            if (!hidden.value) { alertBox('Please sign in the signature box.'); canvas.scrollIntoView({ block: 'center' }); return; }
+            $('#confirmSiteModal').modal('show');
+        });
+        byId('btnConfirmSite').addEventListener('click', function () {
+            byId('submitAction').value = 'submit';
+            clearHidden(); this.disabled = true; this.innerHTML = 'Submitting...'; form.submit();
+        });
+        function alertBox(msg) {
+            var box = byId('siteClientError');
+            if (!box) { box = document.createElement('div'); box.id = 'siteClientError'; box.className = 'alert alert-danger'; form.insertBefore(box, form.firstChild); }
+            box.textContent = msg; box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    })();
+</script>

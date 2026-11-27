@@ -393,6 +393,7 @@ namespace C8.eServices.Mvc.Keys
         public const string ReActiveOccupancy = "re_active_occupancy";
         public const string ReActive = "re_active";
         public const string ReRevokedPendingReview = "re_revoked_pending_review";
+        public const string ReApplicationDraft = "re_application_draft";
         public const string ReExpired = "re_expired";
     }
 }

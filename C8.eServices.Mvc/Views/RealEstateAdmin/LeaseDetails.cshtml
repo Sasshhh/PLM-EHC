@@ -1,0 +1,234 @@
+@model C8.eServices.Mvc.Models.RE_Lease
+@{
+    ViewBag.Title = "Lease " + Model.LeaseReferenceNumber;
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var history = (IEnumerable<C8.eServices.Mvc.Models.Audits.RE_LeaseAudit>)ViewBag.History;
+    var st = Model.DashboardStatus;
+    var leaseDocs = (IEnumerable<C8.eServices.Mvc.Models.Document>)ViewBag.LeaseDocuments;
+    var docTypes = (string[])ViewBag.LeaseDocumentTypes ?? new string[0];
+}
+@functions {
+    string Show(object v)
+    {
+        if (v == null) return "-";
+        if (v is bool) return (bool)v ? "Yes" : "No";
+        if (v is DateTime) return ((DateTime)v).ToString("yyyy/MM/dd");
+        if (v is decimal) return ((decimal)v).ToString("N2");
+        var s = v.ToString();
+        return string.IsNullOrWhiteSpace(s) ? "-" : s;
+    }
+}
+@Html.Partial("_RE_LeaseStyles")
+
+<div class="admin-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
+    }
+
+    <div class="admin-header-card">
+        <h1>Lease @Model.LeaseReferenceNumber <span class="re-status re-status-@st.Replace(" ", "")" style="vertical-align:middle; margin-left:8px;">@st</span></h1>
+        <p>@Model.TenantName @(string.IsNullOrEmpty(Model.Cca) ? "" : " | " + Model.Cca) @(string.IsNullOrEmpty(Model.Source) ? "" : " | Source: " + Model.Source)</p>
+    </div>
+
+    <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn-re-outline" href="@Url.Action("LeaseRegister")"><i class="fa fa-arrow-left"></i> Lease Register</a>
+        <a class="btn-re-gold" href="@Url.Action("CaptureLease", new { id = Model.Id })"><i class="fa fa-pencil"></i> Edit</a>
+    </div>
+
+    <div class="admin-card">
+        <div class="re-section-title">Lease and Property</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Contract Reference Number</dt><dd>@Show(Model.ContractReferenceNumber)</dd></div>
+            <div class="col-sm-3"><dt>Lease Reference Number</dt><dd>@Show(Model.LeaseReferenceNumber)</dd></div>
+            <div class="col-sm-3"><dt>SOLAR Account Number</dt><dd>@Show(Model.SolarAccountNumber)</dd></div>
+            <div class="col-sm-3"><dt>Property Code</dt><dd>@Show(Model.PropertyCode)</dd></div>
+            <div class="col-sm-3"><dt>Higher Level Property Code</dt><dd>@Show(Model.HigherLevelPropertyCode)</dd></div>
+            <div class="col-sm-3"><dt>Building (Physical Address)</dt><dd>@Show(Model.PhysicalBuildingNumberAndName)</dd></div>
+            <div class="col-sm-3"><dt>Invoice Clarification</dt><dd>@Show(Model.InvoiceClarification)</dd></div>
+            <div class="col-sm-3"><dt>Street Address (Physical)</dt><dd>@Show(Model.PhysicalStreetAddress)</dd></div>
+            <div class="col-sm-3"><dt>CCA</dt><dd>@Show(Model.Cca)</dd></div>
+            <div class="col-sm-3"><dt>Leased Area (m²)</dt><dd>@Show(Model.LeasedAreaSqm)</dd></div>
+        </dl>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Classification and Term</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Lease Classification</dt><dd>@Show(Model.LeaseClassification)</dd></div>
+            <div class="col-sm-3"><dt>Classification in source register</dt><dd>@Show(Model.SourceClassification)</dd></div>
+            <div class="col-sm-3"><dt>Lease Term</dt><dd>@Show(Model.LeaseTerm)</dd></div>
+            <div class="col-sm-3"><dt>Status</dt><dd>@Show(Model.RecordStatus)</dd></div>
+            <div class="col-sm-3"><dt>Agreement in Place</dt><dd>@Show(Model.AgreementInPlace)</dd></div>
+            <div class="col-sm-3"><dt>Archibus/Other Invoice</dt><dd>@Show(Model.ArchibusInvoice)</dd></div>
+            <div class="col-sm-3"><dt>MOA</dt><dd>@Show(Model.IsMemorandumOfAgreement)</dd></div>
+            <div class="col-sm-3"><dt>Legal</dt><dd>@Show(Model.Legal)</dd></div>
+            <div class="col-sm-3"><dt>Lease Start Date</dt><dd>@Show(Model.LeaseStartDate)</dd></div>
+            <div class="col-sm-3"><dt>Escalation Date</dt><dd>@Show(Model.EscalationDate)</dd></div>
+            <div class="col-sm-3"><dt>Lease End Date</dt><dd>@Show(Model.LeaseEndDate)</dd></div>
+            <div class="col-sm-3"><dt>Lease Termination Date</dt><dd>@Show(Model.LeaseTerminationDate)</dd></div>
+            <div class="col-sm-3"><dt>Lease Indefinite</dt><dd>@Show(Model.LeaseIndefinite)</dd></div>
+            <div class="col-sm-3"><dt>Notice Period (Months)</dt><dd>@Show(Model.TerminationNoticePeriodMonths)</dd></div>
+        </dl>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Management and Financial</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Portfolio Manager</dt><dd>@Show(Model.PortfolioManager)</dd></div>
+            <div class="col-sm-3"><dt>Property Manager</dt><dd>@Show(Model.PropertyManager)</dd></div>
+            <div class="col-sm-3"><dt>Collection Manager</dt><dd>@Show(Model.CollectionManager)</dd></div>
+            <div class="col-sm-3"><dt>Escalation Alerts Recipient</dt><dd>@Show(Model.EscalationAlertsRecipient)</dd></div>
+            <div class="col-sm-3"><dt>Financial Officer</dt><dd>@Show(Model.FinancialOfficer)</dd></div>
+            <div class="col-sm-3"><dt>Monthly Rental (R)</dt><dd>@Show(Model.MonthlyRental)</dd></div>
+            <div class="col-sm-3"><dt>Escalation (%)</dt><dd>@Show(Model.EscalationPercentage)</dd></div>
+            <div class="col-sm-3"><dt>Escalation Terms</dt><dd>@Show(Model.EscalationTerms)</dd></div>
+            <div class="col-sm-3"><dt>Venus Rental Account Number</dt><dd>@Show(Model.VenusRentalAccountNumber)</dd></div>
+            <div class="col-sm-3"><dt>Deposit Held (R)</dt><dd>@Show(Model.DepositHeld)</dd></div>
+            <div class="col-sm-3"><dt>Payment Frequency</dt><dd>@Show(Model.PaymentFrequency)</dd></div>
+        </dl>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Tenant</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Tenant Name</dt><dd>@Show(Model.TenantName)</dd></div>
+            <div class="col-sm-3"><dt>Tenant Code</dt><dd>@Show(Model.TenantCode)</dd></div>
+            <div class="col-sm-3"><dt>Applicant Type</dt><dd>@Show(Model.ApplicantType)</dd></div>
+            <div class="col-sm-3"><dt>Other Applicant Type</dt><dd>@Show(Model.ApplicantTypeOther)</dd></div>
+            <div class="col-sm-3"><dt>ID / Registration Number</dt><dd>@Show(Model.RegistrationNumber)</dd></div>
+            <div class="col-sm-3"><dt>VAT Registration Number</dt><dd>@Show(Model.VatRegistrationNumber)</dd></div>
+            <div class="col-sm-3"><dt>Domicilium Building</dt><dd>@Show(Model.DomiciliumBuildingNumberAndName)</dd></div>
+            <div class="col-sm-3"><dt>Domicilium Street Address</dt><dd>@Show(Model.DomiciliumStreetAddress)</dd></div>
+            <div class="col-sm-3"><dt>Suburb</dt><dd>@Show(Model.DomiciliumSuburb)</dd></div>
+            <div class="col-sm-3"><dt>Town/CCA</dt><dd>@Show(Model.DomiciliumTown)</dd></div>
+            <div class="col-sm-3"><dt>Postal Code</dt><dd>@Show(Model.DomiciliumPostalCode)</dd></div>
+        </dl>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Billing Contact</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Contact Type</dt><dd>@Show(Model.ContactType)</dd></div>
+            <div class="col-sm-3"><dt>Name</dt><dd>@Show(Model.BillingContactName)</dd></div>
+            <div class="col-sm-3"><dt>Surname</dt><dd>@Show(Model.BillingContactSurname)</dd></div>
+            <div class="col-sm-3"><dt>Authorised Representative</dt><dd>@Show(Model.AuthorisedRepresentative)</dd></div>
+            <div class="col-sm-3"><dt>Building</dt><dd>@Show(Model.BillingBuildingNumberAndName)</dd></div>
+            <div class="col-sm-3"><dt>Street Address / Private Bag</dt><dd>@Show(Model.BillingStreetAddress)</dd></div>
+            <div class="col-sm-3"><dt>Suburb</dt><dd>@Show(Model.BillingSuburb)</dd></div>
+            <div class="col-sm-3"><dt>Town/CCA</dt><dd>@Show(Model.BillingTown)</dd></div>
+            <div class="col-sm-3"><dt>Postal Code</dt><dd>@Show(Model.BillingPostalCode)</dd></div>
+            <div class="col-sm-3"><dt>Mobile 1</dt><dd>@Show(Model.BillingMobile1)</dd></div>
+            <div class="col-sm-3"><dt>Mobile 2</dt><dd>@Show(Model.BillingMobile2)</dd></div>
+            <div class="col-sm-3"><dt>Telephone 1</dt><dd>@Show(Model.BillingTelephone1)</dd></div>
+            <div class="col-sm-3"><dt>Telephone 2</dt><dd>@Show(Model.BillingTelephone2)</dd></div>
+            <div class="col-sm-3"><dt>Fax 1</dt><dd>@Show(Model.BillingFax1)</dd></div>
+            <div class="col-sm-3"><dt>Fax 2</dt><dd>@Show(Model.BillingFax2)</dd></div>
+            <div class="col-sm-3"><dt>E-mail 1</dt><dd>@Show(Model.BillingEmail1)</dd></div>
+            <div class="col-sm-3"><dt>E-mail 2</dt><dd>@Show(Model.BillingEmail2)</dd></div>
+        </dl>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Lease Contact</div>
+        <dl class="row re-dl">
+            <div class="col-sm-3"><dt>Name</dt><dd>@Show(Model.LeaseContactName)</dd></div>
+            <div class="col-sm-3"><dt>Surname</dt><dd>@Show(Model.LeaseContactSurname)</dd></div>
+            <div class="col-sm-3"><dt>Mobile 1</dt><dd>@Show(Model.LeaseContactMobile1)</dd></div>
+            <div class="col-sm-3"><dt>Mobile 2</dt><dd>@Show(Model.LeaseContactMobile2)</dd></div>
+            <div class="col-sm-3"><dt>Telephone 1</dt><dd>@Show(Model.LeaseContactTelephone1)</dd></div>
+            <div class="col-sm-3"><dt>Telephone 2</dt><dd>@Show(Model.LeaseContactTelephone2)</dd></div>
+            <div class="col-sm-3"><dt>Fax</dt><dd>@Show(Model.LeaseContactFax1)</dd></div>
+            <div class="col-sm-3"><dt>E-mail 1</dt><dd>@Show(Model.LeaseContactEmail1)</dd></div>
+            <div class="col-sm-3"><dt>E-mail 2</dt><dd>@Show(Model.LeaseContactEmail2)</dd></div>
+        </dl>
+    </div>
+
+    <div class="admin-card">
+        <div class="re-section-title">Lease Details and Purpose</div>
+        <p style="white-space:pre-wrap;">@Show(Model.LeaseDetailsAndPurpose)</p>
+        <div class="re-section-title">Additional Comments</div>
+        <p style="white-space:pre-wrap;">@Show(Model.AdditionalComments)</p>
+    </div>
+
+    <div class="admin-card">
+        <div class="re-section-title">Lease Documents</div>
+        @if (leaseDocs == null || !leaseDocs.Any())
+        {
+            <p style="color:#64748b;">No documents yet.</p>
+        }
+        else
+        {
+            <table class="table table-condensed" id="tblLeaseDocuments">
+                <thead><tr><th>Document</th><th>Source</th><th>Uploaded</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var d in leaseDocs)
+                    {
+                        bool fromApplication = d.RealEstateApplicationId != null;
+                        <tr>
+                            <td>@d.DocumentName</td>
+                            <td>@(fromApplication ? "Application" : "Lease")</td>
+                            <td>@(d.CreatedDateTime.HasValue ? d.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                            <td style="text-align:right;">
+                                @if (d.File != null)
+                                {
+                                    <a href="@Url.Action("GetDocument", "File", new { q = d.File.Data })" target="_blank" class="btn btn-default btn-xs" id="btn-lease-doc-@d.Id"><i class="fa fa-download"></i> View</a>
+                                }
+                                @if (!fromApplication)
+                                {
+                                    using (Html.BeginForm("RemoveLeaseDocument", "RealEstateAdmin", new { id = Model.Id, documentId = d.Id }, FormMethod.Post, new { style = "display:inline;", onsubmit = "return confirm('Remove this document from the lease?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-default btn-xs" style="color:#dc2626;" id="btn-remove-lease-doc-@d.Id"><i class="fa fa-trash"></i> Remove</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        @using (Html.BeginForm("UploadLeaseDocument", "RealEstateAdmin", new { id = Model.Id }, FormMethod.Post, new { enctype = "multipart/form-data", id = "frmLeaseDocument", @class = "form-inline", style = "margin-top:10px;" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <select name="documentType" class="form-control" required id="ddlLeaseDocumentType">
+                    <option value="">-- Document type --</option>
+                    @foreach (string t in docTypes) { <option value="@t">@t</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" name="description" class="form-control" maxlength="150" placeholder="Description (optional)" id="txtLeaseDocumentDescription" />
+            </div>
+            <div class="form-group">
+                <input type="file" name="leaseFile" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required id="fileLeaseDocument" />
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-upload-lease-doc"><i class="fa fa-upload"></i> Upload</button>
+        }
+    </div>
+
+    <div class="admin-card">
+        <div class="re-section-title">Change History</div>
+        @if (history == null || !history.Any())
+        {
+            <p style="color:#64748b;">No changes recorded.</p>
+        }
+        else
+        {
+            <table class="admin-table">
+                <thead><tr><th>When</th><th>Action</th><th>Classification</th><th>End Date</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var h in history)
+                    {
+                        <tr>
+                            <td>@Show(h.ModifiedDateTime ?? h.CreatedDateTime)</td>
+                            <td>@h.Action</td>
+                            <td>@Show(h.LeaseClassification)</td>
+                            <td>@Show(h.LeaseEndDate)</td>
+                            <td>@Show(h.RecordStatus)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -14,7 +14,7 @@ using C8.eServices.Mvc.Keys;
 namespace C8.eServices.Mvc.Controllers
 {
     [AllowAnonymous]
-    public class RealEstateController : Controller
+    public partial class RealEstateController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
         private readonly BaseHelper _base = new BaseHelper();
@@ -40,6 +40,9 @@ namespace C8.eServices.Mvc.Controllers
             {
                 _customer.Status = db.Status.Find(_customer.StatusId);
             }
+
+            // DPRE-Q46: an official capturing for an applicant works as that applicant.
+            ApplyOnBehalf();
         }
 
         // GET: RealEstate/Inbox
@@ -61,13 +64,37 @@ namespace C8.eServices.Mvc.Controllers
             return View(applications);
         }
 
-        // GET: RealEstate/Capture
-        public ActionResult Capture()
+        // GET: RealEstate/LeaseApplications  (DPRE UC05 Steps 1-2: choose the lease type)
+        public ActionResult LeaseApplications()
         {
             Initialise();
             if (_customer == null)
             {
                 return RedirectToAction("Login", "Account");
+            }
+            return View(RE_LeaseLookups.LeaseApplicationTypes);
+        }
+
+        // GET: RealEstate/Capture?leaseType=Business%20Hub
+        public ActionResult Capture(string leaseType)
+        {
+            Initialise();
+            if (_customer == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var selectedType = RE_LeaseLookups.FindLeaseApplicationType(leaseType);
+            if (selectedType == null || !selectedType.OnlineFormAvailable)
+            {
+                if (selectedType != null)
+                    TempData["ErrorMessage"] = selectedType.Name + " applications are not yet available online. Please contact the DPRE office.";
+                return RedirectToAction("LeaseApplications");
+            }
+            if (selectedType.RefCode != "BUS")
+            {
+                // Outdoor Advertising, Telecommunications and Concession/Leasehold use the site form
+                return RedirectToAction("CaptureSite", new { leaseType = selectedType.Name });
             }
 
             // Check if profile is active/approved
@@ -84,6 +111,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 Application = new RE_Application
                 {
+                    LeaseType = selectedType.Name,
                     SystemUserId = _systemUser.Id,
                     CustomerId = _customer.Id,
                     EntityEmail = _systemUser.EmailAddress,
@@ -208,8 +236,8 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("file_References", "Contactable References document is required.");
             if (file_Letters == null || file_Letters.ContentLength == 0)
                 ModelState.AddModelError("file_Letters", "Supporting/Motivational Letter is required.");
-            if (file_Fee == null || file_Fee.ContentLength == 0)
-                ModelState.AddModelError("file_Fee", "Proof of Application Fee Payment is required.");
+            // DPRE-Q39 (26 Nov 2026): the application fee is paid after submission, so proof of payment is optional here.
+            // The applicant can upload it later from My Applications (UploadProofOfPayment).
             if (file_Experience == null || file_Experience.ContentLength == 0)
                 ModelState.AddModelError("file_Experience", "Facilities Management Experience description is required.");
             if (file_Financials == null || file_Financials.ContentLength == 0)
@@ -218,6 +246,7 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("file_BusinessPlan", "Business Plan is required.");
             if (file_Mbd4 == null || file_Mbd4.ContentLength == 0)
                 ModelState.AddModelError("file_Mbd4", "Declaration of Interest (Form MBD 4) is required.");
+            ValidateSignedPaperForm(false);
 
             // Parse and validate SelectedUnitsJson list
             List<RE_SelectedUnit> selectedUnitsList = null;
@@ -238,6 +267,13 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.Remove("Application.SelectedUnitCount");
 
                 decimal totalRental = 0;
+
+                // DPRE-Q36 (26 Nov 2026): one application per facility; several units are allowed within that facility.
+                var selectedIds = selectedUnitsList.Select(u => u.UnitId).Distinct().ToList();
+                var facilityCount = db.RE_FacilityUnits.Where(fu => selectedIds.Contains(fu.Id)).Select(fu => fu.FacilityId).Distinct().Count();
+                if (facilityCount > 1)
+                    ModelState.AddModelError("", "Select units from one facility only. Submit a separate application for each facility.");
+
                 foreach (var selUnit in selectedUnitsList)
                 {
                     var facilityUnit = db.RE_FacilityUnits
@@ -316,12 +352,16 @@ namespace C8.eServices.Mvc.Controllers
 
             try
             {
-                // Generate Reference Number
-                string referenceNumber = GenerateReferenceNumber();
+                // Generate Reference Number per lease type (UC05 Step 20, e.g. DPRE-BUS 2026/0001)
+                var leaseTypeInfo = RE_LeaseLookups.FindLeaseApplicationType(model.Application.LeaseType)
+                                    ?? RE_LeaseLookups.FindLeaseApplicationType("Business Hub");
+                model.Application.LeaseType = leaseTypeInfo.Name;
+                string referenceNumber = GenerateReferenceNumber(leaseTypeInfo.RefCode);
                     model.Application.ApplicationReferenceNumber = referenceNumber;
                     model.Application.SystemUserId = _systemUser.Id;
                     model.Application.CustomerId = _customer.Id;
-                    model.Application.StatusId = db.Status.FirstOrDefault(s => s.Key == StatusKeys.AwaitingApplicationFeeValidation).Id;
+                    bool feeUploaded = file_Fee != null && file_Fee.ContentLength > 0;
+                    model.Application.StatusId = FeeStageStatusId(feeUploaded);
                     model.Application.DepartmentId = db.ApplicationEntities.FirstOrDefault(ae => ae.Key == ApplicationEntityKeys.RealEstateDevelopment)?.Id;
                     model.Application.IsActive = true;
                     model.Application.IsDeleted = false;
@@ -353,7 +393,8 @@ namespace C8.eServices.Mvc.Controllers
                         SaveAndLinkFile(file_Locality, "Locality Plan of Property", appId, 18, refTypeId);
                     if (file_Zoning != null && file_Zoning.ContentLength > 0)
                         SaveAndLinkFile(file_Zoning, "Copy of Zoning Certificate", appId, 18, refTypeId);
-                    SaveAndLinkFile(file_Fee, "Proof of Application Fee Payment", appId, 18, refTypeId);
+                    if (feeUploaded)
+                        SaveAndLinkFile(file_Fee, ProofOfPaymentDocumentName, appId, 18, refTypeId);
                     SaveAndLinkFile(file_Experience, "Facilities Management Experience", appId, 18, refTypeId);
                     SaveAndLinkFile(file_Financials, "3-years Audited Financial Statements", appId, 59, refTypeId);
                     SaveAndLinkFile(file_BusinessPlan, "Business Plan", appId, 18, refTypeId);
@@ -364,16 +405,18 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         SaveAndLinkFile(otherFile, "Other Supporting Document: " + Path.GetFileName(otherFile.FileName), appId, 18, refTypeId);
                     }
+                    SaveSignedPaperFormAndLog(appId, refTypeId, true);
 
-                    // Assign Verify Payment task in Round Robin Queue
-                    RealEstateWorkAllocationHelper.AssignRealEstateTask(db, appId, ResponsibilityTypeKeys.RealEstateVerifyPayment);
+                    // Assign Verify Payment task in Round Robin Queue, only once proof of payment is in
+                    if (feeUploaded)
+                        RealEstateWorkAllocationHelper.AssignRealEstateTask(db, appId, ResponsibilityTypeKeys.RealEstateVerifyPayment);
 
                     // Notify customer via Email
                     try
                     {
                         var email = new Email();
                         string subject = "Real Estate Development: Lease Application Captured Successfully";
-                        string body = string.Format("Dear {0},<br/><br/>Your lease application for space has been captured successfully. Your Reference Number is: <strong>{1}</strong>.<br/><br/>Your application will now be processed for evaluation.", _systemUser.FullName, referenceNumber);
+                        string body = string.Format("Dear {0},<br/><br/>Your lease application for space has been captured successfully. Your Reference Number is: <strong>{1}</strong>.<br/><br/>{2}", _systemUser.FullName, referenceNumber, FeeNextStepText(feeUploaded));
                         email.GenerateEmail(_systemUser.EmailAddress, subject, body, _customer.Id.ToString(), false, AppSettingKeys.EservicesDefaultEmailTemplate, _systemUser.FullName);
                     }
                     catch (Exception ex)
@@ -381,7 +424,8 @@ namespace C8.eServices.Mvc.Controllers
                         EventLogHelper.LogSystemError(ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
                     }
 
-                    TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber;
+                    TempData["SuccessMessage"] = "Application submitted successfully! Reference Number: " + referenceNumber
+                        + (feeUploaded ? "" : ". Please pay the application fee and upload your proof of payment from this page.");
                     return RedirectToAction("MyApplications");
                 }
                 catch (Exception ex)
@@ -426,6 +470,7 @@ namespace C8.eServices.Mvc.Controllers
                 .Where(a => a.CustomerId == _customer.Id && a.IsActive && !a.IsDeleted)
                 .ToList();
 
+            LoadMyWaitingList();
             return View(applications);
         }
 
@@ -579,6 +624,28 @@ namespace C8.eServices.Mvc.Controllers
             db.SaveChanges();
         }
 
+        /// <summary>
+        /// UC05: DPRE-{TYPE} YYYY/#### with a running number per lease type per year (e.g. DPRE-BUS 2026/0001).
+        /// Two submissions of the same type in the same instant could get the same number; volumes are low, so this is accepted for now.
+        /// </summary>
+        private string GenerateReferenceNumber(string typeCode)
+        {
+            string prefix = string.Format("DPRE-{0} {1}/", typeCode, DateTime.Now.Year);
+            var existing = db.RE_Applications
+                .Where(a => a.ApplicationReferenceNumber.StartsWith(prefix))
+                .Select(a => a.ApplicationReferenceNumber)
+                .ToList();
+
+            int max = 0;
+            foreach (var reference in existing)
+            {
+                int n;
+                if (int.TryParse(reference.Substring(prefix.Length), out n) && n > max) max = n;
+            }
+            return prefix + (max + 1).ToString().PadLeft(4, '0');
+        }
+
+        // Previous daily format DPRE-YYYYMMDD-NNNN, kept for reference; no longer called for new applications.
         private string GenerateReferenceNumber()
         {
             var counterSetting = db.AppSettings.FirstOrDefault(o => o.Key == "red_daily_sequence_counter");
@@ -637,7 +704,9 @@ namespace C8.eServices.Mvc.Controllers
             ViewBag.PurposesOfLease = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Retail", Text = "Retail Units (Shops, kiosks, stalls, etc.)" },
-                new SelectListItem { Value = "Office/Professional", Text = "Offices/Professional Units" }
+                new SelectListItem { Value = "Office/Professional", Text = "Offices/Professional Units" },
+                // ASSUMPTION (DPRE-Q37): BR03 also lists workshops, repairs, fabrication and artisanal production
+                new SelectListItem { Value = "Workshop", Text = "Workshops (repairs, fabrication, artisanal production)" }
             };
         }
 

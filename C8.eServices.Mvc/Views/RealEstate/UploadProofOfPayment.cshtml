@@ -1,0 +1,50 @@
+@model C8.eServices.Mvc.Models.RE_Application
+@{
+    ViewBag.Title = "Upload Proof of Payment";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
+
+<div class="re-container re-form-page" style="max-width: 760px;">
+    @Html.Partial("_OnBehalfBanner")
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-credit-card"></i> Real Estate &middot; Application fee</div>
+        <h1>Upload proof of payment</h1>
+        <p>Pay the application fee, then upload the EFT receipt or deposit slip so your application can be processed.</p>
+    </div>
+
+    <div class="re-card">
+        <div class="re-card-header"><i class="fa fa-file-text-o"></i><h3 class="re-card-title">Application details</h3></div>
+        <div class="re-card-body" style="padding-bottom: 18px;">
+        <div class="pop-row"><span>Reference Number</span><span>@Model.ApplicationReferenceNumber</span></div>
+        <div class="pop-row"><span>Lease Type</span><span>@(string.IsNullOrEmpty(Model.LeaseType) ? "Business Hub" : Model.LeaseType)</span></div>
+        <div class="pop-row"><span>Applicant</span><span>@Model.EntityName</span></div>
+        <div class="pop-row"><span>Status</span><span>@(Model.Status == null ? "" : Model.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.AwaitingApplicationFeeUpload ? "Waiting for proof of payment" : Model.Status.Name)</span></div>
+
+        @if (!string.IsNullOrEmpty(Model.PaymentValidationComment))
+        {
+            <div class="alert alert-warning" style="margin-top: 18px; border-radius: 8px;">
+                <strong>Your previous proof of payment was not accepted.</strong><br />
+                Reason: @Model.PaymentValidationComment
+            </div>
+        }
+
+        @using (Html.BeginForm("UploadProofOfPayment", "RealEstate", new { id = Model.Id }, FormMethod.Post, new { enctype = "multipart/form-data", id = "frmUploadPop" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="file_Fee" style="font-weight: 600;">Proof of Application Fee Payment <span style="color: #dc2626;">*</span></label>
+                <input type="file" name="file_Fee" id="file_Fee" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required />
+                <small class="text-muted">PDF, PNG or JPG, up to 10 MB.</small>
+                @Html.ValidationMessage("file_Fee", "", new { @class = "text-danger", style = "display: block;" })
+            </div>
+            <div class="re-submit-bar" style="position: static; margin: 0; padding: 0; border: 0; background: none;">
+                <a href="@Url.Action("MyApplications", "RealEstate")" class="btn-re-outline" id="btn-pop-cancel">Cancel</a>
+                <button type="submit" class="btn-re-gold" id="btn-pop-submit"><i class="fa fa-check"></i> Submit proof of payment</button>
+            </div>
+        }
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/RealEstate/re-forms.js?v=20261127" defer></script>

@@ -148,6 +148,12 @@ namespace C8.eServices.Mvc.DataAccessLayer
         public DbSet<RE_FacilityCategoryAudit> RE_FacilityCategoryAudits { get; set; }
         public DbSet<RE_FacilityUnitAudit> RE_FacilityUnitAudits { get; set; }
         public DbSet<RE_DepartmentalCommentAudit> RE_DepartmentalCommentAudits { get; set; }
+        public DbSet<RE_Lease> RE_Leases { get; set; }
+        public DbSet<RE_LeaseAudit> RE_LeaseAudits { get; set; }
+        public DbSet<RE_ApplicationSiteDetail> RE_ApplicationSiteDetails { get; set; }
+        public DbSet<RE_ApplicationSiteDetailAudit> RE_ApplicationSiteDetailAudits { get; set; }
+        public DbSet<RE_WaitingListEntry> RE_WaitingList { get; set; }
+        public DbSet<RE_WaitingListEntryAudit> RE_WaitingListAudits { get; set; }
         //Audits 
         public DbSet<ScheduledInspectionAudit> ScheduledInspectionAudits { get; set; }
         public DbSet<UnitsEkurhuleniHousingCompanyAudit> UnitsEkurhuleniHousingCompanyAudits { get; set; }
@@ -793,6 +799,15 @@ namespace C8.eServices.Mvc.DataAccessLayer
                             break;
                         case "RE_DepartmentalComment":
                             RE_DepartmentalCommentAudits.Add((RE_DepartmentalCommentAudit)audit);
+                            break;
+                        case "RE_Lease":
+                            RE_LeaseAudits.Add((RE_LeaseAudit)audit);
+                            break;
+                        case "RE_ApplicationSiteDetail":
+                            RE_ApplicationSiteDetailAudits.Add((RE_ApplicationSiteDetailAudit)audit);
+                            break;
+                        case "RE_WaitingListEntry":
+                            RE_WaitingListAudits.Add((RE_WaitingListEntryAudit)audit);
                             break;
                         case "ApplicationRole":
                             ApplicationRoleAudits.Add((ApplicationRoleAudit)audit);

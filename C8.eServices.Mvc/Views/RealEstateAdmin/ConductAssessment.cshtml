@@ -338,6 +338,8 @@
                     </div>
                 </div>
 
+                @Html.Action("SiteDetailsPanel", "RealEstateAdmin", new { applicationId = Model.Id })
+
                 <!-- Section 2: Premises Details -->
                 <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
                     <h5 style="color:var(--re-gold); font-weight:700; text-transform:uppercase; margin-bottom:15px; font-size:14px;"><i class="fa fa-building"></i> Premises & Space Specifications</h5>

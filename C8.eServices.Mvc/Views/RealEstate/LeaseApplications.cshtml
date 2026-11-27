@@ -1,0 +1,57 @@
+@model IEnumerable<C8.eServices.Mvc.Models.RE_LeaseLookups.LeaseApplicationType>
+@{
+    ViewBag.Title = "Lease Applications";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var icons = new Dictionary<string, string>
+    {
+        { "Business Hub", "fa-building" }, { "Commercial", "fa-shopping-cart" }, { "Outdoor Advertising", "fa-bullhorn" },
+        { "Telecommunications", "fa-signal" }, { "Social", "fa-users" }, { "Agricultural", "fa-leaf" }, { "Servitude", "fa-road" }
+    };
+}
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
+
+<div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-warning"><i class="fa fa-info-circle"></i> @TempData["ErrorMessage"]</div>
+    }
+
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-key"></i> Real Estate &middot; Development Planning</div>
+        <h1>Apply to lease municipal property</h1>
+        <p>Choose the type of lease you need. Each form saves as you go, and you pay the application fee after you submit.</p>
+    </div>
+
+    <div class="lt-grid">
+        @foreach (var t in Model)
+        {
+            string icon = icons.ContainsKey(t.Name) ? icons[t.Name] : "fa-file-text-o";
+            string cardId = "lease-type-" + t.Name.Replace(" ", "-").ToLowerInvariant();
+            if (t.OnlineFormAvailable)
+            {
+                <a class="lt-card" href="@Url.Action(t.RefCode == "BUS" ? "Capture" : "CaptureSite", "RealEstate", new { leaseType = t.Name })" id="@cardId">
+                    <span class="lt-icon"><i class="fa @icon" aria-hidden="true"></i></span>
+                    <h3>@t.Name</h3>
+                    <p>@t.Description</p>
+                    <span class="lt-meta"><span class="lt-code">DPRE-@t.RefCode</span><span class="go">Start application <i class="fa fa-arrow-right"></i></span></span>
+                </a>
+            }
+            else
+            {
+                <div class="lt-card off" id="@cardId">
+                    <span class="lt-icon"><i class="fa @icon" aria-hidden="true"></i></span>
+                    <h3>@t.Name</h3>
+                    <p>@t.Description</p>
+                    <span class="soon">Not yet available online. Please contact the DPRE office.</span>
+                </div>
+            }
+        }
+    </div>
+
+    <ol class="re-steps-guide">
+        <li><b>1</b><span>Complete the form and upload your documents. You can save and continue later.</span></li>
+        <li><b>2</b><span>Submit to get your reference number, then pay the application fee.</span></li>
+        <li><b>3</b><span>Upload your proof of payment under My Applications and track progress there.</span></li>
+    </ol>
+</div>

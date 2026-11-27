@@ -1,0 +1,87 @@
+@model List<C8.eServices.Mvc.Models.RE_WaitingListEntry>
+@{
+    ViewBag.Title = "Waiting List";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var freeByFacility = ViewBag.FreeByFacility as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var freeByCcc = ViewBag.FreeByCcc as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
+
+<div class="re-container re-form-page">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
+    }
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-list-ol"></i> Real Estate &middot; Lease administration</div>
+        <h1>Business Hub waiting list</h1>
+        <p>Applicants who asked to be told when a unit becomes free. Work each area from the top: the first person to join is first in line.</p>
+    </div>
+
+    <div class="re-card">
+        <div class="re-card-body" style="padding-top: 18px;">
+            <form method="get" action="@Url.Action("WaitingList")" class="re-search-row" style="margin-bottom: 16px;">
+                <label for="cccId" class="sr-only">Customer Care Area</label>
+                @Html.DropDownList("cccId", (SelectList)ViewBag.CccFilter, "All Customer Care Areas", new { @class = "form-control", id = "cccId" })
+                <button type="submit" class="btn-re-gold" id="btnFilterWaitingList"><i class="fa fa-filter"></i> Show</button>
+            </form>
+
+            @if (!Model.Any())
+            {
+                <p id="waitingListEmpty" style="margin: 0;">Nobody is waiting.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table" id="waitingListTable">
+                        <thead>
+                            <tr><th>#</th><th>Applicant</th><th>Area</th><th>Facility</th><th>Purpose</th><th>Joined</th><th>Units free now</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            @{ int place = 0; int? lastCcc = null; }
+                            @foreach (var w in Model)
+                            {
+                                if (lastCcc != w.CCCId) { place = 0; lastCcc = w.CCCId; }
+                                place++;
+                                int free = w.FacilityId.HasValue ? (freeByFacility.ContainsKey(w.FacilityId.Value) ? freeByFacility[w.FacilityId.Value] : 0)
+                                                                 : (freeByCcc.ContainsKey(w.CCCId) ? freeByCcc[w.CCCId] : 0);
+                                <tr>
+                                    <td>@place</td>
+                                    <td><strong>@(w.Customer != null ? w.Customer.FullName : "")</strong><div class="text-muted" style="font-size: 12px;">@(w.Customer != null ? w.Customer.EmailAddress : "")</div></td>
+                                    <td>@(w.CCC != null ? w.CCC.CCCName : "")</td>
+                                    <td>@(w.Facility != null ? w.Facility.Name : "Any in the area")</td>
+                                    <td>@w.PurposeOfLease</td>
+                                    <td>@(w.CreatedDateTime.HasValue ? w.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "")</td>
+                                    <td>@if (free > 0) { <span class="re-wl-free">@free free</span> } else { <span class="re-wl-none">None</span> }</td>
+                                    <td>@(w.WaitingStatus == "Offered" ? "Told on " + (w.OfferedDateTime.HasValue ? w.OfferedDateTime.Value.ToString("yyyy-MM-dd") : "") : "Waiting")</td>
+                                    <td style="min-width: 220px;">
+                                        @if (w.WaitingStatus == "Waiting")
+                                        {
+                                            <form method="post" action="@Url.Action("OfferFromWaitingList")" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@w.Id" />
+                                                <button type="submit" class="btn-re-gold" id="btnOffer-@w.Id" style="min-height: 36px; padding: 6px 12px !important; font-size: 13px !important;" @Html.Raw(free > 0 ? "" : "title=\"No unit is free yet\"")>Tell them a unit is free</button>
+                                            </form>
+                                        }
+                                        <form method="post" action="@Url.Action("RemoveFromWaitingList")" class="re-search-row" style="margin-top: 6px;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@w.Id" />
+                                            <label for="reason-@w.Id" class="sr-only">Reason for removing</label>
+                                            <input type="text" name="reason" id="reason-@w.Id" class="form-control" placeholder="Reason" required style="min-height: 36px;" />
+                                            <button type="submit" class="btn-re-outline" id="btnRemove-@w.Id" style="min-height: 36px; padding: 6px 12px !important; font-size: 13px !important;">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

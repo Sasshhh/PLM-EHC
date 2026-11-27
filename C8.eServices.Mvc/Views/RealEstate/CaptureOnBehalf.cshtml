@@ -1,0 +1,70 @@
+@using C8.eServices.Mvc.Models
+@{
+    ViewBag.Title = "Capture for an Applicant";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+    var results = ViewBag.Results as List<Customer> ?? new List<Customer>();
+    string search = ViewBag.Search;
+    string activeKey = ViewBag.ActiveStatusKey;
+}
+
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
+
+<div class="re-container re-form-page" style="max-width: 880px;">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
+    }
+    <div class="re-header-card">
+        <div class="re-eyebrow"><i class="fa fa-user-plus"></i> Real Estate &middot; Paper applications</div>
+        <h1>Capture an application for an applicant</h1>
+        <p>For applicants who handed in a signed paper form. Find their profile, then fill in the online form for them and upload the signed paper form.</p>
+    </div>
+
+    <div class="re-card">
+        <div class="re-card-header"><i class="fa fa-search"></i><h3 class="re-card-title">Find the applicant</h3></div>
+        <div class="re-card-body">
+            <form method="get" action="@Url.Action("CaptureOnBehalf")" class="re-search-row">
+                <label for="search" class="sr-only">ID number, e-mail address or surname</label>
+                <input type="text" name="search" id="search" class="form-control" value="@search" placeholder="ID number, e-mail address or surname" autocomplete="off" />
+                <button type="submit" class="btn-re-gold" id="btnSearchApplicant"><i class="fa fa-search"></i> Search</button>
+            </form>
+            <p class="text-muted" style="font-size: 13px; margin: 10px 0 0;">The applicant must already be registered for Real Estate and have an approved profile. If they are not registered yet, help them register first.</p>
+
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                if (!results.Any())
+                {
+                    <p style="margin: 18px 0 0;" id="noApplicantFound">No Real Estate applicant matches "@search".</p>
+                }
+                else
+                {
+                    <div class="re-applicant-list" id="applicantResults">
+                        @foreach (var c in results)
+                        {
+                            bool approved = c.Status != null && c.Status.Key == activeKey;
+                            <div class="re-applicant">
+                                <div>
+                                    <strong>@c.FullName</strong>
+                                    <div class="text-muted" style="font-size: 13px;">ID @c.IdentificationNumber &middot; @c.EmailAddress</div>
+                                    <div style="font-size: 13px;">Profile: @(c.Status != null ? c.Status.Name : "Unknown")</div>
+                                </div>
+                                @if (approved)
+                                {
+                                    <form method="post" action="@Url.Action("StartOnBehalf")">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="customerId" value="@c.Id" />
+                                        <button type="submit" class="btn-re-gold" id="btnStart-@c.Id">Capture for this applicant</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size: 13px;">Approve the profile first</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

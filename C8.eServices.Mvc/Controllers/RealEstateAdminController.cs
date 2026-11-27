@@ -15,7 +15,7 @@ using C8.eServices.Mvc.Keys;
 namespace C8.eServices.Mvc.Controllers
 {
     [AllowAnonymous]
-    public class RealEstateAdminController : Controller
+    public partial class RealEstateAdminController : Controller
     {
         private readonly eServicesDbContext db = new eServicesDbContext();
         private readonly BaseHelper _base = new BaseHelper();
@@ -29,6 +29,9 @@ namespace C8.eServices.Mvc.Controllers
             // Smart role restriction: if the user only has the Departmental Representative role,
             // restrict their access strictly to the Departmental Review Queue and Comments capture pages.
             if (User.IsInRole("Departmental Representative") &&
+                !User.IsInRole(RealEstateRoles.PropertyOfficer) &&
+                !User.IsInRole(RealEstateRoles.HeadOfDepartment) &&
+                !User.IsInRole(RealEstateRoles.EvaluationCommittee) &&
                 !User.IsInRole("Property Manager") &&
                 !User.IsInRole("Property Managers") &&
                 !User.IsInRole("Finance Administrator") &&
@@ -134,7 +137,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: RealEstateAdmin/AddCategory
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddCategory(string key, string name, decimal tariffPerSqm)
+        public ActionResult AddCategory(string key, string name, decimal tariffPerSqm, decimal? escalationPercentage = null)
         {
             Initialise();
             if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(name))
@@ -157,6 +160,7 @@ namespace C8.eServices.Mvc.Controllers
                 Key = normalizedKey,
                 Name = name.Trim(),
                 TariffPerSqm = tariffPerSqm,
+                EscalationPercentage = escalationPercentage,
                 IsActive = true,
                 IsDeleted = false,
                 CreatedBySystemUserId = _systemUser?.Id,
@@ -175,7 +179,7 @@ namespace C8.eServices.Mvc.Controllers
         // POST: RealEstateAdmin/EditCategory
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditCategory(int id, string name, decimal tariffPerSqm)
+        public ActionResult EditCategory(int id, string name, decimal tariffPerSqm, decimal? escalationPercentage = null)
         {
             Initialise();
             var category = db.RE_FacilityCategories.Find(id);
@@ -183,6 +187,7 @@ namespace C8.eServices.Mvc.Controllers
             {
                 category.Name = name.Trim();
                 category.TariffPerSqm = tariffPerSqm;
+                category.EscalationPercentage = escalationPercentage;
                 category.ModifiedDateTime = DateTime.Now;
                 category.ModifiedBySystemUserId = _systemUser?.Id;
 
@@ -505,6 +510,9 @@ namespace C8.eServices.Mvc.Controllers
                 }
 
                 app.PaymentValidationComment = comment;
+                // DPRE-Q39: send the application back to the applicant to upload a valid proof of payment
+                var uploadStatus = db.Status.FirstOrDefault(s => s.Key == StatusKeys.AwaitingApplicationFeeUpload);
+                if (uploadStatus != null) app.StatusId = uploadStatus.Id;
                 app.ModifiedDateTime = DateTime.Now;
                 app.ModifiedBySystemUserId = _systemUser?.Id;
                 db.Entry(app).State = EntityState.Modified;
@@ -2009,7 +2017,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         // GET: RealEstateAdmin/ManageWorkflow
-        [Authorize(Roles = "Administrators, Back Office System Administrator, Area Manager, Property Manager")]
+        [Authorize(Roles = "Administrators, Back Office System Administrator, Area Manager, Property Manager, Property Officer")]
         public ActionResult ManageWorkflow()
         {
             Initialise();
@@ -2029,7 +2037,7 @@ namespace C8.eServices.Mvc.Controllers
 
             // 3. Get all active committee members (System Users in the "Area Manager" or "Property Manager" roles)
             var committeeRoleIds = db.Roles
-                .Where(r => r.Name == "Area Manager" || r.Name == "Property Manager")
+                .Where(r => r.Name == RealEstateRoles.EvaluationCommittee || r.Name == "Area Manager" || r.Name == "Property Manager")
                 .Select(r => r.Id)
                 .ToList();
 
@@ -2158,8 +2166,9 @@ namespace C8.eServices.Mvc.Controllers
                 var result = userManager.Create(user, defaultPassword);
                 if (result.Succeeded)
                 {
-                    // Add user to "Area Manager" role (used for Committee Members)
-                    identityManager.AddUserToRole(user.Id, "Area Manager");
+                    // Committee members get the DPRE Evaluation Committee role once it exists, otherwise Area Manager.
+                    var committeeRoleName = RealEstateRoles.CommitteeRoleForNewMembers(db);
+                    identityManager.AddUserToRole(user.Id, committeeRoleName);
 
                     // Create Customer profile
                     var defaultCustomerType = db.CustomerTypes.FirstOrDefault(c => c.Key == CustomerTypeKeys.Individual);
@@ -2188,7 +2197,7 @@ namespace C8.eServices.Mvc.Controllers
 
                     // Create ApplicationUserRole
                     var rcsApp = db.Applications.FirstOrDefault(x => x.Key == ApplicationKeys.RatesClearanceSystem);
-                    var role = db.Roles.FirstOrDefault(r => r.Name == "Area Manager");
+                    var role = db.Roles.FirstOrDefault(r => r.Name == committeeRoleName);
                     if (rcsApp != null && role != null)
                     {
                         var appUserRole = new ApplicationUserRole
@@ -2804,6 +2813,16 @@ namespace C8.eServices.Mvc.Controllers
             app.ModifiedBySystemUserId = _systemUser?.Id;
             db.Entry(app).State = EntityState.Modified;
             db.SaveChanges();
+
+            // DPRE UCXX: keep the lease register in step with the application workflow
+            try
+            {
+                UpsertLeaseFromApplication(app);
+            }
+            catch (Exception ex)
+            {
+                EventLogHelper.LogSystemError("Lease register update failed for application " + app.Id + ": " + ex.Message, LogTypeKeys.TryCatchException, ReferenceTypeKeys.ExceptionLog);
+            }
 
             MatchingHelper.AddHistoryLog(db, app.Id, _systemUser?.Id ?? 1, string.Format("Lease details captured. Category: {0}. Tenancy Number: {1}.", leaseCategory, app.UniqueTenancyLeaseNumber));
             TempData["SuccessMessage"] = string.Format("Lease details captured successfully. Tenancy Number: {0}.", app.UniqueTenancyLeaseNumber);

@@ -322,6 +322,7 @@
                         <th>Category Key</th>
                         <th>Category Name</th>
                         <th>Tariff Per Square Meter (VAT incl.)</th>
+                        <th>Annual Escalation</th>
                         <th style="width: 250px; text-align: right;">Actions</th>
                     </tr>
                 </thead>
@@ -332,11 +333,13 @@
                             <td><code style="font-size: 13px;">@cat.Key</code></td>
                             <td style="font-weight: 600;">@cat.Name</td>
                             <td><span class="badge-gold">R @cat.TariffPerSqm.ToString("F2") / m²</span></td>
+                            <td>@(cat.EscalationPercentage.HasValue ? cat.EscalationPercentage.Value.ToString("0.##") + "%" : "Not set")</td>
                             <td style="text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
                                 <button type="button" class="btn btn-edit edit-category-btn" 
                                         data-id="@cat.Id" 
                                         data-name="@cat.Name" 
-                                        data-tariff="@cat.TariffPerSqm">
+                                        data-tariff="@cat.TariffPerSqm"
+                                        data-escalation="@(cat.EscalationPercentage.HasValue ? cat.EscalationPercentage.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")">
                                     <i class="fa fa-pencil"></i> Edit
                                 </button>
                                 @using (Html.BeginForm("DeleteCategory", "RealEstateAdmin", FormMethod.Post, new { style = "margin: 0;", onsubmit = "return confirm('Are you sure you want to delete this category? All linked units will be affected.');" }))
@@ -507,6 +510,11 @@
                         <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff per Square Meter (R)</label>
                         <input type="number" step="0.01" name="tariffPerSqm" class="form-control" placeholder="e.g. 57.00" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
                     </div>
+                    <div class="form-group" style="margin-top: 18px; margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Annual Escalation (%)</label>
+                        <input type="number" step="0.01" name="escalationPercentage" class="form-control" placeholder="e.g. 8.00" min="0" max="100" style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                        <small style="color: #64748b;">Applied to new leases in this category. Leave blank if not set yet.</small>
+                    </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
                     <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 8px 18px;">Cancel</button>
@@ -537,6 +545,11 @@
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Tariff per Square Meter (R)</label>
                         <input type="number" step="0.01" name="tariffPerSqm" class="form-control" required style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin-top: 18px; margin-bottom: 0;">
+                        <label class="control-label" style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 6px; display: block;">Annual Escalation (%)</label>
+                        <input type="number" step="0.01" name="escalationPercentage" class="form-control" placeholder="e.g. 8.00" min="0" max="100" style="border-radius: 8px; padding: 10px 12px; border-color: #cbd5e1;" />
+                        <small style="color: #64748b;">Applied to new leases in this category. Leave blank if not set yet.</small>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid var(--re-border-color); padding: 18px 24px;">
@@ -727,6 +740,7 @@
                 $("#editCategoryModal [name='id']").val(id);
                 $("#editCategoryModal [name='name']").val(name);
                 $("#editCategoryModal [name='tariffPerSqm']").val(tariff);
+                $("#editCategoryModal [name='escalationPercentage']").val($(this).attr("data-escalation"));
 
                 $("#editCategoryModal").modal("show");
             });

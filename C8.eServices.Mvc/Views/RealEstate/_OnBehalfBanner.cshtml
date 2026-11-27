@@ -1,0 +1,15 @@
+@* DPRE-Q46: shown on applicant screens while an official is capturing for an applicant. *@
+@if (ViewBag.OnBehalfApplicant != null)
+{
+    <div class="re-onbehalf" role="status" id="onBehalfBanner">
+        <i class="fa fa-user-circle-o" aria-hidden="true"></i>
+        <div class="re-onbehalf-text">
+            <strong>Capturing for @ViewBag.OnBehalfApplicant</strong>
+            <span>You are working as this applicant. Everything you submit is saved on their profile, and the history shows you captured it.</span>
+        </div>
+        <form method="post" action="@Url.Action("StopOnBehalf", "RealEstate")" class="re-onbehalf-stop">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-re-outline" id="btnStopOnBehalf">Stop capturing</button>
+        </form>
+    </div>
+}

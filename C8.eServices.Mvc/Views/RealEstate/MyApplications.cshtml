@@ -265,7 +265,9 @@
     }
 </style>
 
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 <div class="re-container">
+    <div class="re-form-page" style="padding:0;">@Html.Partial("_OnBehalfBanner")</div>
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success" style="border-radius: 8px; margin-bottom: 25px;">
@@ -333,7 +335,7 @@
                         }
 
                         <tr>
-                            <td><span class="ref-badge">@app.ApplicationReferenceNumber</span></td>
+                            <td><span class="ref-badge">@(app.ApplicationReferenceNumber != null && app.ApplicationReferenceNumber.StartsWith("DRAFT-") ? "Draft" : app.ApplicationReferenceNumber)</span>@if (!string.IsNullOrEmpty(app.LeaseType)) { <div style="font-size: 12px; color: #64748b;">@app.LeaseType</div> }</td>
                             <td>
                                 <div style="font-weight: 600;">@app.EntityName</div>
                                 <div style="font-size: 12px; color: #64748b;">@app.ApplicantType</div>
@@ -348,9 +350,24 @@
                                 </span>
                             </td>
                             <td style="text-align: center; display: flex; gap: 6px; justify-content: center; align-items: center; border-bottom: 1px solid var(--re-border-color) !important;">
+                                @if (app.Status != null && app.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.ReApplicationDraft)
+                                {
+                                    <a href="@Url.Action("CaptureSite", "RealEstate", new { draftId = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-continue-@app.Id">
+                                        <i class="fa fa-pencil"></i> Continue
+                                    </a>
+                                }
+                                else
+                                {
                                 <button type="button" class="action-btn btn-view-details" data-app-id="@app.Id" id="btn-view-@app.Id">
                                     <i class="fa fa-eye"></i> View
                                 </button>
+                                }
+                                @if (app.Status != null && app.Status.Key == C8.eServices.Mvc.Keys.StatusKeys.AwaitingApplicationFeeUpload)
+                                {
+                                    <a href="@Url.Action("UploadProofOfPayment", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-upload-pop-@app.Id">
+                                        <i class="fa fa-upload"></i> Upload Proof of Payment
+                                    </a>
+                                }
                                 @if (app.Status != null && app.Status.Key == "re_awaiting_inspection" && app.InspectionStatus == "Scheduled")
                                 {
                                     <a href="@Url.Action("SelectInspectionSlot", "RealEstate", new { id = app.Id })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-select-slot-@app.Id">
@@ -370,6 +387,42 @@
             </table>
         }
     </div>
+
+    @{ var waitingList = ViewBag.WaitingList as List<C8.eServices.Mvc.Models.RE_WaitingListEntry>; }
+    @if (waitingList != null && waitingList.Any())
+    {
+        <div class="re-card" id="myWaitingList" style="margin-top: 24px;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--re-border-color);">
+                <h3 style="margin: 0; font-size: 17px; font-weight: 700;"><i class="fa fa-hourglass-half" style="color: var(--re-gold);"></i> Waiting list</h3>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">You asked to be told when a Business Hub unit becomes free.</p>
+            </div>
+            <table class="table re-table">
+                <thead><tr><th>Area</th><th>Facility</th><th>Joined</th><th>Status</th><th style="text-align: center;">Action</th></tr></thead>
+                <tbody>
+                    @foreach (var w in waitingList)
+                    {
+                        <tr>
+                            <td>@(w.CCC != null ? w.CCC.CCCName : "")</td>
+                            <td>@(w.Facility != null ? w.Facility.Name : "Any facility in the area")</td>
+                            <td>@(w.CreatedDateTime.HasValue ? w.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "")</td>
+                            <td>@(w.WaitingStatus == "Offered" ? "A unit is free: apply now" : "Waiting")</td>
+                            <td style="text-align: center;">
+                                @if (w.WaitingStatus == "Offered")
+                                {
+                                    <a href="@Url.Action("Capture", "RealEstate", new { leaseType = "Business Hub" })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-apply-wl-@w.Id">Apply now</a>
+                                }
+                                <form method="post" action="@Url.Action("LeaveWaitingList", "RealEstate")" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@w.Id" />
+                                    <button type="submit" class="action-btn" id="btn-leave-wl-@w.Id">Leave list</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 <!-- Details Modal -->

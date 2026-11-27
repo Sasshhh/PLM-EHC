@@ -1,0 +1,502 @@
+@model C8.eServices.Mvc.Models.RE_Lease
+@{
+    bool isEdit = Model != null && Model.Id > 0;
+    ViewBag.Title = isEdit ? "Edit Lease Details" : "Capture Lease Details";
+    Layout = "~/Views/Shared/RCS_Layout.cshtml";
+}
+@Html.Partial("_RE_LeaseStyles")
+
+<div class="admin-container re-form">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"] You can capture another lease below, or close.</div>
+    }
+
+    <div class="admin-header-card">
+        <h1>@(isEdit ? "Edit Lease " + Model.LeaseReferenceNumber : "Capture Lease Details")</h1>
+        <p>Record the lease information and assign the lease category for management, billing and reporting.</p>
+    </div>
+
+    @using (Html.BeginForm("CaptureLease", "RealEstateAdmin", FormMethod.Post, new { id = "leaseForm", novalidate = "novalidate" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+        if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">Please correct the highlighted fields.</div>
+        }
+
+    <div class="admin-card">
+        <div class="re-section-title">Lease and Property</div>
+        <div class="row">
+            <div class="col-sm-3 form-group">
+                <label for="ContractReferenceNumber">Contract Reference Number</label>
+                @Html.TextBoxFor(m => m.ContractReferenceNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.ContractReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseReferenceNumber" class="@(isEdit ? "req" : "")">Lease Reference Number (Unique)</label>
+                @Html.TextBoxFor(m => m.LeaseReferenceNumber, new { @class = "form-control", placeholder = isEdit ? "" : "Leave blank to auto-number" })
+                @Html.ValidationMessageFor(m => m.LeaseReferenceNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="SolarAccountNumber">SOLAR Account Number</label>
+                @Html.TextBoxFor(m => m.SolarAccountNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.SolarAccountNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="PropertyCode">Property Code</label>
+                @Html.TextBoxFor(m => m.PropertyCode, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PropertyCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="HigherLevelPropertyCode">Higher Level Property Code</label>
+                @Html.TextBoxFor(m => m.HigherLevelPropertyCode, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.HigherLevelPropertyCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-5 form-group">
+                <label for="PhysicalBuildingNumberAndName">Building Number and Name (Physical Address)</label>
+                @Html.TextBoxFor(m => m.PhysicalBuildingNumberAndName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PhysicalBuildingNumberAndName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="InvoiceClarification">Invoice Clarification</label>
+                @Html.TextBoxFor(m => m.InvoiceClarification, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.InvoiceClarification, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="PhysicalStreetAddress">Street Address (Physical Address)</label>
+                @Html.TextBoxFor(m => m.PhysicalStreetAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PhysicalStreetAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="CCCId">CCA</label>
+                @Html.DropDownListFor(m => m.CCCId, new SelectList(((SelectList)ViewBag.CCCList).Items, "Id", "CCCName", Model.CCCId), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.CCCId, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeasedAreaSqm">Leased Area (Size, m²)</label>
+                @Html.TextBoxFor(m => m.LeasedAreaSqm, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                @Html.ValidationMessageFor(m => m.LeasedAreaSqm, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Classification and Status</div>
+        <div class="row">
+            <div class="col-sm-4 form-group">
+                <label for="LeaseClassification" class="req">Lease Classification</label>
+                @Html.DropDownListFor(m => m.LeaseClassification, new SelectList((string[])ViewBag.Classifications, Model.LeaseClassification), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseClassification, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="LeaseTerm">Lease Term</label>
+                @Html.DropDownListFor(m => m.LeaseTerm, new SelectList((string[])ViewBag.LeaseTerms, Model.LeaseTerm), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseTerm, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="RecordStatus">Status</label>
+                @Html.DropDownListFor(m => m.RecordStatus, new SelectList((string[])ViewBag.RecordStatuses, Model.RecordStatus), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.RecordStatus, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-12 form-group">
+                <label for="LeaseDetailsAndPurpose">Lease Details & Purpose for Use</label>
+                @Html.TextAreaFor(m => m.LeaseDetailsAndPurpose, 3, 0, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseDetailsAndPurpose, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <div class="checkbox" style="margin-top:24px;"><label>@Html.CheckBoxFor(m => m.AgreementInPlace) Lease/User Agreement in Place?</label></div>
+                @Html.ValidationMessageFor(m => m.AgreementInPlace, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <div class="checkbox" style="margin-top:24px;"><label>@Html.CheckBoxFor(m => m.ArchibusInvoice) Archibus/Other Invoice</label></div>
+                @Html.ValidationMessageFor(m => m.ArchibusInvoice, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <div class="checkbox" style="margin-top:24px;"><label>@Html.CheckBoxFor(m => m.IsMemorandumOfAgreement) Memorandum of Agreement (MOA)</label></div>
+                @Html.ValidationMessageFor(m => m.IsMemorandumOfAgreement, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <div class="checkbox" style="margin-top:24px;"><label>@Html.CheckBoxFor(m => m.Legal) Legal</label></div>
+                @Html.ValidationMessageFor(m => m.Legal, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Term and Dates</div>
+        <div class="row">
+            <div class="col-sm-3 form-group">
+                <label for="LeaseStartDate">Lease Start Date</label>
+                @Html.TextBoxFor(m => m.LeaseStartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.ValidationMessageFor(m => m.LeaseStartDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="EscalationDate">Escalation Date</label>
+                @Html.TextBoxFor(m => m.EscalationDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.ValidationMessageFor(m => m.EscalationDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseEndDate">Lease End Date</label>
+                @Html.TextBoxFor(m => m.LeaseEndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.ValidationMessageFor(m => m.LeaseEndDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseTerminationDate">Lease Termination Date</label>
+                @Html.TextBoxFor(m => m.LeaseTerminationDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.ValidationMessageFor(m => m.LeaseTerminationDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <div class="checkbox" style="margin-top:24px;"><label>@Html.CheckBoxFor(m => m.LeaseIndefinite) Lease Indefinite</label></div>
+                @Html.ValidationMessageFor(m => m.LeaseIndefinite, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="TerminationNoticePeriodMonths">Termination Notice Period (Months)</label>
+                @Html.TextBoxFor(m => m.TerminationNoticePeriodMonths, new { @class = "form-control", type = "number", step = "1", min = "0" })
+                @Html.ValidationMessageFor(m => m.TerminationNoticePeriodMonths, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Management</div>
+        <div class="row">
+            <div class="col-sm-4 form-group">
+                <label for="PortfolioManager">Portfolio Manager</label>
+                @Html.TextBoxFor(m => m.PortfolioManager, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PortfolioManager, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="PropertyManager">Property Manager</label>
+                @Html.TextBoxFor(m => m.PropertyManager, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PropertyManager, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="CollectionManager">Collection Manager</label>
+                @Html.TextBoxFor(m => m.CollectionManager, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.CollectionManager, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="EscalationAlertsRecipient">Escalation Alerts Recipient</label>
+                @Html.TextBoxFor(m => m.EscalationAlertsRecipient, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.EscalationAlertsRecipient, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="FinancialOfficer">Financial Officer</label>
+                @Html.TextBoxFor(m => m.FinancialOfficer, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.FinancialOfficer, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Financial</div>
+        <div class="row">
+            <div class="col-sm-3 form-group">
+                <label for="MonthlyRental">Monthly Rental (R)</label>
+                @Html.TextBoxFor(m => m.MonthlyRental, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                @Html.ValidationMessageFor(m => m.MonthlyRental, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="EscalationPercentage">Escalation (%)</label>
+                @Html.TextBoxFor(m => m.EscalationPercentage, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                @Html.ValidationMessageFor(m => m.EscalationPercentage, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="EscalationTerms">Escalation Terms</label>
+                @Html.TextBoxFor(m => m.EscalationTerms, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.EscalationTerms, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="VenusRentalAccountNumber">Venus Rental Account Number</label>
+                @Html.TextBoxFor(m => m.VenusRentalAccountNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.VenusRentalAccountNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="DepositHeld">Amount Deposit Held (R)</label>
+                @Html.TextBoxFor(m => m.DepositHeld, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                @Html.ValidationMessageFor(m => m.DepositHeld, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="PaymentFrequency">Payment Frequency</label>
+                @Html.DropDownListFor(m => m.PaymentFrequency, new SelectList((string[])ViewBag.PaymentFrequencies, Model.PaymentFrequency), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PaymentFrequency, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Tenant</div>
+        <div class="row">
+            <div class="col-sm-6 form-group">
+                <label for="TenantName" class="req">Tenant Name</label>
+                @Html.TextBoxFor(m => m.TenantName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.TenantName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="TenantCode">Tenant Code</label>
+                @Html.TextBoxFor(m => m.TenantCode, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.TenantCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="ApplicantType">Applicant Type</label>
+                @Html.DropDownListFor(m => m.ApplicantType, new SelectList((string[])ViewBag.ApplicantTypes, Model.ApplicantType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.ApplicantType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="ApplicantTypeOther">Other, please specify</label>
+                @Html.TextBoxFor(m => m.ApplicantTypeOther, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.ApplicantTypeOther, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="RegistrationNumber">ID / Registration Number</label>
+                @Html.TextBoxFor(m => m.RegistrationNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.RegistrationNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="VatRegistrationNumber">VAT Registration Number</label>
+                @Html.TextBoxFor(m => m.VatRegistrationNumber, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.VatRegistrationNumber, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="DomiciliumBuildingNumberAndName">Building Number and Name (Domicilia)</label>
+                @Html.TextBoxFor(m => m.DomiciliumBuildingNumberAndName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DomiciliumBuildingNumberAndName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="DomiciliumStreetAddress">Street Address (No PO Box)</label>
+                @Html.TextBoxFor(m => m.DomiciliumStreetAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DomiciliumStreetAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="DomiciliumSuburb">Suburb</label>
+                @Html.TextBoxFor(m => m.DomiciliumSuburb, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DomiciliumSuburb, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="DomiciliumTown">Town/CCA</label>
+                @Html.TextBoxFor(m => m.DomiciliumTown, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DomiciliumTown, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="DomiciliumPostalCode">Postal Code</label>
+                @Html.TextBoxFor(m => m.DomiciliumPostalCode, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DomiciliumPostalCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-12 form-group">
+                <label for="AdditionalComments">Additional Comments</label>
+                @Html.TextAreaFor(m => m.AdditionalComments, 3, 0, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.AdditionalComments, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Billing Contact</div>
+        <div class="row">
+            <div class="col-sm-4 form-group">
+                <label for="ContactType">Contact Type</label>
+                @Html.DropDownListFor(m => m.ContactType, new SelectList((string[])ViewBag.ContactTypes, Model.ContactType), "-- Select --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.ContactType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="BillingContactName">Billing Contact Name</label>
+                @Html.TextBoxFor(m => m.BillingContactName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingContactName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="BillingContactSurname">Billing Contact Surname</label>
+                @Html.TextBoxFor(m => m.BillingContactSurname, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingContactSurname, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="AuthorisedRepresentative">Authorised Representative Full Name</label>
+                @Html.TextBoxFor(m => m.AuthorisedRepresentative, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.AuthorisedRepresentative, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="BillingBuildingNumberAndName">Billing Address Building Number and Name</label>
+                @Html.TextBoxFor(m => m.BillingBuildingNumberAndName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingBuildingNumberAndName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="BillingStreetAddress">Billing Address (Street Address / Private Bag)</label>
+                @Html.TextBoxFor(m => m.BillingStreetAddress, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingStreetAddress, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-2 form-group">
+                <label for="BillingSuburb">Suburb</label>
+                @Html.TextBoxFor(m => m.BillingSuburb, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingSuburb, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-2 form-group">
+                <label for="BillingTown">Town/CCA</label>
+                @Html.TextBoxFor(m => m.BillingTown, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingTown, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-2 form-group">
+                <label for="BillingPostalCode">Postal Code</label>
+                @Html.TextBoxFor(m => m.BillingPostalCode, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingPostalCode, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingMobile1">Mobile Number 1</label>
+                @Html.TextBoxFor(m => m.BillingMobile1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingMobile1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingMobile2">Mobile Number 2</label>
+                @Html.TextBoxFor(m => m.BillingMobile2, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingMobile2, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingTelephone1">Telephone Number 1</label>
+                @Html.TextBoxFor(m => m.BillingTelephone1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingTelephone1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingTelephone2">Telephone Number 2</label>
+                @Html.TextBoxFor(m => m.BillingTelephone2, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingTelephone2, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingFax1">Fax Number 1</label>
+                @Html.TextBoxFor(m => m.BillingFax1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingFax1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingFax2">Fax Number 2</label>
+                @Html.TextBoxFor(m => m.BillingFax2, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.BillingFax2, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingEmail1">E-mail Address 1</label>
+                @Html.TextBoxFor(m => m.BillingEmail1, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(m => m.BillingEmail1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="BillingEmail2">E-mail Address 2</label>
+                @Html.TextBoxFor(m => m.BillingEmail2, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(m => m.BillingEmail2, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div class="re-section-title">Lease Contact</div>
+        <div class="row">
+            <div class="col-sm-4 form-group">
+                <label for="LeaseContactName">Lease Contact Name</label>
+                @Html.TextBoxFor(m => m.LeaseContactName, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="LeaseContactSurname">Lease Contact Surname</label>
+                @Html.TextBoxFor(m => m.LeaseContactSurname, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactSurname, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-4 form-group">
+                <label for="LeaseContactFax1">Fax Number</label>
+                @Html.TextBoxFor(m => m.LeaseContactFax1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactFax1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseContactMobile1">Mobile Number 1</label>
+                @Html.TextBoxFor(m => m.LeaseContactMobile1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactMobile1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseContactMobile2">Mobile Number 2</label>
+                @Html.TextBoxFor(m => m.LeaseContactMobile2, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactMobile2, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseContactTelephone1">Telephone Number 1</label>
+                @Html.TextBoxFor(m => m.LeaseContactTelephone1, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactTelephone1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-3 form-group">
+                <label for="LeaseContactTelephone2">Telephone Number 2</label>
+                @Html.TextBoxFor(m => m.LeaseContactTelephone2, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.LeaseContactTelephone2, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="LeaseContactEmail1">E-mail Address 1</label>
+                @Html.TextBoxFor(m => m.LeaseContactEmail1, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(m => m.LeaseContactEmail1, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="LeaseContactEmail2">E-mail Address 2</label>
+                @Html.TextBoxFor(m => m.LeaseContactEmail2, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(m => m.LeaseContactEmail2, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+        <div class="admin-card" style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+            <a class="btn-re-outline" href="@(isEdit ? Url.Action("LeaseDetails", new { id = Model.Id }) : Url.Action("LeaseDashboard"))">Close</a>
+            <button type="button" class="btn-re-gold" id="btnSubmitLease"><i class="fa fa-check"></i> Submit</button>
+        </div>
+
+        <!-- UCXX Step 8: confirmation -->
+        <div class="modal fade" id="confirmLeaseModal" tabindex="-1" role="dialog" aria-labelledby="confirmLeaseLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="confirmLeaseLabel">Confirm lease record</h4>
+                    </div>
+                    <div class="modal-body">Are you sure you want to confirm this lease record?</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-re-outline" data-dismiss="modal">No</button>
+                        <button type="submit" class="btn-re-gold" id="btnConfirmLease">Yes, I am sure</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    (function () {
+        function req(id, msg) {
+            var el = document.getElementById(id);
+            if (el && !el.value.trim()) { return msg; }
+            return null;
+        }
+        document.getElementById('btnSubmitLease').addEventListener('click', function () {
+            var errors = [
+                @(isEdit ? Html.Raw("req('LeaseReferenceNumber', 'Lease Reference Number is required.'),") : Html.Raw(""))
+                req('TenantName', 'Tenant Name is required.'),
+                req('LeaseClassification', 'Select a Lease Classification.')
+            ].filter(function (e) { return e; });
+            var s = document.getElementById('LeaseStartDate').value, e = document.getElementById('LeaseEndDate').value;
+            if (s && e && e < s) { errors.push('Lease End Date cannot be before the Lease Start Date.'); }
+            if (errors.length) {
+                var box = document.getElementById('leaseClientErrors');
+                if (!box) {
+                    box = document.createElement('div');
+                    box.id = 'leaseClientErrors';
+                    box.className = 'alert alert-danger';
+                    var form = document.getElementById('leaseForm');
+                    form.insertBefore(box, form.firstChild);
+                }
+                box.innerHTML = errors.join('<br />');
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            $('#confirmLeaseModal').modal('show');
+        });
+        document.getElementById('btnConfirmLease').addEventListener('click', function () {
+            this.disabled = true;
+            this.innerHTML = 'Saving...';
+            document.getElementById('leaseForm').submit();
+        });
+
+        // GIS Viewer link (IR014) deferred until after UC01-05/UCXX (DPRE-Q04/Q22, 26 Nov 2026); it will come through a GIS integration.
+
+        // Show "Other, please specify" and Authorised Representative only when relevant
+        function toggle(selectId, value, targetId) {
+            var sel = document.getElementById(selectId), target = document.getElementById(targetId).closest('.form-group');
+            function apply() { target.style.display = sel.value === value ? '' : 'none'; }
+            sel.addEventListener('change', apply); apply();
+        }
+        toggle('ApplicantType', 'Other', 'ApplicantTypeOther');
+        toggle('ContactType', 'Authorised Representative', 'AuthorisedRepresentative');
+    })();
+</script>

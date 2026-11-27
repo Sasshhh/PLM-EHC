@@ -253,6 +253,7 @@ namespace C8.eServices.Mvc.Models.Audits
         public DateTime? LeaseAgreementHodSignatureDate { get; set; }
 
         public string LeaseCategory { get; set; }
+        public string LeaseType { get; set; }
         public string UniqueTenancyLeaseNumber { get; set; }
         public DateTime? LeaseStartDate { get; set; }
         public DateTime? LeaseEndDate { get; set; }

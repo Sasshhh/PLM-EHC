@@ -877,7 +877,7 @@
                     }
 
                     <!-- Back-office Applications Menu -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property Officer") || User.IsInRole("DPRE Head of Department") || User.IsInRole("DPRE Evaluation Committee") || User.IsInRole("Finance Administrator") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -887,7 +887,7 @@
                             </a>
                             <ul class="inner-drop list-unstyled">
                                 <!-- Option: Assessment (UC 07, 08, 09, 10, 11) -->
-                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative"))
+                                @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("DPRE Evaluation Committee") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin") || User.IsInRole("Departmental Representative"))
                                 {
                                     <li>
                                         <a href="javascript:;">
@@ -896,7 +896,7 @@
                                             <i class="arrow ion-chevron-left"></i>
                                         </a>
                                         <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
-                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                             {
                                                 <li>
                                                     <a href="~/RealEstateAdmin/RiskAssessments">
@@ -911,7 +911,7 @@
                                                     </a>
                                                 </li>
                                             }
-                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Departmental Representative") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Departmental Representative") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                             {
                                                 <li>
                                                     <a href="~/RealEstateAdmin/DepartmentalQueue">
@@ -920,7 +920,7 @@
                                                     </a>
                                                 </li>
                                             }
-                                            @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                             {
                                                 <li>
                                                     <a href="~/RealEstateAdmin/ConsolidateFeedback">
@@ -929,7 +929,7 @@
                                                     </a>
                                                 </li>
                                             }
-                                            @if (User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                            @if (User.IsInRole("DPRE Evaluation Committee") || User.IsInRole("Area Manager") || User.IsInRole("Area Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                             {
                                                 <li>
                                                     <a href="~/RealEstateAdmin/CommitteeReviews">
@@ -949,7 +949,7 @@
                                 }
 
                                 <!-- Option: Lease Agreements (UC 18, 19) -->
-                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                 {
                                     <li>
                                         <a href="javascript:;">
@@ -1010,8 +1010,52 @@
                                     </li>
                                 }
 
+                                <!-- Option: Lease Administration (UCXX Lease Dashboard / Register) -->
+                                @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                {
+                                    <li>
+                                        <a href="javascript:;">
+                                            <i class="ion ion-stats-bars" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                            <span class="text">Lease Administration</span>
+                                            <i class="arrow ion-chevron-left"></i>
+                                        </a>
+                                        <ul class="inner-drop list-unstyled" style="padding-left: 10px;">
+                                            <li>
+                                                <a href="~/RealEstateAdmin/LeaseDashboard">
+                                                    <i class="ion ion-pie-graph" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Lease Dashboard</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/LeaseRegister">
+                                                    <i class="ion ion-ios-list-outline" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Lease Register</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/CaptureLease">
+                                                    <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Capture Existing Lease</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstate/CaptureOnBehalf">
+                                                    <i class="ion ion-person-add" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Capture for an Applicant</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="~/RealEstateAdmin/WaitingList">
+                                                    <i class="ion ion-clock" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
+                                                    <span class="text">Waiting List</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+
                                 <!-- Option: Worklists (UC 12, UC 20) -->
-                                @if (User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                @if (User.IsInRole("DPRE Head of Department") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                 {
                                     <li>
                                         <a href="~/RealEstateAdmin/FinalAuthorisation">
@@ -1028,7 +1072,7 @@
                                 }
                                 
                                 <!-- Maintenance options that belong here -->
-                                @if (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
+                                @if (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin"))
                                 {
                                     <li>
                                         <a href="~/RealEstateAdmin/Index">
@@ -1048,7 +1092,7 @@
                     }
 
                     <!-- Inspections (UC 13, 14) -->
-                    @if (Request.IsAuthenticated && (User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
+                    @if (Request.IsAuthenticated && (User.IsInRole("Property Officer") || User.IsInRole("Property Manager") || User.IsInRole("Property Managers") || User.IsInRole("Back Office System Administrator") || User.IsInRole("Super Administrators") || User.IsInRole("Administrators") || User.IsInRole("Support Admin")))
                     {
                         <li>
                             <a href="javascript:;">
@@ -2923,9 +2967,9 @@
                                 </a>
                                 <ul class="inner-drop list-unstyled">
                                     <li>
-                                        <a href="~/RealEstate/Capture">
+                                        <a href="~/RealEstate/LeaseApplications">
                                             <i class="ion ion-plus-circled" style="margin-left: -20%; margin-top:-2%; padding:0%;"></i>
-                                            <span class="text">Lease Application Screen</span>
+                                            <span class="text">Lease Applications</span>
                                         </a>
                                     </li>
                                     <li>

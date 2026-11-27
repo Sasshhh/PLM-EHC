@@ -273,6 +273,10 @@ namespace C8.eServices.Mvc.Models
         public DateTime? LeaseAgreementHodSignatureDate { get; set; }
 
         public string LeaseCategory { get; set; }
+
+        /// <summary>DPRE UC05: lease type chosen under Lease Applications (Business Hub, Commercial, ...).</summary>
+        [System.ComponentModel.DataAnnotations.MaxLength(50)]
+        public string LeaseType { get; set; }
         public string UniqueTenancyLeaseNumber { get; set; }
         public DateTime? LeaseStartDate { get; set; }
         public DateTime? LeaseEndDate { get; set; }

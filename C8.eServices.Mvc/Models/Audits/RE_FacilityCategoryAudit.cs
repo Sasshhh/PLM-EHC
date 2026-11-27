@@ -16,5 +16,9 @@ namespace C8.eServices.Mvc.Models.Audits
 
         [Required]
         public decimal TariffPerSqm { get; set; }
+
+        // DPRE-Q11 (26 Nov 2026): annual escalation % set by the administrator per facility category.
+        // Copied to the lease register record when a lease is created from an application.
+        public decimal? EscalationPercentage { get; set; }
     }
 }

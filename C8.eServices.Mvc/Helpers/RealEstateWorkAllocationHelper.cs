@@ -17,47 +17,26 @@ namespace C8.eServices.Mvc.Helpers
         {
             try
             {
-                // Resolve the role associated with the responsibility type
-                string targetRole = "";
-                if (responsibilityTypeKey == ResponsibilityTypeKeys.RealEstateVerifyPayment)
+                // Try each role for this task in order (see RealEstateRoles.RoutingRoles); the first role with an active clerk gets it.
+                var activeClerks = new List<Customer>();
+                foreach (var targetRole in RealEstateRoles.RoutingRoles(responsibilityTypeKey))
                 {
-                    targetRole = "Finance Administrator";
-                }
-                else if (responsibilityTypeKey == ResponsibilityTypeKeys.RealEstateRiskAssessment)
-                {
-                    targetRole = "Property Manager";
-                }
-                else if (responsibilityTypeKey == ResponsibilityTypeKeys.RealEstateCommitteeReview)
-                {
-                    targetRole = "Area Manager";
-                }
-                else if (responsibilityTypeKey == ResponsibilityTypeKeys.RealEstateHODAuthorisation)
-                {
-                    targetRole = "Back Office System Administrator";
-                }
+                    var role = core.Roles.FirstOrDefault(r => r.Name == targetRole);
+                    if (role == null) continue;
 
-                if (string.IsNullOrEmpty(targetRole))
-                {
-                    targetRole = "Back Office System Administrator";
+                    var userIds = role.Users.Select(u => u.UserId).ToList();
+                    var usernames = core.Users.Where(u => userIds.Contains(u.Id)).Select(u => u.UserName).ToList();
+                    var systemUserIds = core.SystemUsers
+                        .Where(su => usernames.Contains(su.UserName) && su.IsActive && !su.IsDeleted)
+                        .Select(su => su.Id)
+                        .ToList();
+                    if (!systemUserIds.Any()) continue;
+
+                    activeClerks = core.Customers
+                        .Where(c => c.SystemUserId != null && systemUserIds.Contains((int)c.SystemUserId) && c.IsActive && !c.IsDeleted)
+                        .ToList();
+                    if (activeClerks.Any()) break;
                 }
-
-                // Get all active users in that role
-                var role = core.Roles.FirstOrDefault(r => r.Name == targetRole);
-                if (role == null) return 0;
-
-                var userIds = role.Users.Select(u => u.UserId).ToList();
-                var usernames = core.Users.Where(u => userIds.Contains(u.Id)).Select(u => u.UserName).ToList();
-                var systemUsers = core.SystemUsers
-                    .Where(su => usernames.Contains(su.UserName) && su.IsActive && !su.IsDeleted)
-                    .ToList();
-
-                if (!systemUsers.Any()) return 0;
-
-                // Find corresponding Customers for these SystemUsers
-                var systemUserIds = systemUsers.Select(su => su.Id).ToList();
-                var activeClerks = core.Customers
-                    .Where(c => c.SystemUserId != null && systemUserIds.Contains((int)c.SystemUserId) && c.IsActive && !c.IsDeleted)
-                    .ToList();
 
                 if (!activeClerks.Any()) return 0;
 
