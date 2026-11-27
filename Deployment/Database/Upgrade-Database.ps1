@@ -60,7 +60,7 @@ if (-not $SkipBackup) {
 }
 
 # 2-4. Upgrade
-foreach ($f in '10-Upgrade-Schema', '20-Upgrade-MasterData', '25-EHC-Gap-MasterData') {
+foreach ($f in '10-Upgrade-Schema', '20-Upgrade-MasterData', '25-EHC-Gap-MasterData', '52-EHC-Co-Tenant') {
     Invoke-Sql $f @('-i', (Join-Path $here "$f.sql"), '-v', "DbName=$Database")
 }
 

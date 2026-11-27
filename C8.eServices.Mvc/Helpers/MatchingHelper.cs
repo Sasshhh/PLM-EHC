@@ -94,6 +94,25 @@ namespace C8.eServices.Mvc.Helpers
                 documentCheckLists.Add(addDoc);
             }
 
+            // Co-tenant affidavit / supporting document (BA 2026-11-26): shown when the application has a co-tenant,
+            // required when the co-tenant is not working.
+            var coTenantCheckList = GetCoTenantAffidavitCheckList(core, referenceTypeId);
+            if (coTenantCheckList != null)
+            {
+                var coTenantApp = core.PropertyLeaseApplications.AsNoTracking()
+                    .Where(p => p.Id == rcsappId)
+                    .Select(p => new { p.SecondApplicant, p.SecAppIsWorking })
+                    .FirstOrDefault();
+                if (coTenantApp != null && coTenantApp.SecondApplicant && documentCheckLists.All(chk => chk == null || chk.Id != coTenantCheckList.Id))
+                {
+                    documentCheckLists.Add(coTenantCheckList);
+                    if (coTenantApp.SecAppIsWorking == false)
+                    {
+                        dvm.RequiredDocumentCheckListIds.Add(coTenantCheckList.Id);
+                    }
+                }
+            }
+
             dvm.DocumentCheckLists = documentCheckLists;
 
             foreach (var customerDocument in dvm.Documents)
@@ -121,6 +140,36 @@ namespace C8.eServices.Mvc.Helpers
             }
 
             return dvm;
+        }
+
+        /// <summary>The "Co-Tenant Affidavit / Supporting Document" checklist row for this reference type, or null when script 52 has not been run.</summary>
+        public static DocumentCheckList GetCoTenantAffidavitCheckList(eServicesDbContext core, int? referenceTypeId)
+        {
+            var docType = core.DocumentTypes.FirstOrDefault(dt => dt.Key == DocumentTypeKeys.CoTenantAffidavit && dt.IsActive && !dt.IsDeleted);
+            if (docType == null) return null;
+            return core.DocumentCheckLists.Include(dcl => dcl.DocumentType)
+                .FirstOrDefault(dcl => dcl.DocumentTypeId == docType.Id && dcl.ReferenceTypeId == referenceTypeId && dcl.IsActive && !dcl.IsDeleted);
+        }
+
+        /// <summary>
+        /// True when the application has a co-tenant who is NOT working and no co-tenant affidavit has been uploaded yet.
+        /// Used to stop the application moving on from the document upload step without it.
+        /// </summary>
+        public static bool IsCoTenantAffidavitMissing(eServicesDbContext core, int propertyLeaseApplicationId)
+        {
+            var app = core.PropertyLeaseApplications.AsNoTracking()
+                .Where(p => p.Id == propertyLeaseApplicationId)
+                .Select(p => new { p.SecondApplicant, p.SecAppIsWorking })
+                .FirstOrDefault();
+            if (app == null || !app.SecondApplicant || app.SecAppIsWorking != false) return false;
+
+            var docType = core.DocumentTypes.FirstOrDefault(dt => dt.Key == DocumentTypeKeys.CoTenantAffidavit && dt.IsActive && !dt.IsDeleted);
+            if (docType == null) return false; // script 52 not run yet: do not block applications
+
+            var checkListIds = core.DocumentCheckLists.Where(dcl => dcl.DocumentTypeId == docType.Id && dcl.IsActive && !dcl.IsDeleted).Select(dcl => dcl.Id).ToList();
+            return !core.Documents.Any(d => d.PropertyLeaseApplicationId == propertyLeaseApplicationId
+                                            && checkListIds.Contains(d.DocumentCheckListId)
+                                            && d.IsActive && !d.IsDeleted);
         }
         public static DocumentsViewModel DocumentRiskAssessmentOutcome(DocumentsViewModel dvm, eServicesDbContext core, int? referenceId, int? customerId, int? referenceTypeId, int? applicationId, string returnUrl, int rcsappId, bool IsUpload)
         {

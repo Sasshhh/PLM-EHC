@@ -19,6 +19,7 @@ PARTS = [
     ('10-Upgrade-Schema.sql', 'Schema: missing tables and columns'),
     ('20-Upgrade-MasterData.sql', 'Master data: missing lookups, roles, settings'),
     ('25-EHC-Gap-MasterData.sql', 'EHC keys no seed script created'),
+    ('52-EHC-Co-Tenant.sql', 'EHC co-tenant: SecAppIsWorking column + co-tenant affidavit document'),
     ('90-Verify-Schema.sql', 'CHECK: missing tables/columns (both lists must be empty)'),
     ('30-Verify-MasterData.sql', 'CHECK: keys the code looks up that are still missing'),
 ]
@@ -30,6 +31,7 @@ HEADER = """/*
     1. schema      (10-Upgrade-Schema.sql)      missing tables and columns, additive only
     2. master data (20-Upgrade-MasterData.sql)  missing lookups/roles/settings, insert-only
     3. EHC gaps    (25-EHC-Gap-MasterData.sql)  EHC keys no seed script created
+       co-tenant   (52-EHC-Co-Tenant.sql)       SecAppIsWorking column + co-tenant affidavit document
     4. checks      (90 + 30)                    result sets listing anything still missing
 
   HOW TO RUN (SSMS):

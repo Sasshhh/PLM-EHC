@@ -362,7 +362,7 @@ namespace C8.eServices.Mvc.Models
 
         //Second Applicant Details
         [Column(Order = 92)]
-        [Display(Name = "Second Applicant")]
+        [Display(Name = "Co-Tenant")]
         public bool SecondApplicant { get; set; }
 
         [Display(Name = "First Name")]
@@ -556,6 +556,11 @@ namespace C8.eServices.Mvc.Models
         public decimal? KeyDeposit { get; set; }
 
         public bool IsFullyMigrated { get; set; }
+
+        // Co-tenant (agreed with BA 2026-11-26): is the co-tenant working?
+        // true = Working, false = Not working (co-tenant affidavit must be uploaded), null = no co-tenant / not answered.
+        [Display(Name = "Co-Tenant Working?")]
+        public bool? SecAppIsWorking { get; set; }
 
         [NotMapped]
         public String FullName

@@ -127,6 +127,8 @@ namespace C8.eServices.Mvc.Keys
         public const string BirthCertificate = "dt_birth_certificate";
         public const string ProofOfEmployment = "dt_proof_of_employment";
         public const string Affidavit = "dt_affidavit_document";
+        // Co-tenant affidavit / supporting document (agreed with BA 2026-11-26). Required when the co-tenant is not working.
+        public const string CoTenantAffidavit = "dt_co_tenant_affidavit";
         public const string ProofOfAddress = "dt_proof_of_address";
         public const string DebitOrder = "dt_debit_order";
 

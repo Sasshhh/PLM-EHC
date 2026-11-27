@@ -30,6 +30,8 @@ namespace C8.eServices.Mvc.ViewModels
         public Application Application { get; set; }
         public RCSApplicationStatus RCSApplicationStatus { get; set; }
         public List<DocumentCheckList> DocumentCheckLists { get; set; }
+        // Checklist rows that must have a document before the applicant can go on (e.g. co-tenant affidavit when the co-tenant is not working).
+        public List<int> RequiredDocumentCheckListIds { get; set; } = new List<int>();
         public List<DocumentCheckList> RiskAssessmentDocumentCheckLists { get; set; }
         public List<DocumentCheckList> UnitInspectionDocumentCheckLists { get; set; }
         public List<DocumentCheckList> MaintananceJobSheetDocumentCheckLists { get; set; }
