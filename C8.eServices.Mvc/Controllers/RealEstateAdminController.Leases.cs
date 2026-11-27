@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using C8.eServices.Mvc.Helpers;
 using C8.eServices.Mvc.Keys;
 using C8.eServices.Mvc.Models;
 
@@ -147,7 +148,106 @@ namespace C8.eServices.Mvc.Controllers
             var lease = ActiveLeases().FirstOrDefault(l => l.Id == id);
             if (lease == null) return HttpNotFound();
             ViewBag.History = db.RE_LeaseAudits.Where(a => a.Id == id).OrderByDescending(a => a.AuditId).Take(50).ToList();
+            ViewBag.LeaseDocuments = LeaseDocuments(lease);
+            ViewBag.LeaseDocumentTypes = LeaseDocumentTypes;
             return View(lease);
+        }
+
+        /// <summary>
+        /// DPRE-Q21 (assumption): supporting documents can be attached to a lease record. Lease documents are linked by
+        /// reference type rt_real_estate_lease; documents from the lease's application are listed with them (read-only).
+        /// </summary>
+        private static readonly string[] LeaseDocumentTypes =
+        {
+            "Signed Lease Agreement", "Memorandum of Agreement", "Municipal Item / Council Resolution", "Advert",
+            "Addendum", "Correspondence", "Other"
+        };
+
+        private List<Document> LeaseDocuments(RE_Lease lease)
+        {
+            var leaseRefTypeId = db.ReferenceTypes.Where(r => r.Key == ReferenceTypeKeys.RealEstateLease).Select(r => (int?)r.Id).FirstOrDefault();
+            var docs = db.Documents
+                .Where(d => d.IsActive && !d.IsDeleted
+                    && ((leaseRefTypeId != null && d.ReferenceTypeId == leaseRefTypeId && d.ReferenceId == lease.Id)
+                        || (lease.RE_ApplicationId != null && d.RealEstateApplicationId == lease.RE_ApplicationId)))
+                .OrderByDescending(d => d.CreatedDateTime)
+                .ToList();
+            foreach (var doc in docs.Where(d => d.FileId != null))
+            {
+                doc.File = new C8.eServices.Mvc.Models.File { Id = doc.FileId.Value, CreatedDateTime = doc.CreatedDateTime };
+                doc.File.Data = SecureActionLinkExtension.Encrypt(string.Format("fileId={0}", doc.FileId));
+            }
+            return docs;
+        }
+
+        // POST: RealEstateAdmin/UploadLeaseDocument/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UploadLeaseDocument(int id, string documentType, string description, System.Web.HttpPostedFileBase leaseFile)
+        {
+            var denied = EnsureLeaseAdmin();
+            if (denied != null) return denied;
+            Initialise();
+
+            var lease = ActiveLeases().FirstOrDefault(l => l.Id == id);
+            if (lease == null) return HttpNotFound();
+
+            var ext = (System.IO.Path.GetExtension(leaseFile?.FileName) ?? "").ToLowerInvariant();
+            string error = null;
+            if (leaseFile == null || leaseFile.ContentLength == 0) error = "Select a file to upload.";
+            else if (leaseFile.ContentLength > 10 * 1024 * 1024) error = "The file is larger than 10 MB.";
+            else if (!new[] { ".pdf", ".png", ".jpg", ".jpeg", ".doc", ".docx" }.Contains(ext)) error = "Upload a PDF, Word or image file.";
+            else if (!LeaseDocumentTypes.Contains(documentType)) error = "Select the document type.";
+            var refTypeId = db.ReferenceTypes.Where(r => r.Key == ReferenceTypeKeys.RealEstateLease).Select(r => (int?)r.Id).FirstOrDefault();
+            if (error == null && refTypeId == null) error = "Lease documents are not set up yet. Run DatabaseScripts/RE_LeaseDocuments_Setup.sql.";
+            if (error != null)
+            {
+                TempData["ErrorMessage"] = error;
+                return RedirectToAction("LeaseDetails", new { id });
+            }
+
+            var fileId = SaveFile(leaseFile);
+            var name = documentType + (string.IsNullOrWhiteSpace(description) ? "" : ": " + description.Trim());
+            db.Documents.Add(new Document
+            {
+                ReferenceTypeId = refTypeId.Value,
+                ReferenceId = lease.Id,
+                FileId = fileId,
+                DocumentName = name.Length > 250 ? name.Substring(0, 250) : name,
+                LocationTypeId = db.LocationTypes.FirstOrDefault(l => l.Key == LocationTypeKeys.Database)?.Id ?? 3,
+                StatusId = db.Status.First(s => s.Key == StatusKeys.DocumentUploaded).Id,
+                DocumentCheckListId = db.DocumentCheckLists.FirstOrDefault(d => d.DocumentTypeId == 18)?.Id ?? 1,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedBySystemUserId = _systemUser?.Id,
+                CreatedDateTime = DateTime.Now
+            });
+            db.SaveChanges();
+            TempData["SuccessMessage"] = "Document uploaded to lease " + lease.LeaseReferenceNumber + ".";
+            return RedirectToAction("LeaseDetails", new { id });
+        }
+
+        // POST: RealEstateAdmin/RemoveLeaseDocument  (soft delete; only documents attached to the lease, not application documents)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult RemoveLeaseDocument(int id, int documentId)
+        {
+            var denied = EnsureLeaseAdmin();
+            if (denied != null) return denied;
+            Initialise();
+
+            var refTypeId = db.ReferenceTypes.Where(r => r.Key == ReferenceTypeKeys.RealEstateLease).Select(r => (int?)r.Id).FirstOrDefault();
+            var doc = db.Documents.FirstOrDefault(d => d.Id == documentId && d.ReferenceId == id && d.ReferenceTypeId == refTypeId && !d.IsDeleted);
+            if (doc != null)
+            {
+                doc.IsDeleted = true;
+                doc.IsActive = false;
+                doc.ModifiedBySystemUserId = _systemUser?.Id;
+                doc.ModifiedDateTime = DateTime.Now;
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Document removed.";
+            }
+            return RedirectToAction("LeaseDetails", new { id });
         }
 
         // GET: RealEstateAdmin/CaptureLease  (new)  or  /CaptureLease/5 (edit)

@@ -4,6 +4,8 @@
     Layout = "~/Views/Shared/RCS_Layout.cshtml";
     var history = (IEnumerable<C8.eServices.Mvc.Models.Audits.RE_LeaseAudit>)ViewBag.History;
     var st = Model.DashboardStatus;
+    var leaseDocs = (IEnumerable<C8.eServices.Mvc.Models.Document>)ViewBag.LeaseDocuments;
+    var docTypes = (string[])ViewBag.LeaseDocumentTypes ?? new string[0];
 }
 @functions {
     string Show(object v)
@@ -22,6 +24,10 @@
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
     }
 
     <div class="admin-header-card">
@@ -142,6 +148,62 @@
         <p style="white-space:pre-wrap;">@Show(Model.LeaseDetailsAndPurpose)</p>
         <div class="re-section-title">Additional Comments</div>
         <p style="white-space:pre-wrap;">@Show(Model.AdditionalComments)</p>
+    </div>
+
+    <div class="admin-card">
+        <div class="re-section-title">Lease Documents</div>
+        @if (leaseDocs == null || !leaseDocs.Any())
+        {
+            <p style="color:#64748b;">No documents yet.</p>
+        }
+        else
+        {
+            <table class="table table-condensed" id="tblLeaseDocuments">
+                <thead><tr><th>Document</th><th>Source</th><th>Uploaded</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var d in leaseDocs)
+                    {
+                        bool fromApplication = d.RealEstateApplicationId != null;
+                        <tr>
+                            <td>@d.DocumentName</td>
+                            <td>@(fromApplication ? "Application" : "Lease")</td>
+                            <td>@(d.CreatedDateTime.HasValue ? d.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "-")</td>
+                            <td style="text-align:right;">
+                                @if (d.File != null)
+                                {
+                                    <a href="@Url.Action("GetDocument", "File", new { q = d.File.Data })" target="_blank" class="btn btn-default btn-xs" id="btn-lease-doc-@d.Id"><i class="fa fa-download"></i> View</a>
+                                }
+                                @if (!fromApplication)
+                                {
+                                    using (Html.BeginForm("RemoveLeaseDocument", "RealEstateAdmin", new { id = Model.Id, documentId = d.Id }, FormMethod.Post, new { style = "display:inline;", onsubmit = "return confirm('Remove this document from the lease?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-default btn-xs" style="color:#dc2626;" id="btn-remove-lease-doc-@d.Id"><i class="fa fa-trash"></i> Remove</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        @using (Html.BeginForm("UploadLeaseDocument", "RealEstateAdmin", new { id = Model.Id }, FormMethod.Post, new { enctype = "multipart/form-data", id = "frmLeaseDocument", @class = "form-inline", style = "margin-top:10px;" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <select name="documentType" class="form-control" required id="ddlLeaseDocumentType">
+                    <option value="">-- Document type --</option>
+                    @foreach (string t in docTypes) { <option value="@t">@t</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" name="description" class="form-control" maxlength="150" placeholder="Description (optional)" id="txtLeaseDocumentDescription" />
+            </div>
+            <div class="form-group">
+                <input type="file" name="leaseFile" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required id="fileLeaseDocument" />
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-upload-lease-doc"><i class="fa fa-upload"></i> Upload</button>
+        }
     </div>
 
     <div class="admin-card">
