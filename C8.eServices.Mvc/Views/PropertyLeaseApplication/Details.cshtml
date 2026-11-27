@@ -1210,16 +1210,22 @@
                                                 {
                                                     <div id="DivSecondaApplicant">
                                                         <br />
-                                                        <h3>Applicant's Spouse Details</h3>
+                                                        <h3>Co-Tenant Details</h3>
                                                         <hr />
                                                         <br />
+                                                        <div class="form-group">
+                                                            <label class="control-label col-md-2">Co-Tenant Working?</label>
+                                                            <div class="col-md-3">
+                                                                <input type="text" class="form-control" readonly="readonly" value="@(Model.PropertyLeaseApplication.SecAppIsWorking == true ? "Working" : Model.PropertyLeaseApplication.SecAppIsWorking == false ? "Not working (affidavit required)" : "Not captured")" />
+                                                            </div>
+                                                        </div>
                                                         <div class="form-group">
                                                             @Html.LabelFor(model => model.PropertyLeaseApplication.SecAppFirstName, "Fist Name", htmlAttributes: new { @class = "control-label col-md-2" })
                                                             <div class="col-md-3">
                                                                 @Html.EditorFor(model => model.PropertyLeaseApplication.SecAppFirstName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
                                                                 @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.SecAppFirstName, "", new { @class = "text-danger" })
                                                             </div>
-                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.SecAppIDNo, "ID No. of Spouse", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                            @Html.LabelFor(model => model.PropertyLeaseApplication.SecAppIDNo, "ID No. of Co-Tenant", htmlAttributes: new { @class = "control-label col-md-2" })
                                                             <div class="col-md-3">
                                                                 @Html.EditorFor(model => model.PropertyLeaseApplication.SecAppIDNo, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
                                                                 @Html.ValidationMessageFor(model => model.PropertyLeaseApplication.SecAppIDNo, "", new { @class = "text-danger" })
@@ -1289,7 +1295,7 @@
                                                 if (Model.PropertyLeaseApplication.SecondApplicant == true)
                                                 {
                                                     <br />
-                                                    <h3>Spouse's Income Details</h3>
+                                                    <h3>Co-Tenant's Income Details</h3>
                                                     <hr />
                                                     <br />
                                                     <div class="form-group">
@@ -1432,7 +1438,7 @@
                                                     {
                                                         var SecondMonthlyIncomeDetails = Model.MonthlyIncomeList.FirstOrDefault(s => s.ApplicantTypeId == 2);
                                                         <br />
-                                                        <h3>Spouse's Monthly Income Details</h3>
+                                                        <h3>Co-Tenant's Monthly Income Details</h3>
                                                         <hr />
                                                         <br />
                                                         <div class="form-group">
@@ -1806,7 +1812,7 @@
                                                     {
                                                         var SecondMonthlyExpenseDetails = Model.MonthlyExpenseList.FirstOrDefault(s => s.ApplicantTypeId == 2);
                                                         <br />
-                                                        <h3>Spouse's Monthly Expense Details</h3>
+                                                        <h3>Co-Tenant's Monthly Expense Details</h3>
                                                         <hr />
                                                         <br />
                                                         <div class="form-group">
@@ -1864,7 +1870,7 @@
                                                         </div>
                                                         <br />
 
-                                                        <h3>Spouse's Vehicle Expenses</h3>
+                                                        <h3>Co-Tenant's Vehicle Expenses</h3>
                                                         <hr />
                                                         <br />
                                                         <div class="form-group">
@@ -1894,7 +1900,7 @@
                                                         </div>
                                                         <br />
 
-                                                        <h3>Spouse's Policies</h3>
+                                                        <h3>Co-Tenant's Policies</h3>
                                                         <hr />
                                                         <br />
                                                         <div class="form-group">
@@ -1917,7 +1923,7 @@
                                                         </div>
                                                         <br />
 
-                                                        <h3>Spouse's Living Expenses</h3>
+                                                        <h3>Co-Tenant's Living Expenses</h3>
                                                         <hr />
                                                         <br />
                                                         <div class="form-group">

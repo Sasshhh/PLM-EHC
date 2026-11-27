@@ -10943,6 +10943,8 @@ Activating your billing account and debit order mandate is required before occup
                         return RedirectToAction("Capture");
                     }
                     var result = SecondApplicantBool == true ? PLA.SecondApplicant = true : PLA.SecondApplicant = false;
+                    // Co-tenant working / not working only applies when there is a co-tenant.
+                    if (!PLA.SecondApplicant) PLA.SecAppIsWorking = null;
                     ////PLA.BType = (int)capture.PropertyLeaseApplication.BType;
                     ////PLA.BUsage = (int)capture.PropertyLeaseApplication.BUsage;
                     int limiter = 0;

@@ -215,7 +215,9 @@ namespace C8.eServices.Mvc.Controllers
                                 DepartmentsApprovalsController dac = new DepartmentsApprovalsController();
                                 PropertyLeaseApplicationController cc = new PropertyLeaseApplicationController();
                                 
-                                if (RcsApplication.Status.Key == StatusKeys.ReuploadApplicationDocs)
+                                // Co-tenant not working: the application only moves on once the co-tenant affidavit is uploaded (BA 2026-11-26).
+                                if (RcsApplication.Status.Key == StatusKeys.ReuploadApplicationDocs
+                                    && !MatchingHelper.IsCoTenantAffidavitMissing(_context, RcsApplication.Id))
                                 {
                                     if (RcsApplication.PurchaserTypeId == 1)
                                     {
@@ -1110,7 +1112,9 @@ namespace C8.eServices.Mvc.Controllers
                                     var Result = DA.ActivityTrackerAudit(RcsApplication.Id, ActivityTrackerMessage, customerId);
 
                                 }
-                                if (RcsApplication.Status.Key == StatusKeys.ReuploadApplicationDocs)
+                                // Co-tenant not working: the application only moves on once the co-tenant affidavit is uploaded (BA 2026-11-26).
+                                if (RcsApplication.Status.Key == StatusKeys.ReuploadApplicationDocs
+                                    && !MatchingHelper.IsCoTenantAffidavitMissing(_context, RcsApplication.Id))
                                 {
                                     DepartmentsApprovalsController dac = new DepartmentsApprovalsController();
                                     var docresult = dac.CaptureDocChecker(RcsApplication.Id);

@@ -94,7 +94,14 @@
             <text>
 
                 <div class="form-group">
-                    @Html.Label(doc.DocumentType.Name, new { @class = "control-label col-md-3" })
+                    @if (Model.RequiredDocumentCheckListIds != null && Model.RequiredDocumentCheckListIds.Contains(doc.Id))
+                    {
+                        <label class="control-label col-md-3">@doc.DocumentType.Name <span style="color:red" title="Required">*</span></label>
+                    }
+                    else
+                    {
+                        @Html.Label(doc.DocumentType.Name, new { @class = "control-label col-md-3" })
+                    }
                     <div class="col-md-9">
                         <dl class="dl-horizontal">
                             <dt class="dtAlign">
@@ -134,7 +141,7 @@
                 </div>
                 <div class="col-md-3">
 
-                    <input type="button" id="btnExternal" class="button1" value="Next"onclick="location.href='@Url.Action("Index2", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("RcsApplicationId=" + Model.RcsApplicationId.ToString()) })'"/>
+                    <input type="button" id="btnExternal" class="button1" value="Next"onclick="if (requiredDocsUploaded(false)) { location.href='@Url.Action("Index2", "PropertyLeaseApplication", new { q = new C8.eServices.Mvc.Helpers.AesCrypto().Encrypt("RcsApplicationId=" + Model.RcsApplicationId.ToString()) })'; }"/>
                     @*@Html.ActionLink(
             "Pay at cashier (receipt upload)",
             "Index2",                         // controller action
@@ -178,6 +185,29 @@
     function myFunction(a, b) {
         return a * b;
     }
+    // Rows that must have a document (e.g. co-tenant affidavit when the co-tenant is not working).
+    var requiredDocCheckListIds = @Html.Raw(Json.Encode(Model.RequiredDocumentCheckListIds ?? new System.Collections.Generic.List<int>()));
+
+    // includeSelected = true: a file chosen but not yet uploaded also counts. The Next button passes false.
+    function requiredDocsUploaded(includeSelected) {
+        var missing = [];
+        $.each(requiredDocCheckListIds, function (i, id) {
+            var hasUploaded = $('#docDetails_' + id).find('a[href*="GetDocument"]').length > 0;
+            var input = document.getElementById('docUpload_' + id);
+            var hasSelected = includeSelected && input && input.files && input.files.length > 0;
+            if (!hasUploaded && !hasSelected) {
+                var name = $('#docUpload_' + id).closest('.form-group').find('label.control-label').first().text().replace('*', '').trim();
+                missing.push(name);
+            }
+        });
+        if (missing.length > 0) {
+            $("#modalText").html("Please upload the following required document(s) before you continue:<br/><b>" + missing.join("<br/>") + "</b>");
+            $("#documentResponseModal").modal('show');
+            return false;
+        }
+        return true;
+    }
+
        function checkdocs(id) {
             debugger;
             alert('inside');
