@@ -36,7 +36,7 @@ namespace C8.eServices.Mvc.Controllers
 
         /// <summary>
         /// Supporting documents per form (SDS UC05 Scenario 2 Step 23, Scenario 3 Step 11, Scenario 4 Step 11).
-        /// ASSUMPTIONS: proof of the application fee is required at submission for every type, as for Business Hub (DPRE-Q39);
+        /// DPRE-Q39 (confirmed 26 Nov): the application fee is paid after submission, so proof of payment is optional here;
         /// person-only documents apply to Individuals and entity documents to the other applicant types (DPRE-Q40);
         /// proof of income stays optional because it applies only to salaried persons or pensioners.
         /// </summary>
@@ -207,6 +207,7 @@ namespace C8.eServices.Mvc.Controllers
                     bool uploaded = PostedFiles(doc.Key).Any() || existingDocs.Any(n => n == doc.Name || n.StartsWith(doc.Name + ":"));
                     if (!uploaded) ModelState.AddModelError(doc.Key, doc.Name + " is required.");
                 }
+                ValidateSignedPaperForm(false, existingDocs.Contains(SignedPaperFormName));
                 foreach (var key in SiteDocuments.Select(d => d.Key))
                     foreach (var f in PostedFiles(key))
                         if (f.ContentLength > 10 * 1024 * 1024)
@@ -301,6 +302,7 @@ namespace C8.eServices.Mvc.Controllers
                 }
                 foreach (var other in PostedFiles("file_Other"))
                     SaveAndLinkFile(other, "Other Supporting Document: " + Path.GetFileName(other.FileName), app.Id, 18, refTypeId);
+                SaveSignedPaperFormAndLog(app.Id, refTypeId, !isDraft);
 
                 if (isDraft)
                 {

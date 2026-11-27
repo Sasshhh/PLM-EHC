@@ -333,6 +333,37 @@
     .re-form-page #tblSelectedUnits td[data-label]::before { content: attr(data-label) ": "; font-weight: 600; color: var(--re-muted); }
 }
 
+/* ---- capturing on behalf of an applicant (DPRE-Q46) ---- */
+.re-form-page .re-onbehalf {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+    background: #fff7e0; border: 1px solid #ecd28a; border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 16px;
+}
+.re-form-page .re-onbehalf > .fa { font-size: 26px; color: #8a6a12; }
+.re-form-page .re-onbehalf-text { flex: 1 1 260px; min-width: 0; display: grid; gap: 2px; font-size: 14px; }
+.re-form-page .re-onbehalf-text span { color: #5b4a1d; }
+.re-form-page .re-onbehalf-stop { margin: 0; }
+.re-form-page .re-signed-form { margin-top: 8px; }
+.re-form-page .re-search-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.re-form-page .re-search-row .form-control { flex: 1 1 260px; min-width: 0; }
+.re-form-page .re-applicant-list { display: grid; gap: 10px; margin-top: 18px; }
+.re-form-page .re-applicant {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px;
+    border: 1px solid #e7e2da; border-radius: 12px; padding: 12px 14px; background: #fff;
+}
+.re-form-page .re-applicant form { margin: 0; }
+
+/* ---- waiting list (DPRE-Q50) ---- */
+.re-form-page .re-waitlist {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+    background: var(--re-gold-soft); border: 1px dashed var(--re-gold); border-radius: 12px;
+    padding: 14px 16px; margin: 4px 0 18px;
+}
+.re-form-page .re-waitlist > .fa { font-size: 22px; color: var(--re-gold-ink); }
+.re-form-page .re-waitlist-text { flex: 1 1 260px; min-width: 0; display: grid; gap: 2px; font-size: 14px; }
+.re-form-page .re-wl-free { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #166534; }
+.re-form-page .re-wl-none { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; }
+
 @media (prefers-reduced-motion: reduce) {
     .re-form-page *, .re-progress > i { transition: none !important; }
 }

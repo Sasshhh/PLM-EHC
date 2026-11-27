@@ -1,0 +1,10 @@
+@* DPRE-Q46: when an official captures on behalf of an applicant, the signed paper form must be uploaded. Sits inside the application form. *@
+@if (ViewBag.OnBehalfApplicant != null)
+{
+    <div class="form-group re-signed-form" id="signedPaperFormGroup">
+        <label for="file_SignedForm" class="req">Signed paper application form</label>
+        <input type="file" name="file_SignedForm" id="file_SignedForm" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required />
+        <small class="text-muted">Scan of the form the applicant signed. Required because you are capturing on their behalf. PDF, PNG or JPG, up to 10 MB.</small>
+        @Html.ValidationMessage("file_SignedForm", "", new { @class = "text-danger", style = "display: block;" })
+    </div>
+}

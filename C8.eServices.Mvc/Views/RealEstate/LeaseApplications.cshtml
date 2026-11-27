@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
 <div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-warning"><i class="fa fa-info-circle"></i> @TempData["ErrorMessage"]</div>

@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
 <div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success"><i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]</div>
@@ -481,6 +482,7 @@
                 @Html.HiddenFor(m => m.Site.SignatureImage)
                 @Html.ValidationMessageFor(m => m.Site.SignatureImage, "", new { @class = "text-danger" })
             </div>
+            <div class="col-xs-12">@Html.Partial("_SignedPaperFormUpload")</div>
             </div></div>
         </div>
 

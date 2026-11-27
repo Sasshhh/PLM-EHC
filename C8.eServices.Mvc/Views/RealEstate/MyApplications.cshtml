@@ -265,7 +265,9 @@
     }
 </style>
 
+<link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 <div class="re-container">
+    <div class="re-form-page" style="padding:0;">@Html.Partial("_OnBehalfBanner")</div>
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success" style="border-radius: 8px; margin-bottom: 25px;">
@@ -385,6 +387,42 @@
             </table>
         }
     </div>
+
+    @{ var waitingList = ViewBag.WaitingList as List<C8.eServices.Mvc.Models.RE_WaitingListEntry>; }
+    @if (waitingList != null && waitingList.Any())
+    {
+        <div class="re-card" id="myWaitingList" style="margin-top: 24px;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--re-border-color);">
+                <h3 style="margin: 0; font-size: 17px; font-weight: 700;"><i class="fa fa-hourglass-half" style="color: var(--re-gold);"></i> Waiting list</h3>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">You asked to be told when a Business Hub unit becomes free.</p>
+            </div>
+            <table class="table re-table">
+                <thead><tr><th>Area</th><th>Facility</th><th>Joined</th><th>Status</th><th style="text-align: center;">Action</th></tr></thead>
+                <tbody>
+                    @foreach (var w in waitingList)
+                    {
+                        <tr>
+                            <td>@(w.CCC != null ? w.CCC.CCCName : "")</td>
+                            <td>@(w.Facility != null ? w.Facility.Name : "Any facility in the area")</td>
+                            <td>@(w.CreatedDateTime.HasValue ? w.CreatedDateTime.Value.ToString("yyyy-MM-dd") : "")</td>
+                            <td>@(w.WaitingStatus == "Offered" ? "A unit is free: apply now" : "Waiting")</td>
+                            <td style="text-align: center;">
+                                @if (w.WaitingStatus == "Offered")
+                                {
+                                    <a href="@Url.Action("Capture", "RealEstate", new { leaseType = "Business Hub" })" class="action-btn" style="background-color: var(--re-gold); color: white; border-color: var(--re-gold); font-weight: 600;" id="btn-apply-wl-@w.Id">Apply now</a>
+                                }
+                                <form method="post" action="@Url.Action("LeaveWaitingList", "RealEstate")" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@w.Id" />
+                                    <button type="submit" class="action-btn" id="btn-leave-wl-@w.Id">Leave list</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 <!-- Details Modal -->

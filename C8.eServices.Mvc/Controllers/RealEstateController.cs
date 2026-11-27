@@ -40,6 +40,9 @@ namespace C8.eServices.Mvc.Controllers
             {
                 _customer.Status = db.Status.Find(_customer.StatusId);
             }
+
+            // DPRE-Q46: an official capturing for an applicant works as that applicant.
+            ApplyOnBehalf();
         }
 
         // GET: RealEstate/Inbox
@@ -243,6 +246,7 @@ namespace C8.eServices.Mvc.Controllers
                 ModelState.AddModelError("file_BusinessPlan", "Business Plan is required.");
             if (file_Mbd4 == null || file_Mbd4.ContentLength == 0)
                 ModelState.AddModelError("file_Mbd4", "Declaration of Interest (Form MBD 4) is required.");
+            ValidateSignedPaperForm(false);
 
             // Parse and validate SelectedUnitsJson list
             List<RE_SelectedUnit> selectedUnitsList = null;
@@ -401,6 +405,7 @@ namespace C8.eServices.Mvc.Controllers
                     {
                         SaveAndLinkFile(otherFile, "Other Supporting Document: " + Path.GetFileName(otherFile.FileName), appId, 18, refTypeId);
                     }
+                    SaveSignedPaperFormAndLog(appId, refTypeId, true);
 
                     // Assign Verify Payment task in Round Robin Queue, only once proof of payment is in
                     if (feeUploaded)
@@ -465,6 +470,7 @@ namespace C8.eServices.Mvc.Controllers
                 .Where(a => a.CustomerId == _customer.Id && a.IsActive && !a.IsDeleted)
                 .ToList();
 
+            LoadMyWaitingList();
             return View(applications);
         }
 

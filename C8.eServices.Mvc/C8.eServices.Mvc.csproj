@@ -1575,6 +1575,10 @@
     <Content Include="Views\RealEstate\LeaseApplications.cshtml" />
     <Content Include="Views\RealEstate\CaptureSite.cshtml" />
     <Content Include="Views\RealEstate\UploadProofOfPayment.cshtml" />
+    <Content Include="Views\RealEstate\CaptureOnBehalf.cshtml" />
+    <Content Include="Views\RealEstate\_OnBehalfBanner.cshtml" />
+    <Content Include="Views\RealEstate\_SignedPaperFormUpload.cshtml" />
+    <Content Include="Views\RealEstateAdmin\WaitingList.cshtml" />
     <Content Include="Content\RealEstate\re-forms.css" />
     <Content Include="Scripts\RealEstate\re-forms.js" />
     <Content Include="Views\RealEstate\Inbox.cshtml" />
@@ -2009,6 +2013,12 @@
     <Compile Include="Controllers\RCSApplicationController.cs" />
     <Compile Include="Controllers\RCSController.cs" />
     <Compile Include="Controllers\RealEstateController.cs" />
+    <Compile Include="Controllers\RealEstateController.OnBehalf.cs">
+      <DependentUpon>RealEstateController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\RealEstateController.WaitingList.cs">
+      <DependentUpon>RealEstateController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\RealEstateController.ApplicationFee.cs">
       <DependentUpon>RealEstateController.cs</DependentUpon>
     </Compile>
@@ -2016,6 +2026,9 @@
       <DependentUpon>RealEstateController.cs</DependentUpon>
     </Compile>
     <Compile Include="Controllers\RealEstateAdminController.cs" />
+    <Compile Include="Controllers\RealEstateAdminController.WaitingList.cs">
+      <DependentUpon>RealEstateAdminController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\RealEstateAdminController.Leases.cs">
       <DependentUpon>RealEstateAdminController.cs</DependentUpon>
     </Compile>
@@ -2276,6 +2289,7 @@
     <Compile Include="Models\Audits\RE_FacilityAudit.cs" />
     <Compile Include="Models\Audits\RE_LeaseAudit.cs" />
     <Compile Include="Models\Audits\RE_ApplicationSiteDetailAudit.cs" />
+    <Compile Include="Models\Audits\RE_WaitingListEntryAudit.cs" />
     <Compile Include="Models\Audits\RE_FacilityCategoryAudit.cs" />
     <Compile Include="Models\Audits\RE_FacilityUnitAudit.cs" />
     <Compile Include="Models\Audits\RE_DepartmentalCommentAudit.cs" />
@@ -2622,6 +2636,7 @@
     <Compile Include="Models\RE_Lease.cs" />
     <Compile Include="Models\RE_LeaseLookups.cs" />
     <Compile Include="Models\RE_ApplicationSiteDetail.cs" />
+    <Compile Include="Models\RE_WaitingListEntry.cs" />
     <Compile Include="Models\RE_FacilityUnit.cs" />
     <Compile Include="Models\RatesRebateProperty.cs" />
     <Compile Include="Models\RCSActionType.cs" />

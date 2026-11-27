@@ -374,6 +374,7 @@
 <link rel="stylesheet" href="~/Content/RealEstate/re-forms.css?v=20261127" />
 
 <div class="re-container re-form-page">
+    @Html.Partial("_OnBehalfBanner")
     <div class="re-header-card">
         <div class="re-eyebrow"><i class="fa fa-building"></i> Real Estate &middot; Lease application</div>
         <h1 class="re-header-title">Submit Lease Application@(string.IsNullOrEmpty(Model.Application.LeaseType) ? "" : ": " + Model.Application.LeaseType)</h1>
@@ -554,6 +555,16 @@
                             <i class="fa fa-plus-circle"></i> Add Unit to Selection
                         </button>
                     </div>
+                </div>
+
+                <!-- DPRE-Q50 / BR07: no free unit in the chosen area or facility -->
+                <div class="re-waitlist" id="waitingListPanel" style="display: none;" role="status">
+                    <i class="fa fa-hourglass-half" aria-hidden="true"></i>
+                    <div class="re-waitlist-text">
+                        <strong id="waitingListTitle">No units are free here right now</strong>
+                        <span>Join the waiting list and we will let you know when a unit becomes free. Places are kept in the order people join.</span>
+                    </div>
+                    <button type="button" class="btn-re-outline" id="btnJoinWaitingList"><i class="fa fa-list-ol"></i> Join the waiting list</button>
                 </div>
 
                 <!-- Live Selection Grid -->
@@ -917,6 +928,7 @@
                 <p style="font-size: 14px; color: var(--re-ink-2); line-height: 1.55; margin-bottom: 16px;">
                     By submitting, you confirm that all information provided is accurate and all uploaded pre-qualification documents are valid. False or misleading declarations will lead to the application being rejected.
                 </p>
+                @Html.Partial("_SignedPaperFormUpload")
             </div>
         </div>
         <div class="re-submit-bar">
@@ -1153,6 +1165,7 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
+                hideWaitingList();
 
                 if (!cccId) return;
 
@@ -1169,6 +1182,8 @@
                                 }));
                             });
                             $("#ddlSelectedFacility").removeAttr("disabled");
+                        } else {
+                            showWaitingList("No Business Hub facility in this area has a free unit right now", null);
                         }
                     },
                     error: function () {
@@ -1185,6 +1200,7 @@
                 $("#txtUnitCount").val("").attr("disabled", "disabled");
                 $("#lblMaxUnitsWarning").text("");
                 selectedUnitData = null;
+                hideWaitingList();
 
                 if (!facilityId) return;
 
@@ -1207,11 +1223,40 @@
                                 $("#ddlSelectedUnit").append(option);
                             });
                             $("#ddlSelectedUnit").removeAttr("disabled");
+                        } else {
+                            showWaitingList("No units are free at " + $("#ddlSelectedFacility option:selected").text() + " right now", facilityId);
                         }
                     },
                     error: function () {
                         swal("Error", "Failed to retrieve units for the selected facility.", "error");
                     }
+                });
+            });
+
+            // ---- DPRE-Q50 waiting list ----
+            var waitingFacilityId = null;
+            function showWaitingList(title, facilityId) {
+                waitingFacilityId = facilityId;
+                $("#waitingListTitle").text(title);
+                $("#waitingListPanel").css("display", "");
+            }
+            function hideWaitingList() { waitingFacilityId = null; $("#waitingListPanel").hide(); }
+            $("#btnJoinWaitingList").click(function () {
+                var btn = $(this).prop("disabled", true);
+                $.ajax({
+                    url: '@Url.Action("JoinWaitingList", "RealEstate")',
+                    type: 'POST',
+                    data: {
+                        cccId: $("#Application_CCCId").val(),
+                        facilityId: waitingFacilityId,
+                        purposeOfLease: $("#Application_PurposeOfLease").val(),
+                        __RequestVerificationToken: $("#realEstateForm input[name=__RequestVerificationToken]").val()
+                    },
+                    success: function (r) {
+                        swal(r.ok ? "Added to the waiting list" : "Not added", r.message, r.ok ? "success" : "warning");
+                    },
+                    error: function () { swal("Error", "Could not add you to the waiting list. Please try again.", "error"); },
+                    complete: function () { btn.prop("disabled", false); }
                 });
             });
 
