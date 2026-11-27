@@ -2183,6 +2183,7 @@
     <Compile Include="Helpers\UnitEngine\Abstract\IUnitAllocation.cs" />
     <Compile Include="Helpers\UnitEngine\Concrete\UnitAllocation.cs" />
     <Compile Include="Helpers\WebHepler.cs" />
+    <Compile Include="Helpers\RealEstateRoles.cs" />
     <Compile Include="Helpers\RealEstateWorkAllocationHelper.cs" />
     <Compile Include="Helpers\RealEstateUserAgreementHelper.cs" />
     <Compile Include="Helpers\WorkAllocationHumanHelper.cs" />

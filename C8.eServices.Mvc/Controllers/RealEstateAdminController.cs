@@ -29,6 +29,9 @@ namespace C8.eServices.Mvc.Controllers
             // Smart role restriction: if the user only has the Departmental Representative role,
             // restrict their access strictly to the Departmental Review Queue and Comments capture pages.
             if (User.IsInRole("Departmental Representative") &&
+                !User.IsInRole(RealEstateRoles.PropertyOfficer) &&
+                !User.IsInRole(RealEstateRoles.HeadOfDepartment) &&
+                !User.IsInRole(RealEstateRoles.EvaluationCommittee) &&
                 !User.IsInRole("Property Manager") &&
                 !User.IsInRole("Property Managers") &&
                 !User.IsInRole("Finance Administrator") &&
@@ -2014,7 +2017,7 @@ namespace C8.eServices.Mvc.Controllers
         }
 
         // GET: RealEstateAdmin/ManageWorkflow
-        [Authorize(Roles = "Administrators, Back Office System Administrator, Area Manager, Property Manager")]
+        [Authorize(Roles = "Administrators, Back Office System Administrator, Area Manager, Property Manager, Property Officer")]
         public ActionResult ManageWorkflow()
         {
             Initialise();
@@ -2034,7 +2037,7 @@ namespace C8.eServices.Mvc.Controllers
 
             // 3. Get all active committee members (System Users in the "Area Manager" or "Property Manager" roles)
             var committeeRoleIds = db.Roles
-                .Where(r => r.Name == "Area Manager" || r.Name == "Property Manager")
+                .Where(r => r.Name == RealEstateRoles.EvaluationCommittee || r.Name == "Area Manager" || r.Name == "Property Manager")
                 .Select(r => r.Id)
                 .ToList();
 
@@ -2163,8 +2166,9 @@ namespace C8.eServices.Mvc.Controllers
                 var result = userManager.Create(user, defaultPassword);
                 if (result.Succeeded)
                 {
-                    // Add user to "Area Manager" role (used for Committee Members)
-                    identityManager.AddUserToRole(user.Id, "Area Manager");
+                    // Committee members get the DPRE Evaluation Committee role once it exists, otherwise Area Manager.
+                    var committeeRoleName = RealEstateRoles.CommitteeRoleForNewMembers(db);
+                    identityManager.AddUserToRole(user.Id, committeeRoleName);
 
                     // Create Customer profile
                     var defaultCustomerType = db.CustomerTypes.FirstOrDefault(c => c.Key == CustomerTypeKeys.Individual);
@@ -2193,7 +2197,7 @@ namespace C8.eServices.Mvc.Controllers
 
                     // Create ApplicationUserRole
                     var rcsApp = db.Applications.FirstOrDefault(x => x.Key == ApplicationKeys.RatesClearanceSystem);
-                    var role = db.Roles.FirstOrDefault(r => r.Name == "Area Manager");
+                    var role = db.Roles.FirstOrDefault(r => r.Name == committeeRoleName);
                     if (rcsApp != null && role != null)
                     {
                         var appUserRole = new ApplicationUserRole
